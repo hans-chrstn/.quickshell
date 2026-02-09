@@ -8,21 +8,16 @@ import Quickshell.Services.UPower
 import Quickshell.Services.Notifications
 import qs.modules.island
 import qs.config
+import qs.modules.bars
 
-PanelWindow {
+BaseBar {
     id: root
-    property var modelData
-    screen: modelData
     
-    anchors {
-        top: true
-        left: true
-        right: true
-    }
+    anchors.top: true
+    anchors.left: true
+    anchors.right: true
     
     property int barHeight: FrameConfig.thickness
-    property color barColor: FrameConfig.color
-    
     property bool expandedMode: false
     
     implicitHeight: expandedMode ? 130 : barHeight
@@ -50,7 +45,7 @@ PanelWindow {
         anchors.left: parent.left
         anchors.right: parent.right
         height: barHeight
-        color: barColor
+        color: root.barColor
     }
 
     DynamicIsland {
@@ -66,7 +61,8 @@ PanelWindow {
             if (expanded) {
                 root.expandedMode = true
                 collapseTimer.stop()
-            } else {
+            }
+            else {
                 collapseTimer.restart()
             }
         }

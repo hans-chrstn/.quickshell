@@ -2,16 +2,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.config
+import qs.modules.bars
 
-PanelWindow {
-    property var modelData
-    screen: modelData
-    
-    anchors {
-        left: true
-        top: true
-        bottom: true
-    }
+BaseBar {
+    anchors.left: true
+    anchors.top: true
+    anchors.bottom: true
     
     margins { top: 0; bottom: 0 }
     

@@ -2,18 +2,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.config
+import qs.modules.bars
 
-PanelWindow {
-    property var modelData
-    screen: modelData
-    anchors {
-        bottom: true
-        left: true
-        right: true
-    }
+BaseBar {
+    anchors.bottom: true
+    anchors.left: true
+    anchors.right: true
     
     implicitHeight: FrameConfig.thickness
-    color: "transparent"
     
     Rectangle {
         anchors.fill: parent
