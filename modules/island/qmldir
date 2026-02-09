@@ -1,0 +1,5 @@
+module qs.modules.island
+DynamicIsland DynamicIsland.qml
+MusicWidget MusicWidget.qml
+BatteryWidget BatteryWidget.qml
+NotificationWidget NotificationWidget.qml

@@ -1,0 +1,5 @@
+module qs.modules.bars
+TopBar TopBar.qml
+BottomBar BottomBar.qml
+LeftBar LeftBar.qml
+RightBar RightBar.qml
