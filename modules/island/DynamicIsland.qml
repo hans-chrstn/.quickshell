@@ -24,8 +24,8 @@ Item {
     width: targetWidth
     height: targetHeight
     
-    Behavior on width { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
-    Behavior on height { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
+    Behavior on width { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
+    Behavior on height { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
     
     Item {
         id: islandContainer
@@ -64,8 +64,8 @@ Item {
             bottomLeftRadius: root.expanded ? 25 : 0
             bottomRightRadius: root.expanded ? 25 : 0
             
-            Behavior on bottomLeftRadius { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
-            Behavior on bottomRightRadius { NumberAnimation { duration: 350; easing.type: Easing.OutQuint } }
+            Behavior on bottomLeftRadius { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
+            Behavior on bottomRightRadius { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
 
             HoverHandler { id: hoverHandler }
 
