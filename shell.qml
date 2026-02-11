@@ -12,6 +12,7 @@ ShellRoot {
     Variants { model: Quickshell.screens; delegate: BottomBar {} }
     Variants { model: Quickshell.screens; delegate: LeftBar {} } 
     Variants { model: Quickshell.screens; delegate: RightBar {} }
+    Variants { model: Quickshell.screens; delegate: MiscPanel {} }
     
     Variants { 
         model: Quickshell.screens

@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.config
+import qs.components
 import "." 
 
 Item {
@@ -18,14 +19,54 @@ Item {
     property bool expanded: false
     property alias isInteracting: islandContainer.hovered
     
-    property real targetWidth: expanded ? 420 : 120
-    property real targetHeight: expanded ? 130 : barHeight
-    
-    width: targetWidth
-    height: targetHeight
-    
-    Behavior on width { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
-    Behavior on height { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
+    states: [
+        State {
+            name: "expanded"
+            when: root.expanded
+            PropertyChanges { target: root; width: 420; height: 130 }
+            PropertyChanges { target: islandContentArea; opacity: 1 }
+        },
+        State {
+            name: "collapsed"
+            when: !root.expanded
+            PropertyChanges { target: root; width: 120; height: root.barHeight }
+            PropertyChanges { target: islandContentArea; opacity: 0 }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            from: "collapsed"
+            to: "expanded"
+            NumberAnimation {
+                properties: "width,height"
+                duration: FrameConfig.animDuration
+                easing.type: Easing.OutExpo
+            }
+            SequentialAnimation {
+                PauseAnimation { duration: FrameConfig.animDuration * 0.5 }
+                NumberAnimation { 
+                    target: islandContentArea
+                    property: "opacity"
+                    duration: FrameConfig.animDuration * 0.5
+                }
+            }
+        },
+        Transition {
+            from: "expanded"
+            to: "collapsed"
+            NumberAnimation {
+                properties: "width,height"
+                duration: FrameConfig.animDuration
+                easing.type: Easing.InExpo
+            }
+            NumberAnimation {
+                target: islandContentArea
+                property: "opacity"
+                duration: FrameConfig.animDuration * 0.5
+            }
+        }
+    ]
     
     Item {
         id: islandContainer
@@ -37,19 +78,28 @@ Item {
         onHoveredChanged: root.expanded = hovered || dragging
         onDraggingChanged: root.expanded = hovered || dragging
 
-        Shape {
-            anchors.right: islandRect.left; anchors.top: parent.top; anchors.topMargin: root.barHeight
-            width: 20; height: Math.min(20, Math.max(0, root.height - root.barHeight)); clip: true
+        RoundedCornerShape {
+            anchors.right: islandRect.left
+            anchors.top: parent.top
+            anchors.topMargin: root.barHeight
+            width: 20
+            height: Math.min(20, Math.max(0, root.height - root.barHeight))
+            isLeft: true
+            cornerRadius: 20
+            cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)
-            layer.enabled: true; layer.samples: 4
-            ShapePath { strokeWidth: 0; fillColor: root.barColor; PathSvg { path: "M 0 0 L 20 0 L 20 20 A 20 20 0 0 0 0 0 Z" } }
         }
-        Shape {
-            anchors.left: islandRect.right; anchors.top: parent.top; anchors.topMargin: root.barHeight
-            width: 20; height: Math.min(20, Math.max(0, root.height - root.barHeight)); clip: true
+
+        RoundedCornerShape {
+            anchors.left: islandRect.right
+            anchors.top: parent.top
+            anchors.topMargin: root.barHeight
+            width: 20
+            height: Math.min(20, Math.max(0, root.height - root.barHeight))
+            isLeft: false
+            cornerRadius: 20
+            cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)
-            layer.enabled: true; layer.samples: 4
-            ShapePath { strokeWidth: 0; fillColor: root.barColor; PathSvg { path: "M 20 0 L 0 0 L 0 20 A 20 20 0 0 1 20 0 Z" } }
         }
 
         ClippingRectangle {
@@ -59,13 +109,51 @@ Item {
             height: parent.height
             color: root.barColor
             
-            topLeftRadius: 0
-            topRightRadius: 0
-            bottomLeftRadius: root.expanded ? 25 : 0
-            bottomRightRadius: root.expanded ? 25 : 0
-            
-            Behavior on bottomLeftRadius { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
-            Behavior on bottomRightRadius { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
+            states: [
+                State {
+                    name: "expanded"
+                    when: root.expanded
+                    PropertyChanges { 
+                        target: islandRect; 
+                        topLeftRadius: 0; 
+                        topRightRadius: 0;
+                        bottomLeftRadius: FrameConfig.dynamicIslandCornerRadius; 
+                        bottomRightRadius: FrameConfig.dynamicIslandCornerRadius 
+                    }
+                },
+                State {
+                    name: "collapsed"
+                    when: !root.expanded
+                    PropertyChanges { 
+                        target: islandRect; 
+                        topLeftRadius: 0; 
+                        topRightRadius: 0;
+                        bottomLeftRadius: 0; 
+                        bottomRightRadius: 0 
+                    }
+                }
+            ]
+
+            transitions: [
+                Transition {
+                    from: "collapsed"
+                    to: "expanded"
+                    NumberAnimation {
+                        properties: "topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
+                        duration: FrameConfig.animDuration
+                        easing.type: Easing.OutExpo
+                    }
+                },
+                Transition {
+                    from: "expanded"
+                    to: "collapsed"
+                    NumberAnimation {
+                        properties: "topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
+                        duration: FrameConfig.animDuration
+                        easing.type: Easing.InExpo
+                    }
+                }
+            ]
 
             HoverHandler { id: hoverHandler }
 
@@ -73,20 +161,17 @@ Item {
                 id: islandContentArea
                 anchors.fill: parent
                 clip: true
-                opacity: root.width > 350 ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: 50 } }
 
-                Row {
+
+                Loader {
                     anchors.bottom: indicatorsRow.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 15
-                    height: 40; spacing: 4; opacity: 0.2 
-                    visible: view.currentIndex === 0 && root.activePlayer && root.activePlayer.playbackState === MprisPlaybackState.Playing
-                    Repeater {
-                        model: 20 
-                        Rectangle { width: (parent.width - (19 * 4)) / 20; height: parent.height * (0.2 + (0.6 * Math.random())); color: "white"; anchors.bottom: parent.bottom; radius: 2
-                            Timer { interval: 100; running: parent.visible; repeat: true; onTriggered: parent.height = parent.parent.height * (0.2 + (0.6 * Math.random())) }
-                            Behavior on height { NumberAnimation { duration: 100 } }
-                        }
-                    }
+                    height: 40;
+                    
+                    readonly property bool musicPlaying: root.activePlayer && root.activePlayer.playbackState === MprisPlaybackState.Playing
+                    readonly property bool musicTabActive: view.currentIndex === 1
+                    
+                    active: root.expanded && musicTabActive && musicPlaying
+                    source: "Cava.qml"
                 }
 
                 PathView {
@@ -137,6 +222,7 @@ Item {
                             anchors.rightMargin: 20
                             
                             sourceComponent: {
+                                if (model.type === "timeDate") return timeDateComp
                                 if (model.type === "music") return musicComp
                                 if (model.type === "battery") return batteryComp
                                 if (model.type === "notif") return notifComp
@@ -155,13 +241,15 @@ Item {
         }
     }
     
-    Component { id: musicComp; MusicWidget { player: root.activePlayer } }
-    Component { id: batteryComp; BatteryWidget {} }
-    Component { id: notifComp; NotificationWidget { server: root.notifServer } }
+    Component { id: timeDateComp; TimeDate { } }
+    Component { id: musicComp; Music { player: root.activePlayer } }
+    Component { id: batteryComp; Battery {} }
+    Component { id: notifComp; Notification { server: root.notifServer } }
 
     ListModel {
         id: tabModel
         Component.onCompleted: {
+            append({ "type": "timeDate" })
             append({ "type": "music" })
             append({ "type": "notif" })
             append({ "type": "battery" }) 
