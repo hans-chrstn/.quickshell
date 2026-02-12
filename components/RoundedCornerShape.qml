@@ -6,6 +6,7 @@ Item {
 
     property bool isTop: false
     property bool isLeft: false
+    property bool isBottom: false
     property real cornerRadius: 0
     property color cornerColor: "#222222"
 
@@ -14,11 +15,16 @@ Item {
         var H = root.height;
         var R = root.cornerRadius;
 
-        if (root.isLeft) {
+        if (root.isTop && root.isLeft) {
             return `M 0 0 L ${W} 0 L ${W} ${H} A ${R} ${R} 0 0 0 0 0 Z`;
-        } else {
+        } else if (root.isTop && !root.isLeft) {
             return `M ${W} 0 L 0 0 L 0 ${H} A ${R} ${R} 0 0 1 ${W} 0 Z`;
+        } else if (root.isBottom && root.isLeft) {
+            return `M 0 ${H} L ${W} ${H} L ${W} 0 A ${R} ${R} 0 0 1 0 ${H} Z`;
+        } else if (root.isBottom && !root.isLeft) {
+            return `M ${W} ${H} L 0 ${H} L 0 0 A ${R} ${R} 0 0 0 ${W} ${H} Z`;
         }
+        return "";
     }
 
     Shape {

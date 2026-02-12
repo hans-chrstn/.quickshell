@@ -11,8 +11,8 @@ import "."
 Item {
     id: root
     
-    property int barHeight: 15
-    property color barColor: "#222"
+    property int barHeight: FrameConfig.thickness
+    property color barColor: FrameConfig.color
     property var activePlayer: null
     property var notifServer: null
     
@@ -23,13 +23,13 @@ Item {
         State {
             name: "expanded"
             when: root.expanded
-            PropertyChanges { target: root; width: 420; height: 130 }
+            PropertyChanges { target: root; width: FrameConfig.dynamicIslandExpandedWidth; height: FrameConfig.dynamicIslandExpandedHeight }
             PropertyChanges { target: islandContentArea; opacity: 1 }
         },
         State {
             name: "collapsed"
             when: !root.expanded
-            PropertyChanges { target: root; width: 120; height: root.barHeight }
+            PropertyChanges { target: root; width: FrameConfig.dynamicIslandCollapsedWidth; height: root.barHeight }
             PropertyChanges { target: islandContentArea; opacity: 0 }
         }
     ]
@@ -45,7 +45,7 @@ Item {
             }
             SequentialAnimation {
                 PauseAnimation { duration: FrameConfig.animDuration * 0.5 }
-                NumberAnimation { 
+                NumberAnimation {
                     target: islandContentArea
                     property: "opacity"
                     duration: FrameConfig.animDuration * 0.5
@@ -82,10 +82,10 @@ Item {
             anchors.right: islandRect.left
             anchors.top: parent.top
             anchors.topMargin: root.barHeight
-            width: 20
-            height: Math.min(20, Math.max(0, root.height - root.barHeight))
+            width: FrameConfig.roundedCornerShapeWidth
+            height: Math.min(FrameConfig.roundedCornerShapeWidth, Math.max(0, root.height - root.barHeight))
             isLeft: true
-            cornerRadius: 20
+            cornerRadius: FrameConfig.roundedCornerShapeRadius
             cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)
         }
@@ -94,10 +94,10 @@ Item {
             anchors.left: islandRect.right
             anchors.top: parent.top
             anchors.topMargin: root.barHeight
-            width: 20
-            height: Math.min(20, Math.max(0, root.height - root.barHeight))
+            width: FrameConfig.roundedCornerShapeWidth
+            height: Math.min(FrameConfig.roundedCornerShapeWidth, Math.max(0, root.height - root.barHeight))
             isLeft: false
-            cornerRadius: 20
+            cornerRadius: FrameConfig.roundedCornerShapeRadius
             cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)
         }
@@ -164,8 +164,8 @@ Item {
 
 
                 Loader {
-                    anchors.bottom: indicatorsRow.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 15
-                    height: 40;
+                    anchors.bottom: indicatorsRow.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: FrameConfig.cavaLoaderMargin
+                    height: FrameConfig.cavaLoaderHeight
                     
                     readonly property bool musicPlaying: root.activePlayer && root.activePlayer.playbackState === MprisPlaybackState.Playing
                     readonly property bool musicTabActive: view.currentIndex === 1
@@ -177,9 +177,9 @@ Item {
                 PathView {
                     id: view
                     anchors.fill: parent
-                    anchors.topMargin: 10
+                    anchors.topMargin: FrameConfig.pathViewTopMargin
                     anchors.bottom: indicatorsRow.top 
-                    anchors.bottomMargin: 5
+                    anchors.bottomMargin: FrameConfig.pathViewBottomMargin
                     
                     visible: opacity > 0
                     model: tabModel
@@ -218,8 +218,8 @@ Item {
                         
                         Loader {
                             anchors.fill: parent
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 20
+                            anchors.leftMargin: FrameConfig.delegateLoaderMargin
+                            anchors.rightMargin: FrameConfig.delegateLoaderMargin
                             
                             sourceComponent: {
                                 if (model.type === "timeDate") return timeDateComp
@@ -234,8 +234,8 @@ Item {
                 
                 Row {
                     id: indicatorsRow
-                    anchors.bottom: parent.bottom; anchors.bottomMargin: 8; anchors.horizontalCenter: parent.horizontalCenter; spacing: 6; opacity: view.visible ? 1 : 0
-                    Repeater { model: tabModel.count; Rectangle { width: 6; height: 6; radius: 3; color: view.currentIndex === index ? "white" : "#555"; Behavior on color { ColorAnimation { duration: 150 } } } }
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin; anchors.horizontalCenter: parent.horizontalCenter; spacing: FrameConfig.indicatorRowSpacing; opacity: view.visible ? 1 : 0
+                    Repeater { model: tabModel.count; Rectangle { width: FrameConfig.indicatorDotSize; height: FrameConfig.indicatorDotSize; radius: FrameConfig.indicatorDotRadius; color: view.currentIndex === index ? FrameConfig.indicatorDotActiveColor : FrameConfig.indicatorDotColor; Behavior on color { ColorAnimation { duration: FrameConfig.indicatorDotAnimationDuration } } } }
                 }
             }
         }

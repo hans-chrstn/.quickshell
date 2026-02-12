@@ -20,11 +20,11 @@ BaseBar {
     property int barHeight: FrameConfig.thickness
     property bool expandedMode: false
     
-    implicitHeight: expandedMode ? 130 : barHeight
+    implicitHeight: expandedMode ? FrameConfig.dynamicIslandExpandedHeight : barHeight
     
     Timer {
         id: collapseTimer
-        interval: 350 + 200
+        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
         onTriggered: root.expandedMode = false
     }
 
@@ -45,7 +45,7 @@ BaseBar {
         anchors.left: parent.left
         anchors.right: parent.right
         height: barHeight
-        color: root.barColor
+        color: FrameConfig.color
     }
 
     DynamicIsland {
@@ -53,7 +53,7 @@ BaseBar {
         y: 0
         
         barHeight: root.barHeight
-        barColor: root.barColor
+        barColor: FrameConfig.color
         activePlayer: root.activePlayer
         notifServer: notifServer
         
