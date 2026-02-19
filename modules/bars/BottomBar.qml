@@ -13,11 +13,16 @@ BaseBar {
     anchors.right: true
     
     property bool expandedMode: false
-
-    exclusiveZone: FrameConfig.thickness
-
+    
     implicitHeight: expandedMode ? FrameConfig.appIslandExpandedHeight : FrameConfig.thickness
     
+    Timer {
+        id: collapseTimer
+        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
+        onTriggered: root.expandedMode = false
+    }
+
+    exclusiveZone: FrameConfig.thickness
     color: "transparent"
 
     Rectangle {
@@ -34,8 +39,15 @@ BaseBar {
         
         barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
+
         onExpandedChanged: {
-            root.expandedMode = expanded
+            if (expanded) {
+                root.expandedMode = true
+                collapseTimer.stop()
+            }
+            else {
+                collapseTimer.restart()
+            }
         }
     }
 }

@@ -12,12 +12,7 @@ Item {
     property color barColor: FrameConfig.color
     property bool searchVisible: false
     property bool expanded: false
-
-    Timer {
-        id: collapseTimer
-        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
-        onTriggered: root.expanded = false
-    }
+    property alias isInteracting: hoverHandler.hovered
 
     states: [
         State {
@@ -30,13 +25,13 @@ Item {
             name: "expanded"
             when: root.expanded
             PropertyChanges { target: root; width: FrameConfig.appIslandExpandedWidth; height: FrameConfig.appIslandExpandedHeight }
-            PropertyChanges { target: islandContentArea; opacity: 1; scale: 1 }
+            PropertyChanges { target: islandContentArea; opacity: 1 }
         },
         State {
             name: "collapsed"
             when: !root.expanded
             PropertyChanges { target: root; width: FrameConfig.dynamicIslandCollapsedWidth; height: root.barHeight }
-            PropertyChanges { target: islandContentArea; opacity: 0; scale: 0 }
+            PropertyChanges { target: islandContentArea; opacity: 0 }
         }
     ]
 
@@ -77,14 +72,8 @@ Item {
         anchors.fill: parent
 
         HoverHandler {
-            onHoveredChanged: {
-                if (hovered) {
-                    root.expanded = true
-                    collapseTimer.stop()
-                } else {
-                    collapseTimer.restart()
-                }
-            }
+            id: hoverHandler
+            onHoveredChanged: root.expanded = hovered
         }
 
         MouseArea {
@@ -176,8 +165,6 @@ Item {
                 id: islandContentArea
                 anchors.fill: parent
                 opacity: 0
-                scale: 0
-                visible: opacity > 0
                 clip: true
 
                 AlphabetScrubber {
