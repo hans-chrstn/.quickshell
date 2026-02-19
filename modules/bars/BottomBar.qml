@@ -12,16 +12,8 @@ BaseBar {
     anchors.left: true
     anchors.right: true
     
-    property bool expandedMode: false
+    implicitHeight: FrameConfig.appIslandExpandedHeight
     
-    implicitHeight: expandedMode ? FrameConfig.appIslandExpandedHeight : FrameConfig.thickness
-    
-    Timer {
-        id: collapseTimer
-        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
-        onTriggered: root.expandedMode = false
-    }
-
     exclusiveZone: FrameConfig.thickness
     color: "transparent"
 
@@ -39,15 +31,5 @@ BaseBar {
         
         barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
-
-        onExpandedChanged: {
-            if (expanded) {
-                root.expandedMode = true
-                collapseTimer.stop()
-            }
-            else {
-                collapseTimer.restart()
-            }
-        }
     }
 }
