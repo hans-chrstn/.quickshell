@@ -10,29 +10,39 @@ Item {
 
     property int barHeight: FrameConfig.thickness
     property color barColor: FrameConfig.color
-    property string searchText: ""
-
+    property bool searchVisible: false
     property bool expanded: false
 
+    Timer {
+        id: collapseTimer
+        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
+        onTriggered: root.expanded = false
+    }
+
     states: [
+        State {
+            name: "search"
+            when: root.searchVisible
+            PropertyChanges { target: root; height: FrameConfig.appIslandExpandedHeight + searchBar.height + FrameConfig.appIslandSearchBarTopMargin }
+            PropertyChanges { target: searchBar; visible: true; opacity: 1 }
+        },
         State {
             name: "expanded"
             when: root.expanded
             PropertyChanges { target: root; width: FrameConfig.appIslandExpandedWidth; height: FrameConfig.appIslandExpandedHeight }
-            PropertyChanges { target: islandContentArea; opacity: 1 }
+            PropertyChanges { target: islandContentArea; opacity: 1; scale: 1 }
         },
         State {
             name: "collapsed"
             when: !root.expanded
             PropertyChanges { target: root; width: FrameConfig.dynamicIslandCollapsedWidth; height: root.barHeight }
-            PropertyChanges { target: islandContentArea; opacity: 0 }
+            PropertyChanges { target: islandContentArea; opacity: 0; scale: 0 }
         }
     ]
 
     transitions: [
         Transition {
-            from: "collapsed"
-            to: "expanded"
+            from: "collapsed"; to: "expanded"
             NumberAnimation {
                 properties: "width,height"
                 duration: FrameConfig.animDuration
@@ -48,8 +58,7 @@ Item {
             }
         },
         Transition {
-            from: "expanded"
-            to: "collapsed"
+            from: "expanded"; to: "collapsed"
             NumberAnimation {
                 properties: "width,height"
                 duration: FrameConfig.animDuration
@@ -66,6 +75,35 @@ Item {
     Item {
         id: islandContainer
         anchors.fill: parent
+
+        HoverHandler {
+            onHoveredChanged: {
+                if (hovered) {
+                    root.expanded = true
+                    collapseTimer.stop()
+                } else {
+                    collapseTimer.restart()
+                }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+
+            property real initialY: 0
+            onPressed: (mouse) => initialY = mouse.y
+            onPositionChanged: (mouse) => {
+                if (initialY - mouse.y > FrameConfig.appIslandDragThreshold) {
+                    root.searchVisible = true
+                }
+            }
+            onReleased: (mouse) => {
+                if (initialY - mouse.y < -FrameConfig.appIslandDragThreshold) {
+                    root.searchVisible = false
+                }
+            }
+        }
 
         RoundedCornerShape {
             anchors.right: islandRect.left
@@ -102,24 +140,22 @@ Item {
 
             states: [
                 State {
-                    name: "expanded"
-                    when: root.expanded
+                    name: "expanded"; when: root.expanded
                     PropertyChanges {
-                        target: islandRect;
-                        topLeftRadius: FrameConfig.dynamicIslandCornerRadius;
-                        topRightRadius: FrameConfig.dynamicIslandCornerRadius;
-                        bottomLeftRadius: 0;
+                        target: islandRect
+                        topLeftRadius: FrameConfig.dynamicIslandCornerRadius
+                        topRightRadius: FrameConfig.dynamicIslandCornerRadius
+                        bottomLeftRadius: 0
                         bottomRightRadius: 0
                     }
                 },
                 State {
-                    name: "collapsed"
-                    when: !root.expanded
+                    name: "collapsed"; when: !root.expanded
                     PropertyChanges {
-                        target: islandRect;
-                        topLeftRadius: 0;
-                        topRightRadius: 0;
-                        bottomLeftRadius: 0;
+                        target: islandRect
+                        topLeftRadius: 0
+                        topRightRadius: 0
+                        bottomLeftRadius: 0
                         bottomRightRadius: 0
                     }
                 }
@@ -127,149 +163,154 @@ Item {
 
             transitions: [
                 Transition {
-                    from: "collapsed"
-                    to: "expanded"
-                    NumberAnimation {
-                        properties: "topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
-                        duration: FrameConfig.animDuration
-                        easing.type: Easing.OutExpo
-                    }
+                    from: "collapsed"; to: "expanded"
+                    NumberAnimation { properties: "topLeftRadius,topRightRadius"; duration: FrameConfig.animDuration; easing.type: Easing.OutExpo }
                 },
                 Transition {
-                    from: "expanded"
-                    to: "collapsed"
-                    NumberAnimation {
-                        properties: "topLeftRadius,topRightRadius,bottomLeftRadius,bottomRightRadius"
-                        duration: FrameConfig.animDuration
-                        easing.type: Easing.InExpo
-                    }
+                    from: "expanded"; to: "collapsed"
+                    NumberAnimation { properties: "topLeftRadius,topRightRadius"; duration: FrameConfig.animDuration; easing.type: Easing.InExpo }
                 }
             ]
 
             Item {
                 id: islandContentArea
                 anchors.fill: parent
+                opacity: 0
+                scale: 0
+                visible: opacity > 0
                 clip: true
 
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 10
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 40
-                        radius: 20
-                        color: "#333333"
-
-                        TextInput {
-                            id: searchInput
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            verticalAlignment: TextInput.AlignVCenter
-                            color: "white"
-                            font.pixelSize: 16
-                            onTextChanged: {
-                                root.searchText = text
-                            }
-                            Keys.onUpPressed: appListView.decrementCurrentIndex()
-                            Keys.onDownPressed: appListView.incrementCurrentIndex()
-                            Keys.onReturnPressed: {
-                                if (appListView.currentItem && appListView.currentItem.modelData) {
-                                    appListView.currentItem.modelData.execute()
-                                }
-                            }
-                            Keys.onPressed: event => {
-                                if (event.key >= Qt.Key_A && event.key <= Qt.Key_Z ||
-                                    event.key >= Qt.Key_0 && event.key <= Qt.Key_9 ||
-                                    event.key >= Qt.Key_Space && event.key <= Qt.Key_AsciiTilde ||
-                                    event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete) {
-                                    searchInput.forceActiveFocus()
-                                }
-                            }
-                            Connections {
-                                target: root
-                                function onExpandedChanged() {
-                                    if (root.expanded) {
-                                        searchInput.forceActiveFocus()
-                                    } else {
-                                        searchInput.text = ""
-                                    }
-                                }
+                AlphabetScrubber {
+                    id: alphabetScrubber
+                    width: parent.width
+                    anchors.top: parent.top
+                    onLetterClicked: (letter) => {
+                        for (var i = 0; i < appListModel.count; i++) {
+                            var app = appListModel.get(i).app
+                            var firstLetter = app.name.substring(0, 1).toUpperCase()
+                            if (letter === "#" && !"ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
+                                view.currentIndex = i
+                                break
+                            } else if (firstLetter === letter) {
+                                view.currentIndex = i
+                                break
                             }
                         }
-                        Text {
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            verticalAlignment: Text.AlignVCenter
-                            text: "Search applications..."
-                            color: "#888888"
-                            font.pixelSize: 16
-                            visible: !searchInput.text && !searchInput.activeFocus
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: searchInput.forceActiveFocus()
+                    }
+                }
+
+                PathView {
+                    id: view
+                    anchors.fill: parent
+                    anchors.topMargin: 30
+                    clip: true
+
+                    model: appListModel
+                    delegate: AppIslandDelegate { app: model.app }
+
+                    onCurrentIndexChanged: {
+                        if (currentIndex >= 0 && currentIndex < appListModel.count) {
+                            var currentApp = appListModel.get(currentIndex).app
+                            var firstLetter = currentApp.name.substring(0, 1).toUpperCase()
+                            if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
+                                alphabetScrubber.highlightedLetter = firstLetter
+                            } else {
+                                alphabetScrubber.highlightedLetter = "#"
                             }
                         }
                     }
 
-                    ListView {
-                        id: appListView
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        clip: true
-                        spacing: 5
-                        
-                        model: ScriptModel {
-                            values: {
-                                var filteredApps = DesktopEntries.applications.values.filter(function(app) {
-                                    return app.name.toLowerCase().includes(root.searchText.toLowerCase()) ||
-                                           app.keywords.join(" ").toLowerCase().includes(root.searchText.toLowerCase());
-                                });
-                                return filteredApps;
+                    path: Path {
+                        startX: 0
+                        startY: view.height / 2
+                        PathLine { x: view.width; y: view.height / 2 }
+                    }
+                    
+                    pathItemCount: 7
+                    
+                    highlightRangeMode: PathView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0.5
+                    preferredHighlightEnd: 0.5
+                    snapMode: PathView.SnapToItem
+
+                    ListModel { id: appListModel }
+
+                    ScriptModel {
+                        id: scriptModel
+                        values: {
+                            var apps = DesktopEntries.applications.values.slice()
+
+                            if (FrameConfig.appIslandSortMode === "alphabetical") {
+                                apps.sort(function(a, b) {
+                                    if (a.name.toLowerCase() < b.name.toLowerCase()) return -1
+                                    if (a.name.toLowerCase() > b.name.toLowerCase()) return 1
+                                    return 0
+                                })
+                            }
+
+                            if (searchInput.text === "") {
+                                return apps
+                            } else {
+                                return apps.filter(function(app) {
+                                    return app.name.toLowerCase().includes(searchInput.text.toLowerCase()) ||
+                                           (app.keywords && app.keywords.join(" ").toLowerCase().includes(searchInput.text.toLowerCase()))
+                                })
                             }
                         }
-
-                        delegate: Item {
-                            width: appListView.width
-                            height: 40
-
-                            Rectangle {
-                                anchors.fill: parent
-                                color: appListView.currentIndex === index ? "#555555" : "transparent"
-                                radius: 5
-                            }
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.leftMargin: 10
-                                spacing: 10
-
-                                Image {
-                                    Layout.preferredWidth: 32
-                                    Layout.preferredHeight: 32
-                                    source: Quickshell.iconPath(modelData.icon)
-                                    fillMode: Image.PreserveAspectFit
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    verticalAlignment: Text.AlignVCenter
-                                    text: modelData.name
-                                    color: "white"
-                                    font.pixelSize: 16
-                                }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: {
-                                    modelData.execute()
+                        onValuesChanged: {
+                            appListModel.clear()
+                            var apps = scriptModel.values
+                            if (apps.length > 0) {
+                                for (var i = 0; i < apps.length; i++) {
+                                    var app = apps[i]
+                                    if (app) appListModel.append({ "app": app })
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            Rectangle {
+                id: searchBar
+                width: parent.width - (FrameConfig.appIslandSearchBarHorizontalMargin * 2)
+                height: FrameConfig.appIslandSearchBarHeight
+                anchors.top: parent.top
+                anchors.topMargin: FrameConfig.appIslandSearchBarTopMargin
+                anchors.horizontalCenter: parent.horizontalCenter
+                radius: FrameConfig.appIslandSearchBarRadius
+                color: FrameConfig.appIslandSearchBarColor
+                visible: false
+                opacity: 0
+
+                TextInput {
+                    id: searchInput
+                    anchors.fill: parent
+                    anchors.leftMargin: FrameConfig.appIslandSearchInputHorizontalMargin
+                    anchors.rightMargin: FrameConfig.appIslandSearchInputHorizontalMargin
+                    verticalAlignment: TextInput.AlignVCenter
+                    color: "white"
+                    font.pixelSize: FrameConfig.appIslandSearchInputFontSize
+
+                    Connections {
+                        target: root
+                        function onSearchVisibleChanged() {
+                            if (root.searchVisible) {
+                                searchInput.forceActiveFocus()
+                            }
+                        }
+                    }
+                }
+            }
+
+            Text {
+                anchors.top: parent.top
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.topMargin: FrameConfig.appIslandArrowIndicatorTopMargin
+                text: FrameConfig.appIslandArrowIndicatorText
+                color: "white"
+                font.pixelSize: FrameConfig.appIslandArrowIndicatorSize
+                visible: root.expanded && !root.searchVisible
             }
         }
     }

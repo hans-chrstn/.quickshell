@@ -14,14 +14,10 @@ BaseBar {
     
     property bool expandedMode: false
 
+    exclusiveZone: FrameConfig.thickness
+
     implicitHeight: expandedMode ? FrameConfig.appIslandExpandedHeight : FrameConfig.thickness
     
-    Timer {
-        id: collapseTimer
-        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
-        onTriggered: root.expandedMode = false
-    }
-
     color: "transparent"
 
     Rectangle {
@@ -32,32 +28,14 @@ BaseBar {
         color: FrameConfig.color
     }
 
-    Rectangle {
-        id: hoverArea
-        width: 200
-        height: root.implicitHeight
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        color: "transparent"
-
-        HoverHandler {
-            onHoveredChanged: {
-                if (hovered) {
-                    root.expandedMode = true
-                    collapseTimer.stop()
-                } else {
-                    collapseTimer.restart()
-                }
-            }
-        }
-    }
-
     AppIsland {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         
         barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
-        expanded: root.expandedMode
+        onExpandedChanged: {
+            root.expandedMode = expanded
+        }
     }
 }

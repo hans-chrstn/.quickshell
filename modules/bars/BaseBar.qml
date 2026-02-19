@@ -5,6 +5,7 @@ import qs.config
 
 PanelWindow {
     id: baseBarRoot
+    color: "transparent"
 
     property var modelData
     screen: modelData

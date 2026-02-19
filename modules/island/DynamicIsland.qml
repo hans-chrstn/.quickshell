@@ -85,6 +85,7 @@ Item {
             width: FrameConfig.roundedCornerShapeWidth
             height: Math.min(FrameConfig.roundedCornerShapeWidth, Math.max(0, root.height - root.barHeight))
             isLeft: true
+            isTop: true
             cornerRadius: FrameConfig.roundedCornerShapeRadius
             cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)
@@ -96,7 +97,7 @@ Item {
             anchors.topMargin: root.barHeight
             width: FrameConfig.roundedCornerShapeWidth
             height: Math.min(FrameConfig.roundedCornerShapeWidth, Math.max(0, root.height - root.barHeight))
-            isLeft: false
+            isTop: true
             cornerRadius: FrameConfig.roundedCornerShapeRadius
             cornerColor: root.barColor
             visible: root.height > (root.barHeight + 2)

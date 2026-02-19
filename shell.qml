@@ -8,25 +8,59 @@ import qs.modules.bars
 import "components"
 
 ShellRoot {
-    Variants { model: Quickshell.screens; delegate: TopBar {} }
-    Variants { model: Quickshell.screens; delegate: BottomBar {} }
-    Variants { model: Quickshell.screens; delegate: LeftBar {} } 
-    Variants { model: Quickshell.screens; delegate: RightBar {} }
-    
-    Variants { 
+    Variants {
         model: Quickshell.screens
-        delegate: ScreenCorner { activeTop: true; activeLeft: true }
+        delegate: TopBar {}
     }
-    Variants { 
+
+    Variants {
         model: Quickshell.screens
-        delegate: ScreenCorner { activeTop: true; activeRight: true }
+        delegate: LeftBar {}
     }
-    Variants { 
+
+    Variants {
         model: Quickshell.screens
-        delegate: ScreenCorner { activeBottom: true; activeLeft: true }
+        delegate: RightBar {}
     }
-    Variants { 
+
+    Variants {
         model: Quickshell.screens
-        delegate: ScreenCorner { activeBottom: true; activeRight: true }
+        delegate: BottomBar {}
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: ScreenCorner {
+            activeTop: true
+            activeLeft: true
+            aboveWindows: true
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: ScreenCorner {
+            activeTop: true
+            activeRight: true
+            aboveWindows: true
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: ScreenCorner {
+            activeBottom: true
+            activeLeft: true
+            aboveWindows: true
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: ScreenCorner {
+            activeBottom: true
+            activeRight: true
+            aboveWindows: true
+        }
     }
 }
