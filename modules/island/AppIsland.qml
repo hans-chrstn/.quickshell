@@ -254,7 +254,6 @@ Item {
                 opacity: 0
                 visible: false
                 
-                // Subtle shadow for the search bar
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true

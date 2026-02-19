@@ -31,6 +31,11 @@ BaseBar {
     exclusiveZone: barHeight
     color: "transparent"
 
+    mask: Region {
+        Region { item: barRect; intersection: Intersection.Combine }
+        Region { item: dIsland; intersection: Intersection.Combine }
+    }
+
     property var activePlayer: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
     
     NotificationServer {
@@ -41,6 +46,7 @@ BaseBar {
     }
 
     Rectangle {
+        id: barRect
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -49,6 +55,7 @@ BaseBar {
     }
 
     DynamicIsland {
+        id: dIsland
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         

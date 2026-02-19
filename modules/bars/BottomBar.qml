@@ -17,7 +17,13 @@ BaseBar {
     exclusiveZone: FrameConfig.thickness
     color: "transparent"
 
+    mask: Region {
+        Region { item: barRect; intersection: Intersection.Combine }
+        Region { item: appIsland; intersection: Intersection.Combine }
+    }
+
     Rectangle {
+        id: barRect
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -26,6 +32,7 @@ BaseBar {
     }
 
     AppIsland {
+        id: appIsland
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         
