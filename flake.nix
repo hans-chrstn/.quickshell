@@ -21,6 +21,7 @@
         pkgs.quickshell
         pkgs.upower
         pkgs.libnotify
+        pkgs.wf-recorder
       ];
     };
   };

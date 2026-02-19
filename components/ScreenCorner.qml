@@ -8,6 +8,7 @@ PanelWindow {
     id: root
     property var modelData
     screen: modelData
+    readonly property string screenName: modelData ? modelData.name : ""
 
     property bool activeTop: false
     property bool activeBottom: false
@@ -22,7 +23,7 @@ PanelWindow {
     property bool hoverEnabled: false
     property int expandedWidth: 200
     property int expandedHeight: 200
-    readonly property bool hovered: hoverEnabled && mouseArea.containsMouse
+    readonly property bool hovered: hoverEnabled && hoverHandler.hovered
     
     property bool expandedState: false
     
@@ -57,9 +58,9 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     
     mask: Region {
-        Region { item: container }
-        Region { item: verticalFillet }
-        Region { item: horizontalFillet }
+        Region { item: container; intersection: Intersection.Combine }
+        Region { item: verticalFillet; intersection: Intersection.Combine }
+        Region { item: horizontalFillet; intersection: Intersection.Combine }
     }
 
     Item {
@@ -72,6 +73,11 @@ PanelWindow {
         anchors.left: root.activeLeft ? parent.left : undefined
         anchors.right: root.activeRight ? parent.right : undefined
         
+        HoverHandler {
+            id: hoverHandler
+            enabled: root.hoverEnabled
+        }
+
         readonly property bool isFullyExpanded: width === root.expandedWidth && height === root.expandedHeight
         readonly property bool isCollapsed: width === root.sRadius && height === root.sRadius
 
@@ -201,11 +207,5 @@ PanelWindow {
                 }
             }
         }
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: container
-        hoverEnabled: root.hoverEnabled
     }
 }
