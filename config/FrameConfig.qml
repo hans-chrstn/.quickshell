@@ -21,7 +21,7 @@ QtObject {
 
     property int appIslandExpandedWidth: 600
     property int appIslandExpandedHeight: 130
-    property string appIslandSortMode: "alphabetical"
+    property string appIslandSortMode: "alphabetical" // or none
 
     property int appIslandDelegateHeight: 130
     property int appIslandDelegateWidth: 80
@@ -39,7 +39,6 @@ QtObject {
     property string appIslandArrowIndicatorText: "^"
     property int appIslandArrowIndicatorSize: 16
     property int appIslandArrowIndicatorTopMargin: 5
-    property int appIslandDragThreshold: 50
 
     property int appIslandSearchBarHeight: 40
     property int appIslandSearchBarTopMargin: 10

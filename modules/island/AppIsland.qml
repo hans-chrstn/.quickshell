@@ -76,24 +76,6 @@ Item {
             onHoveredChanged: root.expanded = hovered
         }
 
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-
-            property real initialY: 0
-            onPressed: (mouse) => initialY = mouse.y
-            onPositionChanged: (mouse) => {
-                if (initialY - mouse.y > FrameConfig.appIslandDragThreshold) {
-                    root.searchVisible = true
-                }
-            }
-            onReleased: (mouse) => {
-                if (initialY - mouse.y < -FrameConfig.appIslandDragThreshold) {
-                    root.searchVisible = false
-                }
-            }
-        }
-
         RoundedCornerShape {
             anchors.right: islandRect.left
             anchors.bottom: parent.bottom
