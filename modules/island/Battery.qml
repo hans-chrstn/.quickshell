@@ -47,7 +47,7 @@ Item {
 
             Text { 
                 anchors.centerIn: parent
-                text: root.device ? Math.round(root.device.percentage) + "%" : "--"
+                text: root.device ? Math.round(root.device.percentage * 100) + "%" : "--"
                 color: "white"
                 font.weight: Font.Bold
                 font.pixelSize: 14
