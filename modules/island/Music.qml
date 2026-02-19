@@ -51,7 +51,7 @@ Item {
             Layout.fillWidth: true 
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 4
+            spacing: 2
             
             Item { Layout.fillHeight: true } 
             
@@ -59,15 +59,17 @@ Item {
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackTitle) || "No Music"
                 color: "white"
-                font.bold: true
+                font.weight: Font.DemiBold
+                font.pixelSize: 14
                 elide: Text.ElideRight 
                 horizontalAlignment: Text.AlignLeft
             }
             Text { 
                 Layout.fillWidth: true
-                text: (root.player && root.player.trackArtist) || ""
-                color: "#aaa"
-                font.pixelSize: 12
+                text: (root.player && root.player.trackArtist) || "Nothing playing"
+                color: "white"
+                opacity: 0.6
+                font.pixelSize: 11
                 elide: Text.ElideRight 
                 horizontalAlignment: Text.AlignLeft
             }
@@ -75,22 +77,32 @@ Item {
             Item {
                 id: progressBarArea
                 Layout.fillWidth: true
-                Layout.preferredHeight: 6
+                Layout.preferredHeight: 12
+                Layout.topMargin: 4
                 
                 Rectangle {
                     anchors.centerIn: parent
                     width: parent.width
                     height: 4
-                    color: "#444"
+                    color: "white"
+                    opacity: 0.1
                     radius: 2
                     
                     Rectangle {
                         height: parent.height
                         radius: 2
-                        color: "white"
+                        color: FrameConfig.accentColor
                         width: (root.player && root.player.length > 0) 
                                ? parent.width * (root.player.position / root.player.length) 
                                : 0
+                        
+                        Rectangle {
+                            anchors.fill: parent
+                            color: FrameConfig.accentColor
+                            opacity: 0.3
+                            radius: 2
+                            visible: parent.width > 0
+                        }
                     }
                 }
                 
@@ -105,13 +117,19 @@ Item {
             }
 
             Row { 
-                spacing: 20
+                spacing: 24
                 visible: !!root.player
                 Layout.alignment: Qt.AlignHCenter 
+                Layout.topMargin: 4
                 
-                Text { text: "⏮"; color: "white"; font.pixelSize: 16; TapHandler { onTapped: if(root.player) root.player.previous() } }
-                Text { text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "⏸" : "▶"; color: "white"; font.pixelSize: 20; TapHandler { onTapped: if(root.player) root.player.togglePlaying() } }
-                Text { text: "⏭"; color: "white"; font.pixelSize: 16; TapHandler { onTapped: if(root.player) root.player.next() } }
+                Text { text: "󰒮"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.previous() } }
+                Text { 
+                    text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
+                    color: "white"
+                    font.pixelSize: 24
+                    TapHandler { onTapped: if(root.player) root.player.togglePlaying() } 
+                }
+                Text { text: "󰒭"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.next() } }
             }
             
             Item { Layout.fillHeight: true }

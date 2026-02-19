@@ -14,6 +14,10 @@ BaseBar {
         bottom: 0
     }
     
-    implicitWidth: FrameConfig.thickness
-    color: FrameConfig.color
-}
+        implicitWidth: FrameConfig.thickness
+    
+        color: FrameConfig.color
+    
+    }
+    
+    

@@ -15,25 +15,28 @@ Rectangle {
     Row {
         id: letterRow
         anchors.centerIn: parent
-        spacing: 5
+        spacing: 4
 
         Repeater {
             model: root.alphabetModel
             
             delegate: Text {
                 text: modelData
-                font.pixelSize: FrameConfig.appIslandScrubberFontSize
+                font.pixelSize: 10
+                font.weight: root.highlightedLetter === modelData ? Font.Bold : Font.Normal
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter
 
-                opacity: root.highlightedLetter === modelData ? FrameConfig.appIslandScrubberActiveOpacity : FrameConfig.appIslandScrubberInactiveOpacity
-                scale: root.highlightedLetter === modelData ? FrameConfig.appIslandScrubberActiveScale : FrameConfig.appIslandScrubberInactiveScale
+                opacity: root.highlightedLetter === modelData ? 1.0 : 0.3
+                scale: root.highlightedLetter === modelData ? 1.2 : 1.0
 
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-                Behavior on scale { NumberAnimation { duration: 150 } }
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
 
                 MouseArea {
                     anchors.fill: parent
+                    width: 14; height: 30
+                    anchors.centerIn: parent
                     onClicked: root.letterClicked(modelData)
                 }
             }

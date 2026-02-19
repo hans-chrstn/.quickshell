@@ -71,39 +71,42 @@ ShellRoot {
 
             Row {
                 anchors.centerIn: parent
-                spacing: 20
+                spacing: 24
 
                 Column {
-                    spacing: 8
+                    spacing: 6
                     
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        width: 40; height: 40; radius: 20
-                        color: "#333"
-                        Text { anchors.centerIn: parent; text: "📸"; font.pixelSize: 20 }
+                        width: 44; height: 44; radius: 22
+                        color: "white"
+                        opacity: 0.1
+                        
+                        Text { anchors.centerIn: parent; text: "󰄀"; color: "white"; font.pixelSize: 22 }
                         
                         MouseArea {
                             anchors.fill: parent
                             onClicked: Quickshell.execDetached(["sh", "-c", "niri msg action screenshot"])
                         }
                     }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Snap"; color: "white"; font.pixelSize: 10 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"; color: "white"; opacity: 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1 }
                 }
 
                 Column {
-                    spacing: 8
+                    spacing: 6
                     
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        width: 40; height: 40; radius: 20
-                        color: recorder.running ? "#ff4444" : "#333"
+                        width: 44; height: 44; radius: 22
+                        color: recorder.running ? "#ff4444" : "white"
+                        opacity: recorder.running ? 1.0 : 0.1
                         
                         Rectangle {
                             anchors.centerIn: parent
-                            width: recorder.running ? 16 : 20
+                            width: recorder.running ? 14 : 18
                             height: width
-                            radius: recorder.running ? 4 : 10
-                            color: recorder.running ? "white" : "#ff4444"
+                            radius: recorder.running ? 3 : 9
+                            color: recorder.running ? "white" : "white"
                             Behavior on width { NumberAnimation { duration: 200 } }
                             Behavior on radius { NumberAnimation { duration: 200 } }
                         }
@@ -119,7 +122,7 @@ ShellRoot {
                             }
                         }
                     }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: recorder.running ? "Stop" : "Rec"; color: "white"; font.pixelSize: 10 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: recorder.running ? "STOP" : "REC"; color: recorder.running ? "#ff4444" : "white"; opacity: recorder.running ? 1.0 : 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1 }
                 }
             }
         }
@@ -151,26 +154,39 @@ ShellRoot {
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 10
+                    spacing: 8
                     visible: confirmAction === ""
                     
-                    Text {
+                    Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Logout"
-                        color: "white"
-                        font.pixelSize: 14
+                        width: 100; height: 32; radius: 16
+                        color: "white"; opacity: 0.1
+                        Text {
+                            anchors.centerIn: parent
+                            text: "LOGOUT"
+                            color: "white"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                            font.letterSpacing: 1
+                        }
                         MouseArea {
                             anchors.fill: parent
                             onClicked: confirmAction = "logout"
                         }
                     }
 
-                    Text {
+                    Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Power Off"
-                        color: "#ff5555"
-                        font.pixelSize: 14
-                        font.bold: true
+                        width: 100; height: 32; radius: 16
+                        color: "#ff5555"; opacity: 0.2
+                        Text {
+                            anchors.centerIn: parent
+                            text: "POWER OFF"
+                            color: "#ff5555"
+                            font.pixelSize: 10
+                            font.weight: Font.Bold
+                            font.letterSpacing: 1
+                        }
                         MouseArea {
                             anchors.fill: parent
                             onClicked: confirmAction = "poweroff"
@@ -180,26 +196,33 @@ ShellRoot {
 
                 Column {
                     anchors.centerIn: parent
-                    spacing: 10
+                    spacing: 12
                     visible: confirmAction !== ""
 
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "Are you sure?"
+                        text: "CONFIRM ACTION?"
                         color: "white"
-                        font.pixelSize: 12
-                        font.italic: true
+                        opacity: 0.6
+                        font.pixelSize: 9
+                        font.weight: Font.Bold
+                        font.letterSpacing: 1.5
                     }
 
                     Row {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        spacing: 15
+                        spacing: 12
 
-                        Text {
-                            text: "Yes"
+                        Rectangle {
+                            width: 60; height: 32; radius: 16
                             color: "#ff5555"
-                            font.pixelSize: 14
-                            font.bold: true
+                            Text {
+                                anchors.centerIn: parent
+                                text: "YES"
+                                color: "white"
+                                font.pixelSize: 10
+                                font.weight: Font.Bold
+                            }
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
@@ -212,10 +235,16 @@ ShellRoot {
                             }
                         }
 
-                        Text {
-                            text: "Cancel"
-                            color: "white"
-                            font.pixelSize: 14
+                        Rectangle {
+                            width: 60; height: 32; radius: 16
+                            color: "white"; opacity: 0.1
+                            Text {
+                                anchors.centerIn: parent
+                                text: "NO"
+                                color: "white"
+                                font.pixelSize: 10
+                                font.weight: Font.Bold
+                            }
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: confirmAction = ""

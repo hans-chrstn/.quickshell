@@ -2,12 +2,15 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    readonly property int thickness: 15
-    readonly property int cornerRadius: 10
-    readonly property color color: "#222222"
+    readonly property int thickness: 16
+    readonly property int cornerRadius: 12
+    readonly property color color: "#0D0D0F"
+    readonly property color accentColor: "#3D5AFE"
+    readonly property color highlightColor: "#FFFFFF"
+    readonly property real highlightOpacity: 0.08
 
-    readonly property int animDuration: 350
-    readonly property int animEasing: Easing.OutQuint
+    readonly property int animDuration: 450
+    readonly property int animEasing: Easing.OutQuart
 
     property bool leftBarExpanded: false
     property int dynamicIslandCornerRadius: 30

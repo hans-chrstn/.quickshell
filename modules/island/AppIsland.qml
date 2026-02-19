@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import qs.config
@@ -242,30 +244,59 @@ Item {
 
             Rectangle {
                 id: searchBar
-                width: parent.width - (FrameConfig.appIslandSearchBarHorizontalMargin * 2)
-                height: FrameConfig.appIslandSearchBarHeight
+                width: parent.width - 40
+                height: 36
                 anchors.top: parent.top
-                anchors.topMargin: FrameConfig.appIslandSearchBarTopMargin
+                anchors.topMargin: 12
                 anchors.horizontalCenter: parent.horizontalCenter
-                radius: FrameConfig.appIslandSearchBarRadius
-                color: FrameConfig.appIslandSearchBarColor
-                visible: false
+                radius: 18
+                color: "white"
                 opacity: 0
+                visible: false
+                
+                // Subtle shadow for the search bar
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowColor: "black"
+                    shadowOpacity: 0.3
+                    shadowBlur: 0.5
+                    shadowVerticalOffset: 2
+                }
 
-                TextInput {
-                    id: searchInput
+                RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: FrameConfig.appIslandSearchInputHorizontalMargin
-                    anchors.rightMargin: FrameConfig.appIslandSearchInputHorizontalMargin
-                    verticalAlignment: TextInput.AlignVCenter
-                    color: "white"
-                    font.pixelSize: FrameConfig.appIslandSearchInputFontSize
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 8
 
-                    Connections {
-                        target: root
-                        function onSearchVisibleChanged() {
-                            if (root.searchVisible) {
-                                searchInput.forceActiveFocus()
+                    Text {
+                        text: "󰍉"
+                        color: "#666"
+                        font.pixelSize: 16
+                    }
+
+                    TextInput {
+                        id: searchInput
+                        Layout.fillWidth: true
+                        verticalAlignment: TextInput.AlignVCenter
+                        color: "#222"
+                        font.pixelSize: 14
+                        font.weight: Font.Medium
+                        
+                        Text {
+                            text: "Search apps..."
+                            color: "#999"
+                            font.pixelSize: 14
+                            visible: !searchInput.text && !searchInput.activeFocus
+                        }
+
+                        Connections {
+                            target: root
+                            function onSearchVisibleChanged() {
+                                if (root.searchVisible) {
+                                    searchInput.forceActiveFocus()
+                                }
                             }
                         }
                     }

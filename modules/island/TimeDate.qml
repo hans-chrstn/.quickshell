@@ -16,23 +16,28 @@ Item {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 0
 
         Text {
             id: timeText
             text: Qt.formatDateTime(new Date(), "hh:mm")
             color: "white"
-            font.bold: true
-            font.pixelSize: 40
+            font.weight: Font.DemiBold
+            font.pixelSize: 48
+            font.letterSpacing: -1
             Layout.alignment: Qt.AlignHCenter
         }
 
         Text {
             id: dateText
-            text: Qt.formatDateTime(new Date(), "dddd, MMMM d")
-            color: "#aaa"
-            font.pixelSize: 12
+            text: Qt.formatDateTime(new Date(), "dddd, MMMM d").toUpperCase()
+            color: "white"
+            opacity: 0.5
+            font.pixelSize: 11
+            font.letterSpacing: 1.5
+            font.weight: Font.Medium
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: -4
         }
     }
 }

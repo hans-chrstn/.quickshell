@@ -19,32 +19,47 @@ Item {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: FrameConfig.appIslandSpacing
+        spacing: 8
 
-        Image {
-            id: appIcon
-            width: FrameConfig.appIslandIconSize
-            height: FrameConfig.appIslandIconSize
-            sourceSize: Qt.size(FrameConfig.appIslandIconSize, FrameConfig.appIslandIconSize)
+        Item {
+            Layout.preferredWidth: FrameConfig.appIslandIconSize
+            Layout.preferredHeight: FrameConfig.appIslandIconSize
             Layout.alignment: Qt.AlignHCenter
-            source: Quickshell.iconPath(app.icon)
-            fillMode: Image.PreserveAspectFit
+            
+            Rectangle {
+                anchors.fill: parent
+                radius: 12
+                color: "black"
+                opacity: 0.2
+                scale: 0.9
+                y: 4
+                z: -1
+            }
+
+            Image {
+                id: appIcon
+                anchors.fill: parent
+                sourceSize: Qt.size(FrameConfig.appIslandIconSize, FrameConfig.appIslandIconSize)
+                source: Quickshell.iconPath(app.icon)
+                fillMode: Image.PreserveAspectFit
+            }
         }
 
-        Rectangle {
-            width: FrameConfig.appIslandDelegateWidth - FrameConfig.appIslandDelegateTextMargin
-            height: childrenRect.height
-            clip: true
-            color: "transparent"
+        Item {
+            Layout.preferredWidth: FrameConfig.appIslandDelegateWidth - FrameConfig.appIslandDelegateTextMargin
+            Layout.preferredHeight: 16
             Layout.alignment: Qt.AlignHCenter
 
             Text {
+                anchors.fill: parent
                 text: app.name
                 color: "white"
-                font.pixelSize: FrameConfig.appIslandFontSize
+                font.pixelSize: 11
+                font.weight: Font.Medium
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 wrapMode: Text.NoWrap
+                opacity: PathView.isCurrentItem ? 1.0 : 0.7
             }
         }
     }

@@ -235,8 +235,25 @@ Item {
                 
                 Row {
                     id: indicatorsRow
-                    anchors.bottom: parent.bottom; anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin; anchors.horizontalCenter: parent.horizontalCenter; spacing: FrameConfig.indicatorRowSpacing; opacity: view.visible ? 1 : 0
-                    Repeater { model: tabModel.count; Rectangle { width: FrameConfig.indicatorDotSize; height: FrameConfig.indicatorDotSize; radius: FrameConfig.indicatorDotRadius; color: view.currentIndex === index ? FrameConfig.indicatorDotActiveColor : FrameConfig.indicatorDotColor; Behavior on color { ColorAnimation { duration: FrameConfig.indicatorDotAnimationDuration } } } }
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 10
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    spacing: 6
+                    opacity: view.visible ? 1 : 0
+                    
+                    Repeater { 
+                        model: tabModel.count
+                        Rectangle { 
+                            width: view.currentIndex === index ? 12 : 4
+                            height: 4
+                            radius: 2
+                            color: "white"
+                            opacity: view.currentIndex === index ? 0.8 : 0.2
+                            
+                            Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutQuint } }
+                            Behavior on opacity { NumberAnimation { duration: 300 } }
+                        } 
+                    }
                 }
             }
         }
