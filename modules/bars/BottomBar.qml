@@ -13,14 +13,8 @@ BaseBar {
     anchors.right: true
     
     implicitHeight: FrameConfig.appIslandExpandedHeight
-    
     exclusiveZone: FrameConfig.thickness
     color: "transparent"
-
-    mask: Region {
-        Region { item: barRect; intersection: Intersection.Combine }
-        Region { item: appIsland; intersection: Intersection.Combine }
-    }
 
     Rectangle {
         id: barRect
@@ -29,23 +23,35 @@ BaseBar {
         anchors.right: parent.right
         height: FrameConfig.thickness
         color: FrameConfig.color
-
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.alpha("white", 0.03) }
-                GradientStop { position: 1.0; color: "transparent" }
-            }
-            rotation: 180
-        }
+        z: 1
     }
 
     AppIsland {
         id: appIsland
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
+        z: 2
         
         barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
     }
+
+    MouseArea {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+
+        width: appIsland.expanded ? FrameConfig.appIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
+        height: appIsland.expanded ? FrameConfig.appIslandExpandedHeight : FrameConfig.thickness
+
+        hoverEnabled: true
+
+        onEntered: appIsland.expanded = true
+        onExited: appIsland.expanded = false
+        propagateComposedEvents: true
+        onPressed: (mouse) => mouse.accepted = false
+    }
 }
+
+        
+
+    

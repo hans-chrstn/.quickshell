@@ -1,5 +1,5 @@
 //@ pragma Env QS_NO_RELOAD_POPUP=1
-//@ pragma Env QSG_RENDER_LOOP=threaded
+//@ pragma Env QSG_RENDER_LOOP=basic
 //@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
 
 import QtQuick
@@ -12,22 +12,30 @@ import qs.config
 ShellRoot {
     Variants {
         model: Quickshell.screens
-        delegate: TopBar {}
+        delegate: TopBar {
+            aboveWindows: true
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: LeftBar {}
+        delegate: LeftBar {
+            aboveWindows: true
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: RightBar {}
+        delegate: RightBar {
+            aboveWindows: true
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: BottomBar {}
+        delegate: BottomBar {
+            aboveWindows: true
+        }
     }
 
     Variants {

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import "../config"
@@ -27,21 +28,6 @@ PanelWindow {
     
     property bool expandedState: false
     
-    Timer {
-        id: collapseTimer
-        interval: 150
-        onTriggered: root.expandedState = false
-    }
-    
-    onHoveredChanged: {
-        if (hovered) {
-            root.expandedState = true
-            collapseTimer.stop()
-        } else {
-            collapseTimer.restart()
-        }
-    }
-    
     default property alias content: contentContainer.data
 
     anchors {
@@ -65,14 +51,66 @@ PanelWindow {
 
     Item {
         id: container
-        width: root.expandedState ? root.expandedWidth : root.sRadius
-        height: root.expandedState ? root.expandedHeight : root.sRadius
-        
         anchors.top: root.activeTop ? parent.top : undefined
         anchors.bottom: root.activeBottom ? parent.bottom : undefined
         anchors.left: root.activeLeft ? parent.left : undefined
         anchors.right: root.activeRight ? parent.right : undefined
         
+        property real radius: 15
+
+        states: [
+            State {
+                name: "expanded"
+                when: root.expandedState
+                PropertyChanges { target: container; width: root.expandedWidth; height: root.expandedHeight }
+            },
+            State {
+                name: "collapsed"
+                when: !root.expandedState
+                PropertyChanges { target: container; width: root.sRadius; height: root.sRadius }
+            }
+        ]
+
+        transitions: [
+            Transition {
+                to: "expanded"
+                ParallelAnimation {
+                    NumberAnimation {
+                        properties: "width,height"
+                        duration: FrameConfig.animDuration
+                        easing.type: FrameConfig.animEasing
+                    }
+                    SequentialAnimation {
+                        PauseAnimation { duration: FrameConfig.animDuration * 0.7 }
+                        NumberAnimation {
+                            target: contentContainer
+                            property: "opacity"
+                            to: 1
+                            duration: 150
+                        }
+                    }
+                }
+            },
+            Transition {
+                to: "collapsed"
+                SequentialAnimation {
+                    NumberAnimation {
+                        target: contentContainer
+                        property: "opacity"
+                        to: 0
+                        duration: 100
+                    }
+                    ParallelAnimation {
+                        NumberAnimation {
+                            properties: "width,height"
+                            duration: FrameConfig.animDuration
+                            easing.type: FrameConfig.animEasing
+                        }
+                    }
+                }
+            }
+        ]
+
         HoverHandler {
             id: hoverHandler
             enabled: root.hoverEnabled
@@ -81,78 +119,31 @@ PanelWindow {
         readonly property bool isFullyExpanded: width === root.expandedWidth && height === root.expandedHeight
         readonly property bool isCollapsed: width === root.sRadius && height === root.sRadius
 
-        Behavior on width { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
-        Behavior on height { NumberAnimation { duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing } }
+        Rectangle {
+            anchors.fill: bgRect
+            radius: container.radius
+            color: "black"
+            opacity: root.expandedState ? 0.4 : 0
+            visible: opacity > 0
+            z: -1
+            layer.enabled: true
+            layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+        }
 
         Rectangle {
+            id: bgRect
             anchors.fill: parent
             color: root.sColor
             opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-            radius: root.expandedState ? 15 : 0
-            
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-            Behavior on radius { NumberAnimation { duration: FrameConfig.animDuration } }
-        }
-
-        RoundedCornerShape {
-            id: verticalFillet
-            anchors.top: root.activeTop ? container.bottom : undefined
-            anchors.bottom: root.activeBottom ? container.top : undefined
-            anchors.left: root.activeLeft ? container.left : undefined
-            anchors.right: root.activeRight ? container.right : undefined
-            
-            anchors.leftMargin: root.activeLeft ? root.sThick : 0
-            anchors.rightMargin: root.activeRight ? root.sThick : 0
-            
-            width: root.sThick
-            height: FrameConfig.roundedCornerShapeRadius
-            
-            isTop: root.activeTop
-            isBottom: root.activeBottom
-            isLeft: root.activeRight
-            
-            cornerRadius: FrameConfig.roundedCornerShapeRadius
-            cornerColor: root.sColor
-            opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-        }
-
-        RoundedCornerShape {
-            id: horizontalFillet
-            anchors.left: root.activeLeft ? container.right : undefined
-            anchors.right: root.activeRight ? container.left : undefined
-            anchors.top: root.activeTop ? container.top : undefined
-            anchors.bottom: root.activeBottom ? container.bottom : undefined
-            
-            anchors.topMargin: root.activeTop ? root.sThick : 0
-            anchors.bottomMargin: root.activeBottom ? root.sThick : 0
-            
-            width: FrameConfig.roundedCornerShapeRadius
-            height: root.sThick
-            
-            isTop: root.activeTop
-            isBottom: root.activeBottom
-            isLeft: root.activeRight
-            
-            cornerRadius: FrameConfig.roundedCornerShapeRadius
-            cornerColor: root.sColor
-            opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-            visible: opacity > 0
+            radius: container.radius
             Behavior on opacity { NumberAnimation { duration: 150 } }
         }
 
         Item {
             id: contentContainer
             anchors.fill: parent
-            opacity: (root.hovered && container.isFullyExpanded) ? 1 : 0
-            visible: opacity > 0
-            
-            Behavior on opacity { 
-                NumberAnimation { 
-                    duration: root.hovered ? 150 : 50
-                } 
-            }
+            opacity: 0
         }
 
         Item {
@@ -206,6 +197,69 @@ PanelWindow {
                     PathSvg { path: "M 25 25 L 0 25 L 0 10 A 10 10 0 0 0 10 0 L 25 0 Z" }
                 }
             }
+        }
+    }
+
+    RoundedCornerShape {
+        id: verticalFillet
+        anchors.top: root.activeTop ? container.bottom : undefined
+        anchors.bottom: root.activeBottom ? container.top : undefined
+        anchors.left: root.activeLeft ? container.left : undefined
+        anchors.right: root.activeRight ? container.right : undefined
+        
+        anchors.leftMargin: root.activeLeft ? root.sThick : 0
+        anchors.rightMargin: root.activeRight ? root.sThick : 0
+        
+        width: root.sThick
+        height: FrameConfig.roundedCornerShapeRadius
+        
+        isTop: root.activeTop
+        isBottom: root.activeBottom
+        isLeft: root.activeRight
+        
+        cornerRadius: FrameConfig.roundedCornerShapeRadius
+        cornerColor: root.sColor
+        opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+    }
+
+    RoundedCornerShape {
+        id: horizontalFillet
+        anchors.left: root.activeLeft ? container.right : undefined
+        anchors.right: root.activeRight ? container.left : undefined
+        anchors.top: root.activeTop ? container.top : undefined
+        anchors.bottom: root.activeBottom ? container.bottom : undefined
+        
+        anchors.topMargin: root.activeTop ? root.sThick : 0
+        anchors.bottomMargin: root.activeBottom ? root.sThick : 0
+        
+        width: FrameConfig.roundedCornerShapeRadius
+        height: root.sThick
+        
+        isTop: root.activeTop
+        isBottom: root.activeBottom
+        isLeft: root.activeRight
+        
+        cornerRadius: FrameConfig.roundedCornerShapeRadius
+        cornerColor: root.sColor
+        opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: 150 } }
+    }
+
+    Timer {
+        id: collapseTimer
+        interval: 150
+        onTriggered: root.expandedState = false
+    }
+    
+    onHoveredChanged: {
+        if (hovered) {
+            root.expandedState = true
+            collapseTimer.stop()
+        } else {
+            collapseTimer.restart()
         }
     }
 }

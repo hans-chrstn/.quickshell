@@ -11,7 +11,7 @@ QtObject {
     readonly property real highlightOpacity: 0.08
     readonly property color secondaryTextColor: "#888888"
 
-    readonly property int animDuration: 450
+    readonly property int animDuration: 300
     readonly property int animEasing: Easing.OutQuart
 
     readonly property real shadowOpacity: 0.4
@@ -21,16 +21,16 @@ QtObject {
     property int dynamicIslandCornerRadius: 30
     property int dynamicIslandExpandedWidth: 420
     property int dynamicIslandExpandedHeight: 130
-    property int dynamicIslandCollapsedWidth: 120
+    property int dynamicIslandCollapsedWidth: 160
     property int collapseTimerDelay: 200
     
     property int appIslandExpandedWidth: 600
-    property int appIslandExpandedHeight: 130
+    property int appIslandExpandedHeight: 110
+    property int appIslandDelegateWidth: 70
+    property int appIslandDelegateHeight: 90
+    property int appIslandIconSize: 40
+    property real appIslandMinOpacity: 0.4
     property string appIslandSortMode: "alphabetical"
-    property int appIslandIconSize: 48
-    property int appIslandHighlightAnimDuration: 150
-    property real appIslandMinOpacity: 0.5
-    property real appIslandMinScale: 0.8
 
     property int appIslandSearchBarHeight: 36
     property int appIslandSearchBarRadius: 18
@@ -52,8 +52,8 @@ QtObject {
     property real notifOpacity: 0.04
     property real notifHoverOpacity: 0.08
 
-    property int cavaBarCount: 32
-    property int cavaSpacing: 2
+    property int cavaBarCount: 20
+    property int cavaSpacing: 3
     property real cavaOpacity: 0.15
     property int cavaUpdateInterval: 100
 

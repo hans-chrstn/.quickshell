@@ -10,7 +10,9 @@ Item {
     id: root
     property var player: null
     
-    FrameAnimation {
+    Timer {
+        interval: 100
+        repeat: true
         running: root.visible && root.player && root.player.playbackState === MprisPlaybackState.Playing
         onTriggered: if (root.player) root.player.positionChanged()
     }

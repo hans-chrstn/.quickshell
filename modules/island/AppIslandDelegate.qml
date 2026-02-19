@@ -9,17 +9,15 @@ Item {
     width: FrameConfig.appIslandDelegateWidth
     height: FrameConfig.appIslandDelegateHeight
 
-    property var app
+    readonly property var app: model.app
 
-    opacity: PathView.isCurrentItem ? 1.0 : FrameConfig.appIslandMinOpacity
-    scale: PathView.isCurrentItem ? 1.0 : FrameConfig.appIslandMinScale
-
-    Behavior on opacity { NumberAnimation { duration: FrameConfig.appIslandHighlightAnimDuration } }
-    Behavior on scale { NumberAnimation { duration: FrameConfig.appIslandHighlightAnimDuration } }
+    opacity: PathView.itemOpacity
 
     ColumnLayout {
         anchors.centerIn: parent
         spacing: 4
+        scale: mouseArea.pressed ? 0.95 : 1.0
+        Behavior on scale { NumberAnimation { duration: 100 } }
 
         Item {
             Layout.preferredWidth: FrameConfig.appIslandIconSize
@@ -39,8 +37,8 @@ Item {
             Image {
                 id: appIcon
                 anchors.fill: parent
-                sourceSize: Qt.size(FrameConfig.appIslandIconSize * 2, FrameConfig.appIslandIconSize * 2)
-                source: Quickshell.iconPath(app.icon)
+                sourceSize: Qt.size(FrameConfig.appIslandIconSize, FrameConfig.appIslandIconSize)
+                source: app ? Quickshell.iconPath(app.icon) : ""
                 fillMode: Image.PreserveAspectFit
             }
         }
@@ -62,7 +60,10 @@ Item {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        preventStealing: false
-        onClicked: app.execute()
+        onClicked: {
+            if (app) {
+                app.execute();
+            }
+        }
     }
 }

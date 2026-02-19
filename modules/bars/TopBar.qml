@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
@@ -17,24 +18,9 @@ BaseBar {
     anchors.left: true
     anchors.right: true
     
-    property int barHeight: FrameConfig.thickness
-    property bool expandedMode: false
-    
-    implicitHeight: expandedMode ? FrameConfig.dynamicIslandExpandedHeight : barHeight
-    
-    Timer {
-        id: collapseTimer
-        interval: FrameConfig.animDuration + FrameConfig.collapseTimerDelay
-        onTriggered: root.expandedMode = false
-    }
-
-    exclusiveZone: barHeight
+    implicitHeight: FrameConfig.dynamicIslandExpandedHeight
+    exclusiveZone: FrameConfig.thickness
     color: "transparent"
-
-    mask: Region {
-        Region { item: barRect; intersection: Intersection.Combine }
-        Region { item: dIsland; intersection: Intersection.Combine }
-    }
 
     property var activePlayer: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
     
@@ -50,36 +36,32 @@ BaseBar {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: barHeight
+        height: FrameConfig.thickness
         color: FrameConfig.color
-        
-        Rectangle {
-            anchors.fill: parent
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.alpha("white", 0.03) }
-                GradientStop { position: 1.0; color: "transparent" }
-            }
-        }
+        z: 1
     }
 
     DynamicIsland {
         id: dIsland
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
+        z: 2
         
-        barHeight: root.barHeight
+        barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
         activePlayer: root.activePlayer
         notifServer: notifServer
-        
-        onExpandedChanged: {
-            if (expanded) {
-                root.expandedMode = true
-                collapseTimer.stop()
-            }
-            else {
-                collapseTimer.restart()
-            }
-        }
+    }
+
+    MouseArea {
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        width: dIsland.expanded ? FrameConfig.dynamicIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
+        height: dIsland.expanded ? FrameConfig.dynamicIslandExpandedHeight : FrameConfig.thickness
+        hoverEnabled: true
+        onEntered: dIsland.expanded = true
+        onExited: dIsland.expanded = false
+        propagateComposedEvents: true
+        onPressed: (mouse) => mouse.accepted = false
     }
 }

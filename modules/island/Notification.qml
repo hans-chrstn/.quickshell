@@ -16,7 +16,7 @@ Item {
         spacing: 0
         
         Text { 
-            text: "󰂚"
+            text: "🔔"
             color: "white"
             opacity: 0.2
             font.pixelSize: 40 
@@ -94,72 +94,86 @@ Item {
             
             model: root.server ? root.server.trackedNotifications : null
             
-            delegate: Item {
+                        delegate: Item {
+                id: notifDelegate
                 width: ListView.view.width
-                height: FrameConfig.notifItemHeight
+                height: expanded ? (mainLayout.implicitHeight + 24) : FrameConfig.notifItemHeight
                 
+                property bool expanded: false
+                Behavior on height { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
+
                 Rectangle {
                     anchors.fill: parent
-                    anchors.bottomMargin: 1
+                    anchors.bottomMargin: 4
                     color: "white"
-                    opacity: notifMouse.containsMouse ? FrameConfig.notifHoverOpacity : FrameConfig.notifOpacity
                     radius: 12
+                    opacity: (notifMouse.containsMouse || expanded) ? 0.12 : 0.06
                     Behavior on opacity { NumberAnimation { duration: 200 } }
+                }
+
+                RowLayout {
+                    id: mainLayout
+                    width: parent.width
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 12
+                    spacing: 12
                     
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 12
-                        spacing: 12
+                    Rectangle {
+                        Layout.preferredWidth: FrameConfig.notifIconSize
+                        Layout.preferredHeight: FrameConfig.notifIconSize
+                        color: FrameConfig.accentColor
+                        opacity: 0.15
+                        radius: width / 2
+                        Layout.alignment: Qt.AlignTop
                         
-                        Rectangle {
-                            Layout.preferredWidth: FrameConfig.notifIconSize
-                            Layout.preferredHeight: FrameConfig.notifIconSize
-                            color: FrameConfig.accentColor
-                            opacity: 0.1
-                            radius: width / 2
-                            Text { 
-                                anchors.centerIn: parent
-                                text: "󰂚"
-                                color: FrameConfig.accentColor
-                                font.pixelSize: 14
-                            }
+                        Text { 
+                            anchors.centerIn: parent
+                            text: "🔔"
+                            color: "white"
+                            font.pixelSize: 14
                         }
-                        
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: -2
-                            Text {
-                                text: modelData.summary || "Notification"
-                                color: "white"
-                                font.weight: Font.DemiBold
-                                font.pixelSize: 13
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-                            Text {
-                                text: modelData.body || ""
-                                color: "white"
-                                opacity: 0.5
-                                font.pixelSize: 11
-                                elide: Text.ElideRight
-                                Layout.fillWidth: true
-                            }
-                        }
+                    }
+                    
+                    ColumnLayout {
+                        id: textColumn
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 2
+                        opacity: (notifMouse.containsMouse || expanded) ? 1.0 : 0.85
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
                         
                         Text {
-                            text: "󰅖"
+                            text: modelData.summary || "Notification"
                             color: "white"
-                            opacity: closeMouse.containsMouse ? 1.0 : 0.2
-                            font.pixelSize: 18
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
-                            
-                            MouseArea {
-                                id: closeMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onClicked: modelData.dismiss()
-                            }
+                            font.weight: Font.DemiBold
+                            font.pixelSize: 13
+                            elide: Text.ElideRight
+                            wrapMode: expanded ? Text.Wrap : Text.NoWrap
+                            maximumLineCount: expanded ? 10 : 1
+                            Layout.fillWidth: true
                         }
+                        Text {
+                            text: modelData.body || ""
+                            color: "white"
+                            opacity: 0.7
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                            wrapMode: expanded ? Text.Wrap : Text.NoWrap
+                            maximumLineCount: expanded ? 20 : 1
+                            Layout.fillWidth: true
+                            visible: text !== ""
+                        }
+                    }
+                    
+                    Text {
+                        text: "✕"
+                        color: "white"
+                        opacity: closeMouse.containsMouse ? 1.0 : 0.3
+                        font.pixelSize: 18
+                        Layout.alignment: Qt.AlignTop
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
                     }
                 }
                 
@@ -167,8 +181,22 @@ Item {
                     id: notifMouse
                     anchors.fill: parent
                     hoverEnabled: true
+                    onClicked: notifDelegate.expanded = !notifDelegate.expanded
+                }
+
+                MouseArea {
+                    id: closeMouse
+                    width: 32; height: 32
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 4
+                    z: 100
+                    hoverEnabled: true
+                    onClicked: modelData.dismiss()
                 }
             }
+            
+            
         }
     }
 }

@@ -28,13 +28,6 @@ Item {
             font.pixelSize: 52
             font.letterSpacing: -2
             Layout.alignment: Qt.AlignHCenter
-            
-            layer.enabled: true
-            layer.effect: MultiEffect {
-                blurEnabled: true
-                blur: 0.1
-                brightness: 0.1
-            }
         }
 
         RowLayout {
