@@ -15,14 +15,14 @@ Rectangle {
     Row {
         id: letterRow
         anchors.centerIn: parent
-        spacing: 4
+        spacing: FrameConfig.appIslandScrubberSpacing
 
         Repeater {
             model: root.alphabetModel
             
             delegate: Text {
                 text: modelData
-                font.pixelSize: 10
+                font.pixelSize: FrameConfig.appIslandScrubberFontSize
                 font.weight: root.highlightedLetter === modelData ? Font.Bold : Font.Normal
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter

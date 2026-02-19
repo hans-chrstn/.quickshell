@@ -40,7 +40,16 @@ Item {
                     anchors.right: parent.right
                     height: parent.height * (root.device ? root.device.percentage / 100 : 0)
                     color: (root.device && root.device.state === UPowerDeviceState.Charging) ? "#4caf50" : "white"
-                    opacity: 0.2
+                    opacity: chargingAnim.running ? 0.4 : 0.2
+                    
+                    SequentialAnimation on opacity {
+                        id: chargingAnim
+                        running: root.device && root.device.state === UPowerDeviceState.Charging
+                        loops: Animation.Infinite
+                        NumberAnimation { to: 0.6; duration: 1000; easing.type: Easing.InOutSine }
+                        NumberAnimation { to: 0.3; duration: 1000; easing.type: Easing.InOutSine }
+                    }
+
                     Behavior on height { NumberAnimation { duration: 800; easing.type: Easing.OutQuart } }
                 }
             }

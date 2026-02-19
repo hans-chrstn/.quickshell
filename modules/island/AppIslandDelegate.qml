@@ -19,7 +19,7 @@ Item {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 8
+        spacing: 4
 
         Item {
             Layout.preferredWidth: FrameConfig.appIslandIconSize
@@ -28,44 +28,41 @@ Item {
             
             Rectangle {
                 anchors.fill: parent
-                radius: 12
+                radius: 14
                 color: "black"
-                opacity: 0.2
-                scale: 0.9
-                y: 4
+                opacity: 0.4
+                scale: 0.85
+                y: 6
                 z: -1
             }
 
             Image {
                 id: appIcon
                 anchors.fill: parent
-                sourceSize: Qt.size(FrameConfig.appIslandIconSize, FrameConfig.appIslandIconSize)
+                sourceSize: Qt.size(FrameConfig.appIslandIconSize * 2, FrameConfig.appIslandIconSize * 2)
                 source: Quickshell.iconPath(app.icon)
                 fillMode: Image.PreserveAspectFit
             }
         }
 
-        Item {
-            Layout.preferredWidth: FrameConfig.appIslandDelegateWidth - FrameConfig.appIslandDelegateTextMargin
-            Layout.preferredHeight: 16
-            Layout.alignment: Qt.AlignHCenter
-
-            Text {
-                anchors.fill: parent
-                text: app.name
-                color: "white"
-                font.pixelSize: 11
-                font.weight: Font.Medium
-                horizontalAlignment: Text.AlignHCenter
-                elide: Text.ElideRight
-                wrapMode: Text.NoWrap
-                opacity: PathView.isCurrentItem ? 1.0 : 0.7
-            }
+        Text {
+            text: app ? app.name : ""
+            color: "white"
+            font.pixelSize: 10
+            font.weight: Font.DemiBold
+            width: parent.width - 8
+            Layout.preferredWidth: parent.width - 8
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            wrapMode: Text.NoWrap
+            opacity: PathView.isCurrentItem ? 1.0 : 0.6
         }
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        preventStealing: false
         onClicked: app.execute()
     }
 }

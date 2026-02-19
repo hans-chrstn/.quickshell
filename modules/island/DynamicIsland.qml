@@ -1,11 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.config
 import qs.components
+import qs.modules.island
 import "." 
 
 Item {
@@ -110,6 +112,15 @@ Item {
             height: parent.height
             color: root.barColor
             
+            layer.enabled: root.expanded
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "black"
+                shadowOpacity: FrameConfig.shadowOpacity
+                shadowBlur: FrameConfig.shadowBlur
+                shadowVerticalOffset: FrameConfig.shadowVerticalOffset
+            }
+
             states: [
                 State {
                     name: "expanded"
@@ -165,14 +176,21 @@ Item {
 
 
                 Loader {
-                    anchors.bottom: indicatorsRow.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: FrameConfig.cavaLoaderMargin
-                    height: FrameConfig.cavaLoaderHeight
+                    id: cavaLoader
+                    anchors.bottom: indicatorsRow.top
+                    anchors.bottomMargin: 14
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: parent.width - 40
+                    height: 24
                     
                     readonly property bool musicPlaying: root.activePlayer && root.activePlayer.playbackState === MprisPlaybackState.Playing
                     readonly property bool musicTabActive: view.currentIndex === 1
                     
                     active: root.expanded && musicTabActive && musicPlaying
                     source: "Cava.qml"
+                    visible: active && opacity > 0
+                    opacity: active ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
 
                 PathView {
@@ -236,9 +254,9 @@ Item {
                 Row {
                     id: indicatorsRow
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 10
+                    anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin
                     anchors.horizontalCenter: parent.horizontalCenter
-                    spacing: 6
+                    spacing: FrameConfig.indicatorRowSpacing
                     opacity: view.visible ? 1 : 0
                     
                     Repeater { 

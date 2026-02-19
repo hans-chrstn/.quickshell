@@ -1,50 +1,47 @@
 import QtQuick
-import QtQuick.Controls
+import qs.config
 
-Canvas {
-    id: canvas
+Item {
+    id: root
     anchors.fill: parent
-    opacity: 0.2
+    opacity: FrameConfig.cavaOpacity
     
-    property int barCount: 20
-    property int spacing: 4
-    property color barColor: "white"
+    property int barCount: FrameConfig.cavaBarCount
+    property color barColor: FrameConfig.accentColor
     
     Timer {
-        id: timer
-        interval: 100
-        running: canvas.visible
+        id: mainTimer
+        interval: FrameConfig.cavaUpdateInterval
+        running: root.visible
         repeat: true
-        onTriggered: canvas.requestPaint()
+        onTriggered: {
+            for (var i = 0; i < barCount; i++) {
+                repeater.itemAt(i).targetHeight = root.height * (0.1 + (0.8 * Math.random()));
+            }
+        }
     }
 
-    onPaint: {
-        var ctx = getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    Row {
+        anchors.fill: parent
+        spacing: FrameConfig.cavaSpacing
         
-        var barWidth = (canvas.width - (canvas.barCount - 1) * canvas.spacing) / canvas.barCount;
-        var radius = 2;
-
-        function roundRect(ctx, x, y, width, height, radius) {
-            if (width < 2 * radius) radius = width / 2;
-            if (height < 2 * radius) radius = height / 2;
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.arcTo(x + width, y,   x + width, y + height, radius);
-            ctx.arcTo(x + width, y + height, x, y + height, radius);
-            ctx.arcTo(x, y + height, x, y, radius);
-            ctx.arcTo(x, y, x + width, y, radius);
-            ctx.closePath();
-            return ctx;
-        }
-        
-        for (var i = 0; i < canvas.barCount; i++) {
-            var barHeight = canvas.height * (0.2 + (0.6 * Math.random()));
-            var x = i * (barWidth + canvas.spacing);
-            var y = canvas.height - barHeight;
+        Repeater {
+            id: repeater
+            model: root.barCount
             
-            ctx.fillStyle = canvas.barColor;
-            roundRect(ctx, x, y, barWidth, barHeight, radius).fill();
+            delegate: Rectangle {
+                width: (parent.width - (root.barCount - 1) * parent.spacing) / root.barCount
+                radius: width / 2
+                color: root.barColor
+                anchors.verticalCenter: parent.verticalCenter
+                
+                property real targetHeight: 0
+                height: targetHeight
+                
+                Behavior on height {
+                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                }
+            }
         }
     }
 }

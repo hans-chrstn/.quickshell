@@ -21,29 +21,54 @@ Item {
         anchors.rightMargin: 10
         spacing: 15
         
-        ClippingRectangle { 
-            Layout.preferredWidth: 60
-            Layout.preferredHeight: 60
-            radius: 30
-            color: "#333" 
+        Item {
+            Layout.preferredWidth: FrameConfig.musicArtSize
+            Layout.preferredHeight: FrameConfig.musicArtSize
             Layout.alignment: Qt.AlignVCenter
-            
-            Item {
-                anchors.fill: parent
-                RotationAnimator on rotation { from: 0; to: 360; duration: 4000; loops: Animation.Infinite; running: root.player && root.player.playbackState === MprisPlaybackState.Playing }
-                
-                Image {
-                    anchors.fill: parent
-                    source: (root.player && root.player.trackArtUrl) || ""
-                    fillMode: Image.PreserveAspectCrop
-                }
-            }
-            
+
             Rectangle {
-                width: 15; height: 15
-                radius: 7.5
-                color: FrameConfig.color
-                anchors.centerIn: parent
+                anchors.fill: artContainer
+                radius: FrameConfig.musicArtRadius
+                color: "black"
+                opacity: FrameConfig.musicArtShadowOpacity
+                scale: 0.95
+                y: 4
+                z: -1
+            }
+
+            ClippingRectangle { 
+                id: artContainer
+                anchors.fill: parent
+                radius: FrameConfig.musicArtRadius
+                color: "#222"
+                opacity: 1.0
+                
+                Item {
+                    anchors.fill: parent
+                    RotationAnimator on rotation { 
+                        from: 0; to: 360; duration: 8000; 
+                        loops: Animation.Infinite; 
+                        running: root.player && root.player.playbackState === MprisPlaybackState.Playing 
+                    }
+                    
+                    Image {
+                        anchors.fill: parent
+                        source: (root.player && root.player.trackArtUrl) || ""
+                        fillMode: Image.PreserveAspectCrop
+                        visible: source != ""
+                    }
+                }
+                
+                Rectangle {
+                    width: FrameConfig.musicHoleSize; height: width
+                    radius: width / 2
+                    color: FrameConfig.color
+                    anchors.centerIn: parent
+                    border.color: "white"
+                    border.width: 1
+                    opacity: 0.8
+                    z: 1
+                }
             }
         }
         
@@ -87,22 +112,23 @@ Item {
                     color: "white"
                     opacity: 0.1
                     radius: 2
+                }
+
+                ClippingRectangle {
+                    anchors.centerIn: parent
+                    width: parent.width
+                    height: 4
+                    radius: 2
+                    color: "transparent"
                     
                     Rectangle {
-                        height: parent.height
-                        radius: 2
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
                         color: FrameConfig.accentColor
                         width: (root.player && root.player.length > 0) 
                                ? parent.width * (root.player.position / root.player.length) 
                                : 0
-                        
-                        Rectangle {
-                            anchors.fill: parent
-                            color: FrameConfig.accentColor
-                            opacity: 0.3
-                            radius: 2
-                            visible: parent.width > 0
-                        }
                     }
                 }
                 
@@ -117,19 +143,19 @@ Item {
             }
 
             Row { 
-                spacing: 24
+                spacing: FrameConfig.musicControlSpacing
                 visible: !!root.player
                 Layout.alignment: Qt.AlignHCenter 
                 Layout.topMargin: 4
                 
-                Text { text: "󰒮"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.previous() } }
+                Text { text: "⏮"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.previous() } }
                 Text { 
-                    text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
+                    text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "⏸" : "▶"
                     color: "white"
                     font.pixelSize: 24
                     TapHandler { onTapped: if(root.player) root.player.togglePlaying() } 
                 }
-                Text { text: "󰒭"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.next() } }
+                Text { text: "⏭"; color: "white"; opacity: 0.8; font.pixelSize: 18; TapHandler { onTapped: if(root.player) root.player.next() } }
             }
             
             Item { Layout.fillHeight: true }

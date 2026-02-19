@@ -20,7 +20,7 @@ Item {
         State {
             name: "search"
             when: root.searchVisible
-            PropertyChanges { target: root; height: FrameConfig.appIslandExpandedHeight + searchBar.height + FrameConfig.appIslandSearchBarTopMargin }
+            PropertyChanges { target: root; height: FrameConfig.appIslandExpandedHeight + searchBar.height + 10 }
             PropertyChanges { target: searchBar; visible: true; opacity: 1 }
         },
         State {
@@ -111,6 +111,15 @@ Item {
             height: parent.height
             color: root.barColor
 
+            layer.enabled: root.expanded
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowColor: "black"
+                shadowOpacity: FrameConfig.shadowOpacity
+                shadowBlur: FrameConfig.shadowBlur
+                shadowVerticalOffset: -FrameConfig.shadowVerticalOffset
+            }
+
             states: [
                 State {
                     name: "expanded"; when: root.expanded
@@ -148,8 +157,8 @@ Item {
             Item {
                 id: islandContentArea
                 anchors.fill: parent
+                anchors.bottomMargin: 10
                 opacity: 0
-                clip: true
 
                 AlphabetScrubber {
                     id: alphabetScrubber
@@ -175,6 +184,14 @@ Item {
                     anchors.fill: parent
                     anchors.topMargin: 30
                     clip: true
+                    interactive: true
+                    
+                    pathItemCount: 11
+                    snapMode: PathView.SnapToItem
+                    highlightRangeMode: PathView.StrictlyEnforceRange
+                    preferredHighlightBegin: 0.5
+                    preferredHighlightEnd: 0.5
+                    dragMargin: width / 2
 
                     model: appListModel
                     delegate: AppIslandDelegate { app: model.app }
@@ -182,27 +199,22 @@ Item {
                     onCurrentIndexChanged: {
                         if (currentIndex >= 0 && currentIndex < appListModel.count) {
                             var currentApp = appListModel.get(currentIndex).app
-                            var firstLetter = currentApp.name.substring(0, 1).toUpperCase()
-                            if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
-                                alphabetScrubber.highlightedLetter = firstLetter
-                            } else {
-                                alphabetScrubber.highlightedLetter = "#"
+                            if (currentApp) {
+                                var firstLetter = currentApp.name.substring(0, 1).toUpperCase()
+                                if ("ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
+                                    alphabetScrubber.highlightedLetter = firstLetter
+                                } else {
+                                    alphabetScrubber.highlightedLetter = "#"
+                                }
                             }
                         }
                     }
 
                     path: Path {
-                        startX: 0
+                        startX: -view.width * 0.2
                         startY: view.height / 2
-                        PathLine { x: view.width; y: view.height / 2 }
+                        PathLine { x: view.width * 1.2; y: view.height / 2 }
                     }
-                    
-                    pathItemCount: 7
-                    
-                    highlightRangeMode: PathView.StrictlyEnforceRange
-                    preferredHighlightBegin: 0.5
-                    preferredHighlightEnd: 0.5
-                    snapMode: PathView.SnapToItem
 
                     ListModel { id: appListModel }
 
@@ -245,12 +257,12 @@ Item {
             Rectangle {
                 id: searchBar
                 width: parent.width - 40
-                height: 36
+                height: FrameConfig.appIslandSearchBarHeight
                 anchors.top: parent.top
                 anchors.topMargin: 12
                 anchors.horizontalCenter: parent.horizontalCenter
-                radius: 18
-                color: "white"
+                radius: FrameConfig.appIslandSearchBarRadius
+                color: FrameConfig.appIslandSearchBarColor
                 opacity: 0
                 visible: false
                 
@@ -280,13 +292,13 @@ Item {
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter
                         color: "#222"
-                        font.pixelSize: 14
+                        font.pixelSize: FrameConfig.appIslandSearchInputFontSize
                         font.weight: Font.Medium
                         
                         Text {
                             text: "Search apps..."
                             color: "#999"
-                            font.pixelSize: 14
+                            font.pixelSize: FrameConfig.appIslandSearchInputFontSize
                             visible: !searchInput.text && !searchInput.activeFocus
                         }
 
@@ -302,13 +314,14 @@ Item {
                 }
             }
 
-            Text {
+            Rectangle {
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.topMargin: FrameConfig.appIslandArrowIndicatorTopMargin
-                text: FrameConfig.appIslandArrowIndicatorText
+                anchors.topMargin: 8
+                width: 32; height: 4
+                radius: 2
                 color: "white"
-                font.pixelSize: FrameConfig.appIslandArrowIndicatorSize
+                opacity: 0.2
                 visible: root.expanded && !root.searchVisible
             }
         }

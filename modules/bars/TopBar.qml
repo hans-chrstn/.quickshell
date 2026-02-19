@@ -52,6 +52,14 @@ BaseBar {
         anchors.right: parent.right
         height: barHeight
         color: FrameConfig.color
+        
+        Rectangle {
+            anchors.fill: parent
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: Qt.alpha("white", 0.03) }
+                GradientStop { position: 1.0; color: "transparent" }
+            }
+        }
     }
 
     DynamicIsland {

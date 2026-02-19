@@ -6,7 +6,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.modules.bars
-import "components"
+import qs.components
+import qs.config
 
 ShellRoot {
     Variants {
@@ -77,42 +78,56 @@ ShellRoot {
                     spacing: 6
                     
                     Rectangle {
+                        id: snapBtn
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 44; height: 44; radius: 22
                         color: "white"
-                        opacity: 0.1
+                        opacity: snapMouse.containsMouse ? 0.2 : 0.1
+                        scale: snapMouse.containsMouse ? 1.05 : 1.0
+                        
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
                         
                         Text { anchors.centerIn: parent; text: "󰄀"; color: "white"; font.pixelSize: 22 }
                         
                         MouseArea {
+                            id: snapMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: Quickshell.execDetached(["sh", "-c", "niri msg action screenshot"])
                         }
                     }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"; color: "white"; opacity: 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"; color: "white"; opacity: snapMouse.containsMouse ? 1.0 : 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1; Behavior on opacity { NumberAnimation { duration: 200 } } }
                 }
 
                 Column {
                     spacing: 6
                     
                     Rectangle {
+                        id: recBtn
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 44; height: 44; radius: 22
-                        color: recorder.running ? "#ff4444" : "white"
-                        opacity: recorder.running ? 1.0 : 0.1
+                        color: recorder.running ? FrameConfig.dangerColor : "white"
+                        opacity: (recMouse.containsMouse || recorder.running) ? 1.0 : 0.1
+                        scale: recMouse.containsMouse ? 1.05 : 1.0
+                        
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
                         
                         Rectangle {
                             anchors.centerIn: parent
                             width: recorder.running ? 14 : 18
                             height: width
                             radius: recorder.running ? 3 : 9
-                            color: recorder.running ? "white" : "white"
+                            color: "white"
                             Behavior on width { NumberAnimation { duration: 200 } }
                             Behavior on radius { NumberAnimation { duration: 200 } }
                         }
                         
                         MouseArea {
+                            id: recMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: {
                                 if (!recorder.running) {
                                     recorder.startRecording()
@@ -122,7 +137,7 @@ ShellRoot {
                             }
                         }
                     }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: recorder.running ? "STOP" : "REC"; color: recorder.running ? "#ff4444" : "white"; opacity: recorder.running ? 1.0 : 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1 }
+                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: recorder.running ? "STOP" : "REC"; color: recorder.running ? FrameConfig.dangerColor : "white"; opacity: (recMouse.containsMouse || recorder.running) ? 1.0 : 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1; Behavior on opacity { NumberAnimation { duration: 200 } } }
                 }
             }
         }
@@ -160,7 +175,12 @@ ShellRoot {
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 100; height: 32; radius: 16
-                        color: "white"; opacity: 0.1
+                        color: "white"
+                        opacity: logoutMouse.containsMouse ? 0.2 : 0.1
+                        scale: logoutMouse.containsMouse ? 1.02 : 1.0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on scale { NumberAnimation { duration: 200 } }
+
                         Text {
                             anchors.centerIn: parent
                             text: "LOGOUT"
@@ -170,7 +190,9 @@ ShellRoot {
                             font.letterSpacing: 1
                         }
                         MouseArea {
+                            id: logoutMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: confirmAction = "logout"
                         }
                     }
@@ -178,17 +200,24 @@ ShellRoot {
                     Rectangle {
                         anchors.horizontalCenter: parent.horizontalCenter
                         width: 100; height: 32; radius: 16
-                        color: "#ff5555"; opacity: 0.2
+                        color: FrameConfig.dangerColor
+                        opacity: pwrMouse.containsMouse ? 0.3 : 0.2
+                        scale: pwrMouse.containsMouse ? 1.02 : 1.0
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on scale { NumberAnimation { duration: 200 } }
+
                         Text {
                             anchors.centerIn: parent
                             text: "POWER OFF"
-                            color: "#ff5555"
+                            color: FrameConfig.dangerColor
                             font.pixelSize: 10
                             font.weight: Font.Bold
                             font.letterSpacing: 1
                         }
                         MouseArea {
+                            id: pwrMouse
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: confirmAction = "poweroff"
                         }
                     }
@@ -215,7 +244,7 @@ ShellRoot {
 
                         Rectangle {
                             width: 60; height: 32; radius: 16
-                            color: "#ff5555"
+                            color: FrameConfig.dangerColor
                             Text {
                                 anchors.centerIn: parent
                                 text: "YES"

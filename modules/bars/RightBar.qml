@@ -14,10 +14,15 @@ BaseBar {
         bottom: 0
     }
     
-        implicitWidth: FrameConfig.thickness
-    
-        color: FrameConfig.color
-    
+    implicitWidth: FrameConfig.thickness
+    color: FrameConfig.color
+
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 1.0; color: Qt.alpha("white", 0.03) }
+            GradientStop { position: 0.0; color: "transparent" }
+        }
     }
-    
-    
+}
