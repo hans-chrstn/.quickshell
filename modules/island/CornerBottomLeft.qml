@@ -10,7 +10,7 @@ ScreenCorner {
     
     f1Rot: 90
     f1X: expandedWidth - 1
-    f1Y: expandedHeight - sRadius - radius
+    f1Y: expandedHeight - sRadius - FrameConfig.dynamicIslandCornerRadius
     
     f2Rot: 180
     f2X: 16

@@ -1,0 +1,83 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import qs.config
+import qs.components
+import qs.services
+
+Item {
+    id: root
+    anchors.fill: parent
+
+    RowLayout {
+        anchors.centerIn: parent
+        anchors.verticalCenterOffset: -10
+        spacing: 32
+
+        ColumnLayout {
+            spacing: 10
+            Layout.alignment: Qt.AlignVCenter
+
+            RowLayout {
+                spacing: 10
+                ControlTile { 
+                    width: 44; height: 44; radius: 22
+                    icon: "󰖩"; active: !!SystemControl.wifiEnabled
+                    enabled: SystemControl.hasWifi
+                    onClicked: SystemControl.toggleWifi()
+                }
+                ControlTile { 
+                    width: 44; height: 44; radius: 22
+                    icon: "󰂯"; active: true; activeColor: "#007AFF"
+                    enabled: false
+                }
+            }
+            RowLayout {
+                spacing: 10
+                ControlTile { 
+                    width: 44; height: 44; radius: 22
+                    icon: "󰀝"; active: false; enabled: false 
+                }
+                ControlTile { 
+                    width: 44; height: 44; radius: 22
+                    icon: "󰖔"; active: false; activeColor: "#5856D6"; enabled: false 
+                }
+            }
+        }
+
+        Rectangle {
+            width: 1; height: 100
+            color: "white"; opacity: 0.05
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        ColumnLayout {
+            spacing: 16
+            Layout.alignment: Qt.AlignVCenter
+
+            ColumnLayout {
+                spacing: 4
+                Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; opacity: 0.3; Layout.leftMargin: 4 }
+                ControlSlider { 
+                    width: 200; height: 32
+                    enabled: SystemControl.hasBrightness
+                    value: SystemControl.brightness
+                    icon: "󰃠"; barColor: "#FFCC00"
+                    onMoved: (v) => SystemControl.setBrightness(v)
+                }
+            }
+
+            ColumnLayout {
+                spacing: 4
+                Text { text: "VOLUME"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; opacity: 0.3; Layout.leftMargin: 4 }
+                ControlSlider { 
+                    width: 200; height: 32
+                    enabled: SystemControl.hasAudio
+                    value: SystemControl.volume
+                    icon: SystemControl.muted ? "󰝟" : "󰕾"; barColor: "white"
+                    onMoved: (v) => SystemControl.setVolume(v)
+                }
+            }
+        }
+    }
+}

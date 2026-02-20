@@ -10,8 +10,9 @@ import qs.modules.island
 BaseIsland {
     id: root
     
-    expandedWidth: FrameConfig.dynamicIslandExpandedWidth
-    expandedHeight: FrameConfig.dynamicIslandExpandedHeight
+    readonly property bool isCC: view.currentIndex === 5
+    expandedWidth: isCC ? 480 : FrameConfig.dynamicIslandExpandedWidth
+    expandedHeight: isCC ? 200 : FrameConfig.dynamicIslandExpandedHeight
     collapsedWidth: FrameConfig.dynamicIslandCollapsedWidth
     isTop: true
     isBottom: false
@@ -66,7 +67,7 @@ BaseIsland {
                 PathAttribute { name: "itemOpacity"; value: 0.0 }
             }
             delegate: Item {
-                width: 420; height: view.height; opacity: PathView.itemOpacity
+                width: root.width - 40; height: view.height; opacity: PathView.itemOpacity
                 Loader {
                     anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
                     sourceComponent: {
@@ -76,6 +77,7 @@ BaseIsland {
                         if (model.type === "weather") return weatherComp
                         if (model.type === "battery") return batteryComp
                         if (model.type === "notif") return notifComp
+                        if (model.type === "cc") return ccComp
                         return null
                     }
                 }
@@ -102,6 +104,7 @@ BaseIsland {
     Component { id: weatherComp; Weather { } }
     Component { id: batteryComp; Battery {} }
     Component { id: notifComp; Notification { server: root.notifServer } }
+    Component { id: ccComp; ControlCenter { } }
 
     ListModel {
         id: tabModel
@@ -111,6 +114,7 @@ BaseIsland {
             append({ "type": "notif" })
             try { if (UPower.displayDevice && UPower.displayDevice.type !== 0) append({ "type": "battery" }) } catch (e) {}
             append({ "type": "weather" })
+            append({ "type": "cc" })
         }
     }
 }
