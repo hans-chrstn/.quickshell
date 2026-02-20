@@ -93,22 +93,6 @@ PanelWindow {
                         footer: Item { height: 20 }
                         
                         Behavior on contentY { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
-
-                        Timer {
-                            id: resetTimer
-                            interval: 50
-                            property int savedIndex: 0
-                            onTriggered: categoryList.currentIndex = savedIndex
-                        }
-
-                        Connections {
-                            target: FrameConfig
-                            function onResetOccurred() {
-                                resetTimer.savedIndex = categoryList.currentIndex
-                                categoryList.currentIndex = -1
-                                resetTimer.restart()
-                            }
-                        }
                         
                         delegate: Rectangle {
                             width: categoryList.width
@@ -209,14 +193,15 @@ PanelWindow {
                         Behavior on contentY { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 
                         delegate: Loader {
-                            width: settingsList.width
+                            width: (ListView.view && ListView.view.width) || 0
                             
                             property var safeData: {
-                                var m = settingsList.model
-                                if (m && index >= 0 && index < m.length) {
-                                    return m[index]
+                                if (!ListView.view || !ListView.view.model) return null;
+                                var m = ListView.view.model;
+                                if (index >= 0 && index < m.length) {
+                                    return m[index];
                                 }
-                                return null
+                                return null;
                             }
 
                             sourceComponent: {
