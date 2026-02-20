@@ -9,6 +9,7 @@ import qs.modules.bars
 import qs.modules.island
 import qs.components
 import qs.config
+import qs.modules.windows
 
 ShellRoot {
     Variants {

@@ -2,30 +2,38 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.Pipewire
 
 Singleton {
     id: root
 
-    property bool hasAudio: false
+    property bool hasAudio: !!sink
     property bool hasBrightness: false
     property bool hasWifi: false
 
-    property real volume: 0.0
-    property bool muted: false
+    readonly property PwNode sink: Pipewire.defaultAudioSink
+    
+    PwObjectTracker {
+        objects: [root.sink]
+    }
+
+    readonly property real volume: (sink && sink.ready && sink.audio) ? sink.audio.volume : 0.0
+    readonly property bool muted: (sink && sink.ready && sink.audio) ? sink.audio.muted : false
+    
     property real brightness: 0.5
     property bool wifiEnabled: false
 
     function updateAll(): void {
-        if (hasAudio) audioProc.running = true
         if (hasBrightness) brightnessProc.running = true
         if (hasWifi) wifiCheckProc.running = true
     }
 
     function setVolume(val: real): void {
-        if (!hasAudio) return
-        let v = Math.max(0, Math.min(1, val))
-        Quickshell.execDetached(["wpctl", "set-volume", "@DEFAULT_AUDIO_SINK@", v.toFixed(2)])
-        root.volume = v
+        if (sink && sink.ready && sink.audio) {
+            let v = Math.max(0, Math.min(1, val))
+            sink.audio.muted = false
+            sink.audio.volume = v
+        }
     }
 
     function setBrightness(val: real): void {
@@ -44,30 +52,14 @@ Singleton {
     }
 
     Component.onCompleted: {
-        checkAudio.command = ["which", "wpctl"]
-        checkAudio.running = true
         checkBrightness.command = ["which", "brightnessctl"]
         checkBrightness.running = true
         checkWifi.command = ["which", "nmcli"]
         checkWifi.running = true
     }
 
-    Process { id: checkAudio; onExited: (code) => root.hasAudio = (code === 0) }
     Process { id: checkBrightness; onExited: (code) => root.hasBrightness = (code === 0) }
     Process { id: checkWifi; onExited: (code) => root.hasWifi = (code === 0) }
-
-    Process {
-        id: audioProc
-        command: ["wpctl", "get-volume", "@DEFAULT_AUDIO_SINK@"]
-        onExited: (code) => {
-            if (code === 0 && stdout) {
-                let out = stdout.readAll().trim()
-                root.muted = out.includes("[MUTED]")
-                let match = out.match(/[0-9.]+/) 
-                if (match) root.volume = parseFloat(match[0])
-            }
-        }
-    }
 
     Process {
         id: brightnessProc

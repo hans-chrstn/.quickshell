@@ -18,6 +18,15 @@ Item {
     Rectangle {
         anchors.fill: parent
         radius: height / 2
+        color: "transparent"
+        border.color: "white"
+        border.width: 1
+        opacity: root.enabled ? 0.05 : 0.02
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: height / 2
         color: "white"
         opacity: root.enabled ? 0.08 : 0.02
     }
@@ -31,32 +40,52 @@ Item {
         Rectangle {
             anchors.left: parent.left
             height: parent.height
-            width: parent.width * root.value
+            width: parent.width * (mouseArea.pressed ? internalValue : root.value)
             color: root.barColor
-            opacity: 0.9
+            opacity: 0.95
             
-            Behavior on width { NumberAnimation { duration: 150; easing.type: Easing.OutQuad } }
+            Behavior on width { 
+                enabled: !mouseArea.pressed
+                NumberAnimation { duration: 150; easing.type: Easing.OutQuad } 
+            }
+            
+            Rectangle {
+                anchors.top: parent.top
+                width: parent.width; height: 1
+                color: "white"; opacity: 0.2
+            }
         }
     }
 
-    Text {
+    property real internalValue: root.value
+
+    Item {
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: 10
         anchors.verticalCenter: parent.verticalCenter
-        text: root.icon
-        color: root.value > 0.1 ? "black" : "white"
-        font.pixelSize: 14
-        opacity: root.enabled ? 1.0 : 0.3
+        width: 24; height: 24
+
+        Text {
+            anchors.centerIn: parent
+            text: root.icon
+            color: (root.enabled && (mouseArea.pressed ? internalValue : root.value) > 0.15) ? "black" : "white"
+            font.pixelSize: 16
+            opacity: root.enabled ? ( (mouseArea.pressed ? internalValue : root.value) > 0.15 ? 0.8 : 0.6) : 0.2
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         enabled: root.enabled
         preventStealing: true
         
         function handleMove(mouse) {
-            let nVal = mouse.x / width
-            root.moved(Math.max(0, Math.min(1, nVal)))
+            let nVal = Math.max(0, Math.min(1, mouse.x / width))
+            root.internalValue = nVal
+            root.moved(nVal)
         }
         
         onPressed: (mouse) => handleMove(mouse)

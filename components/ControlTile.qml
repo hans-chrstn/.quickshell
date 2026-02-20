@@ -7,42 +7,54 @@ Rectangle {
     id: root
     
     property string icon: ""
-    property string label: ""
     property bool active: false
     property bool enabled: true
     property color activeColor: FrameConfig.accentColor
     
     signal clicked()
 
-    width: 48; height: 48; radius: 16
+    width: 44; height: 44; radius: 22
     color: active ? activeColor : "white"
     opacity: enabled ? (active ? 1.0 : 0.1) : 0.03
     
+    scale: tapHandler.pressed ? 0.92 : 1.0
+    Behavior on scale { NumberAnimation { duration: 100 } }
     Behavior on color { ColorAnimation { duration: 250 } }
     Behavior on opacity { NumberAnimation { duration: 250 } }
 
-    Item {
+    Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        color: "transparent"
+        border.color: "white"
+        border.width: 1
+        opacity: root.active ? 0.2 : 0.05
+    }
+
+    Text {
+        id: iconText
         anchors.centerIn: parent
-        width: 24; height: 24
         
-        Text {
-            anchors.centerIn: parent
-            text: root.icon
-            color: root.active ? "black" : "white"
-            font.pixelSize: 20
-            opacity: root.enabled ? (root.active ? 1.0 : 0.8) : 0.3
-        }
+        anchors.horizontalCenterOffset: 1
+        anchors.verticalCenterOffset: 1
         
-        Rectangle {
-            anchors.centerIn: parent
-            width: 26; height: 2; radius: 1
-            color: "white"; opacity: 0.6
-            rotation: 45
-            visible: !root.enabled
-        }
+        text: root.icon
+        color: root.active ? "black" : "white"
+        font.pixelSize: 20
+        opacity: root.enabled ? (root.active ? 1.0 : 0.6) : 0.2
+        renderType: Text.NativeRendering
+    }
+    
+    Rectangle {
+        anchors.centerIn: parent
+        width: 24; height: 1.5; radius: 1
+        color: "white"; opacity: 0.6
+        rotation: 45
+        visible: !root.enabled
     }
 
     TapHandler { 
+        id: tapHandler
         enabled: root.enabled
         onTapped: root.clicked() 
     }

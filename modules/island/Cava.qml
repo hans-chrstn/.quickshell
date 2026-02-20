@@ -1,6 +1,8 @@
 import QtQuick
 import Quickshell
+import Quickshell.Services.Mpris
 import qs.config
+import qs.services
 
 Item {
     id: root
@@ -13,6 +15,13 @@ Item {
     property var currentHeights: []
     property var targetHeights: []
     
+    property bool isPlaying: {
+        for (var i = 0; i < Mpris.players.values.length; i++) {
+            if (Mpris.players.values[i].playbackState === MprisPlaybackState.Playing) return true;
+        }
+        return false;
+    }
+
     Component.onCompleted: {
         for (var i = 0; i < barCount; i++) {
             currentHeights.push(0);
@@ -22,13 +31,28 @@ Item {
 
     Timer {
         id: targetTimer
-        interval: 150
-        running: root.visible
+        interval: 100
+        running: root.visible && root.isPlaying
         repeat: true
         onTriggered: {
+            var volume = SystemControl.volume
+            var volumeScale = volume > 0 ? Math.pow(volume, 0.4) : 0
+            
             for (var i = 0; i < barCount; i++) {
-                targetHeights[i] = root.height * (0.1 + (0.8 * Math.random()));
+                var centerBias = 1.0 - Math.abs((i - barCount / 2) / (barCount / 2)) * 0.4
+                var randomFactor = 0.4 + (0.6 * Math.random())
+                
+                var floorHeight = root.height * 0.15 * randomFactor
+                var dynamicHeight = root.height * 0.85 * volumeScale * centerBias * randomFactor
+                
+                targetHeights[i] = floorHeight + dynamicHeight
             }
+        }
+    }
+    
+    onIsPlayingChanged: {
+        if (!isPlaying) {
+            for (var i = 0; i < barCount; i++) targetHeights[i] = 2;
         }
     }
 
@@ -39,7 +63,7 @@ Item {
             for (var i = 0; i < barCount; i++) {
                 currentHeights[i] += (targetHeights[i] - currentHeights[i]) * 0.15;
                 var item = repeater.itemAt(i);
-                if (item) item.height = currentHeights[i];
+                if (item) item.height = Math.max(2, currentHeights[i]);
             }
         }
     }

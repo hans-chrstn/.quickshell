@@ -4,11 +4,12 @@ import Quickshell
 import qs.config
 import qs.components
 import qs.services
+import qs.modules.windows
 
 Item {
     id: root
     anchors.fill: parent
-
+    
     RowLayout {
         anchors.centerIn: parent
         anchors.verticalCenterOffset: -10
@@ -40,7 +41,9 @@ Item {
                 }
                 ControlTile { 
                     width: 44; height: 44; radius: 22
-                    icon: "󰖔"; active: false; activeColor: "#5856D6"; enabled: false 
+                    icon: "󰒓"
+                    active: settingsWin.visible
+                    onClicked: settingsWin.visible = !settingsWin.visible
                 }
             }
         }
@@ -57,7 +60,7 @@ Item {
 
             ColumnLayout {
                 spacing: 4
-                Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; opacity: 0.3; Layout.leftMargin: 4 }
+                Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
                 ControlSlider { 
                     width: 200; height: 32
                     enabled: SystemControl.hasBrightness
@@ -69,7 +72,7 @@ Item {
 
             ColumnLayout {
                 spacing: 4
-                Text { text: "VOLUME"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; opacity: 0.3; Layout.leftMargin: 4 }
+                Text { text: "VOLUME"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
                 ControlSlider { 
                     width: 200; height: 32
                     enabled: SystemControl.hasAudio
@@ -79,5 +82,9 @@ Item {
                 }
             }
         }
+    }
+
+    SettingsWindow {
+        id: settingsWin
     }
 }
