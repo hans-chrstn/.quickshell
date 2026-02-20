@@ -151,7 +151,9 @@ Item {
                 anchors.top: parent.top
                 onLetterClicked: (letter) => {
                     for (var i = 0; i < appListModel.count; i++) {
-                        var app = appListModel.get(i).app;
+                        var item = appListModel.get(i);
+                        if (!item || !item.app) continue;
+                        var app = item.app;
                         var firstLetter = app.name.substring(0, 1).toUpperCase();
                         if (letter === "#" && !"ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
                             view.currentIndex = i; break;
@@ -208,6 +210,15 @@ Item {
 
                 function updateApps() {
                     let apps = DesktopEntries.applications.values.slice();
+                    let filter = searchInput.text.toLowerCase();
+                    
+                    if (filter !== "") {
+                        apps = apps.filter(app => 
+                            app.name.toLowerCase().includes(filter) || 
+                            (app.description && app.description.toLowerCase().includes(filter))
+                        );
+                    }
+                    
                     apps.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
                     
                     appListModel.clear();

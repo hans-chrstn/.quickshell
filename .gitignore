@@ -1,3 +1,5 @@
 **/temp/
 **/.direnv/
 **/notes/
+**/.envrc
+**/cache/

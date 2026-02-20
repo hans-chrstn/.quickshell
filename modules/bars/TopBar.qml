@@ -21,6 +21,12 @@ BaseBar {
     implicitHeight: FrameConfig.dynamicIslandExpandedHeight
     exclusiveZone: FrameConfig.thickness
     color: "transparent"
+    focusable: dIsland.expanded
+
+    mask: Region {
+        Region { item: barRect }
+        Region { item: dIsland }
+    }
 
     property var activePlayer: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
     

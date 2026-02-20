@@ -64,7 +64,7 @@ ShellRoot {
                     let home = Quickshell.env("HOME") || "/tmp"
                     let timestamp = new Date().getTime()
                     let filename = home + "/Videos/recording_" + corner.screenName + "_" + timestamp + ".mp4"
-                    command = ["sh", "-c", "wf-recorder -o " + corner.screenName + " -f " + filename]
+                    command = ["wf-recorder", "-o", corner.screenName, "-f", filename]
                     running = true
                     Quickshell.execDetached(["notify-send", "Recording Started", "Screen: " + corner.screenName + "\nFile: " + filename])
                 }
@@ -102,7 +102,7 @@ ShellRoot {
                             id: snapMouse
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: Quickshell.execDetached(["sh", "-c", "niri msg action screenshot"])
+                            onClicked: Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
                         }
                     }
                     Text { anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"; color: "white"; opacity: snapMouse.containsMouse ? 1.0 : 0.6; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1; Behavior on opacity { NumberAnimation { duration: 200 } } }
@@ -264,9 +264,9 @@ ShellRoot {
                                 anchors.fill: parent
                                 onClicked: {
                                     if (confirmAction === "logout") {
-                                        Quickshell.execDetached(["sh", "-c", "loginctl terminate-user $USER"])
+                                        Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")])
                                     } else {
-                                        Quickshell.execDetached(["sh", "-c", "systemctl poweroff"])
+                                        Quickshell.execDetached(["systemctl", "poweroff"])
                                     }
                                 }
                             }

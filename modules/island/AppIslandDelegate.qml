@@ -38,8 +38,21 @@ Item {
                 id: appIcon
                 anchors.fill: parent
                 sourceSize: Qt.size(FrameConfig.appIslandIconSize, FrameConfig.appIslandIconSize)
-                source: app ? Quickshell.iconPath(app.icon) : ""
+                
+                source: {
+                    if (!app || !app.icon) return Quickshell.iconPath("system-run");
+                    
+                    if (app.icon.startsWith("/")) return "file://" + app.icon;
+                    
+                    return Quickshell.iconPath(app.icon);
+                }
                 fillMode: Image.PreserveAspectFit
+                
+                onStatusChanged: {
+                    if (status === Image.Error) {
+                        source = Quickshell.iconPath("system-run");
+                    }
+                }
             }
         }
 

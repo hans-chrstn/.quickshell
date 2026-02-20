@@ -38,7 +38,7 @@ Item {
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: parent.height * (root.device ? root.device.percentage / 100 : 0)
+                    height: parent.height * (root.device ? root.device.percentage : 0)
                     color: (root.device && root.device.state === UPowerDeviceState.Charging) ? "#4caf50" : "white"
                     opacity: chargingAnim.running ? 0.4 : 0.2
                     

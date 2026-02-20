@@ -16,6 +16,11 @@ BaseBar {
     exclusiveZone: FrameConfig.thickness
     color: "transparent"
 
+    mask: Region {
+        Region { item: barRect }
+        Region { item: appIsland }
+    }
+
     Rectangle {
         id: barRect
         anchors.bottom: parent.bottom
@@ -39,19 +44,12 @@ BaseBar {
     MouseArea {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-
         width: appIsland.expanded ? FrameConfig.appIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
         height: appIsland.expanded ? FrameConfig.appIslandExpandedHeight : FrameConfig.thickness
-
         hoverEnabled: true
-
         onEntered: appIsland.expanded = true
         onExited: appIsland.expanded = false
         propagateComposedEvents: true
         onPressed: (mouse) => mouse.accepted = false
     }
 }
-
-        
-
-    
