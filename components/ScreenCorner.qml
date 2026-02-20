@@ -2,8 +2,10 @@ import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
 import Quickshell
+import QtQuick.Layouts
 import Quickshell.Wayland
-import "../config"
+import qs.config
+import qs.components
 
 PanelWindow {
     id: root
@@ -24,11 +26,24 @@ PanelWindow {
     property bool hoverEnabled: false
     property int expandedWidth: 200
     property int expandedHeight: 200
-    readonly property bool hovered: hoverEnabled && hoverHandler.hovered
+    readonly property bool hovered: hoverEnabled && island.mouseHovered
     
     property bool expandedState: false
     
-    default property alias content: contentContainer.data
+    property color filletColor: sColor
+    property real f1Rot: 0
+    property real f1X: 0
+    property real f1Y: 0
+    property real f2Rot: 0
+    property real f2X: 0
+    property real f2Y: 0
+
+    property var customTL: undefined
+    property var customTR: undefined
+    property var customBL: undefined
+    property var customBR: undefined
+
+    default property alias content: island.content
 
     anchors {
         top: activeTop
@@ -37,229 +52,74 @@ PanelWindow {
         right: activeRight
     }
 
-    implicitWidth: hoverEnabled ? expandedWidth + FrameConfig.roundedCornerShapeRadius : sRadius
-    implicitHeight: hoverEnabled ? expandedHeight + FrameConfig.roundedCornerShapeRadius : sRadius
+    implicitWidth: hoverEnabled ? expandedWidth + 40 : sRadius
+    implicitHeight: hoverEnabled ? expandedHeight + 40 : sRadius
     color: "transparent"
     
     exclusionMode: ExclusionMode.Ignore
     
     mask: Region {
-        Region { item: container; intersection: Intersection.Combine }
-        Region { item: verticalFillet; intersection: Intersection.Combine }
-        Region { item: horizontalFillet; intersection: Intersection.Combine }
+        Region { item: island }
+        Region { item: cornerIconBox }
     }
 
-    Item {
-        id: container
+    BaseIsland {
+        id: island
         anchors.top: root.activeTop ? parent.top : undefined
         anchors.bottom: root.activeBottom ? parent.bottom : undefined
         anchors.left: root.activeLeft ? parent.left : undefined
         anchors.right: root.activeRight ? parent.right : undefined
         
-        property real radius: 15
-
-        states: [
-            State {
-                name: "expanded"
-                when: root.expandedState
-                PropertyChanges { target: container; width: root.expandedWidth; height: root.expandedHeight }
-            },
-            State {
-                name: "collapsed"
-                when: !root.expandedState
-                PropertyChanges { target: container; width: root.sRadius; height: root.sRadius }
-            }
-        ]
-
-        transitions: [
-            Transition {
-                to: "expanded"
-                ParallelAnimation {
-                    NumberAnimation {
-                        properties: "width,height"
-                        duration: FrameConfig.animDuration
-                        easing.type: FrameConfig.animEasing
-                    }
-                    SequentialAnimation {
-                        PauseAnimation { duration: FrameConfig.animDuration * 0.7 }
-                        NumberAnimation {
-                            target: contentContainer
-                            property: "opacity"
-                            to: 1
-                            duration: 150
-                        }
-                    }
-                }
-            },
-            Transition {
-                to: "collapsed"
-                SequentialAnimation {
-                    NumberAnimation {
-                        target: contentContainer
-                        property: "opacity"
-                        to: 0
-                        duration: 100
-                    }
-                    ParallelAnimation {
-                        NumberAnimation {
-                            properties: "width,height"
-                            duration: FrameConfig.animDuration
-                            easing.type: FrameConfig.animEasing
-                        }
-                    }
-                }
-            }
-        ]
-
-        HoverHandler {
-            id: hoverHandler
-            enabled: root.hoverEnabled
-        }
-
-        readonly property bool isFullyExpanded: width === root.expandedWidth && height === root.expandedHeight
-        readonly property bool isCollapsed: width === root.sRadius && height === root.sRadius
-
-        Rectangle {
-            anchors.fill: bgRect
-            radius: container.radius
-            color: "black"
-            opacity: root.expandedState ? 0.4 : 0
-            visible: opacity > 0
-            z: -1
-            layer.enabled: true
-            layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-        }
-
-        Rectangle {
-            id: bgRect
-            anchors.fill: parent
-            color: root.sColor
-            opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-            radius: container.radius
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-        }
-
-        Item {
-            id: contentContainer
-            anchors.fill: parent
-            opacity: 0
-        }
-
-        Item {
-            width: root.sRadius
-            height: root.sRadius
-            anchors.top: root.activeTop ? parent.top : undefined
-            anchors.bottom: root.activeBottom ? parent.bottom : undefined
-            anchors.left: root.activeLeft ? parent.left : undefined
-            anchors.right: root.activeRight ? parent.right : undefined
-            
-            opacity: container.isCollapsed ? 1.0 : 0.0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: 150 } }
-
-            Shape {
-                anchors.fill: parent
-                visible: root.activeTop && root.activeLeft
-                layer.enabled: true; layer.samples: 4
-                ShapePath {
-                    strokeWidth: 0; fillColor: root.sColor
-                    PathSvg { path: "M 0 0 L 25 0 L 25 15 A 10 10 0 0 0 15 25 L 0 25 Z" }
-                }
-            }
-
-            Shape {
-                anchors.fill: parent
-                visible: root.activeBottom && root.activeLeft
-                layer.enabled: true; layer.samples: 4
-                ShapePath {
-                    strokeWidth: 0; fillColor: root.sColor
-                    PathSvg { path: "M 0 25 L 25 25 L 25 10 A 10 10 0 0 1 15 0 L 0 0 Z" }
-                }
-            }
-
-            Shape {
-                anchors.fill: parent
-                visible: root.activeTop && root.activeRight
-                layer.enabled: true; layer.samples: 4
-                ShapePath {
-                    strokeWidth: 0; fillColor: root.sColor
-                    PathSvg { path: "M 25 0 L 0 0 L 0 15 A 10 10 0 0 1 10 25 L 25 25 Z" }
-                }
-            }
-
-            Shape {
-                anchors.fill: parent
-                visible: root.activeBottom && root.activeRight
-                layer.enabled: true; layer.samples: 4
-                ShapePath {
-                    strokeWidth: 0; fillColor: root.sColor
-                    PathSvg { path: "M 25 25 L 0 25 L 0 10 A 10 10 0 0 0 10 0 L 25 0 Z" }
-                }
-            }
-        }
-    }
-
-    RoundedCornerShape {
-        id: verticalFillet
-        anchors.top: root.activeTop ? container.bottom : undefined
-        anchors.bottom: root.activeBottom ? container.top : undefined
-        anchors.left: root.activeLeft ? container.left : undefined
-        anchors.right: root.activeRight ? container.right : undefined
-        
-        anchors.leftMargin: root.activeLeft ? root.sThick : 0
-        anchors.rightMargin: root.activeRight ? root.sThick : 0
-        
-        width: root.sThick
-        height: FrameConfig.roundedCornerShapeRadius
-        
+        isCorner: true
         isTop: root.activeTop
         isBottom: root.activeBottom
-        isLeft: root.activeRight
         
-        cornerRadius: FrameConfig.roundedCornerShapeRadius
-        cornerColor: root.sColor
-        opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-        visible: opacity > 0
+        expanded: root.expandedState
+        expandedWidth: root.expandedWidth
+        expandedHeight: root.expandedHeight
+        collapsedWidth: root.sRadius
+        barHeight: root.sRadius
+        barColor: root.sColor
+        filletColor: root.filletColor
+        
+        f1Rotation: root.f1Rot
+        f1X: root.f1X
+        f1Y: root.f1Y
+
+        f2Rotation: root.f2Rot
+        f2X: root.f2X
+        f2Y: root.f2Y
+
+        customTopLeftRadius: root.customTL !== undefined ? root.customTL : ((root.activeTop && !root.isCorner) ? 0 : root.radius)
+        customTopRightRadius: root.customTR !== undefined ? root.customTR : ((root.activeTop && !root.isCorner) ? 0 : root.radius)
+        customBottomLeftRadius: root.customBL !== undefined ? root.customBL : ((root.activeBottom && !root.isCorner) ? 0 : root.radius)
+        customBottomRightRadius: root.customBR !== undefined ? root.customBR : ((root.activeBottom && !root.isCorner) ? 0 : root.radius)
+
+        opacity: root.expandedState ? 1.0 : 0.0
         Behavior on opacity { NumberAnimation { duration: 150 } }
     }
 
-    RoundedCornerShape {
-        id: horizontalFillet
-        anchors.left: root.activeLeft ? container.right : undefined
-        anchors.right: root.activeRight ? container.left : undefined
-        anchors.top: root.activeTop ? container.top : undefined
-        anchors.bottom: root.activeBottom ? container.bottom : undefined
-        
-        anchors.topMargin: root.activeTop ? root.sThick : 0
-        anchors.bottomMargin: root.activeBottom ? root.sThick : 0
-        
-        width: FrameConfig.roundedCornerShapeRadius
-        height: root.sThick
-        
-        isTop: root.activeTop
-        isBottom: root.activeBottom
-        isLeft: root.activeRight
-        
-        cornerRadius: FrameConfig.roundedCornerShapeRadius
-        cornerColor: root.sColor
-        opacity: root.expandedState ? 1.0 : (container.isCollapsed ? 0.0 : 1.0)
-        visible: opacity > 0
+    Item {
+        id: cornerIconBox
+        width: root.sRadius; height: root.sRadius
+        anchors.top: root.activeTop ? parent.top : undefined
+        anchors.bottom: root.activeBottom ? parent.bottom : undefined
+        anchors.left: root.activeLeft ? parent.left : undefined
+        anchors.right: root.activeRight ? parent.right : undefined
+        opacity: root.expandedState ? 0.0 : 1.0
         Behavior on opacity { NumberAnimation { duration: 150 } }
+        
+        Shape {
+            anchors.fill: parent
+            visible: root.activeTop && root.activeLeft
+            layer.enabled: true; layer.samples: 4
+            ShapePath { strokeWidth: 0; fillColor: root.sColor; PathSvg { path: "M 0 0 L 25 0 L 25 15 A 10 10 0 0 0 15 25 L 0 25 Z" } }
+        }
+        Shape { anchors.fill: parent; visible: root.activeBottom && root.activeLeft; layer.enabled: true; layer.samples: 4; ShapePath { strokeWidth: 0; fillColor: root.sColor; PathSvg { path: "M 0 25 L 25 25 L 25 10 A 10 10 0 0 1 15 0 L 0 0 Z" } } }
+        Shape { anchors.fill: parent; visible: root.activeTop && root.activeRight; layer.enabled: true; layer.samples: 4; ShapePath { strokeWidth: 0; fillColor: root.sColor; PathSvg { path: "M 25 0 L 0 0 L 0 15 A 10 10 0 0 1 10 25 L 25 25 Z" } } }
+        Shape { anchors.fill: parent; visible: root.activeBottom && root.activeRight; layer.enabled: true; layer.samples: 4; ShapePath { strokeWidth: 0; fillColor: root.sColor; PathSvg { path: "M 25 25 L 0 25 L 0 10 A 10 10 0 0 0 10 0 L 25 0 Z" } } }
     }
 
-    Timer {
-        id: collapseTimer
-        interval: 150
-        onTriggered: root.expandedState = false
-    }
-    
-    onHoveredChanged: {
-        if (hovered) {
-            root.expandedState = true
-            collapseTimer.stop()
-        } else {
-            collapseTimer.restart()
-        }
-    }
+    Timer { id: collapseTimer; interval: 150; onTriggered: root.expandedState = false }
+    onHoveredChanged: { if (hovered) { root.expandedState = true; collapseTimer.stop() } else { collapseTimer.restart() } }
 }

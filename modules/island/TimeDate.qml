@@ -7,12 +7,15 @@ Item {
     id: root
 
     Timer {
-        interval: 1000
+        interval: 10000
         running: true
         repeat: true
         onTriggered: {
-            timeText.text = Qt.formatDateTime(new Date(), "hh:mm")
-            dateText.text = Qt.formatDateTime(new Date(), "dddd, MMMM d")
+            let now = new Date();
+            let newTime = Qt.formatDateTime(now, "hh:mm");
+            let newDate = Qt.formatDateTime(now, "dddd, MMMM d").toUpperCase();
+            if (timeText.text !== newTime) timeText.text = newTime;
+            if (dateText.text !== newDate) dateText.text = newDate;
         }
     }
 
@@ -27,6 +30,7 @@ Item {
             font.weight: Font.DemiBold
             font.pixelSize: 52
             font.letterSpacing: -2
+            renderType: Text.NativeRendering
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -49,6 +53,7 @@ Item {
                 font.pixelSize: 9
                 font.letterSpacing: 2
                 font.weight: Font.Bold
+                renderType: Text.NativeRendering
             }
 
             Rectangle {

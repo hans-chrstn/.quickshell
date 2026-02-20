@@ -9,6 +9,7 @@ Item {
     property bool isBottom: false
     property real cornerRadius: 0
     property color cornerColor: "#222222"
+    property real rotation: 0
 
     property string cornerPath: {
         var W = root.width;
@@ -48,6 +49,7 @@ Item {
         anchors.fill: parent
         layer.enabled: true
         layer.samples: 4
+        rotation: root.rotation
         
         ShapePath {
             fillColor: root.cornerColor
