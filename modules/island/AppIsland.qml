@@ -26,12 +26,22 @@ BaseIsland {
 
     property bool searchVisible: false
     property alias isInteracting: appIslandRoot.mouseHovered
+    property int activeMenus: 0
     
     onMouseHoveredChanged: {
         if (mouseHovered) {
             collapseTimer.stop()
             appIslandRoot.expanded = true
-        } else if (!searchVisible) {
+        } else if (!searchVisible && activeMenus === 0) {
+            collapseTimer.restart()
+        }
+    }
+    
+    onActiveMenusChanged: {
+        if (activeMenus > 0) {
+            collapseTimer.stop()
+            appIslandRoot.expanded = true
+        } else if (!mouseHovered && !searchVisible) {
             collapseTimer.restart()
         }
     }
