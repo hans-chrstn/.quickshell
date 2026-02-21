@@ -55,4 +55,8 @@ ShellRoot {
     WallpaperWindow {
         id: wallpaperWin
     }
+
+    ControlPanelWindow {
+        id: controlPanelWin
+    }
 }

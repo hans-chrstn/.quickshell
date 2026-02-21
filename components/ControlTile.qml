@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import qs.config
 
@@ -13,9 +14,9 @@ Rectangle {
     
     signal clicked()
 
-    width: 44; height: 44; radius: 22
-    color: active ? activeColor : "white"
-    opacity: enabled ? (active ? 1.0 : 0.1) : 0.03
+    width: FrameConfig.controlCenterTileSize; height: FrameConfig.controlCenterTileSize; radius: FrameConfig.controlCenterTileRadius
+    color: active ? activeColor : "#FFFFFF"
+    opacity: enabled ? (active ? 1.0 : 0.15) : 0.05
     
     scale: tapHandler.pressed ? 0.92 : (hoverHandler.hovered ? 1.05 : 1.0)
     Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
@@ -25,10 +26,24 @@ Rectangle {
     HoverHandler { id: hoverHandler; cursorShape: Qt.PointingHandCursor }
 
     Rectangle {
+        anchors.centerIn: parent
+        width: parent.width * 1.5; height: parent.height * 1.5
+        radius: width / 2
+        color: root.activeColor
+        opacity: root.active ? 0.25 : 0.0
+        z: -1
+        
+        layer.enabled: root.active
+        layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 }
+        
+        Behavior on opacity { NumberAnimation { duration: 400 } }
+    }
+
+    Rectangle {
         anchors.fill: parent
         radius: parent.radius
         color: "white"
-        opacity: hoverHandler.hovered ? 0.15 : 0.0
+        opacity: hoverHandler.hovered ? 0.2 : 0.0
         Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 
@@ -38,29 +53,17 @@ Rectangle {
         color: "transparent"
         border.color: "white"
         border.width: 1
-        opacity: root.active ? 0.2 : 0.05
+        opacity: root.active ? 0.3 : 0.1
     }
 
     Text {
         id: iconText
         anchors.centerIn: parent
-        
-        anchors.horizontalCenterOffset: 1
-        anchors.verticalCenterOffset: 1
-        
         text: root.icon
-        color: root.active ? "black" : "white"
-        font.pixelSize: 20
-        opacity: root.enabled ? (root.active ? 1.0 : 0.6) : 0.2
+        color: root.active ? "black" : "#FFFFFF"
+        font.pixelSize: 22 
+        opacity: root.enabled ? 1.0 : 0.3
         renderType: Text.NativeRendering
-    }
-    
-    Rectangle {
-        anchors.centerIn: parent
-        width: 24; height: 1.5; radius: 1
-        color: "white"; opacity: 0.6
-        rotation: 45
-        visible: !root.enabled
     }
 
     TapHandler { 

@@ -22,6 +22,7 @@
         pkgs.upower
         pkgs.libnotify
         pkgs.wf-recorder
+        pkgs.swww
       ];
     };
   };
