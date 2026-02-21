@@ -34,7 +34,7 @@ Item {
                     shadowBlur: 0.4
                     shadowVerticalOffset: 2
                 }                
-                RotationAnimator on rotation {
+                NumberAnimation on rotation {
                     from: 0; to: 360
                     duration: FrameConfig.musicRotationDuration
                     loops: Animation.Infinite
