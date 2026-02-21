@@ -51,4 +51,9 @@ ShellRoot {
         model: Quickshell.screens
         delegate: CornerBottomRight { }
     }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: OSDWindow { }
+    }
 }

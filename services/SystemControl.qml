@@ -22,6 +22,8 @@ Singleton {
     
     property real brightness: 0.5
     property bool wifiEnabled: false
+    
+    property real lastVolume: 0.5
 
     function updateAll(): void {
         if (hasBrightness) brightnessProc.running = true
@@ -31,7 +33,12 @@ Singleton {
     function setVolume(val: real): void {
         if (sink && sink.ready && sink.audio) {
             let v = Math.max(0, Math.min(1, val))
-            sink.audio.muted = false
+            
+            if (v === 0 && root.volume > 0) {
+                root.lastVolume = root.volume
+            }
+            
+            sink.audio.muted = (v === 0)
             sink.audio.volume = v
         }
     }
