@@ -51,4 +51,8 @@ ShellRoot {
         model: Quickshell.screens
         delegate: CornerBottomRight { }
     }
+
+    WallpaperWindow {
+        id: wallpaperWin
+    }
 }

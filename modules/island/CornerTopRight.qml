@@ -11,7 +11,7 @@ ScreenCorner {
     activeRight: true
     aboveWindows: true
     hoverEnabled: true
-    expandedWidth: 160
+    expandedWidth: 220
     expandedHeight: 100
     
     f1Rot: 0
@@ -19,7 +19,7 @@ ScreenCorner {
     f1Y: 16
     
     f2Rot: 0
-    f2X: 160 - 20 - 16 - 10
+    f2X: 220 - 20 - 16 - 10
     f2Y: 100 - 1
 
     customTL: 0
@@ -50,6 +50,32 @@ ScreenCorner {
         anchors.centerIn: parent
         spacing: 24
         
+        Column {
+            spacing: 6
+            Rectangle {
+                id: wallBtn
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 44; height: 44; radius: 22; color: "white"
+                opacity: wallMouse.containsMouse ? 0.2 : 0.1
+                scale: wallMouse.containsMouse ? 1.05 : 1.0
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                Text { anchors.centerIn: parent; text: "󰸉"; color: "white"; font.pixelSize: 22 }
+                MouseArea {
+                    id: wallMouse; anchors.fill: parent; hoverEnabled: true
+                    onClicked: {
+                        wallpaperWin.visible = !wallpaperWin.visible
+                    }
+                }
+            }
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter; text: "WALL"
+                color: "white"; opacity: wallMouse.containsMouse ? 1.0 : 0.6; font.pixelSize: 9
+                font.weight: Font.Bold; font.letterSpacing: 1
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+            }
+        }
+
         Column {
             spacing: 6
             Rectangle {
