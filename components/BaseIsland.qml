@@ -119,8 +119,9 @@ Item {
             topRightRadius: root.customTopRightRadius
             bottomLeftRadius: root.customBottomLeftRadius
             bottomRightRadius: root.customBottomRightRadius
+            
             HoverHandler { id: hoverHandler }
-            Item { id: islandContentArea; anchors.fill: parent; opacity: 0; clip: true }
+            Item { id: islandContentArea; anchors.fill: parent; opacity: 0; clip: false }
         }
     }
 }

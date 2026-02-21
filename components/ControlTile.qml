@@ -17,10 +17,20 @@ Rectangle {
     color: active ? activeColor : "white"
     opacity: enabled ? (active ? 1.0 : 0.1) : 0.03
     
-    scale: tapHandler.pressed ? 0.92 : 1.0
-    Behavior on scale { NumberAnimation { duration: 100 } }
+    scale: tapHandler.pressed ? 0.92 : (hoverHandler.hovered ? 1.05 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
     Behavior on color { ColorAnimation { duration: 250 } }
     Behavior on opacity { NumberAnimation { duration: 250 } }
+
+    HoverHandler { id: hoverHandler; cursorShape: Qt.PointingHandCursor }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        color: "white"
+        opacity: hoverHandler.hovered ? 0.15 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+    }
 
     Rectangle {
         anchors.fill: parent

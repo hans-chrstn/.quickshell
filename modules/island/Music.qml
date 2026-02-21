@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
@@ -20,15 +21,10 @@ Item {
             Layout.preferredHeight: FrameConfig.musicArtSize
             Layout.alignment: Qt.AlignVCenter
             
-            Rectangle {
-                anchors.fill: parent; anchors.topMargin: 4
-                radius: FrameConfig.musicArtRadius
-                color: "black"; opacity: FrameConfig.musicArtShadowOpacity
-            }
-
             Item {
                 id: vinylDisk
                 anchors.fill: parent
+                z: 1 
                 
                 RotationAnimator on rotation {
                     from: 0; to: 360
@@ -43,6 +39,7 @@ Item {
                     color: "#222"
                     
                     Image {
+                        id: artImage
                         anchors.fill: parent
                         source: (root.player && root.player.trackArtUrl) || ""
                         fillMode: Image.PreserveAspectCrop
@@ -87,10 +84,37 @@ Item {
             
             Item {
                 Layout.fillWidth: true; Layout.preferredHeight: 4; Layout.topMargin: 8
+                
+                property bool hovered: barMouseArea.containsMouse
+                property bool dragging: barMouseArea.pressed
+                
+                height: hovered || dragging ? 8 : 4
+                Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                
                 Rectangle { anchors.fill: parent; radius: 2; color: "white"; opacity: 0.1 }
+                
                 Rectangle {
                     height: parent.height; radius: 2; color: "white"; opacity: 0.8
                     width: (root.player && root.player.length > 0) ? parent.width * (root.player.position / root.player.length) : 0
+                }
+                
+                MouseArea {
+                    id: barMouseArea
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    hoverEnabled: true
+                    preventStealing: true
+                    cursorShape: Qt.PointingHandCursor
+                    
+                    function seek(mouse) {
+                        if (root.player && root.player.length > 0) {
+                            var pct = Math.max(0, Math.min(1, mouse.x / width))
+                            root.player.position = pct * root.player.length
+                        }
+                    }
+                    
+                    onPressed: (mouse) => seek(mouse)
+                    onPositionChanged: (mouse) => { if (pressed) seek(mouse) }
                 }
             }
 
@@ -104,20 +128,35 @@ Item {
                 Text { 
                     text: "󰒮"; color: "white"; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
-                    TapHandler { onTapped: root.player.previous() } 
+                    
+                    scale: thPrev.pressed ? 0.9 : (hhPrev.hovered ? 1.2 : 1.0)
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                    
+                    TapHandler { id: thPrev; onTapped: root.player.previous() } 
+                    HoverHandler { id: hhPrev; cursorShape: Qt.PointingHandCursor }
                 }
                 
                 Text { 
                     text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
                     color: "white"; font.pixelSize: 28
                     Layout.alignment: Qt.AlignVCenter
-                    TapHandler { onTapped: root.player.togglePlaying() } 
+                    
+                    scale: thPlay.pressed ? 0.9 : (hhPlay.hovered ? 1.2 : 1.0)
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                    
+                    TapHandler { id: thPlay; onTapped: root.player.togglePlaying() }
+                    HoverHandler { id: hhPlay; cursorShape: Qt.PointingHandCursor }
                 }
                 
                 Text { 
                     text: "󰒭"; color: "white"; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
-                    TapHandler { onTapped: root.player.next() } 
+                    
+                    scale: thNext.pressed ? 0.9 : (hhNext.hovered ? 1.2 : 1.0)
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+                    
+                    TapHandler { id: thNext; onTapped: root.player.next() }
+                    HoverHandler { id: hhNext; cursorShape: Qt.PointingHandCursor }
                 }
                 
                 Item { Layout.fillWidth: true }

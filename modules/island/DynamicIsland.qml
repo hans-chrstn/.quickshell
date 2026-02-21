@@ -52,6 +52,11 @@ BaseIsland {
             pathItemCount: 3; snapMode: PathView.SnapOneItem; highlightRangeMode: PathView.StrictlyEnforceRange
             preferredHighlightBegin: 0.5; preferredHighlightEnd: 0.5; dragMargin: width / 2
             
+            transform: Translate {
+                y: root.expanded ? 0 : 15
+                Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutExpo } }
+            }
+            
             onDraggingChanged: root.expanded = root.mouseHovered || dragging
 
             path: Path {
@@ -86,7 +91,17 @@ BaseIsland {
         
         Row {
             id: indicatorsRow; anchors.bottom: parent.bottom; anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin
-            anchors.horizontalCenter: parent.horizontalCenter; spacing: FrameConfig.indicatorRowSpacing; opacity: view.visible ? 1 : 0
+            anchors.horizontalCenter: parent.horizontalCenter; spacing: FrameConfig.indicatorRowSpacing
+            
+            opacity: root.expanded ? 1 : 0
+            visible: opacity > 0.01
+            Behavior on opacity { 
+                SequentialAnimation {
+                    PauseAnimation { duration: root.expanded ? 200 : 0 }
+                    NumberAnimation { duration: 300 } 
+                }
+            }
+
             Repeater { 
                 model: tabModel.count
                 Rectangle { 

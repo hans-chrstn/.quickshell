@@ -51,7 +51,7 @@ PanelWindow {
         scale: root.visible ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
-        Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+        Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
         
         MouseArea {
             anchors.fill: parent
@@ -155,6 +155,9 @@ PanelWindow {
                         }
                         
                         TapHandler { onTapped: FrameConfig.reset() }
+                        
+                        HoverHandler { id: hh; cursorShape: Qt.PointingHandCursor }
+                        Rectangle { anchors.fill: parent; color: "white"; opacity: hh.hovered ? 0.1 : 0; radius: 12 }
                     }
                 }
 
@@ -297,6 +300,8 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter 
                         width: 20; height: 20; radius: 10; color: "white"
                         border.color: FrameConfig.accentColor; border.width: 1
+                        scale: parent.pressed ? 1.2 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
                     }
                 }
             }

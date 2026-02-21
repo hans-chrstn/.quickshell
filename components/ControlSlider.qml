@@ -14,6 +14,9 @@ Item {
     signal moved(real val)
 
     width: 180; height: 32
+    
+    scale: mouseArea.pressed ? 0.98 : (mouseArea.containsMouse ? 1.02 : 1.0)
+    Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
     Rectangle {
         anchors.fill: parent
@@ -28,7 +31,8 @@ Item {
         anchors.fill: parent
         radius: height / 2
         color: "white"
-        opacity: root.enabled ? 0.08 : 0.02
+        opacity: root.enabled ? (mouseArea.containsMouse ? 0.12 : 0.08) : 0.02
+        Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 
     ClippingRectangle {
@@ -46,7 +50,7 @@ Item {
             
             Behavior on width { 
                 enabled: !mouseArea.pressed
-                NumberAnimation { duration: 150; easing.type: Easing.OutQuad } 
+                NumberAnimation { duration: 300; easing.type: Easing.OutExpo } 
             }
             
             Rectangle {
@@ -80,7 +84,9 @@ Item {
         id: mouseArea
         anchors.fill: parent
         enabled: root.enabled
+        hoverEnabled: true
         preventStealing: true
+        cursorShape: Qt.PointingHandCursor
         
         function handleMove(mouse) {
             let nVal = Math.max(0, Math.min(1, mouse.x / width))
@@ -89,6 +95,8 @@ Item {
         }
         
         onPressed: (mouse) => handleMove(mouse)
-        onPositionChanged: (mouse) => handleMove(mouse)
+        onPositionChanged: (mouse) => {
+            if (pressed) handleMove(mouse)
+        }
     }
 }

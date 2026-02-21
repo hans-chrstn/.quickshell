@@ -15,7 +15,7 @@ Singleton {
     property real highlightOpacity: 0.08
     property color secondaryTextColor: "#888888"
 
-    property int animDuration: 300
+    property int animDuration: 400
     property int animEasing: Easing.OutQuart
 
     property real shadowOpacity: 0.4
@@ -212,12 +212,8 @@ Singleton {
                         root[key] = data[key]
                     }
                 }
-                console.log("FrameConfig: Config loaded.")
             } catch (e) {
-                console.log("FrameConfig: Failed to parse config cache: " + e)
             }
-        } else {
-            console.log("FrameConfig: Cache is empty.")
         }
     }
 

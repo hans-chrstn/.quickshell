@@ -27,7 +27,21 @@ Item {
             id: notifHeader; anchors.top: parent.top; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 20; anchors.topMargin: 15
             Text { text: "NOTIFICATIONS"; color: "white"; opacity: 0.3; font.weight: Font.Black; font.pixelSize: 10; font.letterSpacing: 2 }
             Item { Layout.fillWidth: true }
-            Text { text: "CLEAR ALL"; color: FrameConfig.accentColor; font.weight: Font.Bold; font.pixelSize: 9; opacity: 0.6; TapHandler { onTapped: { let notifs = root.server.trackedNotifications.values; for (let i = 0; i < notifs.length; i++) notifs[i].dismiss(); } } }
+            Text { 
+                text: "CLEAR ALL"
+                color: FrameConfig.accentColor
+                font.weight: Font.Bold
+                font.pixelSize: 9
+                opacity: hhClear.hovered ? 1.0 : 0.6
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                
+                TapHandler { 
+                    onTapped: {
+                        root.server.trackedNotifications.values.forEach(n => n.dismiss())
+                    } 
+                }
+                HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }
+            }
         }
 
         ListView {
@@ -40,11 +54,14 @@ Item {
                 height: expanded ? (mainLayout.implicitHeight + 24) : 54
                 property bool expanded: false
                 
+                scale: thNotif.pressed ? 0.98 : (hhNotif.hovered ? 1.02 : 1.0)
+                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                
                 Behavior on height { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
 
                 Rectangle {
                     anchors.fill: parent; radius: 16; color: "white"
-                    opacity: notifDelegate.expanded ? 0.08 : 0.05
+                    opacity: notifDelegate.expanded ? 0.12 : (hhNotif.hovered ? 0.08 : 0.05)
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
 
@@ -87,15 +104,19 @@ Item {
                         Layout.alignment: Qt.AlignTop
                         Text { 
                             anchors.centerIn: parent
-                            text: "󰅖"; color: "white"; opacity: 0.3; font.pixelSize: 16
+                            text: "󰅖"; color: "white"; opacity: hhDismiss.hovered ? 0.8 : 0.3; font.pixelSize: 16
+                            Behavior on opacity { NumberAnimation { duration: 200 } }
                         }
                         TapHandler { onTapped: modelData.dismiss() }
+                        HoverHandler { id: hhDismiss; cursorShape: Qt.PointingHandCursor }
                     }
                 }
 
                 TapHandler {
+                    id: thNotif
                     onTapped: notifDelegate.expanded = !notifDelegate.expanded
                 }
+                HoverHandler { id: hhNotif }
             }
         }
     }
