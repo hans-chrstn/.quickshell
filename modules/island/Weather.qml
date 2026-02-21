@@ -32,7 +32,9 @@ Item {
         }
     }
 
-    readonly property string cacheDir: Quickshell.env("HOME") + "/.config/quickshell/cache"
+    readonly property string cacheDir: Quickshell.cachePath("weather_images")
+    readonly property string locFilePath: Quickshell.cachePath("location")
+
     readonly property var bgMap: {
         "Clear": "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?q=80&w=1000&auto=format&fit=crop",
         "Clouds": "https://images.unsplash.com/photo-1534088568595-a066f410bcda?q=80&w=1000&auto=format&fit=crop",
@@ -107,8 +109,6 @@ Item {
         xhr.open("GET", url);
         xhr.send();
     }
-
-    readonly property string locFilePath: root.cacheDir + "/.location_cache"
 
     FileView {
         id: locFile
@@ -195,7 +195,7 @@ Item {
     }
 
     Timer { 
-        interval: 300000 
+        interval: FrameConfig.weatherUpdateInterval 
         running: true 
         repeat: true 
         triggeredOnStart: false
@@ -307,7 +307,7 @@ Item {
                 }
                 Text {
                     text: (root.cityName || root.weatherLocation || "NO LOCATION").toUpperCase()
-                    color: "white"; opacity: 0.4; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1.5
+                    color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1.5
                     TapHandler { onTapped: root.inputMode = true }
                 }
             }
@@ -326,7 +326,7 @@ Item {
                     }
                     Text {
                         text: root.weatherDescription || "fetching..."
-                        color: "white"; opacity: 0.5; font.pixelSize: 9; font.italic: true
+                        color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 9; font.italic: true
                     }
                 }
             }

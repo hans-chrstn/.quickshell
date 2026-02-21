@@ -67,7 +67,7 @@ BaseBar {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: appIsland.height + 20
         z: 5
-        width: 220; height: 44
+        width: FrameConfig.osdPillWidth; height: FrameConfig.osdPillHeight
         
         property string type: "volume"
         barColor: type === "brightness" ? "#FFCC00" : FrameConfig.accentColor
@@ -91,7 +91,7 @@ BaseBar {
             hideTimer.restart() 
         }
 
-        Timer { id: hideTimer; interval: 2000; onTriggered: if (!osdPill.hovered) osdPill.active = false }
+        Timer { id: hideTimer; interval: FrameConfig.osdHideDelay; onTriggered: if (!osdPill.hovered) osdPill.active = false }
 
         function show(newType, newIcon, newVal) {
             osdPill.type = newType
@@ -132,5 +132,5 @@ BaseBar {
         onPressed: (mouse) => mouse.accepted = false
     }
 
-    Timer { id: collapseTimer; interval: 300; onTriggered: appIsland.expanded = false }
+    Timer { id: collapseTimer; interval: FrameConfig.collapseTimerDelay; onTriggered: appIsland.expanded = false }
 }

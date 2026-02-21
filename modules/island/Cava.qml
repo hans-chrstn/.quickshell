@@ -31,7 +31,7 @@ Item {
 
     Timer {
         id: targetTimer
-        interval: 100
+        interval: FrameConfig.cavaUpdateInterval
         running: root.visible && root.isPlaying
         repeat: true
         onTriggered: {
@@ -61,7 +61,7 @@ Item {
         onTriggered: {
             if (currentHeights.length < barCount) return;
             for (var i = 0; i < barCount; i++) {
-                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * 0.15;
+                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * FrameConfig.cavaSmoothing;
                 var item = repeater.itemAt(i);
                 if (item) item.height = Math.max(2, currentHeights[i]);
             }

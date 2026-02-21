@@ -15,7 +15,7 @@ Rectangle {
     signal moved(real val)
     signal iconClicked()
 
-    radius: 22
+    radius: FrameConfig.osdPillRadius
     color: "#080809"
     
     Rectangle {

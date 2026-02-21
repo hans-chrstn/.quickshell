@@ -34,7 +34,6 @@ Singleton {
     property int appIslandDelegateHeight: 90
     property int appIslandIconSize: 40
     property real appIslandMinOpacity: 0.4
-    property string appIslandSortMode: "alphabetical"
 
     property int appIslandSearchBarHeight: 36
     property int appIslandSearchBarRadius: 18
@@ -51,7 +50,6 @@ Singleton {
     property int musicControlSpacing: 24
 
     property bool showMusicArt: true
-    property bool blurBackground: true
     property bool showWeather: true
 
     property int notifItemHeight: 60
@@ -64,6 +62,23 @@ Singleton {
     property int cavaSpacing: 3
     property real cavaOpacity: 0.15
     property int cavaUpdateInterval: 100
+    property real cavaSmoothing: 0.15
+
+    property int weatherUpdateInterval: 300000
+    property int musicRotationDuration: 8000
+    
+    property int osdPillWidth: 220
+    property int osdPillHeight: 44
+    property int osdPillRadius: 22
+    property int osdHideDelay: 2000
+
+    property int controlCenterTileSize: 44
+    property int controlCenterTileRadius: 22
+    property int controlCenterSliderWidth: 200
+    property int controlCenterSliderHeight: 32
+
+    property string timeFormat: "hh:mm"
+    property string dateFormat: "dddd, MMMM d"
 
     property int roundedCornerShapeWidth: 20
     property int roundedCornerShapeRadius: 20
@@ -73,7 +88,7 @@ Singleton {
     property int indicatorRowSpacing: 6
 
     property bool ready: false
-    readonly property string cachePath: Quickshell.shellPath("cache/config_cache.json")
+    readonly property string cachePath: Quickshell.cachePath("config.json")
     
     signal resetOccurred()
     
@@ -94,7 +109,10 @@ Singleton {
                 { type: "header", label: "Shadows" },
                 { type: "slider", label: "Opacity", property: "shadowOpacity", default: 0.4, min: 0.0, max: 1.0, step: 0.05 },
                 { type: "slider", label: "Blur", property: "shadowBlur", default: 15, min: 0, max: 50 },
-                { type: "slider", label: "Offset Y", property: "shadowVerticalOffset", default: 4, min: 0, max: 20 }
+                { type: "slider", label: "Offset Y", property: "shadowVerticalOffset", default: 4, min: 0, max: 20 },
+                { type: "header", label: "Formats" },
+                { type: "text", label: "Time Format", property: "timeFormat", default: "hh:mm" },
+                { type: "text", label: "Date Format", property: "dateFormat", default: "dddd, MMMM d" }
             ]
         },
         {
@@ -132,8 +150,21 @@ Singleton {
                 { type: "slider", label: "Radius", property: "musicArtRadius", default: 32, min: 0, max: 50 },
                 { type: "slider", label: "Hole Size", property: "musicHoleSize", default: 12, min: 0, max: 40 },
                 { type: "slider", label: "Shadow Opacity", property: "musicArtShadowOpacity", default: 0.3, min: 0.0, max: 1.0, step: 0.05 },
-                { type: "header", label: "Controls" },
-                { type: "slider", label: "Spacing", property: "musicControlSpacing", default: 24, min: 0, max: 50 }
+                { type: "header", label: "Behavior" },
+                { type: "slider", label: "Rotation Speed", property: "musicRotationDuration", default: 8000, min: 2000, max: 20000, step: 500 },
+                { type: "slider", label: "Control Spacing", property: "musicControlSpacing", default: 24, min: 0, max: 50 }
+            ]
+        },
+        {
+            category: "OSD",
+            icon: "󰕾",
+            items: [
+                { type: "header", label: "Dimensions" },
+                { type: "slider", label: "Width", property: "osdPillWidth", default: 220, min: 150, max: 400 },
+                { type: "slider", label: "Height", property: "osdPillHeight", default: 44, min: 30, max: 80 },
+                { type: "slider", label: "Corner Radius", property: "osdPillRadius", default: 22, min: 0, max: 40 },
+                { type: "header", label: "Behavior" },
+                { type: "slider", label: "Hide Delay", property: "osdHideDelay", default: 2000, min: 500, max: 10000, step: 100 }
             ]
         },
         {
@@ -149,13 +180,30 @@ Singleton {
             ]
         },
         {
-            category: "Visualizer",
-            icon: "󰓃",
+            category: "Control Center",
+            icon: "󰒓",
             items: [
-                { type: "header", label: "Cava" },
+                { type: "header", label: "Tiles" },
+                { type: "slider", label: "Size", property: "controlCenterTileSize", default: 44, min: 30, max: 80 },
+                { type: "slider", label: "Corner Radius", property: "controlCenterTileRadius", default: 22, min: 0, max: 40 },
+                { type: "header", label: "Sliders" },
+                { type: "slider", label: "Width", property: "controlCenterSliderWidth", default: 200, min: 100, max: 400 },
+                { type: "slider", label: "Height", property: "controlCenterSliderHeight", default: 32, min: 20, max: 60 }
+            ]
+        },
+        {
+            category: "Advanced",
+            icon: "󰒓",
+            items: [
+                { type: "header", label: "Visualizer" },
                 { type: "slider", label: "Bar Count", property: "cavaBarCount", default: 20, min: 5, max: 50 },
-                { type: "slider", label: "Spacing", property: "cavaSpacing", default: 3, min: 0, max: 10 },
-                { type: "slider", label: "Opacity", property: "cavaOpacity", default: 0.15, min: 0.0, max: 1.0, step: 0.05 }
+                { type: "slider", label: "Bar Spacing", property: "cavaSpacing", default: 3, min: 0, max: 10 },
+                { type: "slider", label: "Smoothing", property: "cavaSmoothing", default: 0.15, min: 0.05, max: 0.5, step: 0.01 },
+                { type: "header", label: "Weather" },
+                { type: "slider", label: "Update Interval", property: "weatherUpdateInterval", default: 300000, min: 60000, max: 3600000, step: 60000 },
+                { type: "header", label: "Layout Internal" },
+                { type: "slider", label: "PathView Top Margin", property: "pathViewTopMargin", default: 10, min: 0, max: 50 },
+                { type: "slider", label: "PathView Bottom Margin", property: "pathViewBottomMargin", default: 5, min: 0, max: 50 }
             ]
         },
         {
@@ -164,7 +212,6 @@ Singleton {
             items: [
                 { type: "header", label: "Toggles" },
                 { type: "switch", label: "Show Music Art", property: "showMusicArt", default: true },
-                { type: "switch", label: "Blur Background", property: "blurBackground", default: true },
                 { type: "switch", label: "Show Weather", property: "showWeather", default: true }
             ]
         }

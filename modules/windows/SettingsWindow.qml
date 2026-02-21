@@ -214,6 +214,7 @@ PanelWindow {
                                     case "slider": return sliderComp;
                                     case "color":  return colorComp;
                                     case "switch": return switchComp;
+                                    case "text":   return textComp;
                                     default: return null;
                                 }
                             }
@@ -228,6 +229,32 @@ PanelWindow {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    Component {
+        id: textComp
+        RowLayout {
+            property var itemData
+            width: parent ? parent.width : 0; height: 44; spacing: 16
+            
+            Text { text: itemData ? itemData.label : ""; color: "white"; font.pixelSize: 15; opacity: 0.9; Layout.fillWidth: true }
+            
+            TextField {
+                Layout.preferredWidth: 180
+                color: "white"; font.pixelSize: 13; font.family: "Monospace"
+                
+                Binding on text {
+                    value: itemData ? FrameConfig[itemData.property] : ""
+                    restoreMode: Binding.RestoreBindingOrValue
+                }
+
+                background: Rectangle { 
+                    color: "white"; opacity: 0.05; radius: 8
+                    border.color: Qt.rgba(1, 1, 1, 0.1); border.width: 1
+                }
+                onAccepted: { FrameConfig[itemData.property] = text; FrameConfig.save(); focus = false }
             }
         }
     }

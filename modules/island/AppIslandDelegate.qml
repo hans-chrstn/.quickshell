@@ -117,8 +117,8 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: 14
-                        color: "black"
-                        opacity: isHovered ? 0.4 : 0.1
+                        color: FrameConfig.highlightColor
+                        opacity: isHovered ? FrameConfig.highlightOpacity * 4 : FrameConfig.highlightOpacity
                         scale: isHovered ? 0.95 : 0.85
                         y: isHovered ? 18 : 4
                         z: -1

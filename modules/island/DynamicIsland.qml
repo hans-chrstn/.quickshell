@@ -123,13 +123,20 @@ BaseIsland {
 
     ListModel {
         id: tabModel
-        Component.onCompleted: {
+        function updateModel() {
+            clear();
             append({ "type": "timeDate" })
             append({ "type": "music" })
             append({ "type": "notif" })
             try { if (UPower.displayDevice && UPower.displayDevice.type !== 0) append({ "type": "battery" }) } catch (e) {}
-            append({ "type": "weather" })
+            if (FrameConfig.showWeather) append({ "type": "weather" })
             append({ "type": "cc" })
         }
+        Component.onCompleted: updateModel()
+    }
+    
+    Connections {
+        target: FrameConfig
+        function onShowWeatherChanged() { tabModel.updateModel() }
     }
 }

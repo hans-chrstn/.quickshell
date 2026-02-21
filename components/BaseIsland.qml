@@ -77,7 +77,13 @@ Item {
             anchors.fill: islandRect; radius: root.radius; color: "black"
             opacity: root.expanded && Math.abs(root.width - root.expandedWidth) < 1.0 ? 0.4 : 0
             visible: opacity > 0; z: -1
-            layer.enabled: true; layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 }
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowOpacity: FrameConfig.shadowOpacity
+            shadowBlur: FrameConfig.shadowBlur / 30.0
+            shadowVerticalOffset: FrameConfig.shadowVerticalOffset
+        }
             Behavior on opacity { NumberAnimation { duration: 200 } }
         }
 

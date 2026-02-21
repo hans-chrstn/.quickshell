@@ -20,15 +20,23 @@ Item {
             Layout.preferredWidth: FrameConfig.musicArtSize
             Layout.preferredHeight: FrameConfig.musicArtSize
             Layout.alignment: Qt.AlignVCenter
+            visible: FrameConfig.showMusicArt
             
             Item {
                 id: vinylDisk
                 anchors.fill: parent
                 z: 1 
                 
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowOpacity: FrameConfig.musicArtShadowOpacity
+                    shadowBlur: 0.4
+                    shadowVerticalOffset: 2
+                }                
                 RotationAnimator on rotation {
                     from: 0; to: 360
-                    duration: 8000
+                    duration: FrameConfig.musicRotationDuration
                     loops: Animation.Infinite
                     running: root.player && root.player.playbackState === MprisPlaybackState.Playing
                 }
@@ -78,7 +86,7 @@ Item {
             Text { 
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackArtist) || "Nothing playing"
-                color: "white"; opacity: 0.5; font.pixelSize: 11
+                color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 11
                 elide: Text.ElideRight 
             }
             

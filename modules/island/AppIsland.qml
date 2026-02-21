@@ -100,11 +100,11 @@ BaseIsland {
 
                 path: Path {
                     startX: -view.width * 0.2; startY: view.height / 2
-                    PathAttribute { name: "itemOpacity"; value: 0.1 }
+                    PathAttribute { name: "itemOpacity"; value: FrameConfig.appIslandMinOpacity }
                     PathLine { x: view.width * 0.5; y: view.height / 2 }
                     PathAttribute { name: "itemOpacity"; value: 1.0 }
                     PathLine { x: view.width * 1.2; y: view.height / 2 }
-                    PathAttribute { name: "itemOpacity"; value: 0.1 }
+                    PathAttribute { name: "itemOpacity"; value: FrameConfig.appIslandMinOpacity }
                 }
 
                 ListModel { id: appListModel }
@@ -173,8 +173,9 @@ BaseIsland {
                 TextInput {
                     id: searchInput
                     Layout.fillWidth: true; verticalAlignment: TextInput.AlignVCenter
-                    color: "white"
-                    font.pixelSize: 14; font.weight: Font.Medium
+                    color: FrameConfig.appIslandSearchBarColor
+                    font.pixelSize: FrameConfig.appIslandSearchInputFontSize
+                    font.weight: Font.Medium
                     selectionColor: FrameConfig.accentColor
                     
                     Text {

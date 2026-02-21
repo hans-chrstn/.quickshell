@@ -22,13 +22,13 @@ Item {
             RowLayout {
                 spacing: 10
                 ControlTile { 
-                    width: 44; height: 44; radius: 22
+                    width: FrameConfig.controlCenterTileSize; height: FrameConfig.controlCenterTileSize; radius: FrameConfig.controlCenterTileRadius
                     icon: "󰖩"; active: !!SystemControl.wifiEnabled
                     enabled: SystemControl.hasWifi
                     onClicked: SystemControl.toggleWifi()
                 }
                 ControlTile { 
-                    width: 44; height: 44; radius: 22
+                    width: FrameConfig.controlCenterTileSize; height: FrameConfig.controlCenterTileSize; radius: FrameConfig.controlCenterTileRadius
                     icon: "󰂯"; active: true; activeColor: "#007AFF"
                     enabled: false
                 }
@@ -36,11 +36,11 @@ Item {
             RowLayout {
                 spacing: 10
                 ControlTile { 
-                    width: 44; height: 44; radius: 22
+                    width: FrameConfig.controlCenterTileSize; height: FrameConfig.controlCenterTileSize; radius: FrameConfig.controlCenterTileRadius
                     icon: "󰀝"; active: false; enabled: false 
                 }
                 ControlTile { 
-                    width: 44; height: 44; radius: 22
+                    width: FrameConfig.controlCenterTileSize; height: FrameConfig.controlCenterTileSize; radius: FrameConfig.controlCenterTileRadius
                     icon: "󰒓"
                     active: settingsWin.visible
                     onClicked: settingsWin.visible = !settingsWin.visible
@@ -62,7 +62,7 @@ Item {
                 spacing: 4
                 Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
                 ControlSlider { 
-                    width: 200; height: 32
+                    width: FrameConfig.controlCenterSliderWidth; height: FrameConfig.controlCenterSliderHeight
                     enabled: SystemControl.hasBrightness
                     value: SystemControl.brightness
                     icon: "󰃠"; barColor: "#FFCC00"
@@ -74,7 +74,7 @@ Item {
                 spacing: 4
                 Text { text: "VOLUME"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
                 ControlSlider { 
-                    width: 200; height: 32
+                    width: FrameConfig.controlCenterSliderWidth; height: FrameConfig.controlCenterSliderHeight
                     enabled: SystemControl.hasAudio
                     value: SystemControl.volume
                     icon: SystemControl.muted ? "󰝟" : "󰕾"; barColor: "white"

@@ -46,12 +46,12 @@ Item {
 
         ListView {
             id: notificationList; anchors.top: notifHeader.bottom; anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 15; anchors.topMargin: 10
-            clip: true; spacing: 8; model: root.server ? root.server.trackedNotifications : null
+            clip: true; spacing: FrameConfig.notifSpacing; model: root.server ? root.server.trackedNotifications : null
             
             delegate: Item {
                 id: notifDelegate
                 width: ListView.view.width
-                height: expanded ? (mainLayout.implicitHeight + 24) : 54
+                height: expanded ? (mainLayout.implicitHeight + 24) : FrameConfig.notifItemHeight
                 property bool expanded: false
                 
                 scale: thNotif.pressed ? 0.98 : (hhNotif.hovered ? 1.02 : 1.0)
@@ -61,7 +61,7 @@ Item {
 
                 Rectangle {
                     anchors.fill: parent; radius: 16; color: "white"
-                    opacity: notifDelegate.expanded ? 0.12 : (hhNotif.hovered ? 0.08 : 0.05)
+                    opacity: notifDelegate.expanded ? (FrameConfig.notifHoverOpacity * 1.5) : (hhNotif.hovered ? FrameConfig.notifHoverOpacity : FrameConfig.notifOpacity)
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
 

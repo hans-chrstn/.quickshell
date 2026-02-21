@@ -12,8 +12,8 @@ Item {
         repeat: true
         onTriggered: {
             let now = new Date();
-            let newTime = Qt.formatDateTime(now, "hh:mm");
-            let newDate = Qt.formatDateTime(now, "dddd, MMMM d").toUpperCase();
+            let newTime = Qt.formatDateTime(now, FrameConfig.timeFormat);
+            let newDate = Qt.formatDateTime(now, FrameConfig.dateFormat).toUpperCase();
             if (timeText.text !== newTime) timeText.text = newTime;
             if (dateText.text !== newDate) dateText.text = newDate;
         }
@@ -25,7 +25,7 @@ Item {
 
         Text {
             id: timeText
-            text: Qt.formatDateTime(new Date(), "hh:mm")
+            text: Qt.formatDateTime(new Date(), FrameConfig.timeFormat)
             color: "white"
             font.weight: Font.DemiBold
             font.pixelSize: 52
@@ -47,7 +47,7 @@ Item {
 
             Text {
                 id: dateText
-                text: Qt.formatDateTime(new Date(), "dddd, MMMM d").toUpperCase()
+                text: Qt.formatDateTime(new Date(), FrameConfig.dateFormat).toUpperCase()
                 color: "white"
                 opacity: 0.4
                 font.pixelSize: 9
