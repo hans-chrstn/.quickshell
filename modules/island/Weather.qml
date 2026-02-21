@@ -94,9 +94,11 @@ Item {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 try {
                     let data = JSON.parse(xhr.responseText);
-                    let addr = data.address;
-                    let name = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state || addr.country || "Unknown City";
-                    root.cityName = name;
+                    if (data && data.address) {
+                        let addr = data.address;
+                        let name = addr.city || addr.town || addr.village || addr.municipality || addr.county || addr.state || addr.country || "Unknown City";
+                        root.cityName = name;
+                    }
                 } catch (e) {
                     root.cityName = "Unknown City";
                 }

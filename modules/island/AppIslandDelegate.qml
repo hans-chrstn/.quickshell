@@ -8,7 +8,7 @@ Item {
     id: delegateRoot
 
     width: FrameConfig.appIslandDelegateWidth
-    height: FrameConfig.appIslandDelegateHeight
+    height: 60
 
     readonly property var app: model.app
 
@@ -69,7 +69,8 @@ Item {
 
     ColumnLayout {
         id: mainLayout
-        anchors.centerIn: parent
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
         spacing: 4
         
         transform: [
@@ -91,78 +92,70 @@ Item {
         ]
 
         Item {
-            Layout.preferredWidth: FrameConfig.appIslandIconSize
-            Layout.preferredHeight: FrameConfig.appIslandIconSize
+            Layout.preferredWidth: Math.max(iconItem.Layout.preferredWidth, nameText.implicitWidth)
+            Layout.preferredHeight: iconItem.Layout.preferredHeight + nameText.implicitHeight + mainLayout.spacing
             Layout.alignment: Qt.AlignHCenter
-            
-            Rectangle {
+
+            MouseArea {
+                id: mouseArea
                 anchors.fill: parent
-                radius: 14
-                color: "black"
-                opacity: isHovered ? 0.4 : 0.1
-                scale: isHovered ? 0.95 : 0.85
-                
-                y: isHovered ? 18 : 4
-                z: -1
-                
-                layer.enabled: isHovered
-                layer.effect: MultiEffect { blurEnabled: true; blur: 0.5 }
-                
-                Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-                Behavior on opacity { NumberAnimation { duration: 400 } }
-                Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: { if (app) app.execute(); }
             }
 
-            Image {
-                id: appIcon
+            ColumnLayout {
                 anchors.fill: parent
-                sourceSize: Qt.size(FrameConfig.appIslandIconSize * 2, FrameConfig.appIslandIconSize * 2) 
-                
-                layer.enabled: isHovered
-                layer.effect: MultiEffect {
-                    brightness: 0.15
-                    saturation: 0.1
-                }
-                
-                source: {
-                    if (!app || !app.icon) return Quickshell.iconPath("system-run");
+                spacing: 4
+
+                Item {
+                    id: iconItem
+                    Layout.preferredWidth: FrameConfig.appIslandIconSize
+                    Layout.preferredHeight: FrameConfig.appIslandIconSize
+                    Layout.alignment: Qt.AlignHCenter
                     
-                    if (app.icon.startsWith("/")) return "file://" + app.icon;
-                    
-                    return Quickshell.iconPath(app.icon);
-                }
-                fillMode: Image.PreserveAspectFit
-                
-                onStatusChanged: {
-                    if (status === Image.Error) {
-                        source = Quickshell.iconPath("system-run");
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 14
+                        color: "black"
+                        opacity: isHovered ? 0.4 : 0.1
+                        scale: isHovered ? 0.95 : 0.85
+                        y: isHovered ? 18 : 4
+                        z: -1
+                        layer.enabled: isHovered
+                        layer.effect: MultiEffect { blurEnabled: true; blur: 0.5 }
+                        Behavior on y { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
+                        Behavior on opacity { NumberAnimation { duration: 400 } }
+                        Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
+                    }
+
+                    Image {
+                        id: appIcon
+                        anchors.fill: parent
+                        sourceSize: Qt.size(FrameConfig.appIslandIconSize * 2, FrameConfig.appIslandIconSize * 2) 
+                        layer.enabled: isHovered
+                        layer.effect: MultiEffect { brightness: 0.15; saturation: 0.1 }
+                        source: {
+                            if (!app || !app.icon) return Quickshell.iconPath("system-run");
+                            if (app.icon.startsWith("/")) return "file://" + app.icon;
+                            return Quickshell.iconPath(app.icon);
+                        }
+                        fillMode: Image.PreserveAspectFit
+                        onStatusChanged: { if (status === Image.Error) source = Quickshell.iconPath("system-run"); }
                     }
                 }
-            }
-        }
 
-        Text {
-            text: app ? app.name : ""
-            color: "white"
-            font.pixelSize: 10
-            font.weight: Font.DemiBold
-            width: parent.width - 8
-            Layout.preferredWidth: parent.width - 8
-            horizontalAlignment: Text.AlignHCenter
-            elide: Text.ElideRight
-            wrapMode: Text.NoWrap
-            opacity: PathView.isCurrentItem ? 1.0 : 0.6
-        }
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: false
-        cursorShape: Qt.PointingHandCursor
-        onClicked: {
-            if (app) {
-                app.execute();
+                Text {
+                    id: nameText
+                    text: app ? app.name : ""
+                    color: "white"
+                    font.pixelSize: 10; font.weight: Font.DemiBold
+                    Layout.preferredWidth: parent.width - 8
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    wrapMode: Text.NoWrap
+                    opacity: PathView.isCurrentItem ? 1.0 : 0.6
+                }
             }
         }
     }

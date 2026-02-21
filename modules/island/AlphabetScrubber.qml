@@ -60,5 +60,6 @@ Rectangle {
         hoverEnabled: true
         preventStealing: true
         propagateComposedEvents: true
+        onPressed: (mouse) => mouse.accepted = false
     }
 }
