@@ -27,6 +27,12 @@ Item {
     property real cascadeRotation: 0
     property real cascadeOpacity: 0.0
 
+    property real animScale: isHovered ? 1.25 : 1.0
+    Behavior on animScale { NumberAnimation { duration: 450; easing.type: Easing.OutBack; easing.overshoot: 1.0 } }
+
+    property real animLift: isHovered ? -12 : 0
+    Behavior on animLift { NumberAnimation { duration: 450; easing.type: Easing.OutBack; easing.overshoot: 1.0 } }
+
     states: [
         State {
             name: "expanded"
@@ -80,12 +86,11 @@ Item {
             Scale {
                 origin.x: FrameConfig.appIslandDelegateWidth / 2
                 origin.y: FrameConfig.appIslandDelegateHeight / 2
-                xScale: mouseArea.pressed ? 0.9 : (isHovered ? 1.25 : 1.0)
+                xScale: (mouseArea.pressed ? 0.9 : 1.0) * animScale
                 yScale: xScale
-                Behavior on xScale { NumberAnimation { duration: 300; easing.type: Easing.OutBack; easing.overshoot: 1.7 } }
             },
             Translate {
-                y: (isHovered ? -10 : 0) + cascadeY
+                y: animLift + cascadeY
             },
             Rotation {
                 origin.x: FrameConfig.appIslandDelegateWidth / 2
@@ -235,7 +240,7 @@ Item {
 
             ColumnLayout {
                 anchors.fill: parent
-                spacing: 4
+spacing: 8
 
                 Item {
                     id: iconItem
