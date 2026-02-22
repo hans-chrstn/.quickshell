@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.config
 import qs.services
 
 Rectangle {
@@ -18,7 +17,7 @@ Rectangle {
         anchors.fill: parent; anchors.margins: 16; spacing: 16
         Text { 
             text: root.pageType === "wifi" ? "󰖩" : "󰂯"
-            color: model.active ? FrameConfig.accentColor : "white"
+            color: model.active ? ThemeService.accentColor : "white"
             opacity: 0.5; font.pixelSize: 20 
         }
         ColumnLayout {
@@ -26,11 +25,11 @@ Rectangle {
             Text { text: model.name || "Unknown"; color: "white"; font.weight: Font.Medium; font.pixelSize: 13 }
             Text { 
                 text: root.pageType === "wifi" ? (model.active ? "Connected" : "Signal: " + model.signal + "%") : (model.address || "Available")
-                color: model.active ? FrameConfig.accentColor : "white"; font.pixelSize: 10; opacity: 0.6 
+                color: model.active ? ThemeService.accentColor : "white"; font.pixelSize: 10; opacity: 0.6 
             }
         }
         Item { Layout.fillWidth: true }
-        Text { text: model.active ? "󰄬" : ""; color: FrameConfig.accentColor; font.pixelSize: 18 }
+        Text { text: model.active ? "󰄬" : ""; color: ThemeService.accentColor; font.pixelSize: 18 }
     }
     
     TapHandler { 

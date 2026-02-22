@@ -4,7 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import QtQuick.Layouts
 import Quickshell.Wayland
-import qs.config
+import qs.services
 import qs.components
 
 PanelWindow {
@@ -18,10 +18,10 @@ PanelWindow {
     property bool activeLeft: false
     property bool activeRight: false
 
-    property int sThick: FrameConfig.thickness
+    property int sThick: ThemeService.thickness
     property int iRadius: 10
     property int sRadius: sThick + iRadius
-    property color sColor: FrameConfig.color
+    property color sColor: ThemeService.color
     
     property bool hoverEnabled: false
     property int expandedWidth: 200

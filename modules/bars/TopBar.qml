@@ -8,9 +8,8 @@ import Quickshell.Services.Mpris
 import Quickshell.Services.UPower
 import Quickshell.Services.Notifications
 import qs.modules.island
-import qs.config
-import qs.modules.bars
 import qs.services
+import qs.modules.bars
 
 BaseBar {
     id: root
@@ -19,8 +18,8 @@ BaseBar {
     anchors.left: true
     anchors.right: true
     
-    implicitHeight: FrameConfig.dynamicIslandExpandedHeight
-    exclusiveZone: FrameConfig.thickness
+    implicitHeight: ThemeService.dynamicIslandExpandedHeight
+    exclusiveZone: ThemeService.thickness
     color: "transparent"
     focusable: dIsland.expanded
 
@@ -34,13 +33,13 @@ BaseBar {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: FrameConfig.thickness
-        color: FrameConfig.color
+        height: ThemeService.thickness
+        color: ThemeService.color
         z: 1
 
         WorkspaceIndicators {
             anchors.left: parent.left
-            anchors.leftMargin: FrameConfig.cornerRadius + 15
+            anchors.leftMargin: ThemeService.cornerRadius + 15
             anchors.verticalCenter: parent.verticalCenter
             screenName: root.screen.name
         }
@@ -52,15 +51,15 @@ BaseBar {
         y: 0
         z: 2
         
-        barHeight: FrameConfig.thickness
-        barColor: FrameConfig.color
+        barHeight: ThemeService.thickness
+        barColor: ThemeService.color
     }
 
     MouseArea {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        width: dIsland.expanded ? FrameConfig.dynamicIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
-        height: dIsland.expanded ? FrameConfig.dynamicIslandExpandedHeight : FrameConfig.thickness
+        width: dIsland.expanded ? ThemeService.dynamicIslandExpandedWidth : ThemeService.dynamicIslandCollapsedWidth
+        height: dIsland.expanded ? ThemeService.dynamicIslandExpandedHeight : ThemeService.thickness
         hoverEnabled: true
         onEntered: dIsland.expanded = true
         onExited: dIsland.expanded = false

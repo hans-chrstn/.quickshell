@@ -32,6 +32,7 @@
     devShells.${system}.default = pkgs.mkShell {
       nativeBuildInputs = [
         qml-niri.packages.${system}.quickshell
+        pkgs.libcava
         pkgs.quickshell
         pkgs.upower
         pkgs.libnotify

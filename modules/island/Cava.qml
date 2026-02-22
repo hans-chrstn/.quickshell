@@ -1,16 +1,15 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
-import qs.config
 import qs.services
 
 Item {
     id: root
     anchors.fill: parent
-    opacity: FrameConfig.cavaOpacity
+    opacity: ThemeService.cavaOpacity
     
-    property int barCount: FrameConfig.cavaBarCount
-    property color barColor: FrameConfig.accentColor
+    property int barCount: ThemeService.cavaBarCount
+    property color barColor: ThemeService.accentColor
     
     property var currentHeights: []
     property var targetHeights: []
@@ -31,14 +30,11 @@ Item {
 
     Timer {
         id: targetTimer
-        interval: FrameConfig.cavaUpdateInterval
+        interval: ThemeService.cavaUpdateInterval
         running: root.visible && root.isPlaying
         repeat: true
         onTriggered: {
-            let lines = text.trim().split("\n");
-            if (lines.length > 0) {
-                var volume = AudioService.volume;
-                var values = lines[0].split(";");
+            var volume = AudioService.volume
             var volumeScale = volume > 0 ? Math.pow(volume, 0.4) : 0
             
             for (var i = 0; i < barCount; i++) {
@@ -64,7 +60,7 @@ Item {
         onTriggered: {
             if (currentHeights.length < barCount) return;
             for (var i = 0; i < barCount; i++) {
-                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * FrameConfig.cavaSmoothing;
+                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * ThemeService.cavaSmoothing;
                 var item = repeater.itemAt(i);
                 if (item) item.height = Math.max(2, currentHeights[i]);
             }
@@ -73,7 +69,7 @@ Item {
 
     Row {
         anchors.fill: parent
-        spacing: FrameConfig.cavaSpacing
+        spacing: ThemeService.cavaSpacing
         
         Repeater {
             id: repeater

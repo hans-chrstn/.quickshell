@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.config
+import qs.services
 import qs.components
 import qs.modules.island
 
@@ -66,11 +66,11 @@ Item {
 
         path: Path {
             startX: -view.width * 0.2; startY: view.height / 2
-            PathAttribute { name: "itemOpacity"; value: FrameConfig.appIslandMinOpacity }
+            PathAttribute { name: "itemOpacity"; value: ThemeService.appIslandMinOpacity }
             PathLine { x: view.width * 0.5; y: view.height / 2 }
             PathAttribute { name: "itemOpacity"; value: 1.0 }
             PathLine { x: view.width * 1.2; y: view.height / 2 }
-            PathAttribute { name: "itemOpacity"; value: FrameConfig.appIslandMinOpacity }
+            PathAttribute { name: "itemOpacity"; value: ThemeService.appIslandMinOpacity }
         }
 
         ListModel { id: appListModel }

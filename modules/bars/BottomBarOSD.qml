@@ -1,16 +1,15 @@
 import QtQuick
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 ControlPill {
     id: root
     
-    width: FrameConfig.osdPillWidth
-    height: FrameConfig.osdPillHeight
+    width: ThemeService.osdPillWidth
+    height: ThemeService.osdPillHeight
     
     property string type: "volume"
-    barColor: type === "brightness" ? "#FFCC00" : FrameConfig.accentColor
+    barColor: type === "brightness" ? "#FFCC00" : ThemeService.accentColor
     
     readonly property bool hovered: hOsd.hovered
     onHoveredChanged: if (hovered) hideTimer.stop()
@@ -31,7 +30,7 @@ ControlPill {
         hideTimer.restart() 
     }
 
-    Timer { id: hideTimer; interval: FrameConfig.osdHideDelay; onTriggered: if (!root.hovered) root.active = false }
+    Timer { id: hideTimer; interval: ThemeService.osdHideDelay; onTriggered: if (!root.hovered) root.active = false }
 
     function show(newType, newIcon, newVal) {
         root.type = newType

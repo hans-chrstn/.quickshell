@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import qs.config
+import qs.services
 import qs.components
 
 ScreenCorner {
@@ -10,14 +10,14 @@ ScreenCorner {
     
     f1Rot: 90
     f1X: expandedWidth - 1
-    f1Y: expandedHeight - sRadius - FrameConfig.dynamicIslandCornerRadius
+    f1Y: expandedHeight - sRadius - ThemeService.dynamicIslandCornerRadius
     
     f2Rot: 180
     f2X: 16
     f2Y: -20 + 1
     
     customTL: 0
-    customTR: FrameConfig.dynamicIslandCornerRadius
+    customTR: ThemeService.dynamicIslandCornerRadius
     customBL: 0
     customBR: 0
 }

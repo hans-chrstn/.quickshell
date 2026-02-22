@@ -6,6 +6,34 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    readonly property color primaryContent: "#000000"
+    readonly property color secondaryContent: root.secondaryTextColor
+    
+    readonly property color backgroundMain: root.color
+    readonly property color backgroundContent: "#FFFFFF"
+    
+    readonly property color surfaceMain: Qt.rgba(1, 1, 1, 0.05)
+    readonly property color surfaceStrong: Qt.rgba(1, 1, 1, 0.1)
+    readonly property color surfaceSubtle: Qt.rgba(1, 1, 1, 0.02)
+    readonly property color surfaceContent: "#FFFFFF"
+    
+    readonly property color surfaceVariant: Qt.rgba(1, 1, 1, 0.08)
+    readonly property color surfaceVariantContent: "#AAAAAA"
+    readonly property color surfaceVariantStrong: Qt.rgba(1, 1, 1, 0.15)
+    
+    readonly property color outlineMain: Qt.rgba(1, 1, 1, 0.1)
+    readonly property color outlineStrong: Qt.rgba(1, 1, 1, 0.2)
+    readonly property color outlineVariant: Qt.rgba(1, 1, 1, 0.05)
+    
+    readonly property color dangerMain: root.dangerColor
+    readonly property color dangerContent: "#FFFFFF"
+    readonly property color dangerSurface: {
+        let c = Qt.color(root.dangerColor);
+        return Qt.rgba(c.r, c.g, c.b, 0.3);
+    }
+    
+    readonly property color shadowMain: "#000000"
+
     property int thickness: 16
     property int cornerRadius: 12
     property color color: "#0D0D0F"
@@ -222,20 +250,14 @@ Singleton {
         path: root.cachePath
         blockLoading: true
         printErrors: true
-        
-        onLoaded: {
-            root.load()
-        }
-        
-        onInternalTextChanged: {
-             root.load()
-        }
+        onLoaded: root.load()
+        onInternalTextChanged: root.load()
     }
 
     function save(): void {
         let data = {}
-        for (let i = 0; i < settingsStructure.length; i++) {
-            let items = settingsStructure[i].items
+        for (let i = 0; i < root.settingsStructure.length; i++) {
+            let items = root.settingsStructure[i].items
             for (let j = 0; j < items.length; j++) {
                 if (items[j].property) {
                     data[items[j].property] = root[items[j].property]
@@ -246,27 +268,21 @@ Singleton {
     }
 
     function load(): void {
-        if (!root.ready) {
-            return
-        }
-        
+        if (!root.ready) return
         let content = cacheFile.text()
         if (content) {
             try {
                 let data = JSON.parse(content)
                 for (let key in data) {
-                    if (root[key] !== undefined) {
-                        root[key] = data[key]
-                    }
+                    if (root[key] !== undefined) root[key] = data[key]
                 }
-            } catch (e) {
-            }
+            } catch (e) {}
         }
     }
 
     function reset(): void {
-        for (let i = 0; i < settingsStructure.length; i++) {
-            let items = settingsStructure[i].items
+        for (let i = 0; i < root.settingsStructure.length; i++) {
+            let items = root.settingsStructure[i].items
             for (let j = 0; j < items.length; j++) {
                 if (items[j].property && items[j].default !== undefined) {
                     root[items[j].property] = items[j].default

@@ -4,7 +4,6 @@ import QtQuick.Effects
 import QtMultimedia
 import Quickshell
 import Quickshell.Widgets
-import qs.config
 import qs.components
 import qs.services
 
@@ -17,6 +16,12 @@ Item {
     property int count: 0
     property bool removeHistory: false 
     property bool dismissing: false
+    
+    SoundEffect {
+        id: dismissSound
+        source: Quickshell.shellPath("assets/sfx/button1.wav")
+        volume: 0.4
+    }
     
     signal requestExpand()
     
@@ -105,8 +110,8 @@ Item {
         ClippingRectangle {
             anchors.fill: parent
             radius: 20
-            color: "#121214"
-            border.color: Qt.rgba(1, 1, 1, 0.1)
+            color: ThemeService.backgroundMain
+            border.color: ThemeService.outlineMain
             border.width: 1
             
             layer.enabled: true
@@ -126,13 +131,13 @@ Item {
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
                     radius: 12
-                    color: FrameConfig.accentColor
+                    color: ThemeService.accentColor
                     opacity: 0.1
                     
                     Text {
                         anchors.centerIn: parent
                         text: "󰂚"
-                        color: FrameConfig.accentColor
+                        color: ThemeService.accentColor
                         font.pixelSize: 20
                     }
                 }
@@ -143,7 +148,7 @@ Item {
                     
                     Text {
                         text: root.notification ? root.notification.summary : "Notification"
-                        color: "white"
+                        color: ThemeService.backgroundContent
                         font.weight: Font.Black
                         font.pixelSize: 13
                         elide: Text.ElideRight
@@ -152,7 +157,7 @@ Item {
                     
                     Text {
                         text: root.notification ? root.notification.body : ""
-                        color: "white"
+                        color: ThemeService.backgroundContent
                         opacity: 0.6
                         font.pixelSize: 11
                         elide: Text.ElideRight
@@ -168,7 +173,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: "󰅖"
-                        color: "white"
+                        color: ThemeService.backgroundContent
                         opacity: hh.hovered ? 0.8 : 0.3
                         font.pixelSize: 16
                         Behavior on opacity { NumberAnimation { duration: 200 } }

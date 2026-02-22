@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import qs.services
 
 Item {
     id: root
@@ -8,7 +9,7 @@ Item {
     property bool isLeft: false
     property bool isBottom: false
     property real cornerRadius: 0
-    property color cornerColor: "#222222"
+    property color cornerColor: ThemeService.backgroundMain
     property real rotation: 0
 
     property string cornerPath: {

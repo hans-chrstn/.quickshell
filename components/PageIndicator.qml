@@ -1,5 +1,5 @@
 import QtQuick
-import qs.config
+import qs.services
 
 Row {
     id: root
@@ -11,7 +11,7 @@ Row {
     property int activeDotWidth: 12
 
     anchors.horizontalCenter: parent.horizontalCenter
-    spacing: FrameConfig.indicatorRowSpacing
+    spacing: ThemeService.indicatorRowSpacing
 
     Repeater { 
         model: root.count

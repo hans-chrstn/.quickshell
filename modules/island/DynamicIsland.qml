@@ -3,18 +3,17 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Services.Notifications
-import qs.config
+import qs.services
 import qs.components
 import qs.modules.island
-import qs.services
 
 BaseIsland {
     id: root
     
     readonly property bool isCC: tabView.currentIndex === 5
-    expandedWidth: isCC ? 480 : FrameConfig.dynamicIslandExpandedWidth
-    expandedHeight: isCC ? 200 : FrameConfig.dynamicIslandExpandedHeight
-    collapsedWidth: FrameConfig.dynamicIslandCollapsedWidth
+    expandedWidth: isCC ? 480 : ThemeService.dynamicIslandExpandedWidth
+    expandedHeight: isCC ? 200 : ThemeService.dynamicIslandExpandedHeight
+    collapsedWidth: ThemeService.dynamicIslandCollapsedWidth
     isTop: true
     isBottom: false
     isCorner: false
@@ -59,7 +58,7 @@ BaseIsland {
         PageIndicator {
             id: pageIndicator
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin
+            anchors.bottomMargin: ThemeService.indicatorRowBottomMargin
             count: tabView.count
             currentIndex: tabView.currentIndex
             

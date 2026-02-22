@@ -6,9 +6,8 @@ import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 import qs.modules.windows
 
 PanelWindow {
@@ -25,17 +24,17 @@ PanelWindow {
     focusable: visible
 
     Rectangle {
-        anchors.fill: parent; color: "black"
+        anchors.fill: parent; color: ThemeService.shadowMain
         opacity: root.visible ? 0.6 : 0
         Behavior on opacity { NumberAnimation { duration: 400 } }
-        MouseArea { anchors.fill: parent; onClicked: root.visible = false }
+        MouseArea { anchors.fill: parent; onClicked: ViewService.closeWindow("wallpaper") }
     }
 
     ClippingRectangle {
         id: windowFrame
         width: 1050; height: 680
         anchors.centerIn: parent; radius: 36
-        color: "#080809"; border.color: Qt.rgba(1, 1, 1, 0.1); border.width: 1
+        color: ThemeService.backgroundMain; border.color: ThemeService.outlineMain; border.width: 1
         
         opacity: root.visible ? 1.0 : 0
         scale: root.visible ? 1.0 : 0.95
@@ -47,7 +46,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent; radius: 36; color: "transparent"
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(1, 1, 1, 0.02) }
+                GradientStop { position: 0.0; color: Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.02) }
                 GradientStop { position: 0.5; color: "transparent" }
             }
         }
@@ -71,11 +70,11 @@ PanelWindow {
             }
 
             Rectangle { 
-                width: 1; Layout.fillHeight: true; color: "white"; opacity: 0.05 
+                width: 1; Layout.fillHeight: true; color: ThemeService.backgroundContent; opacity: 0.05 
             }
 
             Rectangle {
-                Layout.preferredWidth: 420; Layout.fillHeight: true; color: Qt.rgba(0, 0, 0, 0.15)
+                Layout.preferredWidth: 420; Layout.fillHeight: true; color: ThemeService.surfaceSubtle
                 
                 ColumnLayout {
                     anchors.fill: parent; anchors.margins: 24; spacing: 20

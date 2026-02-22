@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
+import qs.services
 
 Rectangle {
     id: root
@@ -15,7 +15,7 @@ Rectangle {
     Row {
         id: letterRow
         anchors.centerIn: parent
-        spacing: FrameConfig.appIslandScrubberSpacing
+        spacing: ThemeService.appIslandScrubberSpacing
 
         Repeater {
             model: root.alphabetModel
@@ -23,7 +23,7 @@ Rectangle {
             delegate: Text {
                 id: letterText
                 text: modelData
-                font.pixelSize: FrameConfig.appIslandScrubberFontSize
+                font.pixelSize: ThemeService.appIslandScrubberFontSize
                 font.weight: root.highlightedLetter === modelData ? Font.Black : Font.Medium
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter

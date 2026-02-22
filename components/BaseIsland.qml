@@ -2,21 +2,20 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 import QtMultimedia
 
 Item {
     id: root
 
     property bool expanded: false
-    property int barHeight: FrameConfig.thickness
-    property color barColor: FrameConfig.color
+    property int barHeight: ThemeService.thickness
+    property color barColor: ThemeService.color
     property int expandedWidth: 400
     property int expandedHeight: 100
     property int collapsedWidth: 160
-    property real radius: FrameConfig.dynamicIslandCornerRadius
+    property real radius: ThemeService.dynamicIslandCornerRadius
     
     property real customTopLeftRadius: (root.isTop && !root.isCorner) ? 0 : root.radius
     property real customTopRightRadius: (root.isTop && !root.isCorner) ? 0 : root.radius
@@ -81,7 +80,7 @@ Item {
     transitions: [
         Transition {
             ParallelAnimation {
-                NumberAnimation { targets: [root]; properties: "width,height"; duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing }
+                NumberAnimation { targets: [root]; properties: "width,height"; duration: ThemeService.animDuration; easing.type: ThemeService.animEasing }
                 NumberAnimation { targets: [f1, f2, islandContentArea]; property: "opacity"; duration: 150 }
             }
         }
@@ -98,9 +97,9 @@ Item {
         layer.enabled: true
         layer.effect: MultiEffect {
             shadowEnabled: true
-            shadowOpacity: FrameConfig.shadowOpacity
-            shadowBlur: FrameConfig.shadowBlur / 30.0
-            shadowVerticalOffset: FrameConfig.shadowVerticalOffset
+            shadowOpacity: ThemeService.shadowOpacity
+            shadowBlur: ThemeService.shadowBlur / 30.0
+            shadowVerticalOffset: ThemeService.shadowVerticalOffset
         }
             Behavior on opacity { NumberAnimation { duration: 200 } }
         }

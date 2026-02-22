@@ -1,9 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Widgets
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 ColumnLayout {
     id: root
@@ -20,7 +19,7 @@ ColumnLayout {
             spacing: 4
             Text { 
                 text: rootHeader.showSettings ? "SETTINGS" : "EXPLORER"
-                color: "white"
+                color: ThemeService.backgroundContent
                 font.pixelSize: 10
                 font.weight: Font.Black
                 font.letterSpacing: 3
@@ -30,9 +29,9 @@ ColumnLayout {
                 Layout.preferredHeight: 24
                 Layout.preferredWidth: Math.min(pathText.implicitWidth + 24, 250)
                 radius: 12
-                color: "white"
+                color: ThemeService.backgroundContent
                 opacity: 0.12
-                border.color: Qt.rgba(1, 1, 1, 0.15)
+                border.color: ThemeService.outlineMain
                 border.width: 1
                 visible: !rootHeader.showSettings
                 
@@ -40,7 +39,7 @@ ColumnLayout {
                     id: pathText
                     anchors.centerIn: parent
                     text: FileBrowserService.currentPath
-                    color: "white"
+                    color: ThemeService.backgroundContent
                     font.pixelSize: 9
                     font.family: "Monospace"
                     opacity: 1.0
@@ -56,11 +55,11 @@ ColumnLayout {
             spacing: 10
             Rectangle {
                 width: 36; height: 36; radius: 10
-                color: rootHeader.showSettings ? FrameConfig.accentColor : "white"
+                color: rootHeader.showSettings ? ThemeService.accentColor : ThemeService.backgroundContent
                 opacity: rootHeader.showSettings ? 1.0 : 0.1
                 Text { 
                     anchors.centerIn: parent; text: "󰒓"
-                    color: rootHeader.showSettings ? "black" : "white"
+                    color: rootHeader.showSettings ? ThemeService.primaryContent : ThemeService.backgroundContent
                     font.pixelSize: 18 
                 }
                 TapHandler { onTapped: rootHeader.showSettings = !rootHeader.showSettings }
@@ -71,14 +70,14 @@ ColumnLayout {
             
             Rectangle {
                 width: 36; height: 36; radius: 10
-                color: FileBrowserService.showHidden ? FrameConfig.accentColor : "white"
+                color: FileBrowserService.showHidden ? ThemeService.accentColor : ThemeService.backgroundContent
                 opacity: FileBrowserService.showHidden ? 1.0 : 0.1
                 visible: !rootHeader.showSettings
                 
                 Text { 
                     id: hHiddenText
                     anchors.centerIn: parent; text: "󰈈"
-                    color: FileBrowserService.showHidden ? "black" : "white"
+                    color: FileBrowserService.showHidden ? ThemeService.primaryContent : ThemeService.backgroundContent
                     font.pixelSize: 18 
                 }
                 TapHandler { onTapped: FileBrowserService.showHidden = !FileBrowserService.showHidden }
@@ -117,8 +116,8 @@ ColumnLayout {
                     Rectangle { 
                         anchors.fill: parent
                         radius: 20
-                        color: "#0A0A0B"
-                        border.color: (WallpaperService.previewWallpaper === model.path) ? FrameConfig.accentColor : Qt.rgba(1, 1, 1, 0.05)
+                        color: ThemeService.backgroundMain
+                        border.color: (WallpaperService.previewWallpaper === model.path) ? ThemeService.accentColor : ThemeService.outlineVariant
                         border.width: (WallpaperService.previewWallpaper === model.path) ? 2 : 1
                         clip: true
                         
@@ -126,7 +125,7 @@ ColumnLayout {
                             anchors.fill: parent
                             radius: 20
                             color: "transparent"
-                            border.color: Qt.rgba(1, 1, 1, 0.05)
+                            border.color: ThemeService.outlineVariant
                             border.width: 1
                             anchors.margins: 1 
                         }
@@ -142,7 +141,7 @@ ColumnLayout {
                                 Text { 
                                     anchors.centerIn: parent
                                     text: model.path === ".." ? "󰁝" : (model.isDir ? "󰉋" : "󰸉")
-                                    color: model.isDir ? FrameConfig.accentColor : "white"
+                                    color: model.isDir ? ThemeService.accentColor : ThemeService.backgroundContent
                                     font.pixelSize: model.isDir ? 42 : 36
                                     opacity: (WallpaperService.previewWallpaper === model.path || hh.hovered) ? 1.0 : 0.3
                                     Behavior on opacity { NumberAnimation { duration: 200 } } 
@@ -151,7 +150,7 @@ ColumnLayout {
                             
                             Text { 
                                 text: model.name
-                                color: "white"
+                                color: ThemeService.backgroundContent
                                 font.pixelSize: 10
                                 font.weight: Font.Medium
                                 opacity: (WallpaperService.previewWallpaper === model.path || hh.hovered) ? 0.9 : 0.4

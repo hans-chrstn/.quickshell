@@ -1,9 +1,8 @@
 import QtQuick
 import QtMultimedia
 import Quickshell
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 ListView {
     id: root
@@ -37,13 +36,16 @@ ListView {
             
             Rectangle {
                 width: 80; height: 24; radius: 12
-                color: "#222"; border.color: "#444"; border.width: 1
+                color: ThemeService.surfaceStrong
+                border.color: ThemeService.outlineMain
+                border.width: 1
                 opacity: 0.8
                 
                 Text {
                     anchors.centerIn: parent
                     text: "COLLAPSE"
-                    color: "white"; font.pixelSize: 10; font.weight: Font.Bold
+                    color: ThemeService.backgroundContent
+                    font.pixelSize: 10; font.weight: Font.Bold
                 }
                 
                 TapHandler { onTapped: root.stackExpanded = false }
@@ -52,13 +54,16 @@ ListView {
 
             Rectangle {
                 width: 80; height: 24; radius: 12
-                color: "#222"; border.color: FrameConfig.accentColor; border.width: 1
+                color: ThemeService.surfaceStrong
+                border.color: ThemeService.accentColor
+                border.width: 1
                 opacity: 0.8
                 
                 Text {
                     anchors.centerIn: parent
                     text: "CLEAR ALL"
-                    color: FrameConfig.accentColor; font.pixelSize: 10; font.weight: Font.Bold
+                    color: ThemeService.accentColor
+                    font.pixelSize: 10; font.weight: Font.Bold
                 }
                 
                 TapHandler { 
@@ -68,7 +73,7 @@ ListView {
                         SfxService.playComplete()
                     }
                 }
-                HoverHandler { cursorShape: Qt.PointingHandCursor }
+                HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }
             }
         }
     }

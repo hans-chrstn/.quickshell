@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
 import qs.services
 
 RowLayout {
@@ -13,16 +12,16 @@ RowLayout {
         spacing: -4
         Text {
             text: isNaN(WeatherService.weatherTemp) ? "--°" : Math.round(WeatherService.weatherTemp) + "°"
-            color: "white"; font.pixelSize: 42; font.weight: Font.DemiBold; font.letterSpacing: -1
+            color: ThemeService.backgroundContent; font.pixelSize: 42; font.weight: Font.DemiBold; font.letterSpacing: -1
         }
         Text {
             text: (WeatherService.cityName || WeatherService.weatherLocation || "NO LOCATION").toUpperCase()
-            color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1.5
+            color: ThemeService.secondaryContent; opacity: 0.8; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1.5
             TapHandler { onTapped: root.requestInput() }
         }
     }
 
-    Rectangle { width: 1; height: 30; color: "white"; opacity: 0.1 }
+    Rectangle { width: 1; height: 30; color: ThemeService.backgroundContent; opacity: 0.1 }
 
     RowLayout {
         spacing: 8
@@ -34,11 +33,11 @@ RowLayout {
             spacing: 1
             Text {
                 text: (WeatherService.weatherCondition || "LOADING").toUpperCase()
-                color: "white"; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 0.5
+                color: ThemeService.backgroundContent; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 0.5
             }
             Text {
                 text: WeatherService.weatherDescription || "fetching..."
-                color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 9; font.italic: true
+                color: ThemeService.secondaryContent; opacity: 0.8; font.pixelSize: 9; font.italic: true
             }
         }
     }

@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.config
+import qs.services
 
 PanelWindow {
     id: baseBarRoot
@@ -10,6 +10,6 @@ PanelWindow {
     property var modelData
     screen: modelData
 
-    property int barThickness: FrameConfig.thickness
-    property color barColor: FrameConfig.color
+    property int barThickness: ThemeService.thickness
+    property color barColor: ThemeService.color
 }

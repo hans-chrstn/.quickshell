@@ -2,9 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 import qs.modules.windows
 import qs.modules.island
 
@@ -25,7 +24,6 @@ Item {
         spacing: 24
 
         ControlTiles {
-            controlPanelWin: controlPanelWin
         }
 
         Rectangle {
@@ -42,7 +40,7 @@ Item {
             
             Text {
                 text: "OPEN SETTINGS 󰒓"
-                color: FrameConfig.accentColor; font.pixelSize: 9; font.weight: Font.Black; font.letterSpacing: 1
+                color: ThemeService.accentColor; font.pixelSize: 9; font.weight: Font.Black; font.letterSpacing: 1
                 Layout.alignment: Qt.AlignRight
                 Layout.topMargin: 4
                 Layout.bottomMargin: 12
@@ -50,16 +48,12 @@ Item {
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 TapHandler { 
                     onTapped: { 
-                        settingsWin.visible = true
+                        ViewService.openSettings()
                         clickSound.play() 
                     } 
                 }
                 HoverHandler { id: hhSet; cursorShape: Qt.PointingHandCursor }
             }
         }
-    }
-
-    SettingsWindow {
-        id: settingsWin
     }
 }

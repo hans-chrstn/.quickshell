@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import qs.config
+import qs.services
 import qs.components
 
 ScreenCorner {
@@ -24,7 +24,7 @@ ScreenCorner {
 
     customTL: 0
     customTR: 0
-    customBL: FrameConfig.dynamicIslandCornerRadius
+    customBL: ThemeService.dynamicIslandCornerRadius
     customBR: 0
 
     Process {
@@ -64,7 +64,7 @@ ScreenCorner {
                 MouseArea {
                     id: wallMouse; anchors.fill: parent; hoverEnabled: true
                     onClicked: {
-                        wallpaperWin.visible = !wallpaperWin.visible
+                        ViewService.toggleWallpaper()
                     }
                 }
             }
@@ -108,7 +108,7 @@ ScreenCorner {
                 id: recBtn
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 44; height: 44; radius: 22
-                color: recorder.running ? FrameConfig.dangerColor : "white"
+                color: recorder.running ? ThemeService.dangerColor : "white"
                 opacity: recorder.running ? 1.0 : (recMouse.containsMouse ? 0.3 : 0.1)
                 scale: recMouse.containsMouse ? 1.05 : 1.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -130,7 +130,7 @@ ScreenCorner {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: recorder.running ? "STOP" : "REC"
-                color: recorder.running ? FrameConfig.dangerColor : "white"
+                color: recorder.running ? ThemeService.dangerColor : "white"
                 opacity: (recMouse.containsMouse || recorder.running) ? 1.0 : 0.6
                 font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }

@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.config
+import qs.services
 import qs.modules.bars
 
 BaseBar {
@@ -14,6 +14,6 @@ BaseBar {
         bottom: 0
     }
     
-    implicitWidth: FrameConfig.thickness
-    color: FrameConfig.color
+    implicitWidth: ThemeService.thickness
+    color: ThemeService.color
 }

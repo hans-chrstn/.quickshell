@@ -25,7 +25,7 @@ Item {
                 radius: 32
                 color: "transparent"
                 border.width: 4
-                border.color: "white"
+                border.color: ThemeService.onBackground
                 opacity: 0.1
             }
             
@@ -39,7 +39,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: parent.height * (root.device ? root.device.percentage : 0)
-                    color: (root.device && root.device.state === 1) ? "#4caf50" : "white"
+                    color: (root.device && root.device.state === 1) ? ThemeService.primary : ThemeService.onBackground
                     opacity: chargingAnim.running ? 0.4 : 0.2
                     
                     SequentialAnimation on opacity {
@@ -57,7 +57,7 @@ Item {
             Text { 
                 anchors.centerIn: parent
                 text: root.device ? Math.round(root.device.percentage * 100) + "%" : "--"
-                color: "white"
+                color: ThemeService.onBackground
                 font.weight: Font.Bold
                 font.pixelSize: 14
             }
@@ -70,7 +70,7 @@ Item {
             
             Text { 
                 text: "SYSTEM POWER"
-                color: "white"
+                color: ThemeService.onBackground
                 opacity: 0.5
                 font.weight: Font.Bold
                 font.pixelSize: 9
@@ -80,7 +80,7 @@ Item {
             }
             Text { 
                 text: root.device ? (root.device.state === 1 ? "CHARGING" : root.device.state === 2 ? "DISCHARGING" : "UNKNOWN") : "UNKNOWN"
-                color: "white"
+                color: ThemeService.onBackground
                 font.weight: Font.DemiBold
                 font.pixelSize: 14
                 Layout.fillWidth: true
@@ -90,7 +90,7 @@ Item {
             Text { 
                 text: root.device ? (Math.round(root.device.timeToEmpty / 60) + " MIN REMAINING") : ""
                 visible: root.device && root.device.state === 2
-                color: "white"
+                color: ThemeService.onBackground
                 opacity: 0.4
                 font.pixelSize: 9
                 font.weight: Font.Medium

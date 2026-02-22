@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
-import qs.config
 import qs.components
 import qs.services
 
@@ -18,7 +17,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         Text { 
             text: "DESKTOP PREVIEW"
-            color: "white"
+            color: ThemeService.backgroundContent
             font.pixelSize: 10
             font.weight: Font.Black
             font.letterSpacing: 4
@@ -29,7 +28,7 @@ ColumnLayout {
             width: 40
             height: 2
             radius: 1
-            color: FrameConfig.accentColor
+            color: ThemeService.accentColor
             opacity: 0.4
             Layout.alignment: Qt.AlignHCenter 
         }
@@ -44,7 +43,7 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: -10
             radius: 30
-            color: FrameConfig.accentColor
+            color: ThemeService.accentColor
             opacity: 0.02
             layer.enabled: true
             layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 } 
@@ -54,8 +53,8 @@ ColumnLayout {
             id: monitorFrame
             anchors.fill: parent
             radius: 24
-            color: "#000"
-            border.color: Qt.rgba(1, 1, 1, 0.15)
+            color: ThemeService.backgroundMain
+            border.color: ThemeService.outlineMain
             border.width: 1
             
             ClippingRectangle {

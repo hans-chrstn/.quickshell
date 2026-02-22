@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import qs.config
+import qs.services
 
 Item {
     id: root
@@ -12,8 +12,8 @@ Item {
         repeat: true
         onTriggered: {
             let now = new Date();
-            let newTime = Qt.formatDateTime(now, FrameConfig.timeFormat);
-            let newDate = Qt.formatDateTime(now, FrameConfig.dateFormat).toUpperCase();
+            let newTime = Qt.formatDateTime(now, ThemeService.timeFormat);
+            let newDate = Qt.formatDateTime(now, ThemeService.dateFormat).toUpperCase();
             if (timeText.text !== newTime) timeText.text = newTime;
             if (dateText.text !== newDate) dateText.text = newDate;
         }
@@ -25,7 +25,7 @@ Item {
 
         Text {
             id: timeText
-            text: Qt.formatDateTime(new Date(), FrameConfig.timeFormat)
+            text: Qt.formatDateTime(new Date(), ThemeService.timeFormat)
             color: "white"
             font.weight: Font.DemiBold
             font.pixelSize: 52
@@ -41,13 +41,13 @@ Item {
 
             Rectangle {
                 width: 4; height: 4; radius: 2
-                color: FrameConfig.accentColor
+                color: ThemeService.accentColor
                 opacity: 0.8
             }
 
             Text {
                 id: dateText
-                text: Qt.formatDateTime(new Date(), FrameConfig.dateFormat).toUpperCase()
+                text: Qt.formatDateTime(new Date(), ThemeService.dateFormat).toUpperCase()
                 color: "white"
                 opacity: 0.4
                 font.pixelSize: 9
@@ -58,7 +58,7 @@ Item {
 
             Rectangle {
                 width: 4; height: 4; radius: 2
-                color: FrameConfig.accentColor
+                color: ThemeService.accentColor
                 opacity: 0.8
             }
         }

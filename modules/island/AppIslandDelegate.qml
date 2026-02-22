@@ -3,13 +3,12 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
-import qs.config
 import qs.services
 
 Item {
     id: delegateRoot
 
-    width: FrameConfig.appIslandDelegateWidth
+    width: ThemeService.appIslandDelegateWidth
     height: 60
 
     readonly property var app: model.app
@@ -84,8 +83,8 @@ Item {
         
         transform: [
             Scale {
-                origin.x: FrameConfig.appIslandDelegateWidth / 2
-                origin.y: FrameConfig.appIslandDelegateHeight / 2
+                origin.x: ThemeService.appIslandDelegateWidth / 2
+                origin.y: ThemeService.appIslandDelegateHeight / 2
                 xScale: (mouseArea.pressed ? 0.9 : 1.0) * animScale
                 yScale: xScale
             },
@@ -93,8 +92,8 @@ Item {
                 y: animLift + cascadeY
             },
             Rotation {
-                origin.x: FrameConfig.appIslandDelegateWidth / 2
-                origin.y: FrameConfig.appIslandDelegateHeight / 2
+                origin.x: ThemeService.appIslandDelegateWidth / 2
+                origin.y: ThemeService.appIslandDelegateHeight / 2
                 angle: cascadeRotation
             }
         ]
@@ -152,10 +151,11 @@ Item {
                 }
                 
                 background: Rectangle {
-                    color: Qt.rgba(0.12, 0.12, 0.14, 0.95)
+                    color: ThemeService.backgroundMain
                     radius: 16
-                    border.color: Qt.rgba(1,1,1,0.08)
+                    border.color: ThemeService.outlineMain
                     border.width: 1
+                    opacity: 0.95
                     
                     layer.enabled: true
                     layer.effect: MultiEffect {
@@ -172,10 +172,10 @@ Item {
                     
                     contentItem: RowLayout {
                         spacing: 10
-                        Text { text: "󰐕"; font.pixelSize: 16; color: newWinItem.highlighted ? "white" : "#AAAAAA"; Layout.leftMargin: 8 }
-                        Text { text: "New Window"; color: newWinItem.highlighted ? "white" : "#CCCCCC"; font.pixelSize: 13; font.weight: Font.Medium; Layout.fillWidth: true }
+                        Text { text: "󰐕"; font.pixelSize: 16; color: newWinItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent; Layout.leftMargin: 8 }
+                        Text { text: "New Window"; color: newWinItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceContent; font.pixelSize: 13; font.weight: Font.Medium; Layout.fillWidth: true }
                     }
-                    background: Rectangle { color: newWinItem.highlighted ? Qt.rgba(1,1,1,0.1) : "transparent"; radius: 10 }
+                    background: Rectangle { color: newWinItem.highlighted ? ThemeService.surfaceMain : "transparent"; radius: 10 }
                     onTriggered: if (app) app.execute()
                 }
 
@@ -190,12 +190,12 @@ Item {
                             
                             Text { 
                                 text: "󰖯"
-                                font.pixelSize: 14; color: winItem.highlighted ? "white" : "#AAAAAA"; Layout.leftMargin: 8 
+                                font.pixelSize: 14; color: winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent; Layout.leftMargin: 8 
                             }
                             
                             Text { 
                                 text: modelData.title
-                                color: winItem.highlighted ? "white" : "#CCCCCC"
+                                color: winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceContent
                                 font.pixelSize: 12
                                 font.weight: Font.Medium
                                 Layout.fillWidth: true
@@ -204,13 +204,13 @@ Item {
 
                             Rectangle {
                                 width: 24; height: 24; radius: 12
-                                color: closeArea.containsMouse ? Qt.rgba(1, 0.3, 0.3, 0.3) : "transparent"
+                                color: closeArea.containsMouse ? ThemeService.dangerSurface : "transparent"
                                 Layout.rightMargin: 4
                                 
                                 Text { 
                                     text: "󰅖"
                                     anchors.centerIn: parent
-                                    color: closeArea.containsMouse ? "#FF5555" : (winItem.highlighted ? "white" : "#AAAAAA")
+                                    color: closeArea.containsMouse ? ThemeService.dangerMain : (winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent)
                                     font.pixelSize: 14
                                 }
                                 
@@ -225,7 +225,7 @@ Item {
                                 }
                             }
                         }
-                        background: Rectangle { color: winItem.highlighted ? Qt.rgba(1,1,1,0.1) : "transparent"; radius: 10 }
+                        background: Rectangle { color: winItem.highlighted ? ThemeService.surfaceMain : "transparent"; radius: 10 }
                         onTriggered: NiriService.focusWindow(modelData.id)
                     }
                 }
@@ -240,19 +240,19 @@ Item {
 
             ColumnLayout {
                 anchors.fill: parent
-spacing: 8
+                spacing: 8
 
                 Item {
                     id: iconItem
-                    Layout.preferredWidth: FrameConfig.appIslandIconSize
-                    Layout.preferredHeight: FrameConfig.appIslandIconSize
+                    Layout.preferredWidth: ThemeService.appIslandIconSize
+                    Layout.preferredHeight: ThemeService.appIslandIconSize
                     Layout.alignment: Qt.AlignHCenter
                     
                     Rectangle {
                         anchors.fill: parent
                         radius: 14
-                        color: FrameConfig.highlightColor
-                        opacity: isHovered ? FrameConfig.highlightOpacity * 4 : FrameConfig.highlightOpacity
+                        color: ThemeService.accentColor
+                        opacity: isHovered ? ThemeService.highlightOpacity * 4 : ThemeService.highlightOpacity
                         scale: isHovered ? 0.95 : 0.85
                         y: isHovered ? 18 : 4
                         z: -1
@@ -266,7 +266,7 @@ spacing: 8
                     Image {
                         id: appIcon
                         anchors.fill: parent
-                        sourceSize: Qt.size(FrameConfig.appIslandIconSize * 2, FrameConfig.appIslandIconSize * 2) 
+                        sourceSize: Qt.size(ThemeService.appIslandIconSize * 2, ThemeService.appIslandIconSize * 2) 
                         layer.enabled: isHovered
                         layer.effect: MultiEffect { brightness: 0.15; saturation: 0.1 }
                         source: {
@@ -284,7 +284,7 @@ spacing: 8
                         anchors.bottomMargin: -6
                         width: isRunning ? 12 : 0
                         height: 4; radius: 2
-                        color: "white"
+                        color: ThemeService.backgroundContent
                         opacity: isRunning ? 0.8 : 0.0
                         
                         Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
@@ -295,7 +295,7 @@ spacing: 8
                 Text {
                     id: nameText
                     text: app ? app.name : ""
-                    color: "white"
+                    color: ThemeService.backgroundContent
                     font.pixelSize: 10; font.weight: Font.DemiBold
                     Layout.preferredWidth: parent.width - 8
                     horizontalAlignment: Text.AlignHCenter

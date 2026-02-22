@@ -1,23 +1,22 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 import qs.modules.bars
 import qs.modules.island
 
 BaseBar {
     id: root
 
-    implicitHeight: FrameConfig.appIslandExpandedHeight + FrameConfig.appIslandSearchBarHeight + 20
+    implicitHeight: ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 20
 
     anchors.bottom: true
     anchors.left: true
     anchors.right: true
     
     exclusionMode: ExclusionMode.Ignore
-    exclusiveZone: FrameConfig.thickness
+    exclusiveZone: ThemeService.thickness
     color: "transparent"
     
     focusable: true
@@ -42,8 +41,8 @@ BaseBar {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: FrameConfig.thickness
-        color: FrameConfig.color
+        height: ThemeService.thickness
+        color: ThemeService.color
         z: 1
     }
 
@@ -53,8 +52,8 @@ BaseBar {
         anchors.bottom: parent.bottom
         z: 2
         
-        barHeight: FrameConfig.thickness
-        barColor: FrameConfig.color
+        barHeight: ThemeService.thickness
+        barColor: ThemeService.color
     }
 
     BottomBarOSD {

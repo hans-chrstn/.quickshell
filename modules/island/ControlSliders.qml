@@ -1,9 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 ColumnLayout {
     id: root
@@ -13,7 +12,7 @@ ColumnLayout {
         spacing: 4
         Text { 
             text: "BRIGHTNESS"
-            color: "white"
+            color: ThemeService.backgroundContent
             font.pixelSize: 8
             font.weight: Font.Black
             font.letterSpacing: 1.5
@@ -33,7 +32,7 @@ ColumnLayout {
         spacing: 4
         Text { 
             text: "VOLUME"
-            color: "white"
+            color: ThemeService.backgroundContent
             font.pixelSize: 8
             font.weight: Font.Black
             font.letterSpacing: 1.5
@@ -44,7 +43,7 @@ ColumnLayout {
             width: 180; height: 28
             enabled: AudioService.hasAudio
             value: AudioService.volume
-            icon: AudioService.muted ? "󰝟" : "󰕾"; barColor: "white"
+            icon: AudioService.muted ? "󰝟" : "󰕾"; barColor: ThemeService.backgroundContent
             onMoved: (v) => AudioService.setVolume(v)
         }
     }

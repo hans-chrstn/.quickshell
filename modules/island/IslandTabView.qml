@@ -2,9 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.Mpris
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 Item {
     id: root
@@ -17,8 +16,8 @@ Item {
     PathView {
         id: view
         anchors.fill: parent
-        anchors.topMargin: FrameConfig.pathViewTopMargin
-        anchors.bottomMargin: FrameConfig.indicatorRowBottomMargin + 10 
+        anchors.topMargin: ThemeService.pathViewTopMargin
+        anchors.bottomMargin: ThemeService.indicatorRowBottomMargin + 10 
         
         model: tabModel
         pathItemCount: 3
@@ -77,14 +76,14 @@ Item {
             append({ "type": "music" })
             append({ "type": "notif" })
             if (BatteryService.hasUPower && BatteryService.device && BatteryService.device.type !== 0) append({ "type": "battery" })
-            if (FrameConfig.showWeather) append({ "type": "weather" })
+            if (ThemeService.showWeather) append({ "type": "weather" })
             append({ "type": "cc" })
         }
         Component.onCompleted: updateModel()
     }
     
     Connections {
-        target: FrameConfig
+        target: ThemeService
         function onShowWeatherChanged() { tabModel.updateModel() }
     }
     

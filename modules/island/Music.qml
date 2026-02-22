@@ -4,7 +4,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
-import qs.config
+import qs.services
 import qs.components
 
 Item {
@@ -17,10 +17,10 @@ Item {
         spacing: 20
         
         Item {
-            Layout.preferredWidth: FrameConfig.musicArtSize
-            Layout.preferredHeight: FrameConfig.musicArtSize
+            Layout.preferredWidth: ThemeService.musicArtSize
+            Layout.preferredHeight: ThemeService.musicArtSize
             Layout.alignment: Qt.AlignVCenter
-            visible: FrameConfig.showMusicArt
+            visible: ThemeService.showMusicArt
             
             Item {
                 id: vinylDisk
@@ -30,21 +30,21 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
-                    shadowOpacity: FrameConfig.musicArtShadowOpacity
+                    shadowOpacity: ThemeService.musicArtShadowOpacity
                     shadowBlur: 0.4
                     shadowVerticalOffset: 2
                 }                
                 NumberAnimation on rotation {
                     from: 0; to: 360
-                    duration: FrameConfig.musicRotationDuration
+                    duration: ThemeService.musicRotationDuration
                     loops: Animation.Infinite
                     running: root.player && root.player.playbackState === MprisPlaybackState.Playing
                 }
                 
                 ClippingRectangle { 
                     anchors.fill: parent
-                    radius: FrameConfig.musicArtRadius
-                    color: "#222"
+                    radius: ThemeService.musicArtRadius
+                    color: ThemeService.surfaceVariant
                     
                     Image {
                         id: artImage
@@ -57,18 +57,18 @@ Item {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "󰝚"; color: "white"; opacity: 0.2; font.pixelSize: 24
-                        visible: !root.player || !root.player.trackArtUrl || parent.children[0].status !== Image.Ready
+                        text: "󰝚"; color: ThemeService.backgroundContent; opacity: 0.2; font.pixelSize: 24
+                        visible: !root.player || !root.player.trackArtUrl || (parent.children[0] && parent.children[0].status !== Image.Ready)
                     }
                 }
                 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: FrameConfig.musicHoleSize
-                    height: FrameConfig.musicHoleSize
+                    width: ThemeService.musicHoleSize
+                    height: ThemeService.musicHoleSize
                     radius: width / 2
-                    color: "#1e1e1e"
-                    border.color: Qt.rgba(1, 1, 1, 0.1); border.width: 1
+                    color: ThemeService.backgroundMain
+                    border.color: ThemeService.outlineVariant; border.width: 1
                 }
             }
         }
@@ -80,13 +80,13 @@ Item {
             Text { 
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackTitle) || "No Music"
-                color: "white"; font.weight: Font.DemiBold; font.pixelSize: 14
+                color: ThemeService.backgroundContent; font.weight: Font.DemiBold; font.pixelSize: 14
                 elide: Text.ElideRight 
             }
             Text { 
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackArtist) || "Nothing playing"
-                color: FrameConfig.secondaryTextColor; opacity: 0.8; font.pixelSize: 11
+                color: ThemeService.secondaryContent; opacity: 0.8; font.pixelSize: 11
                 elide: Text.ElideRight 
             }
             
@@ -99,10 +99,10 @@ Item {
                 height: hovered || dragging ? 8 : 4
                 Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                 
-                Rectangle { anchors.fill: parent; radius: 2; color: "white"; opacity: 0.1 }
+                Rectangle { anchors.fill: parent; radius: 2; color: ThemeService.backgroundContent; opacity: 0.1 }
                 
                 Rectangle {
-                    height: parent.height; radius: 2; color: "white"; opacity: 0.8
+                    height: parent.height; radius: 2; color: ThemeService.backgroundContent; opacity: 0.8
                     width: (root.player && root.player.length > 0) ? parent.width * (root.player.position / root.player.length) : 0
                 }
                 
@@ -128,13 +128,13 @@ Item {
 
             RowLayout { 
                 Layout.fillWidth: true; Layout.topMargin: 8
-                spacing: FrameConfig.musicControlSpacing
+                spacing: ThemeService.musicControlSpacing
                 Layout.alignment: Qt.AlignHCenter
                 
                 Item { Layout.fillWidth: true }
                 
                 Text { 
-                    text: "󰒮"; color: "white"; opacity: 0.6; font.pixelSize: 20
+                    text: "󰒮"; color: ThemeService.backgroundContent; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thPrev.pressed ? 0.9 : (hhPrev.hovered ? 1.2 : 1.0)
@@ -146,7 +146,7 @@ Item {
                 
                 Text { 
                     text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
-                    color: "white"; font.pixelSize: 28
+                    color: ThemeService.backgroundContent; font.pixelSize: 28
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thPlay.pressed ? 0.9 : (hhPlay.hovered ? 1.2 : 1.0)
@@ -157,7 +157,7 @@ Item {
                 }
                 
                 Text { 
-                    text: "󰒭"; color: "white"; opacity: 0.6; font.pixelSize: 20
+                    text: "󰒭"; color: ThemeService.backgroundContent; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thNext.pressed ? 0.9 : (hhNext.hovered ? 1.2 : 1.0)

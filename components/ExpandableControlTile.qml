@@ -1,69 +1,61 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
-import qs.config
+import qs.services
 
-Item {
+Rectangle {
     id: root
     
     property string icon: ""
     property string label: ""
     property bool active: false
-    property bool enabled: true
-    property color activeColor: FrameConfig.accentColor
+    property color activeColor: ThemeService.accentColor
     
     signal clicked()
     signal longPressed()
 
-    width: FrameConfig.controlCenterTileSize
-    height: FrameConfig.controlCenterTileSize
+    width: hh.hovered ? 140 : ThemeService.controlCenterTileSize
+    height: ThemeService.controlCenterTileSize
+    radius: ThemeService.controlCenterTileRadius
     
-    Rectangle {
-        id: bg
+    color: active ? activeColor : ThemeService.backgroundContent
+    opacity: active ? 1.0 : (hh.hovered ? 0.15 : 0.1)
+    
+    clip: true
+    
+    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
+    Behavior on color { ColorAnimation { duration: 200 } }
+    Behavior on opacity { NumberAnimation { duration: 200 } }
+
+    RowLayout {
         anchors.fill: parent
-        radius: FrameConfig.controlCenterTileRadius
-        color: active ? activeColor : "#FFFFFF"
-        opacity: root.enabled ? (active ? 1.0 : 0.15) : 0.05
-        
-        Behavior on color { ColorAnimation { duration: 250 } }
-        Behavior on opacity { NumberAnimation { duration: 250 } }
-    }
+        anchors.leftMargin: (ThemeService.controlCenterTileSize - 18) / 2
+        spacing: 12
 
-    Rectangle {
-        anchors.centerIn: parent
-        width: parent.width * 1.5; height: parent.height * 1.5
-        radius: width / 2
-        color: root.activeColor
-        opacity: root.active ? 0.25 : 0.0
-        z: -1
-        
-        layer.enabled: root.active
-        layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 }
-        Behavior on opacity { NumberAnimation { duration: 400 } }
-    }
+        Text {
+            text: root.icon
+            font.pixelSize: 18
+            color: root.active ? ThemeService.primaryContent : ThemeService.backgroundContent
+            Layout.alignment: Qt.AlignVCenter
+        }
 
-    Text {
-        anchors.centerIn: parent
-        text: root.icon
-        color: root.active ? "black" : "#FFFFFF"
-        font.pixelSize: 22
-        opacity: root.enabled ? 1.0 : 0.3
-        renderType: Text.NativeRendering
+        Text {
+            text: root.label
+            color: root.active ? ThemeService.primaryContent : ThemeService.backgroundContent
+            font.pixelSize: 11; font.weight: Font.Bold
+            visible: root.width > ThemeService.controlCenterTileSize + 20
+            opacity: visible ? 1.0 : 0.0
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+        }
     }
 
     TapHandler {
-        id: tapHandler
-        enabled: root.enabled
         onTapped: root.clicked()
         onLongPressed: root.longPressed()
     }
 
-    MouseArea {
-        anchors.fill: parent
-        acceptedButtons: Qt.MiddleButton
-        onClicked: (mouse) => { if (mouse.button === Qt.MiddleButton) root.longPressed() }
+    HoverHandler {
+        id: hh
+        cursorShape: Qt.PointingHandCursor
     }
-
-    HoverHandler { id: hoverHandler; cursorShape: Qt.PointingHandCursor }
 }

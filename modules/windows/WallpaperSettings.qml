@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import qs.config
 import qs.services
 
 ColumnLayout {
@@ -30,7 +29,7 @@ ColumnLayout {
                     width: 70
                     height: 32
                     radius: 16
-                    color: WallpaperService.transitionType === modelData ? FrameConfig.accentColor : "white"
+                    color: WallpaperService.transitionType === modelData ? ThemeService.accentColor : "white"
                     opacity: WallpaperService.transitionType === modelData ? 1.0 : 0.05
                     
                     Text { 

@@ -1,15 +1,15 @@
 import QtQuick
-import qs.config
+import qs.services
 
 Item {
     id: root
     
     property var targetIsland: null
     
-    width: targetIsland && targetIsland.expanded ? FrameConfig.appIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
+    width: targetIsland && targetIsland.expanded ? ThemeService.appIslandExpandedWidth : ThemeService.dynamicIslandCollapsedWidth
     height: targetIsland && targetIsland.expanded 
-        ? (FrameConfig.appIslandExpandedHeight + FrameConfig.appIslandSearchBarHeight + 20)
-        : FrameConfig.thickness
+        ? (ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 20)
+        : ThemeService.thickness
         
     Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
@@ -30,7 +30,7 @@ Item {
 
     Timer { 
         id: collapseTimer
-        interval: FrameConfig.collapseTimerDelay
+        interval: ThemeService.collapseTimerDelay
         onTriggered: if (targetIsland) targetIsland.expanded = false 
     }
     

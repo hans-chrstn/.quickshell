@@ -2,9 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 Item {
     id: root
@@ -20,9 +19,9 @@ Item {
         width: parent.width * 0.94
         height: parent.height * 0.8
         radius: 24
-        color: FrameConfig.color
+        color: ThemeService.backgroundMain
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.15)
+        border.color: ThemeService.outlineMain
         
         Image {
             id: bgImage
@@ -39,7 +38,7 @@ Item {
             visible: !root.inputMode
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.6) }
+                GradientStop { position: 1.0; color: Qt.rgba(ThemeService.shadowMain.r, ThemeService.shadowMain.g, ThemeService.shadowMain.b, 0.6) }
             }
         }
 

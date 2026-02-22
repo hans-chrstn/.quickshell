@@ -2,7 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.config
+import qs.services
 
 Singleton {
     id: root
@@ -171,7 +171,7 @@ Singleton {
     }
 
     Timer { 
-        interval: FrameConfig.weatherUpdateInterval 
+        interval: ThemeService.weatherUpdateInterval 
         running: true 
         repeat: true 
         triggeredOnStart: false

@@ -8,7 +8,7 @@ import Quickshell.Io
 import qs.modules.bars
 import qs.modules.island
 import qs.components
-import qs.config
+import qs.services
 import qs.modules.windows
 import qs.modules.notifications
 
@@ -64,5 +64,15 @@ ShellRoot {
 
     ControlPanelWindow {
         id: controlPanelWin
+    }
+
+    SettingsWindow {
+        id: settingsWin
+    }
+
+    Component.onCompleted: {
+        ViewService.wallpaperWindow = wallpaperWin
+        ViewService.controlPanelWindow = controlPanelWin
+        ViewService.settingsWindow = settingsWin
     }
 }

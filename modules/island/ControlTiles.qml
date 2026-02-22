@@ -2,9 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 GridLayout {
     id: root
@@ -12,7 +11,11 @@ GridLayout {
     rowSpacing: 12
     columnSpacing: 12
     
-    property var controlPanelWin: null
+    SoundEffect {
+        id: toggleSound
+        source: Quickshell.shellPath("assets/sfx/button2.wav")
+        volume: 0.4
+    }
 
     ExpandableControlTile { 
         icon: "󰖩"; label: "Wifi"
@@ -23,10 +26,7 @@ GridLayout {
             SfxService.playButton2()
         }
         onLongPressed: {
-            if (root.controlPanelWin) {
-                root.controlPanelWin.activePage = "wifi"
-                root.controlPanelWin.visible = true
-            }
+            ViewService.openControlPanel("wifi")
         }
     }
     
@@ -39,10 +39,7 @@ GridLayout {
             SfxService.playButton2()
         }
         onLongPressed: {
-            if (root.controlPanelWin) {
-                root.controlPanelWin.activePage = "bluetooth"
-                root.controlPanelWin.visible = true
-            }
+            ViewService.openControlPanel("bluetooth")
         }
     }
     

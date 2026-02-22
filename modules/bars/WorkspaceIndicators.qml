@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
 import qs.services
 
 RowLayout {
@@ -20,8 +19,9 @@ RowLayout {
             Layout.preferredHeight: visible ? 6 : 0
             
             radius: 3
-            color: model.isFocused ? FrameConfig.accentColor : 
-                   model.isActive ? Qt.rgba(1,1,1,0.5) : Qt.rgba(1,1,1,0.2)
+            color: model.isFocused ? ThemeService.accentColor : 
+                   model.isActive ? Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.5) : 
+                                    Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.2)
             
             Behavior on color { ColorAnimation { duration: 200 } }
             Behavior on Layout.preferredWidth { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }

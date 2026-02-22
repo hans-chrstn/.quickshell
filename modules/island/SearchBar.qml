@@ -2,9 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtMultimedia
 import Quickshell
-import qs.config
-import qs.components
 import qs.services
+import qs.components
 
 Rectangle {
     id: root
@@ -28,13 +27,13 @@ Rectangle {
     anchors.topMargin: root.active ? 12 : 6
     
     width: root.active ? (parent.width - 40) : 24
-    height: root.active ? FrameConfig.appIslandSearchBarHeight : 4
-    radius: root.active ? FrameConfig.appIslandSearchBarRadius : 2
+    height: root.active ? ThemeService.appIslandSearchBarHeight : 4
+    radius: root.active ? ThemeService.appIslandSearchBarRadius : 2
     
-    color: root.active ? Qt.rgba(0.1, 0.1, 0.12, 0.95) : "white"
+    color: root.active ? ThemeService.backgroundMain : ThemeService.backgroundContent
     opacity: root.active ? 1.0 : 0.2
     
-    border.color: "white"
+    border.color: ThemeService.backgroundContent
     border.width: root.active ? 1 : 0
     
     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -59,7 +58,7 @@ Rectangle {
         
         Text { 
             text: "󰍉"
-            color: "white"
+            color: ThemeService.backgroundContent
             opacity: 0.5
             font.pixelSize: 18 
         }
@@ -67,14 +66,14 @@ Rectangle {
         TextInput {
             id: searchInput
             Layout.fillWidth: true; verticalAlignment: TextInput.AlignVCenter
-            color: FrameConfig.appIslandSearchBarColor
-            font.pixelSize: FrameConfig.appIslandSearchInputFontSize
+            color: ThemeService.appIslandSearchBarColor
+            font.pixelSize: ThemeService.appIslandSearchInputFontSize
             font.weight: Font.Medium
-            selectionColor: FrameConfig.accentColor
+            selectionColor: ThemeService.accentColor
             
             Text {
                 text: "Search applications..."
-                color: "white"
+                color: ThemeService.backgroundContent
                 opacity: 0.3
                 font.pixelSize: 14
                 visible: !searchInput.text && !searchInput.activeFocus
@@ -83,7 +82,7 @@ Rectangle {
         
         Text { 
             text: "󰅖"
-            color: "white"
+            color: ThemeService.backgroundContent
             opacity: 0.4
             font.pixelSize: 16 
             

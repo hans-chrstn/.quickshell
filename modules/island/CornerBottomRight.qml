@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import qs.config
+import qs.services
 import qs.components
 
 ScreenCorner {
@@ -21,7 +21,7 @@ ScreenCorner {
     f2X: 160 - 20 - 16 - 10
     f2Y: -20 + 1 - 10
 
-    customTL: FrameConfig.dynamicIslandCornerRadius
+    customTL: ThemeService.dynamicIslandCornerRadius
     customTR: 0
     customBL: 0
     customBR: 0
@@ -53,12 +53,12 @@ ScreenCorner {
             
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 100; height: 32; radius: 16; color: FrameConfig.dangerColor
+                width: 100; height: 32; radius: 16; color: ThemeService.dangerColor
                 opacity: pwrMouse.containsMouse ? 0.3 : 0.2
                 scale: pwrMouse.containsMouse ? 1.02 : 1.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 Behavior on scale { NumberAnimation { duration: 200 } }
-                Text { anchors.centerIn: parent; text: "POWER OFF"; color: FrameConfig.dangerColor; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
+                Text { anchors.centerIn: parent; text: "POWER OFF"; color: ThemeService.dangerColor; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
                 MouseArea { 
                     id: pwrMouse
                     anchors.fill: parent; hoverEnabled: true
@@ -84,7 +84,7 @@ ScreenCorner {
                 spacing: 12
                 
                 Rectangle { 
-                    width: 60; height: 32; radius: 16; color: FrameConfig.dangerColor
+                    width: 60; height: 32; radius: 16; color: ThemeService.dangerColor
                     Text { anchors.centerIn: parent; text: "YES"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
                     MouseArea { 
                         anchors.fill: parent

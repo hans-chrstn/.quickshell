@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import qs.config
 import qs.services
 
 ColumnLayout {
@@ -11,7 +10,7 @@ ColumnLayout {
 
     Text {
         text: "ENTER COORDINATES"
-        color: "white"
+        color: ThemeService.backgroundContent
         font.pixelSize: 10
         font.weight: Font.Bold
         Layout.alignment: Qt.AlignHCenter
@@ -20,9 +19,9 @@ ColumnLayout {
 
     Rectangle {
         width: 200; height: 36; radius: 18
-        color: "white"; opacity: locInput.activeFocus ? 0.2 : 0.1
+        color: ThemeService.surfaceStrong; opacity: locInput.activeFocus ? 1.0 : 0.5
         Layout.alignment: Qt.AlignHCenter
-        border.color: "white"
+        border.color: ThemeService.backgroundContent
         border.width: locInput.activeFocus ? 1 : 0
         
         TextInput {
@@ -31,7 +30,7 @@ ColumnLayout {
             anchors.leftMargin: 15; anchors.rightMargin: 15
             verticalAlignment: TextInput.AlignVCenter
             horizontalAlignment: TextInput.AlignHCenter
-            color: "white"
+            color: ThemeService.backgroundContent
             font.pixelSize: 14
             selectByMouse: true
             onAccepted: {
@@ -42,7 +41,7 @@ ColumnLayout {
             
             Text {
                 text: "lat,lon"
-                color: "white"; opacity: 0.3
+                color: ThemeService.backgroundContent; opacity: 0.3
                 visible: !parent.text && !parent.activeFocus
                 anchors.centerIn: parent
             }
@@ -57,7 +56,7 @@ ColumnLayout {
             anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             text: "✕"
-            color: "white"
+            color: ThemeService.backgroundContent
             opacity: 0.5
             font.pixelSize: 12
             TapHandler {
@@ -68,7 +67,7 @@ ColumnLayout {
     
     Text {
         text: "PRESS ENTER TO SAVE"
-        color: "white"; opacity: 0.3; font.pixelSize: 8
+        color: ThemeService.backgroundContent; opacity: 0.3; font.pixelSize: 8
         Layout.alignment: Qt.AlignHCenter
     }
     

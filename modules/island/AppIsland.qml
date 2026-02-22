@@ -1,16 +1,16 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
-import qs.config
+import qs.services
 import qs.components
 import qs.modules.island
 
 BaseIsland {
     id: appIslandRoot
 
-    expandedWidth: FrameConfig.appIslandExpandedWidth
-    expandedHeight: searchBar.active ? (FrameConfig.appIslandExpandedHeight + FrameConfig.appIslandSearchBarHeight + 10) : FrameConfig.appIslandExpandedHeight
-    collapsedWidth: FrameConfig.dynamicIslandCollapsedWidth
+    expandedWidth: ThemeService.appIslandExpandedWidth
+    expandedHeight: searchBar.active ? (ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 10) : ThemeService.appIslandExpandedHeight
+    collapsedWidth: ThemeService.dynamicIslandCollapsedWidth
     
     isTop: false
     isBottom: true
@@ -71,7 +71,7 @@ BaseIsland {
             anchors.fill: parent
             filterText: searchBar.text
             
-            anchors.topMargin: searchBar.active ? (FrameConfig.appIslandSearchBarHeight + 8) : 0
+            anchors.topMargin: searchBar.active ? (ThemeService.appIslandSearchBarHeight + 8) : 0
             Behavior on anchors.topMargin { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
         }
 

@@ -4,7 +4,6 @@ import QtQuick.Effects
 import QtMultimedia
 import Quickshell
 import Quickshell.Widgets
-import qs.config
 import qs.components
 import qs.services
 
@@ -32,14 +31,14 @@ RowLayout {
         Rectangle {
             anchors.fill: parent
             radius: 24
-            color: "#111112"
-            border.color: hSlide.hovered ? FrameConfig.accentColor : Qt.rgba(1, 1, 1, 0.1)
+            color: ThemeService.surfaceVariantStrong
+            border.color: hSlide.hovered ? ThemeService.accentColor : ThemeService.outlineMain
             border.width: 1
             
             Text { 
                 anchors.centerIn: parent
                 text: "󰐊  SLIDESHOW"
-                color: "white"
+                color: ThemeService.backgroundContent
                 font.pixelSize: 11
                 font.weight: Font.Bold
                 font.letterSpacing: 1
@@ -67,14 +66,14 @@ RowLayout {
             id: revBg
             anchors.fill: parent
             radius: 24
-            color: "#111112"
-            border.color: hRev.hovered ? "white" : Qt.rgba(1, 1, 1, 0.1)
+            color: ThemeService.surfaceVariantStrong
+            border.color: hRev.hovered ? ThemeService.backgroundContent : ThemeService.outlineMain
             border.width: 1
             
             Text { 
                 anchors.centerIn: parent
                 text: "󰕌  REVERT"
-                color: "white"
+                color: ThemeService.backgroundContent
                 font.pixelSize: 11
                 font.weight: Font.Bold
                 font.letterSpacing: 1
@@ -104,13 +103,13 @@ RowLayout {
             id: appBg
             anchors.fill: parent
             radius: 24
-            color: FrameConfig.accentColor
+            color: ThemeService.accentColor
             
             Rectangle { 
                 anchors.fill: parent
                 anchors.margins: -8
                 radius: 28
-                color: FrameConfig.accentColor
+                color: ThemeService.accentColor
                 opacity: hApp.hovered ? 0.02 : 0.0
                 z: -1
                 layer.enabled: true
@@ -123,14 +122,15 @@ RowLayout {
                 anchors.margins: 1
                 radius: 23
                 color: "transparent"
-                border.color: Qt.rgba(1, 1, 1, 0.3)
+                border.color: ThemeService.primaryContent
                 border.width: 1 
+                opacity: 0.3
             }
             
             Text { 
                 anchors.centerIn: parent
                 text: "󰄬  CONFIRM CHANGES"
-                color: "black"
+                color: ThemeService.primaryContent
                 font.pixelSize: 11
                 font.weight: Font.Black
                 font.letterSpacing: 1 
