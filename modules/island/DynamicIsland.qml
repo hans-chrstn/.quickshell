@@ -27,7 +27,6 @@ BaseIsland {
     f2Y: 16
 
     property var activePlayer: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
-    property var notifServer: null
     property alias isInteracting: root.mouseHovered
     
     onMouseHoveredChanged: root.expanded = mouseHovered || view.dragging
@@ -121,7 +120,7 @@ BaseIsland {
     Component { id: musicComp; Music { player: root.activePlayer } }
     Component { id: weatherComp; Weather { } }
     Component { id: batteryComp; Battery {} }
-    Component { id: notifComp; Notification { server: root.notifServer } }
+    Component { id: notifComp; Notification { } }
     Component { id: ccComp; ControlCenter { } }
 
     ListModel {

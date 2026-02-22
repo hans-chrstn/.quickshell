@@ -88,7 +88,7 @@ BaseBar {
         
         onMoved: (val) => {
             if (type === "volume") SystemControl.setVolume(val)
-            else SystemControl.setBrightness(val)
+            else BrightnessService.setBrightness(val)
             hideTimer.restart() 
         }
 
@@ -109,7 +109,11 @@ BaseBar {
     Connections {
         target: SystemControl
         function onVolumeChanged() { if (root.osdReady) osdPill.show("volume", SystemControl.muted ? "󰝟" : "󰕾", SystemControl.volume) }
-        function onBrightnessChanged() { if (root.osdReady) osdPill.show("brightness", "󰃠", SystemControl.brightness) }
+    }
+
+    Connections {
+        target: BrightnessService
+        function onBrightnessChanged() { if (root.osdReady) osdPill.show("brightness", "󰃠", BrightnessService.brightness) }
     }
 
     MouseArea {

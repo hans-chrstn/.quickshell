@@ -31,13 +31,6 @@ BaseBar {
 
     property var activePlayer: Mpris.players.values.length > 0 ? Mpris.players.values[0] : null
     
-    NotificationServer {
-        id: notifServer
-        bodySupported: true
-        keepOnReload: false
-        onNotification: (n) => n.tracked = true
-    }
-
     Rectangle {
         id: barRect
         anchors.top: parent.top
@@ -91,7 +84,6 @@ BaseBar {
         barHeight: FrameConfig.thickness
         barColor: FrameConfig.color
         activePlayer: root.activePlayer
-        notifServer: notifServer
     }
 
     MouseArea {

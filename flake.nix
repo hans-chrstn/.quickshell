@@ -37,6 +37,7 @@
         pkgs.libnotify
         pkgs.wf-recorder
         pkgs.swww
+        pkgs.kdePackages.qtmultimedia
       ];
     };
   };

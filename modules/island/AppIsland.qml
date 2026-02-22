@@ -46,8 +46,6 @@ BaseIsland {
         }
     }
     
-    onExpandedChanged: if (!expanded) searchVisible = false 
-
     Timer { id: collapseTimer; interval: 300; onTriggered: appIslandRoot.expanded = false }
 
     Behavior on height {

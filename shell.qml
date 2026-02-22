@@ -10,6 +10,7 @@ import qs.modules.island
 import qs.components
 import qs.config
 import qs.modules.windows
+import qs.modules.notifications
 
 ShellRoot {
     Variants {
@@ -50,6 +51,11 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         delegate: CornerBottomRight { }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: NotificationPopup { }
     }
 
     WallpaperWindow {

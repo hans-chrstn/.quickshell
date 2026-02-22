@@ -24,9 +24,11 @@ Item {
 
             ExpandableControlTile { 
                 icon: "󰖩"; label: "Wifi"
-                active: !!SystemControl.wifiEnabled
-                enabled: SystemControl.hasWifi
-                onClicked: SystemControl.toggleWifi()
+                active: !!WifiService.wifiEnabled
+                enabled: WifiService.hasWifi
+                onClicked: {
+                    WifiService.toggleWifi()
+                }
                 onLongPressed: {
                     controlPanelWin.activePage = "wifi"
                     controlPanelWin.visible = true
@@ -34,23 +36,24 @@ Item {
             }
             ExpandableControlTile { 
                 icon: "󰂯"; label: "Bluetooth"
-                active: !!SystemControl.bluetoothEnabled
-                enabled: SystemControl.hasBluetooth
-                onClicked: SystemControl.toggleBluetooth()
+                active: !!BluetoothService.bluetoothEnabled
+                enabled: BluetoothService.hasBluetooth
+                onClicked: BluetoothService.toggleBluetooth()
                 onLongPressed: {
                     controlPanelWin.activePage = "bluetooth"
                     controlPanelWin.visible = true
                 }
             }
             ControlTile { 
-                icon: "󰀝"; active: !!SystemControl.airplaneMode
-                enabled: SystemControl.hasWifi
-                onClicked: SystemControl.toggleAirplane()
+                icon: "󰀝"; active: !!WifiService.airplaneMode
+                enabled: WifiService.hasWifi
+                onClicked: WifiService.toggleAirplane()
             }
             ControlTile { 
-                icon: "󰂛"; active: !!SystemControl.dndActive
-                enabled: SystemControl.hasDunst
-                onClicked: SystemControl.toggleDND()
+                icon: NotificationService.dndEnabled ? "󰖔" : "󰂚"
+                active: !!NotificationService.dndEnabled
+                enabled: true
+                onClicked: NotificationService.toggleDND()
             }
         }
 
@@ -69,10 +72,10 @@ Item {
                 Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
                 ControlSlider { 
                     width: 180; height: 28
-                    enabled: SystemControl.hasBrightness
-                    value: SystemControl.brightness
+                    enabled: BrightnessService.hasBrightness
+                    value: BrightnessService.brightness
                     icon: "󰃠"; barColor: "#FFCC00"
-                    onMoved: (v) => SystemControl.setBrightness(v)
+                    onMoved: (v) => BrightnessService.setBrightness(v)
                 }
             }
 
@@ -96,7 +99,7 @@ Item {
                 Layout.bottomMargin: 12
                 opacity: hhSet.hovered ? 1.0 : 0.6
                 Behavior on opacity { NumberAnimation { duration: 200 } }
-                TapHandler { onTapped: settingsWin.visible = true }
+                TapHandler { onTapped: { settingsWin.visible = true; console.log("Attempting to play clickSound..."); clickSound.play() } }
                 HoverHandler { id: hhSet; cursorShape: Qt.PointingHandCursor }
             }
         }

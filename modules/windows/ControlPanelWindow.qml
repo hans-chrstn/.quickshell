@@ -77,7 +77,7 @@ PanelWindow {
                 id: listView
                 Layout.fillWidth: true; Layout.fillHeight: true
                 clip: true; spacing: 10
-                model: root.activePage === "wifi" ? SystemControl.wifiModel : SystemControl.bluetoothModel
+                model: root.activePage === "wifi" ? WifiService.model : BluetoothService.model
                 
                 delegate: Rectangle {
                     width: listView.width; height: 60; radius: 16
@@ -125,20 +125,20 @@ PanelWindow {
                 
                 Rectangle {
                     width: 120; height: 40; radius: 20
-                    color: (root.activePage === "wifi" ? SystemControl.wifiEnabled : SystemControl.bluetoothEnabled) ? FrameConfig.accentColor : "#FFFFFF"
-                    opacity: (root.activePage === "wifi" ? SystemControl.wifiEnabled : SystemControl.bluetoothEnabled) ? 1.0 : 0.1
+                    color: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? FrameConfig.accentColor : "#FFFFFF"
+                    opacity: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? 1.0 : 0.1
                     
                     Text {
                         anchors.centerIn: parent
-                        text: (root.activePage === "wifi" ? SystemControl.wifiEnabled : SystemControl.bluetoothEnabled) ? "ENABLED" : "DISABLED"
-                        color: (root.activePage === "wifi" ? SystemControl.wifiEnabled : SystemControl.bluetoothEnabled) ? "black" : "white"
+                        text: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? "ENABLED" : "DISABLED"
+                        color: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? "black" : "white"
                         font.pixelSize: 10; font.weight: Font.Black
                     }
                     
                     TapHandler {
                         onTapped: {
-                            if (root.activePage === "wifi") SystemControl.toggleWifi()
-                            else SystemControl.toggleBluetooth()
+                            if (root.activePage === "wifi") WifiService.toggleWifi()
+                            else BluetoothService.toggleBluetooth()
                         }
                     }
                     HoverHandler { id: hToggle; cursorShape: Qt.PointingHandCursor }

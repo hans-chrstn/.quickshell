@@ -2,16 +2,13 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services
 
 Singleton {
     id: root
-
-    property string currentDir: Quickshell.env("HOME") + "/Pictures"
     property string activeWallpaper: ""
     property string previewWallpaper: ""
     property string lastWallpaper: ""
-    property bool showHidden: false
-    property bool hasImages: false
     
     property string transitionType: "grow"
     property real transitionDuration: 1.5
@@ -46,11 +43,6 @@ Singleton {
     onTransitionDurationChanged: saveSettings()
     onSlideshowIntervalChanged: saveSettings()
 
-    function refresh(): void {
-        listProc.running = false
-        Qt.callLater(() => { listProc.running = true })
-    }
-
     FileView {
         id: currentWallFile
         path: root.cachePath
@@ -59,65 +51,6 @@ Singleton {
             if (p !== "") {
                 root.activeWallpaper = p
                 root.previewWallpaper = p
-            }
-        }
-    }
-
-    readonly property alias model: wallModel
-    ListModel { id: wallModel }
-
-    onShowHiddenChanged: root.refresh()
-    onCurrentDirChanged: root.refresh()
-
-    function changeDirectory(path: string): void {
-        if (path === "..") {
-            let parts = root.currentDir.split("/")
-            parts.pop()
-            root.currentDir = parts.join("/") || "/"
-        } else {
-            root.currentDir = path
-        }
-        root.refresh()
-    }
-
-    Process {
-        id: listProc
-        command: ["ls", root.showHidden ? "-1ap" : "-1p", root.currentDir]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                wallModel.clear()
-                let lines = text.trim().split("\n")
-                let items = []
-                let imgCount = 0
-                
-                for (let line of lines) {
-                    let trimmed = line.trim()
-                    if (trimmed === "" || trimmed === "./" || trimmed === "../" || trimmed === "." || trimmed === "..") continue
-                    
-                    let isDir = trimmed.endsWith("/")
-                    let name = isDir ? trimmed.slice(0, -1) : trimmed
-                    let path = root.currentDir + (root.currentDir === "/" ? "" : "/") + name
-                    
-                    if (isDir || name.match(/\.(jpg|jpeg|png|webp)$/i)) {
-                        items.push({ "name": name, "path": path, "isDir": isDir })
-                        if (!isDir) imgCount++
-                    }
-                }
-
-                items.sort((a, b) => {
-                    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1
-                    return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-                })
-
-                root.hasImages = imgCount > 0
-
-                if (root.currentDir !== "/") {
-                    wallModel.append({ "name": "..", "path": "..", "isDir": true })
-                }
-                
-                for (let item of items) {
-                    wallModel.append(item)
-                }
             }
         }
     }
@@ -191,6 +124,6 @@ Singleton {
 
     Component.onCompleted: {
         Quickshell.execDetached(["swww-daemon"])
-        root.refresh()
+        FileBrowserService.currentPath = Quickshell.env("HOME") + "/Pictures"
     }
 }

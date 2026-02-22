@@ -4,9 +4,22 @@ import Quickshell
 import Quickshell.Widgets
 import qs.config
 import qs.components
+import QtMultimedia
 
 Item {
     id: root
+
+    SoundEffect {
+        id: expandSound
+        source: Quickshell.shellPath("assets/sfx/on.wav")
+        volume: 0.5
+    }
+
+    SoundEffect {
+        id: collapseSound
+        source: Quickshell.shellPath("assets/sfx/off.wav")
+        volume: 0.5
+    }
 
     property bool expanded: false
     property int barHeight: FrameConfig.thickness
@@ -25,6 +38,14 @@ Item {
     property bool isBottom: false
     property bool isCorner: false
     
+    readonly property string screenName: (root.Window.window && root.Window.window.screen) ? root.Window.window.screen.name : ""
+
+    onMouseHoveredChanged: {
+        if (mouseHovered && screenName !== "") {
+            NotificationService.activeScreenName = screenName
+        }
+    }
+    
     property color filletColor: root.barColor
     property real f1Rotation: 0
     property real f1X: -f1.fWidth + 1
@@ -40,6 +61,14 @@ Item {
 
     property alias mouseHovered: hoverHandler.hovered
     default property alias content: islandContentArea.data
+
+    onExpandedChanged: {
+        if (expanded) {
+            expandSound.play()
+        } else {
+            collapseSound.play()
+        }
+    }
 
     states: [
         State {

@@ -163,7 +163,7 @@ PanelWindow {
                         Item {
                             width: 180
                             height: 48
-                            property bool canSlideshow: WallpaperService.hasImages
+                            property bool canSlideshow: FileBrowserService.hasImages
                             
                             opacity: canSlideshow ? 1.0 : 0.0
                             scale: canSlideshow ? 1.0 : 0.8
@@ -191,7 +191,7 @@ PanelWindow {
                                 scale: hSlide.hovered ? 1.02 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 200 } }
                             }
-                            TapHandler { onTapped: { WallpaperService.startSlideshow(WallpaperService.currentDir); root.visible = false } }
+                            TapHandler { onTapped: { WallpaperService.startSlideshow(FileBrowserService.currentPath); root.visible = false } }
                             HoverHandler { id: hSlide; cursorShape: Qt.PointingHandCursor }
                         }
 
@@ -324,7 +324,7 @@ PanelWindow {
                                 Text { 
                                     id: pathText
                                     anchors.centerIn: parent
-                                    text: WallpaperService.currentDir
+                                    text: FileBrowserService.currentPath
                                     color: "white"
                                     font.pixelSize: 9
                                     font.family: "Monospace"
@@ -361,17 +361,17 @@ PanelWindow {
                                 width: 36
                                 height: 36
                                 radius: 10
-                                color: WallpaperService.showHidden ? FrameConfig.accentColor : "white"
-                                opacity: WallpaperService.showHidden ? 1.0 : 0.1
+                                color: FileBrowserService.showHidden ? FrameConfig.accentColor : "white"
+                                opacity: FileBrowserService.showHidden ? 1.0 : 0.1
                                 visible: !root.showSettings
                                 
                                 Text { 
                                     anchors.centerIn: parent
                                     text: "󰈈"
-                                    color: WallpaperService.showHidden ? "black" : "white"
+                                    color: FileBrowserService.showHidden ? "black" : "white"
                                     font.pixelSize: 18 
                                 }
-                                TapHandler { onTapped: WallpaperService.showHidden = !WallpaperService.showHidden }
+                                TapHandler { onTapped: FileBrowserService.showHidden = !FileBrowserService.showHidden }
                                 HoverHandler { id: hHidden; cursorShape: Qt.PointingHandCursor }
                                 scale: hHidden.hovered ? 1.1 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 200 } }
@@ -393,7 +393,7 @@ PanelWindow {
                                 id: grid
                                 anchors.fill: parent
                                 anchors.margins: 10
-                                model: WallpaperService.model
+                                model: FileBrowserService.model
                                 cellWidth: 124
                                 cellHeight: 124
                                 clip: false
@@ -456,7 +456,7 @@ PanelWindow {
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: { 
-                                                if (model.isDir) WallpaperService.changeDirectory(model.path)
+                                                if (model.isDir) FileBrowserService.changeDirectory(model.path)
                                                 else WallpaperService.previewWallpaper = model.path 
                                             } 
                                         }

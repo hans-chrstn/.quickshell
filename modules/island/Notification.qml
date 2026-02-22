@@ -4,12 +4,12 @@ import Quickshell
 import Quickshell.Services.Notifications
 import qs.config
 import qs.components
+import qs.services
 
 Item {
     id: root
     
-    property var server: null 
-    property int count: server ? server.trackedNotifications.values.length : 0
+    property int count: NotificationService.history.count
     
     ColumnLayout {
         anchors.centerIn: parent
@@ -37,37 +37,72 @@ Item {
                 
                 TapHandler { 
                     onTapped: {
-                        root.server.trackedNotifications.values.forEach(n => n.dismiss())
+                        NotificationService.dismissAll()
                     } 
                 }
                 HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }
             }
         }
 
-        ListView {
+        CardStackView {
             id: notificationList; anchors.top: notifHeader.bottom; anchors.bottom: parent.bottom; anchors.left: parent.left; anchors.right: parent.right; anchors.margins: 15; anchors.topMargin: 10
-            clip: true; spacing: FrameConfig.notifSpacing; model: root.server ? root.server.trackedNotifications : null
+            expandedSpacing: FrameConfig.notifSpacing
+            model: NotificationService.history
             
             delegate: Item {
                 id: notifDelegate
                 width: ListView.view.width
-                height: expanded ? (mainLayout.implicitHeight + 24) : FrameConfig.notifItemHeight
+                
+                readonly property bool isVisibleInStack: notificationList.isItemVisible(index)
+                visible: true
+                
+                height: FrameConfig.notifItemHeight
+                
                 property bool expanded: false
                 
-                scale: thNotif.pressed ? 0.98 : (hhNotif.hovered ? 1.02 : 1.0)
+                states: State {
+                    name: "expanded"
+                    when: notifDelegate.expanded
+                    PropertyChanges { target: notifDelegate; height: (mainLayout.implicitHeight + 24) }
+                }
+                
+                transitions: Transition {
+                    NumberAnimation { property: "height"; duration: 200; easing.type: Easing.OutQuart }
+                }
+                
+                z: 1000 - index
+                
+                opacity: isVisibleInStack ? 1.0 : 0.0
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                
+                readonly property real stackScale: notificationList.stackExpanded ? 1.0 : Math.max(0.8, (1.0 - (index * 0.05)))
+                scale: (thNotif.pressed ? 0.98 : (hhNotif.hovered ? 1.02 : 1.0)) * stackScale
                 Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                 
                 Behavior on height { NumberAnimation { duration: 250; easing.type: Easing.OutQuart } }
 
                 Rectangle {
-                    anchors.fill: parent; radius: 16; color: "white"
-                    opacity: notifDelegate.expanded ? (FrameConfig.notifHoverOpacity * 1.5) : (hhNotif.hovered ? FrameConfig.notifHoverOpacity : FrameConfig.notifOpacity)
-                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    id: bgRect
+                    anchors.fill: parent; radius: 16
+                    color: Qt.rgba(0.1, 0.1, 0.12, 0.8)
+                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                    border.width: 1
+                    
+                    opacity: 1.0
+                    
+                    states: State {
+                        when: notifDelegate.expanded || hhNotif.hovered
+                        PropertyChanges { target: bgRect; color: Qt.rgba(0.15, 0.15, 0.18, 0.9) }
+                    }
+                    transitions: Transition { ColorAnimation { duration: 200 } }
                 }
 
                 RowLayout {
                     id: mainLayout
                     anchors.fill: parent; anchors.margins: 12; spacing: 12
+                    
+                    opacity: (index === 0 || notificationList.stackExpanded) ? 1.0 : 0.0
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
                     
                     Item {
                         Layout.preferredWidth: 8; Layout.preferredHeight: 8
@@ -83,14 +118,14 @@ Item {
                         Layout.fillWidth: true; spacing: 2
                         Layout.alignment: Qt.AlignTop
                         Text { 
-                            text: modelData.summary || "Notification"
+                            text: model.summary || "Notification"
                             color: "white"; font.weight: Font.DemiBold; font.pixelSize: 13
                             elide: notifDelegate.expanded ? Text.ElideNone : Text.ElideRight
                             wrapMode: notifDelegate.expanded ? Text.Wrap : Text.NoWrap
                             Layout.fillWidth: true 
                         }
                         Text { 
-                            text: modelData.body || ""
+                            text: model.body || ""
                             color: "white"; opacity: 0.6; font.pixelSize: 11
                             elide: notifDelegate.expanded ? Text.ElideNone : Text.ElideRight
                             wrapMode: notifDelegate.expanded ? Text.Wrap : Text.NoWrap
@@ -107,7 +142,7 @@ Item {
                             text: "󰅖"; color: "white"; opacity: hhDismiss.hovered ? 0.8 : 0.3; font.pixelSize: 16
                             Behavior on opacity { NumberAnimation { duration: 200 } }
                         }
-                        TapHandler { onTapped: modelData.dismiss() }
+                        TapHandler { onTapped: NotificationService.removeHistory(index) }
                         HoverHandler { id: hhDismiss; cursorShape: Qt.PointingHandCursor }
                     }
                 }
