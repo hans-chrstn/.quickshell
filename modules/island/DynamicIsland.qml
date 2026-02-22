@@ -72,7 +72,10 @@ BaseIsland {
                 PathAttribute { name: "itemOpacity"; value: 0.0 }
             }
             delegate: Item {
-                width: root.width - 40; height: view.height; opacity: PathView.itemOpacity
+                width: root.width - 40; height: view.height
+                opacity: PathView.itemOpacity
+                enabled: PathView.isCurrentItem
+
                 Loader {
                     anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
                     sourceComponent: {
