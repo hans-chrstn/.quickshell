@@ -4,22 +4,11 @@ import Quickshell
 import Quickshell.Widgets
 import qs.config
 import qs.components
+import qs.services
 import QtMultimedia
 
 Item {
     id: root
-
-    SoundEffect {
-        id: expandSound
-        source: Quickshell.shellPath("assets/sfx/on.wav")
-        volume: 0.5
-    }
-
-    SoundEffect {
-        id: collapseSound
-        source: Quickshell.shellPath("assets/sfx/off.wav")
-        volume: 0.5
-    }
 
     property bool expanded: false
     property int barHeight: FrameConfig.thickness
@@ -64,9 +53,9 @@ Item {
 
     onExpandedChanged: {
         if (expanded) {
-            expandSound.play()
+            SfxService.playOn()
         } else {
-            collapseSound.play()
+            SfxService.playOff()
         }
     }
 

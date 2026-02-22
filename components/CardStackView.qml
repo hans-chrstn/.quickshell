@@ -1,4 +1,6 @@
 import QtQuick
+import QtMultimedia
+import Quickshell
 import qs.config
 import qs.components
 import qs.services
@@ -63,6 +65,7 @@ ListView {
                     onTapped: {
                         NotificationService.dismissAll()
                         root.stackExpanded = false
+                        SfxService.playComplete()
                     }
                 }
                 HoverHandler { cursorShape: Qt.PointingHandCursor }

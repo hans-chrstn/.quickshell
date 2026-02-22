@@ -2,12 +2,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
-import Quickshell.Services.UPower
+import qs.services
 
 Item {
     id: root
     
-    property var device: UPower.displayDevice
+    property var device: BatteryService.device
 
     RowLayout { 
         anchors.fill: parent
@@ -39,12 +39,12 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: parent.height * (root.device ? root.device.percentage : 0)
-                    color: (root.device && root.device.state === UPowerDeviceState.Charging) ? "#4caf50" : "white"
+                    color: (root.device && root.device.state === 1) ? "#4caf50" : "white"
                     opacity: chargingAnim.running ? 0.4 : 0.2
                     
                     SequentialAnimation on opacity {
                         id: chargingAnim
-                        running: root.device && root.device.state === UPowerDeviceState.Charging
+                        running: root.device && root.device.state === 1
                         loops: Animation.Infinite
                         NumberAnimation { to: 0.6; duration: 1000; easing.type: Easing.InOutSine }
                         NumberAnimation { to: 0.3; duration: 1000; easing.type: Easing.InOutSine }
@@ -79,7 +79,7 @@ Item {
                 horizontalAlignment: Text.AlignLeft
             }
             Text { 
-                text: root.device ? UPowerDeviceState.toString(root.device.state).toUpperCase() : "UNKNOWN"
+                text: root.device ? (root.device.state === 1 ? "CHARGING" : root.device.state === 2 ? "DISCHARGING" : "UNKNOWN") : "UNKNOWN"
                 color: "white"
                 font.weight: Font.DemiBold
                 font.pixelSize: 14
@@ -89,7 +89,7 @@ Item {
             }
             Text { 
                 text: root.device ? (Math.round(root.device.timeToEmpty / 60) + " MIN REMAINING") : ""
-                visible: root.device && root.device.state === UPowerDeviceState.Discharging
+                visible: root.device && root.device.state === 2
                 color: "white"
                 opacity: 0.4
                 font.pixelSize: 9

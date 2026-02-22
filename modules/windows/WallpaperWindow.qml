@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
+import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
@@ -15,6 +16,12 @@ PanelWindow {
     visible: false
     color: "transparent"
     
+    SoundEffect {
+        id: completeSound
+        source: Quickshell.shellPath("assets/sfx/complete.wav")
+        volume: 0.5
+    }
+
     anchors { 
         left: true
         right: true
@@ -191,7 +198,13 @@ PanelWindow {
                                 scale: hSlide.hovered ? 1.02 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 200 } }
                             }
-                            TapHandler { onTapped: { WallpaperService.startSlideshow(FileBrowserService.currentPath); root.visible = false } }
+                            TapHandler { 
+                                onTapped: { 
+                                    WallpaperService.startSlideshow(FileBrowserService.currentPath)
+                                    root.visible = false 
+                                    SfxService.playComplete()
+                                } 
+                            }
                             HoverHandler { id: hSlide; cursorShape: Qt.PointingHandCursor }
                         }
 
@@ -275,7 +288,13 @@ PanelWindow {
                                 scale: hApp.hovered ? 1.03 : 1.0
                                 Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
                             }
-                            TapHandler { onTapped: { WallpaperService.apply(); root.visible = false } }
+                            TapHandler { 
+                                onTapped: { 
+                                    WallpaperService.apply()
+                                    root.visible = false 
+                                    SfxService.playComplete()
+                                } 
+                            }
                             HoverHandler { id: hApp; cursorShape: Qt.PointingHandCursor }
                         }
                     }
@@ -366,6 +385,7 @@ PanelWindow {
                                 visible: !root.showSettings
                                 
                                 Text { 
+                                    id: hHiddenText
                                     anchors.centerIn: parent
                                     text: "󰈈"
                                     color: FileBrowserService.showHidden ? "black" : "white"

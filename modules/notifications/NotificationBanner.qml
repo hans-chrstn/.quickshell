@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import QtMultimedia
 import Quickshell
 import Quickshell.Widgets
 import qs.config
@@ -206,6 +207,7 @@ Item {
     }
 
     function dismiss() {
+        SfxService.playButton1()
         hideAnim.start()
     }
 

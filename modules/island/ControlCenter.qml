@@ -1,60 +1,31 @@
 import QtQuick
 import QtQuick.Layouts
+import QtMultimedia
 import Quickshell
 import qs.config
 import qs.components
 import qs.services
 import qs.modules.windows
+import qs.modules.island
 
 Item {
     id: root
     anchors.fill: parent
     
+    SoundEffect {
+        id: clickSound
+        source: Quickshell.shellPath("assets/sfx/button1.wav")
+        volume: 0.5
+    }
+
     RowLayout {
         id: mainView
         anchors.centerIn: parent
         anchors.verticalCenterOffset: 0
         spacing: 24
 
-        GridLayout {
-            columns: 2
-            rowSpacing: 12
-            columnSpacing: 12
-            Layout.alignment: Qt.AlignVCenter
-
-            ExpandableControlTile { 
-                icon: "󰖩"; label: "Wifi"
-                active: !!WifiService.wifiEnabled
-                enabled: WifiService.hasWifi
-                onClicked: {
-                    WifiService.toggleWifi()
-                }
-                onLongPressed: {
-                    controlPanelWin.activePage = "wifi"
-                    controlPanelWin.visible = true
-                }
-            }
-            ExpandableControlTile { 
-                icon: "󰂯"; label: "Bluetooth"
-                active: !!BluetoothService.bluetoothEnabled
-                enabled: BluetoothService.hasBluetooth
-                onClicked: BluetoothService.toggleBluetooth()
-                onLongPressed: {
-                    controlPanelWin.activePage = "bluetooth"
-                    controlPanelWin.visible = true
-                }
-            }
-            ControlTile { 
-                icon: "󰀝"; active: !!WifiService.airplaneMode
-                enabled: WifiService.hasWifi
-                onClicked: WifiService.toggleAirplane()
-            }
-            ControlTile { 
-                icon: NotificationService.dndEnabled ? "󰖔" : "󰂚"
-                active: !!NotificationService.dndEnabled
-                enabled: true
-                onClicked: NotificationService.toggleDND()
-            }
+        ControlTiles {
+            controlPanelWin: controlPanelWin
         }
 
         Rectangle {
@@ -67,29 +38,7 @@ Item {
             spacing: 12
             Layout.alignment: Qt.AlignVCenter
 
-            ColumnLayout {
-                spacing: 4
-                Text { text: "BRIGHTNESS"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
-                ControlSlider { 
-                    width: 180; height: 28
-                    enabled: BrightnessService.hasBrightness
-                    value: BrightnessService.brightness
-                    icon: "󰃠"; barColor: "#FFCC00"
-                    onMoved: (v) => BrightnessService.setBrightness(v)
-                }
-            }
-
-            ColumnLayout {
-                spacing: 4
-                Text { text: "VOLUME"; color: "white"; font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1.5; opacity: 0.3; Layout.leftMargin: 4 }
-                ControlSlider { 
-                    width: 180; height: 28
-                    enabled: SystemControl.hasAudio
-                    value: SystemControl.volume
-                    icon: SystemControl.muted ? "󰝟" : "󰕾"; barColor: "white"
-                    onMoved: (v) => SystemControl.setVolume(v)
-                }
-            }
+            ControlSliders { }
             
             Text {
                 text: "OPEN SETTINGS 󰒓"
@@ -99,7 +48,12 @@ Item {
                 Layout.bottomMargin: 12
                 opacity: hhSet.hovered ? 1.0 : 0.6
                 Behavior on opacity { NumberAnimation { duration: 200 } }
-                TapHandler { onTapped: { settingsWin.visible = true; console.log("Attempting to play clickSound..."); clickSound.play() } }
+                TapHandler { 
+                    onTapped: { 
+                        settingsWin.visible = true
+                        clickSound.play() 
+                    } 
+                }
                 HoverHandler { id: hhSet; cursorShape: Qt.PointingHandCursor }
             }
         }
