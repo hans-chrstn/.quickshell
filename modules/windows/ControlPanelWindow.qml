@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
@@ -79,70 +78,14 @@ PanelWindow {
                 clip: true; spacing: 10
                 model: root.activePage === "wifi" ? WifiService.model : BluetoothService.model
                 
-                delegate: Rectangle {
-                    width: listView.width; height: 60; radius: 16
-                    color: "white"; opacity: hItem.hovered ? 0.08 : 0.04
-                    
-                    RowLayout {
-                        anchors.fill: parent; anchors.margins: 16; spacing: 16
-                        Text { 
-                            text: root.activePage === "wifi" ? "󰖩" : "󰂯"
-                            color: model.active ? FrameConfig.accentColor : "white"
-                            opacity: 0.5; font.pixelSize: 20 
-                        }
-                        ColumnLayout {
-                            spacing: 0
-                            Text { text: model.name || "Unknown"; color: "white"; font.weight: Font.Medium; font.pixelSize: 13 }
-                            Text { 
-                                text: root.activePage === "wifi" ? (model.active ? "Connected" : "Signal: " + model.signal + "%") : (model.address || "Available")
-                                color: model.active ? FrameConfig.accentColor : "white"; font.pixelSize: 10; opacity: 0.6 
-                            }
-                        }
-                        Item { Layout.fillWidth: true }
-                        Text { text: model.active ? "󰄬" : ""; color: FrameConfig.accentColor; font.pixelSize: 18 }
-                    }
-                    
-                    TapHandler { 
-                        onTapped: {
-                            if (root.activePage === "wifi") {
-                                Quickshell.execDetached(["nmcli", "device", "wifi", "connect", model.name])
-                            } else {
-                                Quickshell.execDetached(["bluetoothctl", "connect", model.address])
-                            }
-                        } 
-                    }
-                    HoverHandler { id: hItem; cursorShape: Qt.PointingHandCursor }
+                delegate: ControlPanelDelegate {
+                    width: listView.width
+                    pageType: root.activePage
                 }
             }
 
-            RowLayout {
-                Layout.fillWidth: true
-                Text { 
-                    text: root.activePage.toUpperCase() + " POWER"
-                    color: "white"; font.pixelSize: 11; font.weight: Font.Black; opacity: 0.6 
-                }
-                Item { Layout.fillWidth: true }
-                
-                Rectangle {
-                    width: 120; height: 40; radius: 20
-                    color: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? FrameConfig.accentColor : "#FFFFFF"
-                    opacity: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? 1.0 : 0.1
-                    
-                    Text {
-                        anchors.centerIn: parent
-                        text: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? "ENABLED" : "DISABLED"
-                        color: (root.activePage === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled) ? "black" : "white"
-                        font.pixelSize: 10; font.weight: Font.Black
-                    }
-                    
-                    TapHandler {
-                        onTapped: {
-                            if (root.activePage === "wifi") WifiService.toggleWifi()
-                            else BluetoothService.toggleBluetooth()
-                        }
-                    }
-                    HoverHandler { id: hToggle; cursorShape: Qt.PointingHandCursor }
-                }
+            ControlPanelFooter {
+                pageType: root.activePage
             }
         }
     }

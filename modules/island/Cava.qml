@@ -35,7 +35,10 @@ Item {
         running: root.visible && root.isPlaying
         repeat: true
         onTriggered: {
-            var volume = SystemControl.volume
+            let lines = text.trim().split("\n");
+            if (lines.length > 0) {
+                var volume = AudioService.volume;
+                var values = lines[0].split(";");
             var volumeScale = volume > 0 ? Math.pow(volume, 0.4) : 0
             
             for (var i = 0; i < barCount; i++) {

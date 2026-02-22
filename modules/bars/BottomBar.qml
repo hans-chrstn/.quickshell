@@ -23,20 +23,15 @@ BaseBar {
     focusable: true
     WlrLayershell.keyboardFocus: appIsland.searchVisible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-    Item {
-        id: islandHitbox
+    BottomBarTrigger {
+        id: islandTrigger
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        width: appIsland.expanded ? FrameConfig.appIslandExpandedWidth : FrameConfig.dynamicIslandCollapsedWidth
-        height: appIsland.expanded 
-            ? (FrameConfig.appIslandExpandedHeight + FrameConfig.appIslandSearchBarHeight + 20)
-            : FrameConfig.thickness
-            
-        Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
+        targetIsland: appIsland
     }
 
     mask: Region {
-        Region { item: islandHitbox }
+        Region { item: islandTrigger }
         Region { 
             item: (osdPill.active && osdPill.opacity > 0.1) ? osdPill : null
         }
@@ -62,58 +57,12 @@ BaseBar {
         barColor: FrameConfig.color
     }
 
-    ControlPill {
+    BottomBarOSD {
         id: osdPill
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: appIsland.height + 20
         z: 5
-        width: FrameConfig.osdPillWidth; height: FrameConfig.osdPillHeight
-        
-        property string type: "volume"
-        barColor: type === "brightness" ? "#FFCC00" : FrameConfig.accentColor
-        
-        readonly property bool hovered: hOsd.hovered
-        onHoveredChanged: if (hovered) hideTimer.stop()
-        else if (active) hideTimer.restart()
-
-        HoverHandler { id: hOsd }
-
-        onIconClicked: {
-            if (type === "volume") {
-                if (SystemControl.volume > 0) SystemControl.setVolume(0)
-                else SystemControl.setVolume(SystemControl.lastVolume > 0 ? SystemControl.lastVolume : 0.5)
-            }
-        }
-        
-        onMoved: (val) => {
-            if (type === "volume") SystemControl.setVolume(val)
-            else BrightnessService.setBrightness(val)
-            hideTimer.restart() 
-        }
-
-        Timer { id: hideTimer; interval: FrameConfig.osdHideDelay; onTriggered: if (!osdPill.hovered) osdPill.active = false }
-
-        function show(newType, newIcon, newVal) {
-            osdPill.type = newType
-            osdPill.icon = newIcon
-            osdPill.value = newVal
-            osdPill.active = true
-            hideTimer.restart()
-        }
-    }
-
-    property bool osdReady: false
-    Timer { interval: 1500; running: true; onTriggered: root.osdReady = true }
-
-    Connections {
-        target: SystemControl
-        function onVolumeChanged() { if (root.osdReady) osdPill.show("volume", SystemControl.muted ? "󰝟" : "󰕾", SystemControl.volume) }
-    }
-
-    Connections {
-        target: BrightnessService
-        function onBrightnessChanged() { if (root.osdReady) osdPill.show("brightness", "󰃠", BrightnessService.brightness) }
     }
 
     MouseArea {
@@ -125,17 +74,4 @@ BaseBar {
             appIsland.expanded = false
         }
     }
-
-    MouseArea {
-        id: triggerArea
-        anchors.fill: islandHitbox
-        z: 0
-        hoverEnabled: true
-        onEntered: { collapseTimer.stop(); appIsland.expanded = true }
-        onExited: { if (!appIsland.searchVisible) collapseTimer.restart() }
-        propagateComposedEvents: true
-        onPressed: (mouse) => mouse.accepted = false
-    }
-
-    Timer { id: collapseTimer; interval: FrameConfig.collapseTimerDelay; onTriggered: appIsland.expanded = false }
 }

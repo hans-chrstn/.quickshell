@@ -42,10 +42,10 @@ ColumnLayout {
         }
         ControlSlider { 
             width: 180; height: 28
-            enabled: SystemControl.hasAudio
-            value: SystemControl.volume
-            icon: SystemControl.muted ? "󰝟" : "󰕾"; barColor: "white"
-            onMoved: (v) => SystemControl.setVolume(v)
+            enabled: AudioService.hasAudio
+            value: AudioService.volume
+            icon: AudioService.muted ? "󰝟" : "󰕾"; barColor: "white"
+            onMoved: (v) => AudioService.setVolume(v)
         }
     }
 }
