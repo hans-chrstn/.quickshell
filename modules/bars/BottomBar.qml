@@ -10,10 +10,11 @@ import qs.modules.island
 BaseBar {
     id: root
 
+    implicitHeight: FrameConfig.appIslandExpandedHeight + FrameConfig.appIslandSearchBarHeight + 20
+
     anchors.bottom: true
     anchors.left: true
     anchors.right: true
-    anchors.top: true
     
     exclusionMode: ExclusionMode.Ignore
     exclusiveZone: FrameConfig.thickness

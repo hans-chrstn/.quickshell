@@ -47,23 +47,23 @@ Item {
             when: root.expanded
             PropertyChanges { target: root; width: root.expandedWidth; height: root.expandedHeight }
             PropertyChanges { target: islandContentArea; opacity: 1 }
-            PropertyChanges { target: f1; opacity: 1.0; fWidth: root.f1TargetWidth; fHeight: root.f1TargetHeight }
-            PropertyChanges { target: f2; opacity: 1.0; fWidth: root.f2TargetWidth; fHeight: root.f2TargetHeight }
+            PropertyChanges { target: f1; opacity: 1.0 }
+            PropertyChanges { target: f2; opacity: 1.0 }
         },
         State {
             name: "collapsed"
             when: !root.expanded
             PropertyChanges { target: root; width: root.collapsedWidth; height: root.barHeight }
             PropertyChanges { target: islandContentArea; opacity: 0 }
-            PropertyChanges { target: f1; opacity: 0.0; fWidth: 0; fHeight: 0 }
-            PropertyChanges { target: f2; opacity: 0.0; fWidth: 0; fHeight: 0 }
+            PropertyChanges { target: f1; opacity: 0.0 }
+            PropertyChanges { target: f2; opacity: 0.0 }
         }
     ]
 
     transitions: [
         Transition {
             ParallelAnimation {
-                NumberAnimation { targets: [root, f1, f2]; properties: "width,height,fWidth,fHeight"; duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing }
+                NumberAnimation { targets: [root]; properties: "width,height"; duration: FrameConfig.animDuration; easing.type: FrameConfig.animEasing }
                 NumberAnimation { targets: [f1, f2, islandContentArea]; property: "opacity"; duration: 150 }
             }
         }
@@ -89,9 +89,7 @@ Item {
 
         Item {
             id: f1
-            property real fWidth: 0
-            property real fHeight: 0
-            width: fWidth; height: fHeight; opacity: 0; clip: true
+            width: root.radius; height: root.radius; opacity: 0; clip: true
             x: root.f1X; y: root.f1Y
             z: 100
 
@@ -105,9 +103,7 @@ Item {
 
         Item {
             id: f2
-            property real fWidth: 0
-            property real fHeight: 0
-            width: fWidth; height: fHeight; opacity: 0; clip: true
+            width: root.radius; height: root.radius; opacity: 0; clip: true
             x: root.f2X; y: root.f2Y
             z: 100
 
