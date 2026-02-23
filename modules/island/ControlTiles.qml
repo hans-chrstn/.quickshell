@@ -10,56 +10,59 @@ GridLayout {
     columns: 2
     rowSpacing: 12
     columnSpacing: 12
-    
-    SoundEffect {
-        id: toggleSound
-        source: Quickshell.shellPath("assets/sfx/button2.wav")
-        volume: 0.4
-    }
 
-    ExpandableControlTile { 
-        icon: "󰖩"; label: "Wifi"
+    ControlTile {
+        icon: WifiService.wifiEnabled ? "󰖩" : "󰖪"
         active: !!WifiService.wifiEnabled
         enabled: WifiService.hasWifi
         onClicked: {
-            WifiService.toggleWifi()
             SfxService.playButton2()
+            WifiService.toggleWifi()
         }
-        onLongPressed: {
-            ViewService.openControlPanel("wifi")
+        
+        TapHandler {
+            acceptedButtons: Qt.RightButton
+            onTapped: {
+                SfxService.playButton2()
+                ViewService.openControlPanel("wifi")
+            }
         }
     }
-    
-    ExpandableControlTile { 
-        icon: "󰂯"; label: "Bluetooth"
+
+    ControlTile {
+        icon: BluetoothService.bluetoothEnabled ? "󰂯" : "󰂲"
         active: !!BluetoothService.bluetoothEnabled
         enabled: BluetoothService.hasBluetooth
         onClicked: {
-            BluetoothService.toggleBluetooth()
             SfxService.playButton2()
+            BluetoothService.toggleBluetooth()
         }
-        onLongPressed: {
-            ViewService.openControlPanel("bluetooth")
+        
+        TapHandler {
+            acceptedButtons: Qt.RightButton
+            onTapped: {
+                SfxService.playButton2()
+                ViewService.openControlPanel("bluetooth")
+            }
         }
     }
-    
-    ControlTile { 
-        icon: "󰀝"; active: !!WifiService.airplaneMode
+
+    ControlTile {
+        icon: "󰀝"
+        active: !!WifiService.airplaneMode
         enabled: WifiService.hasWifi
         onClicked: {
-            WifiService.toggleAirplane()
             SfxService.playButton2()
+            WifiService.toggleAirplane()
         }
     }
-    
-    ControlTile { 
+
+    ControlTile {
         icon: NotificationService.dndEnabled ? "󰖔" : "󰂚"
         active: !!NotificationService.dndEnabled
-        enabled: true
         onClicked: {
-            NotificationService.toggleDND()
             SfxService.playButton2()
+            NotificationService.toggleDND()
         }
     }
 }
-

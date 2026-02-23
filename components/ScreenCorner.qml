@@ -13,6 +13,8 @@ PanelWindow {
     screen: modelData
     readonly property string screenName: modelData ? modelData.name : ""
 
+    property alias islandItem: island
+
     property bool activeTop: false
     property bool activeBottom: false
     property bool activeLeft: false

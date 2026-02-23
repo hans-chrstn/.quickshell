@@ -6,6 +6,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    readonly property color primaryMain: root.accentColor
     readonly property color primaryContent: "#000000"
     readonly property color secondaryContent: root.secondaryTextColor
     

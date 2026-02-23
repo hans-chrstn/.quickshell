@@ -22,22 +22,38 @@ PanelWindow {
     
     exclusionMode: visible ? ExclusionMode.Normal : ExclusionMode.Ignore
     focusable: visible
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.visible
+        onActivated: ViewService.closeWindow("wallpaper")
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            Qt.callLater(() => {
+                explorer.forceActiveFocus()
+            })
+        }
+    }
 
     Rectangle {
         anchors.fill: parent; color: ThemeService.shadowMain
-        opacity: root.visible ? 0.6 : 0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
+        opacity: (root.visible && !ViewService.closingWallpaper) ? 0.6 : 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
         MouseArea { anchors.fill: parent; onClicked: ViewService.closeWindow("wallpaper") }
     }
 
     ClippingRectangle {
         id: windowFrame
-        width: 1050; height: 680
+        width: 1120; height: 700
         anchors.centerIn: parent; radius: 36
         color: ThemeService.backgroundMain; border.color: ThemeService.outlineMain; border.width: 1
         
-        opacity: root.visible ? 1.0 : 0
-        scale: root.visible ? 1.0 : 0.95
+        opacity: (root.visible && !ViewService.closingWallpaper) ? 1.0 : 0
+        scale: (root.visible && !ViewService.closingWallpaper) ? 1.0 : 0.95
+        
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
 
@@ -59,12 +75,21 @@ PanelWindow {
                 Layout.fillWidth: true; Layout.fillHeight: true
                 
                 ColumnLayout {
-                    anchors.fill: parent; anchors.margins: 32; spacing: 32
+                    anchors.centerIn: parent
+                    spacing: 40 
+                    width: 600
                     
-                    WallpaperPreview { }
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 24 
+                        
+                        WallpaperPreview { }
 
-                    WallpaperControls {
-                        rootWindow: root
+                        WallpaperControls {
+                            id: wallpaperControls
+                            rootWindow: root
+                            activeFocusOnTab: true
+                        }
                     }
                 }
             }
@@ -82,7 +107,8 @@ PanelWindow {
                     WallpaperExplorer {
                         id: explorer
                         Layout.fillWidth: true; Layout.fillHeight: true
-                        
+                        activeFocusOnTab: true
+
                         Item {
                             Layout.fillWidth: true; Layout.fillHeight: true
                             visible: explorer.showSettings

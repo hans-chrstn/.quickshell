@@ -22,15 +22,10 @@ BaseBar {
     focusable: true
     WlrLayershell.keyboardFocus: appIsland.searchVisible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-    BottomBarTrigger {
-        id: islandTrigger
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
-        targetIsland: appIsland
-    }
-
     mask: Region {
+        Region { item: barRect }
         Region { item: islandTrigger }
+        // Region { item: trayDots }
         Region { 
             item: (osdPill.active && osdPill.opacity > 0.1) ? osdPill : null
         }
@@ -44,6 +39,22 @@ BaseBar {
         height: ThemeService.thickness
         color: ThemeService.color
         z: 1
+    }
+
+    // SystemTray {
+    //     id: trayDots
+    //     anchors.left: parent.left
+    //     anchors.leftMargin: ThemeService.cornerRadius + 15
+    //     anchors.bottom: parent.bottom
+    //     height: ThemeService.thickness
+    //     z: 10
+    // }
+
+    BottomBarTrigger {
+        id: islandTrigger
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        targetIsland: appIsland
     }
 
     AppIsland {

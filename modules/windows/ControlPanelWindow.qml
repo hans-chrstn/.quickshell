@@ -21,8 +21,8 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent; color: ThemeService.shadowMain
-        opacity: root.visible ? 0.6 : 0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
+        opacity: (root.visible && !ViewService.closingControlPanel) ? 0.6 : 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
         MouseArea { anchors.fill: parent; onClicked: ViewService.closeWindow("controlPanel") }
     }
 
@@ -32,8 +32,9 @@ PanelWindow {
         anchors.centerIn: parent; radius: 32
         color: ThemeService.backgroundMain; border.color: ThemeService.outlineMain; border.width: 1
         
-        opacity: root.visible ? 1.0 : 0
-        scale: root.visible ? 1.0 : 0.95
+        opacity: (root.visible && !ViewService.closingControlPanel) ? 1.0 : 0
+        scale: (root.visible && !ViewService.closingControlPanel) ? 1.0 : 0.95
+        
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
 

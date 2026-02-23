@@ -11,7 +11,7 @@ Item {
 
     property bool expanded: false
     property int barHeight: ThemeService.thickness
-    property color barColor: ThemeService.color
+    property color barColor: ThemeService.backgroundMain
     property int expandedWidth: 400
     property int expandedHeight: 100
     property int collapsedWidth: 160
@@ -36,16 +36,12 @@ Item {
     
     property color filletColor: root.barColor
     property real f1Rotation: 0
-    property real f1X: -f1.fWidth + 1
+    property real f1X: -radius + 1
     property real f1Y: 16
-    property real f1TargetWidth: root.radius
-    property real f1TargetHeight: root.radius
 
     property real f2Rotation: 90
     property real f2X: root.width - 1
     property real f2Y: 16
-    property real f2TargetWidth: root.radius
-    property real f2TargetHeight: root.radius
 
     property alias mouseHovered: hoverHandler.hovered
     default property alias content: islandContentArea.data
@@ -91,45 +87,37 @@ Item {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: islandRect; radius: root.radius; color: "black"
+            anchors.fill: islandRect; radius: root.radius; color: ThemeService.shadowMain
             opacity: root.expanded && Math.abs(root.width - root.expandedWidth) < 1.0 ? 0.4 : 0
             visible: opacity > 0; z: -1
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowOpacity: ThemeService.shadowOpacity
-            shadowBlur: ThemeService.shadowBlur / 30.0
-            shadowVerticalOffset: ThemeService.shadowVerticalOffset
-        }
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                shadowEnabled: true
+                shadowOpacity: ThemeService.shadowOpacity
+                shadowBlur: ThemeService.shadowBlur / 30.0
+                shadowVerticalOffset: ThemeService.shadowVerticalOffset
+            }
             Behavior on opacity { NumberAnimation { duration: 200 } }
         }
 
-        Item {
+        FilletCorner {
             id: f1
-            width: root.radius; height: root.radius; opacity: 0; clip: true
+            isTop: true; isLeft: true
             x: root.f1X; y: root.f1Y
-            z: 100
-
-            RoundedCornerShape {
-                anchors.fill: parent
-                isTop: true; isLeft: true
-                rotation: root.f1Rotation
-                cornerRadius: root.radius; cornerColor: root.filletColor
-            }
+            cornerRadius: root.radius
+            cornerColor: root.filletColor
+            filletRotation: root.f1Rotation
+            opacity: 0
         }
 
-        Item {
+        FilletCorner {
             id: f2
-            width: root.radius; height: root.radius; opacity: 0; clip: true
+            isTop: true; isLeft: true
             x: root.f2X; y: root.f2Y
-            z: 100
-
-            RoundedCornerShape {
-                anchors.fill: parent
-                isTop: true; isLeft: true
-                rotation: root.f2Rotation
-                cornerRadius: root.radius; cornerColor: root.filletColor
-            }
+            cornerRadius: root.radius
+            cornerColor: root.filletColor
+            filletRotation: root.f2Rotation
+            opacity: 0
         }
 
         ClippingRectangle {

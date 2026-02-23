@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import Quickshell
 import Quickshell.Widgets
 import qs.components
 import qs.services
@@ -9,8 +8,9 @@ import qs.services
 ColumnLayout {
     id: root
     spacing: 32
-    Layout.fillWidth: true
-    Layout.fillHeight: true
+    Layout.fillWidth: false
+    Layout.preferredWidth: 600
+    Layout.alignment: Qt.AlignHCenter
 
     ColumnLayout {
         spacing: 4
@@ -44,9 +44,11 @@ ColumnLayout {
             anchors.margins: -10
             radius: 30
             color: ThemeService.accentColor
-            opacity: 0.02
+            opacity: 0.04
             layer.enabled: true
-            layer.effect: MultiEffect { blurEnabled: true; blur: 0.6 } 
+            layer.effect: MultiEffect { 
+                blurEnabled: true; blur: 0.8
+            } 
         }
         
         Rectangle {

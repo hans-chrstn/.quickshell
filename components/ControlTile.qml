@@ -17,13 +17,25 @@ Rectangle {
     radius: ThemeService.controlCenterTileRadius
     
     color: active ? activeColor : ThemeService.backgroundContent
-    opacity: active ? 1.0 : (hh.hovered ? 0.15 : 0.1)
+    
+    readonly property bool isHighlighted: hh.hovered || activeFocus
+    
+    opacity: active ? 1.0 : (isHighlighted ? 0.15 : 0.1)
     
     Behavior on color { ColorAnimation { duration: 200 } }
     Behavior on opacity { NumberAnimation { duration: 200 } }
     Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }
     
-    scale: hh.hovered ? 1.05 : 1.0
+    scale: isHighlighted ? 1.05 : 1.0
+
+    Rectangle {
+        anchors.fill: parent
+        radius: parent.radius
+        color: "transparent"
+        border.color: "white"
+        border.width: root.activeFocus ? 2 : 0
+        visible: root.activeFocus
+    }
 
     Text {
         anchors.centerIn: parent

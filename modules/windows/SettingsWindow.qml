@@ -20,12 +20,27 @@ PanelWindow {
     
     exclusionMode: ExclusionMode.Ignore
     focusable: visible
+    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.visible
+        onActivated: ViewService.closeWindow("settings")
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            Qt.callLater(() => {
+                sidebar.forceActiveFocus()
+            })
+        }
+    }
 
     Rectangle {
         anchors.fill: parent
         color: ThemeService.shadowMain
-        opacity: root.visible ? 0.4 : 0
-        Behavior on opacity { NumberAnimation { duration: 400 } }
+        opacity: (root.visible && !ViewService.closingSettings) ? 0.4 : 0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
         
         MouseArea {
             anchors.fill: parent
@@ -41,8 +56,8 @@ PanelWindow {
         color: ThemeService.backgroundMain
         border.color: ThemeService.outlineMain
         border.width: 1
-        opacity: root.visible ? 1.0 : 0
-        scale: root.visible ? 1.0 : 0.95
+        opacity: (root.visible && !ViewService.closingSettings) ? 1.0 : 0
+        scale: (root.visible && !ViewService.closingSettings) ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -60,11 +75,23 @@ PanelWindow {
             SettingsSidebar {
                 id: sidebar
                 Layout.fillHeight: true
+                activeFocusOnTab: true
+                KeyNavigation.tab: settingsListScope
             }
 
-            Item {
+            FocusScope {
+                id: settingsListScope
                 Layout.fillWidth: true; Layout.fillHeight: true
+                activeFocusOnTab: true
                 
+                KeyNavigation.tab: sidebar
+                
+                onActiveFocusChanged: {
+                    if (activeFocus) {
+                        settingsList.forceActiveFocus()
+                    }
+                }
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 40
@@ -85,6 +112,12 @@ PanelWindow {
                         interactive: true
                         boundsBehavior: Flickable.StopAtBounds
                         footer: Item { height: 40 }
+                        
+                        focus: true
+                        Keys.onUpPressed: decrementCurrentIndex()
+                        Keys.onDownPressed: incrementCurrentIndex()
+                        
+                        onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
                         
                         Behavior on contentY { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 
