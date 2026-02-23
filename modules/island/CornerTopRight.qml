@@ -33,7 +33,7 @@ ScreenCorner {
             let home = Quickshell.env("HOME") || "/tmp"
             let timestamp = new Date().getTime()
             let filename = home + "/Videos/recording_" + root.screenName + "_" + timestamp + ".mp4"
-            command = ["wf-recorder", "-o", root.screenName, "-f", filename]
+            command = ["wf-recorder", "-a", "-o", root.screenName, "-f", filename]
             running = true
             Quickshell.execDetached(["notify-send", "Recording Started", "Screen: " + root.screenName + "\nFile: " + filename])
         }
