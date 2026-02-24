@@ -4,7 +4,6 @@ import Quickshell
 import Quickshell.Widgets
 import qs.services
 import qs.components
-import QtMultimedia
 
 Item {
     id: root

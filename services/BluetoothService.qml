@@ -9,6 +9,7 @@ Singleton {
 
     property bool hasBluetooth: false
     property bool bluetoothEnabled: false
+    property bool isScanning: false
 
     readonly property alias model: bluetoothListModel
     ListModel { id: bluetoothListModel }
@@ -17,41 +18,72 @@ Singleton {
         if (!hasBluetooth) return
         Quickshell.execDetached(["rfkill", root.bluetoothEnabled ? "block" : "unblock", "bluetooth"])
         root.bluetoothEnabled = !root.bluetoothEnabled
-        bluetoothScanProc.running = true
+        refresh()
     }
 
     function refresh(): void {
         if (hasBluetooth) {
             bluetoothCheckProc.running = true
-            bluetoothScanProc.running = true
+            bluetoothListProc.running = true
         }
     }
 
+    function startScan(): void {
+        if (!bluetoothEnabled) return
+        isScanning = true
+        bluetoothScanProc.running = true
+    }
+
     Process { 
-        id: bluetoothScanProc
+        id: bluetoothListProc
         command: ["bluetoothctl", "devices"]
         stdout: StdioCollector { 
             onStreamFinished: { 
                 bluetoothListModel.clear()
-                let lines = text.trim().split("\n")
-                for (let line of lines) { 
-                    let parts = line.split(" ")
-                    if (parts.length >= 3) {
-                        bluetoothListModel.append({ "name": parts.slice(2).join(" "), "address": parts[1], "active": false }) 
-                    }
-                } 
+                parseBluetoothOutput(text) 
             } 
+        } 
+    }
+
+    Process { 
+        id: bluetoothScanProc
+        command: ["bluetoothctl", "--timeout", "10", "scan", "on"]
+        onExited: (code) => {
+            root.isScanning = false
+            bluetoothListProc.running = true 
+        }
+    }
+
+    function parseBluetoothOutput(text) {
+        let lines = text.trim().split("\n")
+        for (let line of lines) { 
+            let parts = line.split(" ")
+            if (parts.length >= 3) {
+                let addr = parts[1]
+                let name = parts.slice(2).join(" ")
+                let found = false
+                for(let i=0; i<bluetoothListModel.count; i++) {
+                    if(bluetoothListModel.get(i).address === addr) {
+                        found = true
+                        break
+                    }
+                }
+                if (!found) {
+                    bluetoothListModel.append({ "name": name, "address": addr, "active": false }) 
+                }
+            }
         } 
     }
 
     Process { 
         id: bluetoothCheckProc
         command: ["rfkill", "list", "bluetooth"]
-        onExited: (code) => { if (code === 0 && stdout) root.bluetoothEnabled = !stdout.readAll().includes("soft blocked: yes") } 
+        stdout: StdioCollector {
+            onStreamFinished: root.bluetoothEnabled = !text.includes("soft blocked: yes")
+        }
     }
 
-    BinaryCheck { 
-        id: vBT
+    AvailabilityCheck { 
         binary: "bluetoothctl"
         onExistsChanged: {
             root.hasBluetooth = exists
@@ -60,10 +92,9 @@ Singleton {
     }
 
     Timer { 
-        interval: 5000
+        interval: 10000
         running: true
         repeat: true
-        triggeredOnStart: false
         onTriggered: root.refresh() 
     }
 }

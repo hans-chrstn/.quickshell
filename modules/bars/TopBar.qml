@@ -1,11 +1,7 @@
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Shapes
-import QtQuick.Effects
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Mpris
-import Quickshell.Services.UPower
 import Quickshell.Services.Notifications
 import qs.modules.island
 import qs.services

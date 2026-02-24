@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.components
@@ -25,7 +24,6 @@ BaseIsland {
     f2Y: height - barHeight - radius
 
     property alias searchVisible: searchBar.active
-    property alias isInteracting: appIslandRoot.mouseHovered
     property int activeMenus: 0
     
     onMouseHoveredChanged: {

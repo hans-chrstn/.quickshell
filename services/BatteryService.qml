@@ -1,18 +1,27 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import Quickshell.Services.UPower
 import qs.components
 
 Singleton {
     id: root
 
     property bool hasUPower: false
-    readonly property var device: hasUPower ? UPower.displayDevice : null
+    
+    readonly property var device: providerLoader.item ? providerLoader.item.displayDevice : null
 
-    BinaryCheck {
-        id: upowerCheck
-        binary: "upower"
-        onExistsChanged: root.hasUPower = exists
+    AvailabilityCheck {
+        dbusService: "org.freedesktop.UPower"
+        onChecked: (exists) => {
+            root.hasUPower = exists
+            if (exists) {
+                providerLoader.source = "UPowerBatteryProvider.qml"
+            }
+        }
+    }
+
+    Loader {
+        id: providerLoader
+        active: root.hasUPower
     }
 }

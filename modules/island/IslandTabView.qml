@@ -12,15 +12,32 @@ Item {
     property alias count: tabModel.count
     property alias moving: view.moving
     property var activePlayer: null
+    
+    property alias tabModelRef: tabModel
+
+    Connections {
+        target: SystemTrayService
+        function onHoveredIndexChanged() {
+            if (SystemTrayService.hoveredIndex !== -1) {
+                for (let i = 0; i < tabModel.count; i++) {
+                    if (tabModel.get(i).type === "tray") {
+                        view.currentIndex = i
+                        break
+                    }
+                }
+            }
+        }
+    }
 
     PathView {
         id: view
         anchors.fill: parent
-        anchors.topMargin: ThemeService.pathViewTopMargin
-        anchors.bottomMargin: ThemeService.indicatorRowBottomMargin + 10 
+        anchors.topMargin: 5
+        anchors.bottomMargin: 20
+        clip: true
         
         model: tabModel
-        pathItemCount: 3
+        pathItemCount: Math.max(tabModel.count, 3)
         snapMode: PathView.SnapOneItem
         highlightRangeMode: PathView.StrictlyEnforceRange
         preferredHighlightBegin: 0.5
@@ -28,25 +45,36 @@ Item {
         dragMargin: width / 2
         
         path: Path {
-            startX: -view.width * 0.5; startY: view.height / 2
+            startX: -view.width * 2; startY: view.height / 2
             PathAttribute { name: "itemOpacity"; value: 0.0 }
-            PathLine { x: 0; y: view.height / 2 }
+            
+            PathLine { x: -view.width * 0.5; y: view.height / 2 }
+            PathPercent { value: 0.48 }
             PathAttribute { name: "itemOpacity"; value: 0.0 }
+            
             PathLine { x: view.width * 0.5; y: view.height / 2 }
+            PathPercent { value: 0.5 }
             PathAttribute { name: "itemOpacity"; value: 1.0 }
-            PathLine { x: view.width; y: view.height / 2 }
-            PathAttribute { name: "itemOpacity"; value: 0.0 }
+            
             PathLine { x: view.width * 1.5; y: view.height / 2 }
+            PathPercent { value: 0.52 }
+            PathAttribute { name: "itemOpacity"; value: 0.0 }
+            
+            PathLine { x: view.width * 3; y: view.height / 2 }
+            PathPercent { value: 1.0 }
             PathAttribute { name: "itemOpacity"; value: 0.0 }
         }
 
         delegate: Item {
-            width: root.width - 40; height: view.height
+            width: view.width; height: view.height
             opacity: PathView.itemOpacity
             enabled: PathView.isCurrentItem
 
             Loader {
-                anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 20
+                anchors.fill: parent
+                anchors.leftMargin: 20; anchors.rightMargin: 20
+                clip: true
+                
                 sourceComponent: {
                     if (!model) return null;
                     if (model.type === "timeDate") return timeDateComp
@@ -55,6 +83,7 @@ Item {
                     if (model.type === "battery") return batteryComp
                     if (model.type === "notif") return notifComp
                     if (model.type === "cc") return ccComp
+                    if (model.type === "tray") return trayComp
                     return null
                 }
             }
@@ -67,6 +96,7 @@ Item {
     Component { id: batteryComp; Battery {} }
     Component { id: notifComp; NotificationTab { } } 
     Component { id: ccComp; ControlCenter { } }
+    Component { id: trayComp; SystemTrayTab { } }
 
     ListModel {
         id: tabModel
@@ -78,6 +108,7 @@ Item {
             if (BatteryService.hasUPower && BatteryService.device && BatteryService.device.type !== 0) append({ "type": "battery" })
             if (ThemeService.showWeather) append({ "type": "weather" })
             append({ "type": "cc" })
+            append({ "type": "tray" })
         }
         Component.onCompleted: updateModel()
     }

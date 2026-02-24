@@ -2,7 +2,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.services
-import qs.components
 import qs.modules.bars
 import qs.modules.island
 
@@ -25,7 +24,6 @@ BaseBar {
     mask: Region {
         Region { item: barRect }
         Region { item: islandTrigger }
-        // Region { item: trayDots }
         Region { 
             item: (osdPill.active && osdPill.opacity > 0.1) ? osdPill : null
         }
@@ -40,15 +38,6 @@ BaseBar {
         color: ThemeService.color
         z: 1
     }
-
-    // SystemTray {
-    //     id: trayDots
-    //     anchors.left: parent.left
-    //     anchors.leftMargin: ThemeService.cornerRadius + 15
-    //     anchors.bottom: parent.bottom
-    //     height: ThemeService.thickness
-    //     z: 10
-    // }
 
     BottomBarTrigger {
         id: islandTrigger

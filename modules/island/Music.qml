@@ -5,7 +5,6 @@ import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.services
-import qs.components
 
 Item {
     id: root

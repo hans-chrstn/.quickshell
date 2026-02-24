@@ -270,12 +270,25 @@ Item {
                         layer.enabled: isHovered
                         layer.effect: MultiEffect { brightness: 0.15; saturation: 0.1 }
                         source: {
-                            if (!app || !app.icon) return Quickshell.iconPath("system-run");
+                            if (!app || !app.icon) return "";
                             if (app.icon.startsWith("/")) return "file://" + app.icon;
+                            if (app.icon === "utilities-system-monitor" || app.icon === "system-run") return "";
                             return Quickshell.iconPath(app.icon);
                         }
                         fillMode: Image.PreserveAspectFit
-                        onStatusChanged: { if (status === Image.Error) source = Quickshell.iconPath("system-run"); }
+                        onStatusChanged: { 
+                            if (status === Image.Error) {
+                                source = ""; 
+                            }
+                        }
+                    }
+                    
+                    Text {
+                        anchors.centerIn: parent
+                        visible: appIcon.status !== Image.Ready
+                        text: app ? app.name.substring(0, 1).toUpperCase() : "?"
+                        color: ThemeService.backgroundContent
+                        font.pixelSize: 20; font.weight: Font.Black; opacity: 0.2
                     }
                     
                     Rectangle {

@@ -13,6 +13,8 @@ import qs.modules.windows
 import qs.modules.notifications
 
 ShellRoot {
+    Lock { }
+
     Variants {
         model: Quickshell.screens
         delegate: TopBar { aboveWindows: true }
@@ -56,23 +58,5 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
         delegate: NotificationPopup { }
-    }
-
-    WallpaperWindow {
-        id: wallpaperWin
-    }
-
-    ControlPanelWindow {
-        id: controlPanelWin
-    }
-
-    SettingsWindow {
-        id: settingsWin
-    }
-
-    Component.onCompleted: {
-        ViewService.wallpaperWindow = wallpaperWin
-        ViewService.controlPanelWindow = controlPanelWin
-        ViewService.settingsWindow = settingsWin
     }
 }

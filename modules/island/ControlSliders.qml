@@ -6,10 +6,10 @@ import qs.components
 
 ColumnLayout {
     id: root
-    spacing: 12
+    spacing: 10
 
     ColumnLayout {
-        spacing: 4
+        spacing: 2
         Text { 
             text: "BRIGHTNESS"
             color: ThemeService.backgroundContent
@@ -17,10 +17,11 @@ ColumnLayout {
             font.weight: Font.Black
             font.letterSpacing: 1.5
             opacity: 0.3
-            Layout.leftMargin: 4 
+            height: 10
+            verticalAlignment: Text.AlignBottom
         }
         ControlSlider { 
-            width: 180; height: 28
+            width: 180; height: 24
             enabled: BrightnessService.hasBrightness
             value: BrightnessService.brightness
             icon: "󰃠"; barColor: "#FFCC00"
@@ -29,7 +30,7 @@ ColumnLayout {
     }
 
     ColumnLayout {
-        spacing: 4
+        spacing: 2
         Text { 
             text: "VOLUME"
             color: ThemeService.backgroundContent
@@ -37,10 +38,11 @@ ColumnLayout {
             font.weight: Font.Black
             font.letterSpacing: 1.5
             opacity: 0.3
-            Layout.leftMargin: 4 
+            height: 10
+            verticalAlignment: Text.AlignBottom
         }
         ControlSlider { 
-            width: 180; height: 28
+            width: 180; height: 24
             enabled: AudioService.hasAudio
             value: AudioService.volume
             icon: AudioService.muted ? "󰝟" : "󰕾"; barColor: ThemeService.backgroundContent

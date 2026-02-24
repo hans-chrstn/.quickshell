@@ -32,8 +32,7 @@ Singleton {
         } 
     }
 
-    BinaryCheck { 
-        id: vBright
+    AvailabilityCheck { 
         binary: "brightnessctl"
         onExistsChanged: {
             root.hasBrightness = exists

@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Effects
-import QtMultimedia
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets

@@ -1,8 +1,6 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import qs.services
-import qs.components
 import qs.modules.island
 
 Item {

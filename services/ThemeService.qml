@@ -7,12 +7,24 @@ Singleton {
     id: root
 
     readonly property color primaryMain: root.accentColor
+    readonly property color primaryAccent: root.accentColor
     readonly property color primaryContent: "#000000"
     readonly property color secondaryContent: root.secondaryTextColor
     
     readonly property color backgroundMain: root.color
     readonly property color backgroundContent: "#FFFFFF"
     
+    property real lockBackgroundOpacity: 0.45
+    property real lockBackgroundBlur: 1.0
+    property int lockClockFontSize: 120
+    property int lockDateFontSize: 16
+    property real lockDateOpacity: 0.8
+    property int lockDateLetterSpacing: 6
+    property int lockContentSpacing: 50
+    property real lockPasswordOpacity: 0.06
+    property bool lockDynamicAccents: true
+    property int lockParallaxIntensity: 20
+
     readonly property color surfaceMain: Qt.rgba(1, 1, 1, 0.05)
     readonly property color surfaceStrong: Qt.rgba(1, 1, 1, 0.1)
     readonly property color surfaceSubtle: Qt.rgba(1, 1, 1, 0.02)
@@ -122,6 +134,24 @@ Singleton {
     signal resetOccurred()
     
     property var settingsStructure: [
+        {
+            category: "Lockscreen",
+            icon: "󰌾",
+            items: [
+                { type: "header", label: "Visuals" },
+                { type: "switch", label: "Dynamic Accents", property: "lockDynamicAccents", default: true },
+                { type: "slider", label: "Wallpaper Opacity", property: "lockBackgroundOpacity", default: 0.45, min: 0.0, max: 1.0, step: 0.05 },
+                { type: "slider", label: "Blur Intensity", property: "lockBackgroundBlur", default: 1.0, min: 0.0, max: 2.0, step: 0.1 },
+                { type: "slider", label: "Parallax Intensity", property: "lockParallaxIntensity", default: 20, min: 0, max: 100 },
+                { type: "header", label: "Date & Time" },
+                { type: "slider", label: "Clock Size", property: "lockClockFontSize", default: 120, min: 60, max: 240 },
+                { type: "slider", label: "Date Size", property: "lockDateFontSize", default: 16, min: 10, max: 40 },
+                { type: "slider", label: "Date Spacing", property: "lockDateLetterSpacing", default: 6, min: 0, max: 20 },
+                { type: "header", label: "Layout" },
+                { type: "slider", label: "Content Spacing", property: "lockContentSpacing", default: 50, min: 10, max: 150 },
+                { type: "slider", label: "Password Opacity", property: "lockPasswordOpacity", default: 0.06, min: 0.0, max: 0.5, step: 0.01 }
+            ]
+        },
         {
             category: "Appearance",
             icon: "󰔉",

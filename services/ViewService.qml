@@ -1,40 +1,48 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import qs.modules.windows
 
 Singleton {
     id: root
 
-    property PanelWindow settingsWindow: null
-    property PanelWindow controlPanelWindow: null
-    property PanelWindow wallpaperWindow: null
+    readonly property SettingsWindow settingsWindow: SettingsWindow {
+        visible: false
+        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    }
+
+    readonly property WallpaperWindow wallpaperWindow: WallpaperWindow {
+        visible: false
+        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    }
+
+    readonly property ControlPanelWindow controlPanelWindow: ControlPanelWindow {
+        visible: false
+        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    }
 
     property bool closingSettings: false
     property bool closingControlPanel: false
     property bool closingWallpaper: false
 
     function openSettings() {
-        if (settingsWindow) {
-            root.closingSettings = false
-            settingsWindow.visible = true
-        }
+        root.closingSettings = false
+        settingsWindow.visible = true
     }
 
     function toggleSettings() {
-        if (settingsWindow && settingsWindow.visible) closeWindow("settings")
+        if (settingsWindow.visible) closeWindow("settings")
         else openSettings()
     }
 
     function openControlPanel(page = "wifi") {
-        if (controlPanelWindow) {
-            root.closingControlPanel = false
-            controlPanelWindow.activePage = page
-            controlPanelWindow.visible = true
-        }
+        root.closingControlPanel = false
+        controlPanelWindow.activePage = page
+        controlPanelWindow.visible = true
     }
 
     function toggleControlPanel(page = "wifi") {
-        if (controlPanelWindow && controlPanelWindow.visible && controlPanelWindow.activePage === page) {
+        if (controlPanelWindow.visible && controlPanelWindow.activePage === page) {
             closeWindow("controlPanel")
         } else {
             openControlPanel(page)
@@ -42,33 +50,31 @@ Singleton {
     }
 
     function openWallpaper() {
-        if (wallpaperWindow) {
-            root.closingWallpaper = false
-            wallpaperWindow.visible = true
-        }
+        root.closingWallpaper = false
+        wallpaperWindow.visible = true
     }
 
     function toggleWallpaper() {
-        if (wallpaperWindow && wallpaperWindow.visible) closeWindow("wallpaper")
+        if (wallpaperWindow.visible) closeWindow("wallpaper")
         else openWallpaper()
     }
 
     function closeWindow(winType) {
-        if (winType === "settings" && settingsWindow) {
+        if (winType === "settings") {
             root.closingSettings = true
-            Qt.callLater(() => { closeTimerSettings.restart() })
+            closeTimerSettings.restart()
         }
-        if (winType === "controlPanel" && controlPanelWindow) {
+        if (winType === "controlPanel") {
             root.closingControlPanel = true
-            Qt.callLater(() => { closeTimerControlPanel.restart() })
+            closeTimerControlPanel.restart()
         }
-        if (winType === "wallpaper" && wallpaperWindow) {
+        if (winType === "wallpaper") {
             root.closingWallpaper = true
-            Qt.callLater(() => { closeTimerWallpaper.restart() })
+            closeTimerWallpaper.restart()
         }
     }
 
-    Timer { id: closeTimerSettings; interval: 350; onTriggered: { if (settingsWindow) settingsWindow.visible = false; root.closingSettings = false } }
-    Timer { id: closeTimerControlPanel; interval: 350; onTriggered: { if (controlPanelWindow) controlPanelWindow.visible = false; root.closingControlPanel = false } }
-    Timer { id: closeTimerWallpaper; interval: 350; onTriggered: { if (wallpaperWindow) wallpaperWindow.visible = false; root.closingWallpaper = false } }
+    Timer { id: closeTimerSettings; interval: 350; onTriggered: { settingsWindow.visible = false; root.closingSettings = false } }
+    Timer { id: closeTimerControlPanel; interval: 350; onTriggered: { controlPanelWindow.visible = false; root.closingControlPanel = false } }
+    Timer { id: closeTimerWallpaper; interval: 350; onTriggered: { wallpaperWindow.visible = false; root.closingWallpaper = false } }
 }

@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import QtMultimedia
 import Quickshell
-import Quickshell.Widgets
 import qs.components
 import qs.services
 
@@ -122,7 +120,7 @@ FocusScope {
                 
                 layer.enabled: true
                 layer.effect: MultiEffect {
-                    shadowEnabled: hApp.hovered || parent.activeFocus
+                    shadowEnabled: (hApp && hApp.hovered) || (parent && parent.activeFocus)
                     shadowColor: ThemeService.accentColor
                     shadowOpacity: 0.3
                     shadowBlur: 0.6

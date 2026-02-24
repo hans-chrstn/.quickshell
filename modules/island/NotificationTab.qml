@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.Notifications
-import qs.components
 import qs.services
 
 Item {

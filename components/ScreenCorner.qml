@@ -1,8 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
-import QtQuick.Effects
 import Quickshell
-import QtQuick.Layouts
 import Quickshell.Wayland
 import qs.services
 import qs.components

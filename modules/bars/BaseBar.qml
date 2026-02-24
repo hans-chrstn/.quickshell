@@ -10,6 +10,5 @@ PanelWindow {
     property var modelData
     screen: modelData
 
-    property int barThickness: ThemeService.thickness
     property color barColor: ThemeService.color
 }

@@ -32,10 +32,6 @@ Singleton {
         niri.closeWindow(id)
     }
 
-    function closeFocusedWindow() {
-        niri.closeWindowOrFocused()
-    }
-
     property var runningApps: ({})
 
     Instantiator {

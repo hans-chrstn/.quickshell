@@ -23,8 +23,8 @@ Singleton {
 
     function toggleAirplane(): void {
         if (!hasWifi) return
-        let cmd = root.airplaneMode ? "on" : "off"
-        Quickshell.execDetached(["nmcli", "radio", "all", cmd === "on" ? "enabled" : "disabled"])
+        let nextState = root.airplaneMode ? "on" : "off"
+        Quickshell.execDetached(["nmcli", "radio", "all", nextState])
         root.airplaneMode = !root.airplaneMode
     }
 
@@ -65,16 +65,12 @@ Singleton {
         onExited: (code) => { if (code === 0 && stdout) root.airplaneMode = !stdout.readAll().includes("enabled") } 
     }
 
-    BinaryCheck { 
-        id: vWifi
+    AvailabilityCheck { 
         binary: "nmcli"
         onExistsChanged: {
             root.hasWifi = exists
             if (exists) root.refresh()
         } 
-    }
-
-    Component.onCompleted: {
     }
 
     Timer { 

@@ -1,48 +1,56 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.SystemTray
 import qs.services
 import qs.components
 
-Row {
+Item {
     id: root
-    spacing: 8
+    width: 14
     height: ThemeService.thickness
     
-    // Repeater {
-    //     model: SystemTrayService.values
-    //     
-    //     delegate: Item {
-    //         id: delegateRoot
-    //         width: 12
-    //         height: ThemeService.thickness
-    //         anchors.verticalCenter: parent.verticalCenter
-    //
-    //         Rectangle {
-    //             id: dot
-    //             anchors.centerIn: parent
-    //             width: 6; height: 6; radius: 3
-    //             
-    //             color: (SystemTrayService.hoveredIndex === index) 
-    //                 ? Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 1.0)
-    //                 : Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.5)
-    //
-    //             Behavior on color { ColorAnimation { duration: 200 } }
-    //         }
-    //
-    //         HoverHandler { 
-    //             id: hh
-    //             onHoveredChanged: {
-    //                 if (hovered) SystemTrayService.hoveredIndex = index
-    //                 else if (SystemTrayService.hoveredIndex === index) SystemTrayService.hoveredIndex = -1
-    //             }
-    //         }
-    //         
-    //         TapHandler {
-    //             onTapped: modelData.activate()
-    //         }
-    //     }
-    // }
+    visible: SystemTrayService.count > 0
+
+    Rectangle {
+        id: indicatorPill
+        anchors.centerIn: parent
+        width: 10; height: 10; radius: 5
+        
+        readonly property var firstItem: SystemTrayService.values.length > 0 ? SystemTrayService.values[0] : null
+        readonly property bool needsAttention: {
+            for (let item of SystemTrayService.values) {
+                if (item.status === SystemTrayItem.NeedsAttention) return true
+            }
+            return false
+        }
+
+        color: needsAttention ? ThemeService.dangerMain : 
+               ((SystemTrayService.hoveredIndex !== -1) 
+                ? Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 1.0)
+                : Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.5))
+
+        Behavior on color { ColorAnimation { duration: 300 } }
+
+        SequentialAnimation on opacity {
+            running: indicatorPill.needsAttention
+            loops: Animation.Infinite
+            NumberAnimation { from: 1.0; to: 0.4; duration: 800; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 0.4; to: 1.0; duration: 800; easing.type: Easing.InOutSine }
+        }
+    }
+
+    HoverHandler { 
+        id: hh
+        onHoveredChanged: {
+            if (hovered) SystemTrayService.hoveredIndex = 0
+            else unhoverTimer.restart()
+        }
+    }
+    
+    Timer {
+        id: unhoverTimer
+        interval: 350 
+        onTriggered: if (!hh.hovered) SystemTrayService.hoveredIndex = -1
+    }
 }

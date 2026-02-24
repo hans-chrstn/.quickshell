@@ -32,12 +32,12 @@ Singleton {
         }
     }
 
-    BinaryCheck {
+    AvailabilityCheck {
         binary: "wpctl"
         onExistsChanged: root.hasWpctl = exists
     }
 
-    BinaryCheck {
+    AvailabilityCheck {
         binary: "pactl"
         onExistsChanged: root.hasPactl = exists
     }

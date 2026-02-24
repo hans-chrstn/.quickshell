@@ -29,23 +29,6 @@ Item {
         return "";
     }
 
-    property string strokePath: {
-        var W = root.width;
-        var H = root.height;
-        var R = root.cornerRadius;
-
-        if (root.isTop && root.isLeft) {
-            return `M ${W} ${H} A ${R} ${R} 0 0 0 0 0`;
-        } else if (root.isTop && !root.isLeft) {
-            return `M 0 ${H} A ${R} ${R} 0 0 1 ${W} 0`;
-        } else if (root.isBottom && root.isLeft) {
-            return `M ${W} 0 A ${R} ${R} 0 0 1 0 ${H}`;
-        } else if (root.isBottom && !root.isLeft) {
-            return `M 0 0 A ${R} ${R} 0 0 0 ${W} ${H}`;
-        }
-        return "";
-    }
-
     Shape {
         anchors.fill: parent
         layer.enabled: true

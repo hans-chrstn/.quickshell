@@ -1,22 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
+import Quickshell
 import qs.services
 
 Item {
     id: root
 
-    Timer {
-        interval: 10000
-        running: true
-        repeat: true
-        onTriggered: {
-            let now = new Date();
-            let newTime = Qt.formatDateTime(now, ThemeService.timeFormat);
-            let newDate = Qt.formatDateTime(now, ThemeService.dateFormat).toUpperCase();
-            if (timeText.text !== newTime) timeText.text = newTime;
-            if (dateText.text !== newDate) dateText.text = newDate;
-        }
+    SystemClock {
+        id: sysClock
+        precision: SystemClock.Minutes
     }
 
     ColumnLayout {
@@ -25,7 +17,7 @@ Item {
 
         Text {
             id: timeText
-            text: Qt.formatDateTime(new Date(), ThemeService.timeFormat)
+            text: Qt.formatDateTime(sysClock.date, ThemeService.timeFormat)
             color: "white"
             font.weight: Font.DemiBold
             font.pixelSize: 52
@@ -47,7 +39,7 @@ Item {
 
             Text {
                 id: dateText
-                text: Qt.formatDateTime(new Date(), ThemeService.dateFormat).toUpperCase()
+                text: Qt.formatDateTime(sysClock.date, ThemeService.dateFormat).toUpperCase()
                 color: "white"
                 opacity: 0.4
                 font.pixelSize: 9

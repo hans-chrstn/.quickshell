@@ -63,6 +63,18 @@ PanelWindow {
                 Item { Layout.fillWidth: true }
                 
                 Rectangle {
+                    width: 36; height: 36; radius: 18; color: ThemeService.backgroundContent; opacity: hSet.hovered ? 0.2 : 0.1
+                    Text { anchors.centerIn: parent; text: "󰒓"; color: ThemeService.backgroundContent; font.pixelSize: 18 }
+                    TapHandler { 
+                        onTapped: {
+                            ViewService.openSettings()
+                            SfxService.playButton1()
+                        }
+                    }
+                    HoverHandler { id: hSet; cursorShape: Qt.PointingHandCursor }
+                }
+
+                Rectangle {
                     width: 36; height: 36; radius: 18; color: ThemeService.backgroundContent; opacity: hClose.hovered ? 0.2 : 0.1
                     Text { anchors.centerIn: parent; text: "󰅖"; color: ThemeService.backgroundContent; font.pixelSize: 18 }
                     TapHandler { onTapped: ViewService.closeWindow("controlPanel") }

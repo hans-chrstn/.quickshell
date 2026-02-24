@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtMultimedia
 import Quickshell
 import qs.services
 import qs.components

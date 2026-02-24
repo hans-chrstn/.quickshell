@@ -6,7 +6,7 @@ Row {
     
     property int count: 0
     property int currentIndex: 0
-    property color color: "white"
+    property color color: ThemeService.backgroundContent
     property int dotSize: 4
     property int activeDotWidth: 12
 
