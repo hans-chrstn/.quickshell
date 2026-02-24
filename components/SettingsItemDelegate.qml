@@ -122,6 +122,7 @@ Loader {
     Component {
         id: switchComp
         Item {
+            id: switchItem
             width: root.width; height: 44; focus: true
             
             function toggle() {
@@ -142,7 +143,7 @@ Loader {
                     implicitWidth: 44; implicitHeight: 24; radius: 12
                     Layout.alignment: Qt.AlignVCenter
                     color: ThemeService[itemData.property] ? ThemeService.accentColor : ThemeService.outlineMain
-                    border.color: parent.parent.activeFocus ? "white" : "transparent"; border.width: parent.parent.activeFocus ? 2 : 0
+                    border.color: switchItem.activeFocus ? "white" : "transparent"; border.width: switchItem.activeFocus ? 2 : 0
                     
                     Rectangle {
                         x: ThemeService[itemData.property] ? parent.width - width - 2 : 2; y: 2; width: 20; height: 20; radius: 10
@@ -151,7 +152,7 @@ Loader {
                         Behavior on color { ColorAnimation { duration: 200 } }
                     }
                     
-                    TapHandler { onTapped: parent.parent.toggle() }
+                    TapHandler { onTapped: switchItem.toggle() }
                 }
             }
         }

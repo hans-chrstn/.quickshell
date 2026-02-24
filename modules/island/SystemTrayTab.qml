@@ -72,8 +72,8 @@ Item {
                         
                         TapHandler {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onTapped: {
-                                if (tap.button === Qt.RightButton) {
+                            onTapped: (point) => {
+                                if (point.pressedButtons & Qt.RightButton) {
                                     modelData.secondaryActivate()
                                 } else {
                                     modelData.activate()
