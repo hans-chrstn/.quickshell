@@ -6,10 +6,10 @@ import qs.services
 Item {
     id: root
     anchors.fill: parent
-    opacity: ThemeService.cavaOpacity
+    opacity: ThemeManager.cavaOpacity
     
-    property int barCount: ThemeService.cavaBarCount
-    property color barColor: ThemeService.accentColor
+    property int barCount: ThemeManager.cavaBarCount
+    property color barColor: ThemeManager.accentColor
     
     property var currentHeights: []
     property var targetHeights: []
@@ -30,11 +30,11 @@ Item {
 
     Timer {
         id: targetTimer
-        interval: ThemeService.cavaUpdateInterval
+        interval: ThemeManager.cavaUpdateInterval
         running: root.visible && root.isPlaying
         repeat: true
         onTriggered: {
-            var volume = AudioService.volume
+            var volume = AudioManager.volume
             var volumeScale = volume > 0 ? Math.pow(volume, 0.4) : 0
             
             for (var i = 0; i < barCount; i++) {
@@ -60,7 +60,7 @@ Item {
         onTriggered: {
             if (currentHeights.length < barCount) return;
             for (var i = 0; i < barCount; i++) {
-                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * ThemeService.cavaSmoothing;
+                currentHeights[i] += (targetHeights[i] - currentHeights[i]) * ThemeManager.cavaSmoothing;
                 var item = repeater.itemAt(i);
                 if (item) item.height = Math.max(2, currentHeights[i]);
             }
@@ -69,7 +69,7 @@ Item {
 
     Row {
         anchors.fill: parent
-        spacing: ThemeService.cavaSpacing
+        spacing: ThemeManager.cavaSpacing
         
         Repeater {
             id: repeater

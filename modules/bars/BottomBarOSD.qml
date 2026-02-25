@@ -5,11 +5,11 @@ import qs.components
 ControlPill {
     id: root
     
-    width: ThemeService.osdPillWidth
-    height: ThemeService.osdPillHeight
+    width: ThemeManager.osdPillWidth
+    height: ThemeManager.osdPillHeight
     
     property string type: "volume"
-    barColor: type === "brightness" ? "#FFCC00" : ThemeService.accentColor
+    barColor: type === "brightness" ? "#FFCC00" : ThemeManager.accentColor
     
     readonly property bool hovered: hOsd.hovered
     onHoveredChanged: if (hovered) hideTimer.stop()
@@ -19,18 +19,18 @@ ControlPill {
 
     onIconClicked: {
         if (type === "volume") {
-            if (AudioService.volume > 0) AudioService.setVolume(0)
-            else AudioService.setVolume(AudioService.lastVolume > 0 ? AudioService.lastVolume : 0.5)
+            if (AudioManager.volume > 0) AudioManager.setVolume(0)
+            else AudioManager.setVolume(AudioManager.previousVolume > 0 ? AudioManager.previousVolume : 0.5)
         }
     }
     
     onMoved: (val) => {
-        if (type === "volume") AudioService.setVolume(val)
-        else BrightnessService.setBrightness(val)
+        if (type === "volume") AudioManager.setVolume(val)
+        else BrightnessManager.setLevel(val)
         hideTimer.restart() 
     }
 
-    Timer { id: hideTimer; interval: ThemeService.osdHideDelay; onTriggered: if (!root.hovered) root.active = false }
+    Timer { id: hideTimer; interval: ThemeManager.osdHideDelay; onTriggered: if (!root.hovered) root.active = false }
 
     function show(newType, newIcon, newVal) {
         root.type = newType
@@ -44,12 +44,12 @@ ControlPill {
     Timer { interval: 1500; running: true; onTriggered: root.osdReady = true }
 
     Connections {
-        target: AudioService
-        function onVolumeChanged() { if (root.osdReady) root.show("volume", AudioService.muted ? "󰝟" : "󰕾", AudioService.volume) }
+        target: AudioManager
+        function onVolumeChanged() { if (root.osdReady) root.show("volume", AudioManager.isMuted ? "󰝟" : "󰕾", AudioManager.volume) }
     }
 
     Connections {
-        target: BrightnessService
-        function onBrightnessChanged() { if (root.osdReady) root.show("brightness", "󰃠", BrightnessService.brightness) }
+        target: BrightnessManager
+        function onLevelChanged() { if (root.osdReady) root.show("brightness", "󰃠", BrightnessManager.level) }
     }
 }

@@ -25,7 +25,7 @@ PanelWindow {
     Shortcut {
         sequence: "Escape"
         enabled: root.visible
-        onActivated: ViewService.closeWindow("wallpaper")
+        onActivated: ViewManager.closeWindowByType("wallpaper")
     }
 
     onVisibleChanged: {
@@ -37,20 +37,20 @@ PanelWindow {
     }
 
     Rectangle {
-        anchors.fill: parent; color: ThemeService.shadowMain
-        opacity: (root.visible && !ViewService.closingWallpaper) ? 0.6 : 0
+        anchors.fill: parent; color: ThemeManager.shadowPrimaryColor
+        opacity: (root.visible && !ViewManager.isWallpaperClosing) ? 0.6 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
-        MouseArea { anchors.fill: parent; onClicked: ViewService.closeWindow("wallpaper") }
+        MouseArea { anchors.fill: parent; onClicked: ViewManager.closeWindowByType("wallpaper") }
     }
 
     ClippingRectangle {
         id: windowFrame
         width: 1120; height: 700
         anchors.centerIn: parent; radius: 36
-        color: ThemeService.backgroundMain; border.color: ThemeService.outlineMain; border.width: 1
+        color: ThemeManager.backgroundPrimaryColor; border.color: ThemeManager.outlinePrimaryColor; border.width: 1
         
-        opacity: (root.visible && !ViewService.closingWallpaper) ? 1.0 : 0
-        scale: (root.visible && !ViewService.closingWallpaper) ? 1.0 : 0.95
+        opacity: (root.visible && !ViewManager.isWallpaperClosing) ? 1.0 : 0
+        scale: (root.visible && !ViewManager.isWallpaperClosing) ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -60,7 +60,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent; radius: 36; color: "transparent"
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.02) }
+                GradientStop { position: 0.0; color: Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.02) }
                 GradientStop { position: 0.5; color: "transparent" }
             }
         }
@@ -93,11 +93,11 @@ PanelWindow {
             }
 
             Rectangle { 
-                width: 1; Layout.fillHeight: true; color: ThemeService.backgroundContent; opacity: 0.05 
+                width: 1; Layout.fillHeight: true; color: ThemeManager.contentOnBackgroundColor; opacity: 0.05 
             }
 
             Rectangle {
-                Layout.preferredWidth: 420; Layout.fillHeight: true; color: ThemeService.surfaceSubtle
+                Layout.preferredWidth: 420; Layout.fillHeight: true; color: ThemeManager.surfaceSubtleColor
                 
                 ColumnLayout {
                     anchors.fill: parent; anchors.margins: 24; spacing: 20

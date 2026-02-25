@@ -29,7 +29,7 @@ FocusScope {
     property alias revertBtn: undoBtn
     property alias confirmBtn: applyBtn
 
-    function playComplete() { SfxService.playComplete() }
+    function playComplete() { SoundManager.playSuccess() }
 
     RowLayout {
         anchors.fill: parent
@@ -38,7 +38,7 @@ FocusScope {
         Item {
             id: slideshowBtn
             width: 180; height: 48
-            property bool canSlideshow: FileBrowserService.hasImages
+            property bool canSlideshow: FileBrowserManager.containsImages
             opacity: canSlideshow ? 1.0 : 0.0
             scale: canSlideshow ? 1.0 : 0.8
             visible: opacity > 0.01
@@ -46,7 +46,7 @@ FocusScope {
             focus: true 
             
             function startSlide() {
-                WallpaperService.startSlideshow(FileBrowserService.currentPath)
+                WallpaperManager.startSlideshow(FileBrowserManager.currentPath)
                 if (root.rootWindow) root.rootWindow.visible = false 
                 playComplete()
             }
@@ -57,12 +57,12 @@ FocusScope {
 
             Rectangle {
                 anchors.fill: parent; radius: 24
-                color: ThemeService.surfaceVariantStrong
-                border.color: parent.activeFocus ? "white" : (hSlide.hovered ? ThemeService.accentColor : ThemeService.outlineMain)
+                color: ThemeManager.surfaceVariantStrongColor
+                border.color: parent.activeFocus ? "white" : (hSlide.hovered ? ThemeManager.accentColor : ThemeManager.outlinePrimaryColor)
                 border.width: parent.activeFocus ? 2 : 1
                 Text { 
                     anchors.centerIn: parent; text: "󰐊  SLIDESHOW"
-                    color: ThemeService.backgroundContent; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hSlide.hovered || parent.activeFocus) ? 1.0 : 0.6 
+                    color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hSlide.hovered || parent.activeFocus) ? 1.0 : 0.6 
                 }
                 scale: (hSlide.hovered || parent.activeFocus) ? 1.02 : 1.0
                 Behavior on scale { NumberAnimation { duration: 200 } }
@@ -74,38 +74,38 @@ FocusScope {
         Item {
             id: undoBtn
             width: 140; height: 48
-            opacity: WallpaperService.lastWallpaper !== "" ? 1.0 : 0.3
+            opacity: WallpaperManager.previousWallpaperPath !== "" ? 1.0 : 0.3
             
-            Keys.onSpacePressed: WallpaperService.revert()
-            Keys.onEnterPressed: WallpaperService.revert()
-            Keys.onReturnPressed: WallpaperService.revert()
+            Keys.onSpacePressed: WallpaperManager.revertWallpaper()
+            Keys.onEnterPressed: WallpaperManager.revertWallpaper()
+            Keys.onReturnPressed: WallpaperManager.revertWallpaper()
 
             Rectangle {
                 anchors.fill: parent; radius: 24
-                color: ThemeService.surfaceVariantStrong
-                border.color: parent.activeFocus ? "white" : (hRev.hovered ? ThemeService.backgroundContent : ThemeService.outlineMain)
+                color: ThemeManager.surfaceVariantStrongColor
+                border.color: parent.activeFocus ? "white" : (hRev.hovered ? ThemeManager.contentOnBackgroundColor : ThemeManager.outlinePrimaryColor)
                 border.width: parent.activeFocus ? 2 : 1
                 Text { 
                     anchors.centerIn: parent; text: "󰕌  REVERT"
-                    color: ThemeService.backgroundContent; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hRev.hovered || parent.activeFocus) ? 1.0 : 0.6 
+                    color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hRev.hovered || parent.activeFocus) ? 1.0 : 0.6 
                 }
                 scale: (hRev.hovered || parent.activeFocus) ? 1.02 : 1.0
                 Behavior on scale { NumberAnimation { duration: 200 } }
             }
-            TapHandler { enabled: WallpaperService.lastWallpaper !== ""; onTapped: WallpaperService.revert() }
+            TapHandler { enabled: WallpaperManager.previousWallpaperPath !== ""; onTapped: WallpaperManager.revertWallpaper() }
             HoverHandler { id: hRev; cursorShape: Qt.PointingHandCursor }
         }
 
         Item {
             id: applyBtn
             width: 240; height: 48
-            readonly property bool hasChanges: WallpaperService.previewWallpaper !== "" && WallpaperService.previewWallpaper !== WallpaperService.activeWallpaper
+            readonly property bool hasChanges: WallpaperManager.previewWallpaperPath !== "" && WallpaperManager.previewWallpaperPath !== WallpaperManager.activeWallpaperPath
             opacity: hasChanges ? 1.0 : 0.0
             scale: hasChanges ? 1.0 : 0.8
             visible: opacity > 0.01
             
             function doConfirm() {
-                WallpaperService.apply()
+                WallpaperManager.applyWallpaper()
                 if (root.rootWindow) root.rootWindow.visible = false 
                 playComplete()
             }
@@ -115,20 +115,20 @@ FocusScope {
             Keys.onReturnPressed: doConfirm()
 
             Rectangle {
-                anchors.fill: parent; radius: 24; color: ThemeService.accentColor
+                anchors.fill: parent; radius: 24; color: ThemeManager.accentColor
                 border.color: parent.activeFocus ? "white" : "transparent"; border.width: parent.activeFocus ? 2 : 0
                 
                 layer.enabled: true
                 layer.effect: MultiEffect {
-                    shadowEnabled: (hApp && hApp.hovered) || (parent && parent.activeFocus)
-                    shadowColor: ThemeService.accentColor
+                    shadowEnabled: (hApp && hApp.hovered) || applyBtn.activeFocus
+                    shadowColor: ThemeManager.accentColor
                     shadowOpacity: 0.3
                     shadowBlur: 0.6
                 }
 
                 Text { 
                     anchors.centerIn: parent; text: "󰄬  CONFIRM CHANGES"
-                    color: ThemeService.primaryContent; font.pixelSize: 11; font.weight: Font.Black; font.letterSpacing: 1 
+                    color: ThemeManager.contentPrimaryColor; font.pixelSize: 11; font.weight: Font.Black; font.letterSpacing: 1 
                 }
                 scale: (hApp.hovered || parent.activeFocus) ? 1.03 : 1.0
                 Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }

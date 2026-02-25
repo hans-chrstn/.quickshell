@@ -7,8 +7,8 @@ Item {
     
     property bool isTop: true
     property bool isLeft: true
-    property real cornerRadius: ThemeService.dynamicIslandCornerRadius
-    property color cornerColor: ThemeService.backgroundMain
+    property real cornerRadius: ThemeManager.dynamicIslandCornerRadius
+    property color cornerColor: ThemeManager.backgroundPrimaryColor
     property real filletRotation: 0
     
     width: cornerRadius

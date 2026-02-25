@@ -14,7 +14,7 @@ Rectangle {
     Row {
         id: letterRow
         anchors.centerIn: parent
-        spacing: ThemeService.appIslandScrubberSpacing
+        spacing: ThemeManager.appIslandScrubberSpacing
 
         Repeater {
             model: root.alphabetModel
@@ -22,7 +22,7 @@ Rectangle {
             delegate: Text {
                 id: letterText
                 text: modelData
-                font.pixelSize: ThemeService.appIslandScrubberFontSize
+                font.pixelSize: ThemeManager.appIslandScrubberFontSize
                 font.weight: root.highlightedLetter === modelData ? Font.Black : Font.Medium
                 color: "white"
                 horizontalAlignment: Text.AlignHCenter

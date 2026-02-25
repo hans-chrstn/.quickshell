@@ -10,7 +10,7 @@ Rectangle {
     property alias text: searchInput.text
     
     onActiveChanged: {
-        SfxService.playButton1()
+        SoundManager.playClick()
         if (active) {
             Qt.callLater(() => {
                 searchInput.forceActiveFocus()
@@ -25,13 +25,13 @@ Rectangle {
     anchors.topMargin: root.active ? 12 : 6
     
     width: root.active ? (parent.width - 40) : 24
-    height: root.active ? ThemeService.appIslandSearchBarHeight : 4
-    radius: root.active ? ThemeService.appIslandSearchBarRadius : 2
+    height: root.active ? ThemeManager.appIslandSearchBarHeight : 4
+    radius: root.active ? ThemeManager.appIslandSearchBarRadius : 2
     
-    color: root.active ? ThemeService.backgroundMain : ThemeService.backgroundContent
+    color: root.active ? ThemeManager.backgroundPrimaryColor : ThemeManager.contentOnBackgroundColor
     opacity: root.active ? 1.0 : 0.2
     
-    border.color: ThemeService.backgroundContent
+    border.color: ThemeManager.contentOnBackgroundColor
     border.width: root.active ? 1 : 0
     
     Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -56,7 +56,7 @@ Rectangle {
         
         Text { 
             text: "󰍉"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             opacity: 0.5
             font.pixelSize: 18 
         }
@@ -64,14 +64,14 @@ Rectangle {
         TextInput {
             id: searchInput
             Layout.fillWidth: true; verticalAlignment: TextInput.AlignVCenter
-            color: ThemeService.appIslandSearchBarColor
-            font.pixelSize: ThemeService.appIslandSearchInputFontSize
+            color: ThemeManager.appIslandSearchBarColor
+            font.pixelSize: ThemeManager.appIslandSearchInputFontSize
             font.weight: Font.Medium
-            selectionColor: ThemeService.accentColor
+            selectionColor: ThemeManager.accentColor
             
             Text {
                 text: "Search applications..."
-                color: ThemeService.backgroundContent
+                color: ThemeManager.contentOnBackgroundColor
                 opacity: 0.3
                 font.pixelSize: 14
                 visible: !searchInput.text && !searchInput.activeFocus
@@ -80,7 +80,7 @@ Rectangle {
         
         Text { 
             text: "󰅖"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             opacity: 0.4
             font.pixelSize: 16 
             

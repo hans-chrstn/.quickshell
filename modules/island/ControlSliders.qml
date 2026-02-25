@@ -12,7 +12,7 @@ ColumnLayout {
         spacing: 2
         Text { 
             text: "BRIGHTNESS"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 8
             font.weight: Font.Black
             font.letterSpacing: 1.5
@@ -22,10 +22,10 @@ ColumnLayout {
         }
         ControlSlider { 
             width: 180; height: 24
-            enabled: BrightnessService.hasBrightness
-            value: BrightnessService.brightness
+            enabled: BrightnessManager.isAvailable
+            value: BrightnessManager.level
             icon: "󰃠"; barColor: "#FFCC00"
-            onMoved: (v) => BrightnessService.setBrightness(v)
+            onMoved: (v) => BrightnessManager.setLevel(v)
         }
     }
 
@@ -33,7 +33,7 @@ ColumnLayout {
         spacing: 2
         Text { 
             text: "VOLUME"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 8
             font.weight: Font.Black
             font.letterSpacing: 1.5
@@ -43,10 +43,10 @@ ColumnLayout {
         }
         ControlSlider { 
             width: 180; height: 24
-            enabled: AudioService.hasAudio
-            value: AudioService.volume
-            icon: AudioService.muted ? "󰝟" : "󰕾"; barColor: ThemeService.backgroundContent
-            onMoved: (v) => AudioService.setVolume(v)
+            enabled: AudioManager.isAudioAvailable
+            value: AudioManager.volume
+            icon: AudioManager.isMuted ? "󰝟" : "󰕾"; barColor: ThemeManager.contentOnBackgroundColor
+            onMoved: (v) => AudioManager.setVolume(v)
         }
     }
 }

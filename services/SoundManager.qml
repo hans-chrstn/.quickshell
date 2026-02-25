@@ -7,38 +7,38 @@ Singleton {
     id: root
 
     SoundEffect {
-        id: onSfx
+        id: expandSound
         source: Quickshell.shellPath("assets/sfx/on.wav")
         volume: 0.5
     }
 
     SoundEffect {
-        id: offSfx
+        id: collapseSound
         source: Quickshell.shellPath("assets/sfx/off.wav")
         volume: 0.5
     }
 
     SoundEffect {
-        id: button1Sfx
+        id: clickSound
         source: Quickshell.shellPath("assets/sfx/button1.wav")
         volume: 0.4
     }
 
     SoundEffect {
-        id: button2Sfx
+        id: toggleSound
         source: Quickshell.shellPath("assets/sfx/button2.wav")
         volume: 0.4
     }
 
     SoundEffect {
-        id: completeSfx
+        id: successSound
         source: Quickshell.shellPath("assets/sfx/complete.wav")
         volume: 0.5
     }
 
-    function playOn() { onSfx.play() }
-    function playOff() { offSfx.play() }
-    function playButton1() { button1Sfx.play() }
-    function playButton2() { button2Sfx.play() }
-    function playComplete() { completeSfx.play() }
+    function playExpand() { expandSound.play() }
+    function playCollapse() { collapseSound.play() }
+    function playClick() { clickSound.play() }
+    function playToggle() { toggleSound.play() }
+    function playSuccess() { successSound.play() }
 }

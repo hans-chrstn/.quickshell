@@ -8,13 +8,13 @@ import qs.services
 Item {
     id: delegateRoot
 
-    width: ThemeService.appIslandDelegateWidth
+    width: ThemeManager.appIslandDelegateWidth
     height: 60
 
     readonly property var app: model.app
 
     readonly property bool isHovered: hHandler.hovered
-    readonly property bool isRunning: app ? NiriService.isAppRunning(app.id) : false
+    readonly property bool isRunning: app ? NiriManager.isApplicationRunning(app.id) : false
     
     readonly property real visualOffset: {
         var count = PathView.view.count;
@@ -83,8 +83,8 @@ Item {
         
         transform: [
             Scale {
-                origin.x: ThemeService.appIslandDelegateWidth / 2
-                origin.y: ThemeService.appIslandDelegateHeight / 2
+                origin.x: ThemeManager.appIslandDelegateWidth / 2
+                origin.y: ThemeManager.appIslandDelegateHeight / 2
                 xScale: (mouseArea.pressed ? 0.9 : 1.0) * animScale
                 yScale: xScale
             },
@@ -92,8 +92,8 @@ Item {
                 y: animLift + cascadeY
             },
             Rotation {
-                origin.x: ThemeService.appIslandDelegateWidth / 2
-                origin.y: ThemeService.appIslandDelegateHeight / 2
+                origin.x: ThemeManager.appIslandDelegateWidth / 2
+                origin.y: ThemeManager.appIslandDelegateHeight / 2
                 angle: cascadeRotation
             }
         ]
@@ -115,7 +115,7 @@ Item {
                         contextMenu.popup()
                     } else {
                         if (isRunning) {
-                            NiriService.focusApp(app.id)
+                            NiriManager.focusApplication(app.id)
                         } else {
                             if (app) app.execute()
                         }
@@ -132,7 +132,7 @@ Item {
                 
                 onOpened: {
                     appIslandRoot.activeMenus++
-                    if (app) windowsList = NiriService.getAppWindows(app.id)
+                    if (app) windowsList = NiriManager.getApplicationWindows(app.id)
                 }
                 onClosed: appIslandRoot.activeMenus--
                 
@@ -151,9 +151,9 @@ Item {
                 }
                 
                 background: Rectangle {
-                    color: ThemeService.backgroundMain
+                    color: ThemeManager.backgroundPrimaryColor
                     radius: 16
-                    border.color: ThemeService.outlineMain
+                    border.color: ThemeManager.outlinePrimaryColor
                     border.width: 1
                     opacity: 0.95
                     
@@ -172,10 +172,10 @@ Item {
                     
                     contentItem: RowLayout {
                         spacing: 10
-                        Text { text: "󰐕"; font.pixelSize: 16; color: newWinItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent; Layout.leftMargin: 8 }
-                        Text { text: "New Window"; color: newWinItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceContent; font.pixelSize: 13; font.weight: Font.Medium; Layout.fillWidth: true }
+                        Text { text: "󰐕"; font.pixelSize: 16; color: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor; Layout.leftMargin: 8 }
+                        Text { text: "New Window"; color: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceContentColor; font.pixelSize: 13; font.weight: Font.Medium; Layout.fillWidth: true }
                     }
-                    background: Rectangle { color: newWinItem.highlighted ? ThemeService.surfaceMain : "transparent"; radius: 10 }
+                    background: Rectangle { color: newWinItem.highlighted ? ThemeManager.surfacePrimaryColor : "transparent"; radius: 10 }
                     onTriggered: if (app) app.execute()
                 }
 
@@ -190,12 +190,12 @@ Item {
                             
                             Text { 
                                 text: "󰖯"
-                                font.pixelSize: 14; color: winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent; Layout.leftMargin: 8 
+                                font.pixelSize: 14; color: winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor; Layout.leftMargin: 8 
                             }
                             
                             Text { 
                                 text: modelData.title
-                                color: winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceContent
+                                color: winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceContentColor
                                 font.pixelSize: 12
                                 font.weight: Font.Medium
                                 Layout.fillWidth: true
@@ -204,13 +204,13 @@ Item {
 
                             Rectangle {
                                 width: 24; height: 24; radius: 12
-                                color: closeArea.containsMouse ? ThemeService.dangerSurface : "transparent"
+                                color: closeArea.containsMouse ? ThemeManager.dangerSurfaceColor : "transparent"
                                 Layout.rightMargin: 4
                                 
                                 Text { 
                                     text: "󰅖"
                                     anchors.centerIn: parent
-                                    color: closeArea.containsMouse ? ThemeService.dangerMain : (winItem.highlighted ? ThemeService.backgroundContent : ThemeService.surfaceVariantContent)
+                                    color: closeArea.containsMouse ? ThemeManager.dangerPrimaryColor : (winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor)
                                     font.pixelSize: 14
                                 }
                                 
@@ -219,14 +219,14 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     onClicked: {
-                                        NiriService.closeWindow(modelData.id)
+                                        NiriManager.closeWindowById(modelData.id)
                                         contextMenu.close()
                                     }
                                 }
                             }
                         }
-                        background: Rectangle { color: winItem.highlighted ? ThemeService.surfaceMain : "transparent"; radius: 10 }
-                        onTriggered: NiriService.focusWindow(modelData.id)
+                        background: Rectangle { color: winItem.highlighted ? ThemeManager.surfacePrimaryColor : "transparent"; radius: 10 }
+                        onTriggered: NiriManager.focusWindowById(modelData.id)
                     }
                 }
                 
@@ -244,15 +244,15 @@ Item {
 
                 Item {
                     id: iconItem
-                    Layout.preferredWidth: ThemeService.appIslandIconSize
-                    Layout.preferredHeight: ThemeService.appIslandIconSize
+                    Layout.preferredWidth: ThemeManager.appIslandIconSize
+                    Layout.preferredHeight: ThemeManager.appIslandIconSize
                     Layout.alignment: Qt.AlignHCenter
                     
                     Rectangle {
                         anchors.fill: parent
                         radius: 14
-                        color: ThemeService.accentColor
-                        opacity: isHovered ? ThemeService.highlightOpacity * 4 : ThemeService.highlightOpacity
+                        color: ThemeManager.accentColor
+                        opacity: isHovered ? ThemeManager.visualHighlightOpacity * 4 : ThemeManager.visualHighlightOpacity
                         scale: isHovered ? 0.95 : 0.85
                         y: isHovered ? 18 : 4
                         z: -1
@@ -266,7 +266,7 @@ Item {
                     Image {
                         id: appIcon
                         anchors.fill: parent
-                        sourceSize: Qt.size(ThemeService.appIslandIconSize * 2, ThemeService.appIslandIconSize * 2) 
+                        sourceSize: Qt.size(ThemeManager.appIslandIconSize * 2, ThemeManager.appIslandIconSize * 2) 
                         layer.enabled: isHovered
                         layer.effect: MultiEffect { brightness: 0.15; saturation: 0.1 }
                         source: {
@@ -287,7 +287,7 @@ Item {
                         anchors.centerIn: parent
                         visible: appIcon.status !== Image.Ready
                         text: app ? app.name.substring(0, 1).toUpperCase() : "?"
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 20; font.weight: Font.Black; opacity: 0.2
                     }
                     
@@ -297,7 +297,7 @@ Item {
                         anchors.bottomMargin: -6
                         width: isRunning ? 12 : 0
                         height: 4; radius: 2
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         opacity: isRunning ? 0.8 : 0.0
                         
                         Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutBack } }
@@ -308,7 +308,7 @@ Item {
                 Text {
                     id: nameText
                     text: app ? app.name : ""
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 10; font.weight: Font.DemiBold
                     Layout.preferredWidth: parent.width - 8
                     horizontalAlignment: Text.AlignHCenter

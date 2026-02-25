@@ -8,7 +8,7 @@ ColumnLayout {
     spacing: 25
     Layout.alignment: Qt.AlignHCenter
 
-    readonly property color accent: ColorService.accent
+    readonly property color accent: ColorManager.accentColor
 
     ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
@@ -21,7 +21,7 @@ ColumnLayout {
         }
         Text {
             Layout.alignment: Qt.AlignHCenter
-            text: LockService.pamContext ? LockService.pamContext.user : "User"
+            text: LockManager.authenticationContext ? LockManager.authenticationContext.user : "User"
             color: "white"; font.pixelSize: 20; font.weight: Font.DemiBold; opacity: 0.9
         }
     }
@@ -30,8 +30,8 @@ ColumnLayout {
         id: pwField
         Layout.alignment: Qt.AlignHCenter
         width: 300; height: 48; radius: 24
-        color: Qt.rgba(1, 1, 1, ThemeService.lockPasswordOpacity)
-        border.color: LockService.messageIsError ? ThemeService.dangerColor : Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.3)
+        color: Qt.rgba(1, 1, 1, ThemeManager.lockPasswordOpacity)
+        border.color: LockManager.isErrorMessage ? ThemeManager.dangerColor : Qt.rgba(root.accent.r, root.accent.g, root.accent.b, 0.3)
         border.width: 1
         
         Rectangle {
@@ -41,7 +41,7 @@ ColumnLayout {
         Row {
             anchors.centerIn: parent; spacing: 10
             Repeater {
-                model: LockService.buffer.length
+                model: LockManager.passwordBuffer.length
                 Rectangle {
                     width: 10; height: 10; radius: 5; color: root.accent
                     NumberAnimation on scale { from: 0; to: 1; duration: 150; easing.type: Easing.OutBack }
@@ -49,7 +49,7 @@ ColumnLayout {
             }
             Rectangle {
                 width: 2; height: 20; color: root.accent
-                visible: LockService.buffer.length === 0
+                visible: LockManager.passwordBuffer.length === 0
                 SequentialAnimation on opacity {
                     loops: Animation.Infinite
                     NumberAnimation { to: 0; duration: 500 }
@@ -60,8 +60,8 @@ ColumnLayout {
 
         Text {
             anchors.centerIn: parent
-            text: (LockService.pamContext && LockService.pamContext.isActive) ? "Verifying..." : "Password"
-            color: "white"; opacity: 0.2; font.pixelSize: 14; visible: LockService.buffer.length === 0
+            text: (LockManager.authenticationContext && LockManager.authenticationContext.isActive) ? "Verifying..." : "Password"
+            color: "white"; opacity: 0.2; font.pixelSize: 14; visible: LockManager.passwordBuffer.length === 0
         }
     }
 }

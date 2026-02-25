@@ -14,6 +14,6 @@ BaseBar {
         bottom: 0
     }
     
-    implicitWidth: ThemeService.thickness
-    color: ThemeService.color
+    implicitWidth: ThemeManager.globalThickness
+    color: ThemeManager.backgroundColor
 }

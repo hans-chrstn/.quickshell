@@ -27,20 +27,20 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
                 Text {
                     text: "SYSTEM"
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 2
                     opacity: 0.4
                 }
                 Text {
                     text: "SERVICES"
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 12; font.weight: Font.Bold
                 }
             }
 
             Rectangle {
                 width: 1; height: 24
-                color: ThemeService.backgroundContent; opacity: 0.1
+                color: ThemeManager.contentOnBackgroundColor; opacity: 0.1
                 Layout.alignment: Qt.AlignVCenter
             }
 
@@ -49,14 +49,14 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 Repeater {
-                    model: SystemTrayService.values
+                    model: SystemTrayManager.items
                     delegate: Rectangle {
                         id: trayIconBox
                         width: 36; height: 36; radius: 10
-                        color: hh.hovered ? ThemeService.surfaceVariantStrong : ThemeService.surfaceVariant
+                        color: hh.hovered ? ThemeManager.surfaceVariantStrongColor : ThemeManager.surfaceVariantColor
                         
                         readonly property bool needsAttention: modelData.status === SystemTrayItem.NeedsAttention
-                        border.color: needsAttention ? ThemeService.dangerMain : ThemeService.backgroundContent
+                        border.color: needsAttention ? ThemeManager.dangerPrimaryColor : ThemeManager.contentOnBackgroundColor
                         border.width: needsAttention || hh.hovered ? 1 : 0
 
                         Behavior on color { ColorAnimation { duration: 200 } }
@@ -78,7 +78,7 @@ Item {
                                 } else {
                                     modelData.activate()
                                 }
-                                SfxService.playButton2()
+                                SoundManager.playToggle()
                             }
                         }
                         
@@ -87,8 +87,8 @@ Item {
                             anchors.horizontalCenter: parent.horizontalCenter
                             width: Math.max(lbl.implicitWidth, desc.implicitWidth) + 20
                             height: desc.text !== "" ? 32 : 22; radius: 8
-                            color: ThemeService.backgroundMain
-                            border.color: ThemeService.outlineMain; border.width: 1
+                            color: ThemeManager.backgroundPrimaryColor
+                            border.color: ThemeManager.outlinePrimaryColor; border.width: 1
                             opacity: hh.hovered ? 1.0 : 0.0
                             visible: opacity > 0.01
                             
@@ -100,14 +100,14 @@ Item {
                                 Text {
                                     id: lbl
                                     text: (modelData.title || "APP").toUpperCase()
-                                    color: ThemeService.backgroundContent
+                                    color: ThemeManager.contentOnBackgroundColor
                                     font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1
                                     Layout.alignment: Qt.AlignHCenter
                                 }
                                 Text {
                                     id: desc
                                     text: modelData.tooltipDescription || ""
-                                    color: ThemeService.backgroundContent
+                                    color: ThemeManager.contentOnBackgroundColor
                                     font.pixelSize: 7; font.weight: Font.Medium; opacity: 0.5
                                     visible: text !== ""
                                     Layout.alignment: Qt.AlignHCenter

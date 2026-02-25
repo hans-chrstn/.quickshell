@@ -9,7 +9,7 @@ Item {
     property bool isLeft: false
     property bool isBottom: false
     property real cornerRadius: 0
-    property color cornerColor: ThemeService.backgroundMain
+    property color cornerColor: ThemeManager.backgroundPrimaryColor
     property real rotation: 0
 
     property string cornerPath: {

@@ -9,12 +9,12 @@ Item {
     id: root
 
     property bool expanded: false
-    property int barHeight: ThemeService.thickness
-    property color barColor: ThemeService.backgroundMain
+    property int barHeight: ThemeManager.globalThickness
+    property color barColor: ThemeManager.backgroundPrimaryColor
     property int expandedWidth: 400
     property int expandedHeight: 100
     property int collapsedWidth: 160
-    property real radius: ThemeService.dynamicIslandCornerRadius
+    property real radius: ThemeManager.dynamicIslandCornerRadius
     
     property real customTopLeftRadius: (root.isTop && !root.isCorner) ? 0 : root.radius
     property real customTopRightRadius: (root.isTop && !root.isCorner) ? 0 : root.radius
@@ -29,7 +29,7 @@ Item {
 
     onMouseHoveredChanged: {
         if (mouseHovered && screenName !== "") {
-            NotificationService.activeScreenName = screenName
+            NotificationManager.activeScreenName = screenName
         }
     }
     
@@ -47,9 +47,9 @@ Item {
 
     onExpandedChanged: {
         if (expanded) {
-            SfxService.playOn()
+            SoundManager.playExpand()
         } else {
-            SfxService.playOff()
+            SoundManager.playCollapse()
         }
     }
 
@@ -75,7 +75,7 @@ Item {
     transitions: [
         Transition {
             ParallelAnimation {
-                NumberAnimation { targets: [root]; properties: "width,height"; duration: ThemeService.animDuration; easing.type: ThemeService.animEasing }
+                NumberAnimation { targets: [root]; properties: "width,height"; duration: ThemeManager.animationDuration; easing.type: ThemeManager.animationEasing }
                 NumberAnimation { targets: [f1, f2, islandContentArea]; property: "opacity"; duration: 150 }
             }
         }
@@ -86,15 +86,15 @@ Item {
         anchors.fill: parent
 
         Rectangle {
-            anchors.fill: islandRect; radius: root.radius; color: ThemeService.shadowMain
+            anchors.fill: islandRect; radius: root.radius; color: ThemeManager.shadowPrimaryColor
             opacity: root.expanded && Math.abs(root.width - root.expandedWidth) < 1.0 ? 0.4 : 0
             visible: opacity > 0; z: -1
             layer.enabled: true
             layer.effect: MultiEffect {
                 shadowEnabled: true
-                shadowOpacity: ThemeService.shadowOpacity
-                shadowBlur: ThemeService.shadowBlur / 30.0
-                shadowVerticalOffset: ThemeService.shadowVerticalOffset
+                shadowOpacity: ThemeManager.shadowOpacity
+                shadowBlur: ThemeManager.shadowBlurRadius / 30.0
+                shadowVerticalOffset: ThemeManager.shadowVerticalOffset
             }
             Behavior on opacity { NumberAnimation { duration: 200 } }
         }

@@ -10,5 +10,5 @@ PanelWindow {
     property var modelData
     screen: modelData
 
-    property color barColor: ThemeService.color
+    property color barColor: ThemeManager.backgroundColor
 }

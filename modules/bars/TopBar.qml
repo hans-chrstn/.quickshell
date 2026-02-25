@@ -14,8 +14,8 @@ BaseBar {
     anchors.left: true
     anchors.right: true
     
-    implicitHeight: ThemeService.dynamicIslandExpandedHeight
-    exclusiveZone: ThemeService.thickness
+    implicitHeight: ThemeManager.dynamicIslandExpandedHeight
+    exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
     focusable: dIsland.expanded
 
@@ -29,13 +29,13 @@ BaseBar {
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
-        height: ThemeService.thickness
-        color: ThemeService.color
+        height: ThemeManager.globalThickness
+        color: ThemeManager.backgroundColor
         z: 1
 
         WorkspaceIndicators {
             anchors.left: parent.left
-            anchors.leftMargin: ThemeService.cornerRadius + 15
+            anchors.leftMargin: ThemeManager.globalCornerRadius + 15
             anchors.verticalCenter: parent.verticalCenter
             screenName: root.screen.name
         }
@@ -47,15 +47,15 @@ BaseBar {
         y: 0
         z: 2
         
-        barHeight: ThemeService.thickness
-        barColor: ThemeService.color
+        barHeight: ThemeManager.globalThickness
+        barColor: ThemeManager.backgroundColor
     }
 
     MouseArea {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        width: dIsland.expanded ? ThemeService.dynamicIslandExpandedWidth : ThemeService.dynamicIslandCollapsedWidth
-        height: dIsland.expanded ? ThemeService.dynamicIslandExpandedHeight : ThemeService.thickness
+        width: dIsland.expanded ? ThemeManager.dynamicIslandExpandedWidth : ThemeManager.dynamicIslandCollapsedWidth
+        height: dIsland.expanded ? ThemeManager.dynamicIslandExpandedHeight : ThemeManager.globalThickness
         hoverEnabled: true
         onEntered: dIsland.expanded = true
         onExited: dIsland.expanded = false

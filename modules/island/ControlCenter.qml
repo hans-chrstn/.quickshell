@@ -27,7 +27,7 @@ Item {
 
         Rectangle {
             width: 1; height: 70
-            color: ThemeService.backgroundContent; opacity: 0.05
+            color: ThemeManager.contentOnBackgroundColor; opacity: 0.05
             Layout.alignment: Qt.AlignVCenter
         }
 
@@ -41,7 +41,7 @@ Item {
 
             Text {
                 text: "OPEN SETTINGS 󰒓"
-                color: ThemeService.accentColor
+                color: ThemeManager.accentColor
                 font.pixelSize: 8
                 font.weight: Font.Black; font.letterSpacing: 1
                 Layout.alignment: Qt.AlignRight
@@ -52,8 +52,8 @@ Item {
                 
                 TapHandler { 
                     onTapped: { 
-                        ViewService.openSettings()
-                        SfxService.playButton1()
+                        ViewManager.openSettings()
+                        SoundManager.playClick()
                     } 
                 }
                 HoverHandler { id: hhSet; cursorShape: Qt.PointingHandCursor }

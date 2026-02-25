@@ -16,20 +16,20 @@ Item {
     RowLayout {
         anchors.left: parent.left
         spacing: 15
-        visible: !isNaN(WeatherService.weatherTemp)
+        visible: !isNaN(WeatherManager.currentTemperature)
 
         Image {
-            source: WeatherService.weatherIconUrl
+            source: WeatherManager.currentWeatherIconUrl
             Layout.preferredWidth: 40; Layout.preferredHeight: 40
         }
         ColumnLayout {
             spacing: 0
             Text { 
-                text: WeatherService.weatherTemp.toFixed(1) + "°"
+                text: WeatherManager.currentTemperature.toFixed(1) + "°"
                 color: "white"; font.pixelSize: 18; font.weight: Font.Bold 
             }
             Text { 
-                text: WeatherService.cityName.toUpperCase()
+                text: WeatherManager.currentCityName.toUpperCase()
                 color: "white"; font.pixelSize: 10; opacity: 0.6; font.weight: Font.Black; font.letterSpacing: 1
             }
         }
@@ -41,19 +41,19 @@ Item {
         
         RowLayout {
             spacing: 15
-            Text { text: WifiService.wifiEnabled ? "󰖩" : "󰖪"; color: "white"; font.pixelSize: 20; opacity: 0.8 }
-            Text { text: BluetoothService.bluetoothEnabled ? "󰂯" : "󰂲"; color: "white"; font.pixelSize: 20; opacity: 0.8 }
+            Text { text: WifiManager.isEnabled ? "󰖩" : "󰖪"; color: "white"; font.pixelSize: 20; opacity: 0.8 }
+            Text { text: BluetoothManager.isEnabled ? "󰂯" : "󰂲"; color: "white"; font.pixelSize: 20; opacity: 0.8 }
             
             RowLayout {
                 spacing: 6
-                visible: BatteryService.hasUPower && !!BatteryService.device
+                visible: BatteryManager.isUPowerAvailable && !!BatteryManager.mainDevice
                 Text { 
-                    text: (BatteryService.device ? (BatteryService.device.percentage * 100).toFixed(0) : "0") + "%"
+                    text: (BatteryManager.mainDevice ? (BatteryManager.mainDevice.percentage * 100).toFixed(0) : "0") + "%"
                     color: "white"; font.pixelSize: 16; font.weight: Font.Medium; opacity: 0.8 
                 }
                 Text { 
-                    text: BatteryService.device ? (BatteryService.device.state === 1 ? "󱐋" : "󰁹") : "󰂄"
-                    color: BatteryService.device && BatteryService.device.percentage < 0.2 ? ThemeService.dangerColor : "white"
+                    text: BatteryManager.mainDevice ? (BatteryManager.mainDevice.state === 1 ? "󱐋" : "󰁹") : "󰂄"
+                    color: BatteryManager.mainDevice && BatteryManager.mainDevice.percentage < 0.2 ? ThemeManager.dangerColor : "white"
                     font.pixelSize: 22 
                 }
             }

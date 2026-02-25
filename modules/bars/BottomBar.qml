@@ -8,14 +8,14 @@ import qs.modules.island
 BaseBar {
     id: root
 
-    implicitHeight: ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 20
+    implicitHeight: ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 20
 
     anchors.bottom: true
     anchors.left: true
     anchors.right: true
     
     exclusionMode: ExclusionMode.Ignore
-    exclusiveZone: ThemeService.thickness
+    exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
     
     focusable: true
@@ -34,8 +34,8 @@ BaseBar {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        height: ThemeService.thickness
-        color: ThemeService.color
+        height: ThemeManager.globalThickness
+        color: ThemeManager.backgroundColor
         z: 1
     }
 
@@ -52,8 +52,8 @@ BaseBar {
         anchors.bottom: parent.bottom
         z: 2
         
-        barHeight: ThemeService.thickness
-        barColor: ThemeService.color
+        barHeight: ThemeManager.globalThickness
+        barColor: ThemeManager.backgroundColor
     }
 
     BottomBarOSD {

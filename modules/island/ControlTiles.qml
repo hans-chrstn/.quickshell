@@ -11,57 +11,57 @@ GridLayout {
     columnSpacing: 12
 
     ControlTile {
-        icon: WifiService.wifiEnabled ? "󰖩" : "󰖪"
-        active: !!WifiService.wifiEnabled
-        enabled: WifiService.hasWifi
+        icon: WifiManager.isEnabled ? "󰖩" : "󰖪"
+        active: !!WifiManager.isEnabled
+        enabled: WifiManager.isAvailable
         onClicked: {
-            SfxService.playButton2()
-            WifiService.toggleWifi()
+            SoundManager.playToggle()
+            WifiManager.togglePower()
         }
         
         TapHandler {
             acceptedButtons: Qt.RightButton
             onTapped: {
-                SfxService.playButton2()
-                ViewService.openControlPanel("wifi")
+                SoundManager.playToggle()
+                ViewManager.openControlPanel("wifi")
             }
         }
     }
 
     ControlTile {
-        icon: BluetoothService.bluetoothEnabled ? "󰂯" : "󰂲"
-        active: !!BluetoothService.bluetoothEnabled
-        enabled: BluetoothService.hasBluetooth
+        icon: BluetoothManager.isEnabled ? "󰂯" : "󰂲"
+        active: !!BluetoothManager.isEnabled
+        enabled: BluetoothManager.isAvailable
         onClicked: {
-            SfxService.playButton2()
-            BluetoothService.toggleBluetooth()
+            SoundManager.playToggle()
+            BluetoothManager.togglePower()
         }
         
         TapHandler {
             acceptedButtons: Qt.RightButton
             onTapped: {
-                SfxService.playButton2()
-                ViewService.openControlPanel("bluetooth")
+                SoundManager.playToggle()
+                ViewManager.openControlPanel("bluetooth")
             }
         }
     }
 
     ControlTile {
         icon: "󰀝"
-        active: !!WifiService.airplaneMode
-        enabled: WifiService.hasWifi
+        active: !!WifiManager.isAirplaneModeEnabled
+        enabled: WifiManager.isAvailable
         onClicked: {
-            SfxService.playButton2()
-            WifiService.toggleAirplane()
+            SoundManager.playToggle()
+            WifiManager.toggleAirplaneMode()
         }
     }
 
     ControlTile {
-        icon: NotificationService.dndEnabled ? "󰖔" : "󰂚"
-        active: !!NotificationService.dndEnabled
+        icon: NotificationManager.isDoNotDisturbEnabled ? "󰖔" : "󰂚"
+        active: !!NotificationManager.isDoNotDisturbEnabled
         onClicked: {
-            SfxService.playButton2()
-            NotificationService.toggleDND()
+            SoundManager.playToggle()
+            NotificationManager.toggleDoNotDisturb()
         }
     }
 }

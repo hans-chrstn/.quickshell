@@ -17,7 +17,7 @@ Item {
 
         Text {
             id: timeText
-            text: Qt.formatDateTime(sysClock.date, ThemeService.timeFormat)
+            text: Qt.formatDateTime(sysClock.date, ThemeManager.timeFormat)
             color: "white"
             font.weight: Font.DemiBold
             font.pixelSize: 52
@@ -33,13 +33,13 @@ Item {
 
             Rectangle {
                 width: 4; height: 4; radius: 2
-                color: ThemeService.accentColor
+                color: ThemeManager.accentColor
                 opacity: 0.8
             }
 
             Text {
                 id: dateText
-                text: Qt.formatDateTime(sysClock.date, ThemeService.dateFormat).toUpperCase()
+                text: Qt.formatDateTime(sysClock.date, ThemeManager.dateFormat).toUpperCase()
                 color: "white"
                 opacity: 0.4
                 font.pixelSize: 9
@@ -50,7 +50,7 @@ Item {
 
             Rectangle {
                 width: 4; height: 4; radius: 2
-                color: ThemeService.accentColor
+                color: ThemeManager.accentColor
                 opacity: 0.8
             }
         }

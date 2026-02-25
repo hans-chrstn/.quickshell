@@ -9,7 +9,7 @@ Item {
     implicitWidth: 350
     implicitHeight: 80
     
-    property var device: BatteryService.device
+    property var device: BatteryManager.mainDevice
 
     RowLayout { 
         anchors.centerIn: parent
@@ -27,7 +27,7 @@ Item {
                 radius: 27
                 color: "transparent"
                 border.width: 3
-                border.color: ThemeService.backgroundContent
+                border.color: ThemeManager.contentOnBackgroundColor
                 opacity: 0.1
             }
             
@@ -41,7 +41,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     height: parent.height * (root.device ? root.device.percentage : 0)
-                    color: (root.device && root.device.state === 1) ? ThemeService.primaryMain : ThemeService.backgroundContent
+                    color: (root.device && root.device.state === 1) ? ThemeManager.primaryColor : ThemeManager.contentOnBackgroundColor
                     opacity: chargingAnim.running ? 0.4 : 0.2
                     
                     SequentialAnimation on opacity {
@@ -59,7 +59,7 @@ Item {
             Text { 
                 anchors.centerIn: parent
                 text: root.device ? Math.round(root.device.percentage * 100) + "%" : "--"
-                color: ThemeService.backgroundContent
+                color: ThemeManager.contentOnBackgroundColor
                 font.weight: Font.Black
                 font.pixelSize: 11
             }
@@ -72,7 +72,7 @@ Item {
             
             Text { 
                 text: "SYSTEM POWER"
-                color: ThemeService.backgroundContent
+                color: ThemeManager.contentOnBackgroundColor
                 opacity: 0.4
                 font.weight: Font.Black
                 font.pixelSize: 9
@@ -80,13 +80,13 @@ Item {
             }
             Text { 
                 text: root.device ? (root.device.state === 1 ? "CHARGING" : root.device.state === 2 ? "DISCHARGING" : "POWERED") : "STANDBY"
-                color: ThemeService.backgroundContent
+                color: ThemeManager.contentOnBackgroundColor
                 font.weight: Font.Bold
                 font.pixelSize: 15
             }
             Text { 
                 text: root.device && root.device.state === 2 ? (Math.round(root.device.timeToEmpty / 60) + " MIN REMAINING") : "STABLE"
-                color: ThemeService.accentColor
+                color: ThemeManager.accentColor
                 opacity: 0.6
                 font.pixelSize: 9
                 font.weight: Font.Black; font.letterSpacing: 1

@@ -14,23 +14,25 @@ Singleton {
     property var pamObject: null
 
     readonly property bool isLocked: lockObject ? !!lockObject.locked : false
-    readonly property bool isGreeter: Greetd.available
+    readonly property bool isGreeterAvailable: Greetd.available
     
-    readonly property string buffer: pamObject ? pamObject.buffer : ""
-    readonly property string message: pamObject ? pamObject.message : ""
-    readonly property bool messageIsError: pamObject ? pamObject.messageIsError : false
+    readonly property string passwordBuffer: pamObject ? pamObject.buffer : ""
+    readonly property string statusMessage: pamObject ? pamObject.message : ""
+    readonly property bool isErrorMessage: pamObject ? pamObject.messageIsError : false
 
-    function registerLock(module, lock, pam) {
+    function register(module, lock, pam) {
         root.lockModule = module
         root.lockObject = lock
         root.pamObject = pam
     }
 
-    function handleKey(event) {
-        if (pamObject) pamObject.handleKey(event)
+    function processKeyEvent(event) {
+        if (pamObject) {
+            pamObject.handleKey(event)
+        }
     }
 
-    function lockSession() {
+    function lock() {
         if (lockObject) {
             lockObject.locked = true
         }
@@ -42,5 +44,5 @@ Singleton {
         }
     }
 
-    readonly property var pamContext: pamObject ? pamObject.passwd : null
+    readonly property var authenticationContext: pamObject ? pamObject.passwd : null
 }

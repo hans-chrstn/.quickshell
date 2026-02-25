@@ -14,13 +14,13 @@ PanelWindow {
     screen: modelData
     
     Connections {
-        target: NotificationService
+        target: NotificationManager
         function onActiveScreenNameChanged() { updateVisibility() }
         function onPopupsUpdated() { updateVisibility() }
     }
 
     function updateVisibility() {
-        root.visible = (screen && screen.name === NotificationService.activeScreenName && NotificationService.popups.count > 0)
+        root.visible = (screen && screen.name === NotificationManager.activeScreenName && NotificationManager.popupModel.count > 0)
     }
 
     Component.onCompleted: updateVisibility()
@@ -46,11 +46,11 @@ PanelWindow {
         height: notifList.stackExpanded ? Math.max(150, Math.min(contentHeight, 750)) : Math.max(80, Math.min(contentHeight, 120))
         
         onStackExpandedChanged: {
-            if (notifList.stackExpanded) NotificationService.expandedCount++
-            else NotificationService.expandedCount--
+            if (notifList.stackExpanded) NotificationManager.expandedNotificationCount++
+            else NotificationManager.expandedNotificationCount--
         }
         
-        model: NotificationService.popups
+        model: NotificationManager.popupModel
         delegate: NotificationBanner {
             notification: model.notification
             width: ListView.view.width

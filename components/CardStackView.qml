@@ -34,15 +34,15 @@ ListView {
             
             Rectangle {
                 width: 80; height: 24; radius: 12
-                color: ThemeService.surfaceStrong
-                border.color: ThemeService.outlineMain
+                color: ThemeManager.surfaceStrongColor
+                border.color: ThemeManager.outlinePrimaryColor
                 border.width: 1
                 opacity: 0.8
                 
                 Text {
                     anchors.centerIn: parent
                     text: "COLLAPSE"
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 10; font.weight: Font.Bold
                 }
                 
@@ -52,23 +52,23 @@ ListView {
 
             Rectangle {
                 width: 80; height: 24; radius: 12
-                color: ThemeService.surfaceStrong
-                border.color: ThemeService.accentColor
+                color: ThemeManager.surfaceStrongColor
+                border.color: ThemeManager.accentColor
                 border.width: 1
                 opacity: 0.8
                 
                 Text {
                     anchors.centerIn: parent
                     text: "CLEAR ALL"
-                    color: ThemeService.accentColor
+                    color: ThemeManager.accentColor
                     font.pixelSize: 10; font.weight: Font.Bold
                 }
                 
                 TapHandler { 
                     onTapped: {
-                        NotificationService.dismissAll()
+                        NotificationManager.clearAllNotifications()
                         root.stackExpanded = false
-                        SfxService.playComplete()
+                        SoundManager.playSuccess()
                     }
                 }
                 HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }

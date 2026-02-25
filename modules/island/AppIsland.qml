@@ -7,9 +7,9 @@ import qs.modules.island
 BaseIsland {
     id: appIslandRoot
 
-    expandedWidth: ThemeService.appIslandExpandedWidth
-    expandedHeight: searchBar.active ? (ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 10) : ThemeService.appIslandExpandedHeight
-    collapsedWidth: ThemeService.dynamicIslandCollapsedWidth
+    expandedWidth: ThemeManager.appIslandExpandedWidth
+    expandedHeight: searchBar.active ? (ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 10) : ThemeManager.appIslandExpandedHeight
+    collapsedWidth: ThemeManager.dynamicIslandCollapsedWidth
     
     isTop: false
     isBottom: true
@@ -69,7 +69,7 @@ BaseIsland {
             anchors.fill: parent
             filterText: searchBar.text
             
-            anchors.topMargin: searchBar.active ? (ThemeService.appIslandSearchBarHeight + 8) : 0
+            anchors.topMargin: searchBar.active ? (ThemeManager.appIslandSearchBarHeight + 8) : 0
             Behavior on anchors.topMargin { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
         }
 

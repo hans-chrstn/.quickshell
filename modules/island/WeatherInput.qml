@@ -10,7 +10,7 @@ ColumnLayout {
 
     Text {
         text: "ENTER COORDINATES"
-        color: ThemeService.backgroundContent
+        color: ThemeManager.contentOnBackgroundColor
         font.pixelSize: 10
         font.weight: Font.Bold
         Layout.alignment: Qt.AlignHCenter
@@ -19,9 +19,9 @@ ColumnLayout {
 
     Rectangle {
         width: 200; height: 36; radius: 18
-        color: ThemeService.surfaceStrong; opacity: locInput.activeFocus ? 1.0 : 0.5
+        color: ThemeManager.surfaceStrongColor; opacity: locInput.activeFocus ? 1.0 : 0.5
         Layout.alignment: Qt.AlignHCenter
-        border.color: ThemeService.backgroundContent
+        border.color: ThemeManager.contentOnBackgroundColor
         border.width: locInput.activeFocus ? 1 : 0
         
         TextInput {
@@ -30,18 +30,18 @@ ColumnLayout {
             anchors.leftMargin: 15; anchors.rightMargin: 15
             verticalAlignment: TextInput.AlignVCenter
             horizontalAlignment: TextInput.AlignHCenter
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 14
             selectByMouse: true
             onAccepted: {
-                WeatherService.saveLocation(text)
+                WeatherManager.updateLocation(text)
                 root.finished()
             }
             Keys.onEscapePressed: root.finished()
             
             Text {
                 text: "lat,lon"
-                color: ThemeService.backgroundContent; opacity: 0.3
+                color: ThemeManager.contentOnBackgroundColor; opacity: 0.3
                 visible: !parent.text && !parent.activeFocus
                 anchors.centerIn: parent
             }
@@ -56,7 +56,7 @@ ColumnLayout {
             anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             text: "✕"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             opacity: 0.5
             font.pixelSize: 12
             TapHandler {
@@ -67,7 +67,7 @@ ColumnLayout {
     
     Text {
         text: "PRESS ENTER TO SAVE"
-        color: ThemeService.backgroundContent; opacity: 0.3; font.pixelSize: 8
+        color: ThemeManager.contentOnBackgroundColor; opacity: 0.3; font.pixelSize: 8
         Layout.alignment: Qt.AlignHCenter
     }
     

@@ -9,49 +9,49 @@ RowLayout {
     
     property string pageType: "wifi"
     
-    readonly property bool isEnabled: pageType === "wifi" ? WifiService.wifiEnabled : BluetoothService.bluetoothEnabled
+    readonly property bool isEnabled: pageType === "wifi" ? WifiManager.isEnabled : BluetoothManager.isEnabled
 
     Text { 
         text: root.pageType.toUpperCase() + " POWER"
-        color: ThemeService.backgroundContent; font.pixelSize: 11; font.weight: Font.Black; opacity: 0.6 
+        color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 11; font.weight: Font.Black; opacity: 0.6 
     }
     
     Item { Layout.fillWidth: true }
 
     Rectangle {
         width: 120; height: 40; radius: 20
-        color: ThemeService.surfaceVariantStrong
+        color: ThemeManager.surfaceVariantStrongColor
         visible: pageType === "bluetooth" && root.isEnabled
         
         Text {
             anchors.centerIn: parent
-            text: BluetoothService.isScanning ? "SCANNING..." : "SCAN FOR DEVICES"
-            color: ThemeService.backgroundContent
+            text: BluetoothManager.isScanning ? "SCANNING..." : "SCAN FOR DEVICES"
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 9; font.weight: Font.Black
         }
         
         TapHandler {
-            onTapped: BluetoothService.startScan()
+            onTapped: BluetoothManager.startScan()
         }
         HoverHandler { cursorShape: Qt.PointingHandCursor }
     }
     
     Rectangle {
         width: 100; height: 40; radius: 20
-        color: root.isEnabled ? ThemeService.accentColor : ThemeService.backgroundContent
+        color: root.isEnabled ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
         opacity: root.isEnabled ? 1.0 : 0.1
         
         Text {
             anchors.centerIn: parent
             text: root.isEnabled ? "ENABLED" : "DISABLED"
-            color: root.isEnabled ? ThemeService.primaryContent : ThemeService.backgroundContent
+            color: root.isEnabled ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
             font.pixelSize: 9; font.weight: Font.Black
         }
         
         TapHandler {
             onTapped: {
-                if (root.pageType === "wifi") WifiService.toggleWifi()
-                else BluetoothService.toggleBluetooth()
+                if (root.pageType === "wifi") WifiManager.togglePower()
+                else BluetoothManager.togglePower()
             }
         }
         HoverHandler { id: hToggle; cursorShape: Qt.PointingHandCursor }

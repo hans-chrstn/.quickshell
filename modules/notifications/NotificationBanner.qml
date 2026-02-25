@@ -42,7 +42,7 @@ Item {
         transform: [
             Translate { id: trans; x: 100 },
             Translate { 
-                x: !root.stackExpanded ? NotificationService.globalDragX : dragProxy.x 
+                x: !root.stackExpanded ? NotificationManager.interactionDragPosition : dragProxy.x 
             }
         ]
         
@@ -51,7 +51,7 @@ Item {
             
             onXChanged: {
                 if (dragArea.drag.active && !root.stackExpanded && root.index === 0) {
-                    NotificationService.globalDragX = x
+                    NotificationManager.interactionDragPosition = x
                 }
             }
 
@@ -62,14 +62,14 @@ Item {
         }
         
         Connections {
-            target: NotificationService
-            function onGlobalDragXChanged() {
+            target: NotificationManager
+            function onInteractionDragPositionChanged() {
             }
         }
         
         Binding on opacity {
-            when: dragArea.drag.active || (!root.stackExpanded && NotificationService.globalDragX !== 0)
-            value: 1.0 - Math.min(1.0, Math.abs(!root.stackExpanded ? NotificationService.globalDragX : dragProxy.x) / 300)
+            when: dragArea.drag.active || (!root.stackExpanded && NotificationManager.interactionDragPosition !== 0)
+            value: 1.0 - Math.min(1.0, Math.abs(!root.stackExpanded ? NotificationManager.interactionDragPosition : dragProxy.x) / 300)
         }
         
         MouseArea {
@@ -87,14 +87,14 @@ Item {
             }
             
             onReleased: {
-                let dragVal = !root.stackExpanded ? NotificationService.globalDragX : dragProxy.x
+                let dragVal = !root.stackExpanded ? NotificationManager.interactionDragPosition : dragProxy.x
                 
                 if (Math.abs(dragVal) > 100) {
                     root.removeHistory = true
                     
                     if (!root.stackExpanded && root.index === 0 && root.count > 1) {
-                        NotificationService.dismissAll()
-                        NotificationService.globalDragX = 0
+                        NotificationManager.clearAllNotifications()
+                        NotificationManager.interactionDragPosition = 0
                     } else {
                         trans.x = dragProxy.x
                         dragProxy.x = 0 
@@ -102,7 +102,7 @@ Item {
                     }
                 } else {
                     dragProxy.x = 0
-                    if (!root.stackExpanded) NotificationService.globalDragX = 0
+                    if (!root.stackExpanded) NotificationManager.interactionDragPosition = 0
                 }
             }
         }
@@ -110,8 +110,8 @@ Item {
         ClippingRectangle {
             anchors.fill: parent
             radius: 20
-            color: ThemeService.backgroundMain
-            border.color: ThemeService.outlineMain
+            color: ThemeManager.backgroundPrimaryColor
+            border.color: ThemeManager.outlinePrimaryColor
             border.width: 1
             
             layer.enabled: true
@@ -131,13 +131,13 @@ Item {
                     Layout.preferredWidth: 40
                     Layout.preferredHeight: 40
                     radius: 12
-                    color: ThemeService.accentColor
+                    color: ThemeManager.accentColor
                     opacity: 0.1
                     
                     Text {
                         anchors.centerIn: parent
                         text: "󰂚"
-                        color: ThemeService.accentColor
+                        color: ThemeManager.accentColor
                         font.pixelSize: 20
                     }
                 }
@@ -148,7 +148,7 @@ Item {
                     
                     Text {
                         text: root.notification ? root.notification.summary : "Notification"
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         font.weight: Font.Black
                         font.pixelSize: 13
                         elide: Text.ElideRight
@@ -157,7 +157,7 @@ Item {
                     
                     Text {
                         text: root.notification ? root.notification.body : ""
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         opacity: 0.6
                         font.pixelSize: 11
                         elide: Text.ElideRight
@@ -173,7 +173,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: "󰅖"
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         opacity: hh.hovered ? 0.8 : 0.3
                         font.pixelSize: 16
                         Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -204,7 +204,7 @@ Item {
 
     Timer {
         interval: 5000
-        running: NotificationService.expandedCount === 0
+        running: NotificationManager.expandedNotificationCount === 0
         onTriggered: {
             root.removeHistory = false
             root.dismiss()
@@ -212,7 +212,7 @@ Item {
     }
 
     function dismiss() {
-        SfxService.playButton1()
+        SoundManager.playClick()
         hideAnim.start()
     }
 
@@ -222,7 +222,7 @@ Item {
         NumberAnimation { target: trans; property: "x"; to: 400; duration: 300; easing.type: Easing.InExpo }
         onFinished: {
             if (root.removeHistory && root.notification) root.notification.dismiss()
-            NotificationService.removePopup(root.notification)
+            NotificationManager.dismissPopup(root.notification)
         }
     }
 }

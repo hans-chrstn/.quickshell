@@ -6,12 +6,12 @@ Row {
     
     property int count: 0
     property int currentIndex: 0
-    property color color: ThemeService.backgroundContent
+    property color color: ThemeManager.contentOnBackgroundColor
     property int dotSize: 4
     property int activeDotWidth: 12
 
     anchors.horizontalCenter: parent.horizontalCenter
-    spacing: ThemeService.indicatorRowSpacing
+    spacing: ThemeManager.indicatorRowSpacing
 
     Repeater { 
         model: root.count

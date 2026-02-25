@@ -20,20 +20,20 @@ PanelWindow {
     property string activePage: "wifi"
 
     Rectangle {
-        anchors.fill: parent; color: ThemeService.shadowMain
-        opacity: (root.visible && !ViewService.closingControlPanel) ? 0.6 : 0
+        anchors.fill: parent; color: ThemeManager.shadowPrimaryColor
+        opacity: (root.visible && !ViewManager.isControlPanelClosing) ? 0.6 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
-        MouseArea { anchors.fill: parent; onClicked: ViewService.closeWindow("controlPanel") }
+        MouseArea { anchors.fill: parent; onClicked: ViewManager.closeWindowByType("controlPanel") }
     }
 
     ClippingRectangle {
         id: windowFrame
         width: 600; height: 500
         anchors.centerIn: parent; radius: 32
-        color: ThemeService.backgroundMain; border.color: ThemeService.outlineMain; border.width: 1
+        color: ThemeManager.backgroundPrimaryColor; border.color: ThemeManager.outlinePrimaryColor; border.width: 1
         
-        opacity: (root.visible && !ViewService.closingControlPanel) ? 1.0 : 0
-        scale: (root.visible && !ViewService.closingControlPanel) ? 1.0 : 0.95
+        opacity: (root.visible && !ViewManager.isControlPanelClosing) ? 1.0 : 0
+        scale: (root.visible && !ViewManager.isControlPanelClosing) ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -41,7 +41,7 @@ PanelWindow {
         Rectangle {
             anchors.fill: parent; radius: 32; color: "transparent"
             gradient: Gradient {
-                GradientStop { position: 0.0; color: Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.02) }
+                GradientStop { position: 0.0; color: Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.02) }
                 GradientStop { position: 0.5; color: "transparent" }
             }
         }
@@ -53,42 +53,42 @@ PanelWindow {
                 Layout.fillWidth: true
                 Text { 
                     text: root.activePage === "wifi" ? "󰖩" : "󰂯"
-                    color: ThemeService.accentColor; font.pixelSize: 32 
+                    color: ThemeManager.accentColor; font.pixelSize: 32 
                 }
                 ColumnLayout {
                     spacing: 0
-                    Text { text: root.activePage.toUpperCase(); color: ThemeService.backgroundContent; font.pixelSize: 14; font.weight: Font.Black; font.letterSpacing: 2 }
-                    Text { text: "MANAGEMENT PANEL"; color: ThemeService.backgroundContent; font.pixelSize: 10; opacity: 0.4; font.weight: Font.Bold }
+                    Text { text: root.activePage.toUpperCase(); color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 14; font.weight: Font.Black; font.letterSpacing: 2 }
+                    Text { text: "MANAGEMENT PANEL"; color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 10; opacity: 0.4; font.weight: Font.Bold }
                 }
                 Item { Layout.fillWidth: true }
                 
                 Rectangle {
-                    width: 36; height: 36; radius: 18; color: ThemeService.backgroundContent; opacity: hSet.hovered ? 0.2 : 0.1
-                    Text { anchors.centerIn: parent; text: "󰒓"; color: ThemeService.backgroundContent; font.pixelSize: 18 }
+                    width: 36; height: 36; radius: 18; color: ThemeManager.contentOnBackgroundColor; opacity: hSet.hovered ? 0.2 : 0.1
+                    Text { anchors.centerIn: parent; text: "󰒓"; color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 18 }
                     TapHandler { 
                         onTapped: {
-                            ViewService.openSettings()
-                            SfxService.playButton1()
+                            ViewManager.openSettings()
+                            SoundManager.playClick()
                         }
                     }
                     HoverHandler { id: hSet; cursorShape: Qt.PointingHandCursor }
                 }
 
                 Rectangle {
-                    width: 36; height: 36; radius: 18; color: ThemeService.backgroundContent; opacity: hClose.hovered ? 0.2 : 0.1
-                    Text { anchors.centerIn: parent; text: "󰅖"; color: ThemeService.backgroundContent; font.pixelSize: 18 }
-                    TapHandler { onTapped: ViewService.closeWindow("controlPanel") }
+                    width: 36; height: 36; radius: 18; color: ThemeManager.contentOnBackgroundColor; opacity: hClose.hovered ? 0.2 : 0.1
+                    Text { anchors.centerIn: parent; text: "󰅖"; color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 18 }
+                    TapHandler { onTapped: ViewManager.closeWindowByType("controlPanel") }
                     HoverHandler { id: hClose; cursorShape: Qt.PointingHandCursor }
                 }
             }
 
-            Rectangle { Layout.fillWidth: true; height: 1; color: ThemeService.backgroundContent; opacity: 0.05 }
+            Rectangle { Layout.fillWidth: true; height: 1; color: ThemeManager.contentOnBackgroundColor; opacity: 0.05 }
 
             ListView {
                 id: listView
                 Layout.fillWidth: true; Layout.fillHeight: true
                 clip: true; spacing: 10
-                model: root.activePage === "wifi" ? WifiService.model : BluetoothService.model
+                model: root.activePage === "wifi" ? WifiManager.networkModel : BluetoothManager.deviceModel
                 
                 delegate: ControlPanelDelegate {
                     width: listView.width

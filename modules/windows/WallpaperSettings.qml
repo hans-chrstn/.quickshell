@@ -29,17 +29,17 @@ ColumnLayout {
                     width: 70
                     height: 32
                     radius: 16
-                    color: WallpaperService.transitionType === modelData ? ThemeService.accentColor : "white"
-                    opacity: WallpaperService.transitionType === modelData ? 1.0 : 0.05
+                    color: WallpaperManager.transitionType === modelData ? ThemeManager.accentColor : "white"
+                    opacity: WallpaperManager.transitionType === modelData ? 1.0 : 0.05
                     
                     Text { 
                         anchors.centerIn: parent
                         text: modelData.toUpperCase()
-                        color: WallpaperService.transitionType === modelData ? "black" : "white"
+                        color: WallpaperManager.transitionType === modelData ? "black" : "white"
                         font.pixelSize: 8
                         font.weight: Font.Bold 
                     }
-                    TapHandler { onTapped: { WallpaperService.transitionType = modelData } }
+                    TapHandler { onTapped: { WallpaperManager.transitionType = modelData } }
                     HoverHandler { id: hT; cursorShape: Qt.PointingHandCursor }
                     scale: hT.hovered ? 1.05 : 1.0
                     Behavior on scale { NumberAnimation { duration: 200 } }
@@ -67,11 +67,11 @@ ColumnLayout {
                 from: 60000
                 to: 3600000
                 stepSize: 60000
-                value: WallpaperService.slideshowInterval
-                onMoved: { WallpaperService.slideshowInterval = value }
+                value: WallpaperManager.slideshowInterval
+                onMoved: { WallpaperManager.slideshowInterval = value }
             }
             Text { 
-                text: Math.round(WallpaperService.slideshowInterval / 60000) + "m"
+                text: Math.round(WallpaperManager.slideshowInterval / 60000) + "m"
                 color: "white"
                 font.pixelSize: 12
                 font.weight: Font.Bold

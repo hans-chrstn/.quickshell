@@ -6,10 +6,10 @@ Item {
     
     property var targetIsland: null
     
-    width: targetIsland && targetIsland.expanded ? ThemeService.appIslandExpandedWidth : ThemeService.dynamicIslandCollapsedWidth
+    width: targetIsland && targetIsland.expanded ? ThemeManager.appIslandExpandedWidth : ThemeManager.dynamicIslandCollapsedWidth
     height: targetIsland && targetIsland.expanded 
-        ? (ThemeService.appIslandExpandedHeight + ThemeService.appIslandSearchBarHeight + 20)
-        : ThemeService.thickness
+        ? (ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 20)
+        : ThemeManager.globalThickness
         
     Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
@@ -30,7 +30,7 @@ Item {
 
     Timer { 
         id: collapseTimer
-        interval: ThemeService.collapseTimerDelay
+        interval: ThemeManager.islandCollapseDelay
         onTriggered: if (targetIsland) targetIsland.expanded = false 
     }
     

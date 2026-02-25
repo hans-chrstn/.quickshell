@@ -17,15 +17,15 @@ Item {
         width: parent.width * 0.94
         height: parent.height * 0.8
         radius: 24
-        color: ThemeService.backgroundMain
+        color: ThemeManager.backgroundPrimaryColor
         border.width: 1
-        border.color: ThemeService.outlineMain
+        border.color: ThemeManager.outlinePrimaryColor
         
         Image {
             id: bgImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
-            source: WeatherService.currentBgSource
+            source: WeatherManager.currentBackgroundUrl
             opacity: 0.45
             visible: !root.inputMode
             Behavior on source { PropertyAnimation { duration: 1000 } }
@@ -36,7 +36,7 @@ Item {
             visible: !root.inputMode
             gradient: Gradient {
                 GradientStop { position: 0.0; color: "transparent" }
-                GradientStop { position: 1.0; color: Qt.rgba(ThemeService.shadowMain.r, ThemeService.shadowMain.g, ThemeService.shadowMain.b, 0.6) }
+                GradientStop { position: 1.0; color: Qt.rgba(ThemeManager.shadowPrimaryColor.r, ThemeManager.shadowPrimaryColor.g, ThemeManager.shadowPrimaryColor.b, 0.6) }
             }
         }
 

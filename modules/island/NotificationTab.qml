@@ -12,23 +12,23 @@ Item {
         id: notifList
         anchors.fill: parent
         anchors.margins: 10
-        model: NotificationService.history
-        spacing: ThemeService.notifSpacing
+        model: NotificationManager.historyModel
+        spacing: ThemeManager.notificationSpacing
         clip: true
         
         delegate: Item {
             width: notifList.width
-            height: ThemeService.notifItemHeight
+            height: ThemeManager.notificationItemHeight
             
             Rectangle {
                 id: bgRect
                 anchors.fill: parent
                 radius: 12
-                color: ThemeService.surfaceVariant
-                border.color: ThemeService.outlineMain
+                color: ThemeManager.surfaceVariantColor
+                border.color: ThemeManager.outlinePrimaryColor
                 border.width: 1
                 
-                opacity: hh.hovered ? ThemeService.notifHoverOpacity * 10 : ThemeService.notifOpacity * 10
+                opacity: hh.hovered ? ThemeManager.notificationHoverOpacity * 10 : ThemeManager.notificationOpacity * 10
                 Behavior on opacity { NumberAnimation { duration: 200 } }
                 
                 RowLayout {
@@ -40,13 +40,13 @@ Item {
                         Layout.preferredWidth: 36
                         Layout.preferredHeight: 36
                         radius: 8
-                        color: ThemeService.primaryAccent
+                        color: ThemeManager.primaryColor
                         opacity: 0.1
                         
                         Text {
                             anchors.centerIn: parent
                             text: model.icon ? "" : "󰂚"
-                            color: ThemeService.primaryAccent
+                            color: ThemeManager.primaryColor
                             font.pixelSize: 18
                         }
                         
@@ -64,7 +64,7 @@ Item {
                         spacing: 0
                         Text {
                             text: model.summary || "Notification"
-                            color: ThemeService.backgroundContent
+                            color: ThemeManager.contentOnBackgroundColor
                             font.weight: Font.Bold
                             font.pixelSize: 12
                             elide: Text.ElideRight
@@ -72,7 +72,7 @@ Item {
                         }
                         Text {
                             text: model.body || ""
-                            color: ThemeService.backgroundContent
+                            color: ThemeManager.contentOnBackgroundColor
                             opacity: 0.6
                             font.pixelSize: 10
                             elide: Text.ElideRight
@@ -87,11 +87,11 @@ Item {
                         Text {
                             anchors.centerIn: parent
                             text: "󰅖"
-                            color: ThemeService.backgroundContent
+                            color: ThemeManager.contentOnBackgroundColor
                             opacity: hhDel.hovered ? 1.0 : 0.3
                             font.pixelSize: 14
                         }
-                        TapHandler { onTapped: NotificationService.removeHistory(index) }
+                        TapHandler { onTapped: NotificationManager.clearHistoryItem(index) }
                         HoverHandler { id: hhDel; cursorShape: Qt.PointingHandCursor }
                     }
                 }
@@ -103,7 +103,7 @@ Item {
         Text {
             anchors.centerIn: parent
             text: "NO NOTIFICATIONS"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             opacity: 0.2
             font.pixelSize: 10
             font.weight: Font.Black
@@ -119,22 +119,22 @@ Item {
             Rectangle {
                 anchors.centerIn: parent
                 width: 120; height: 30; radius: 15
-                color: ThemeService.surfaceVariantStrong
-                border.color: ThemeService.outlineMain
+                color: ThemeManager.surfaceVariantStrongColor
+                border.color: ThemeManager.outlinePrimaryColor
                 border.width: 1
                 
                 Text {
                     anchors.centerIn: parent
                     text: "CLEAR ALL history"
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
                     opacity: hhClear.hovered ? 1.0 : 0.6
                 }
                 
                 TapHandler { 
                     onTapped: {
-                        NotificationService.history.clear()
-                        SfxService.playComplete()
+                        NotificationManager.historyModel.clear()
+                        SoundManager.playSuccess()
                     }
                 }
                 HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }

@@ -9,23 +9,23 @@ Rectangle {
     
     property string icon: ""
     property real value: 0
-    property color barColor: ThemeService.accentColor
+    property color barColor: ThemeManager.accentColor
     property bool active: false
     
     signal moved(real val)
     signal iconClicked()
 
-    radius: ThemeService.osdPillRadius
-    color: ThemeService.backgroundMain
+    radius: ThemeManager.osdPillRadius
+    color: ThemeManager.backgroundPrimaryColor
     
     Rectangle {
         anchors.fill: parent; radius: parent.radius; color: "transparent"
-        border.color: ThemeService.outlineMain; border.width: 1
+        border.color: ThemeManager.outlinePrimaryColor; border.width: 1
         
         Rectangle {
             anchors.fill: parent; anchors.margins: 1; radius: parent.radius - 1; color: "transparent"
             gradient: Gradient {
-                GradientStop { position: 0.0; color: ThemeService.surfaceMain }
+                GradientStop { position: 0.0; color: ThemeManager.surfacePrimaryColor }
                 GradientStop { position: 0.4; color: "transparent" }
             }
         }
@@ -36,7 +36,7 @@ Rectangle {
         rotation: -45; x: -parent.width * 0.2; y: -parent.height * 0.5
         gradient: Gradient {
             GradientStop { position: 0.0; color: "transparent" }
-            GradientStop { position: 0.5; color: ThemeService.outlineVariant }
+            GradientStop { position: 0.5; color: ThemeManager.outlineVariantColor }
             GradientStop { position: 1.0; color: "transparent" }
         }
     }
@@ -53,7 +53,7 @@ Rectangle {
 
         Text {
             text: root.icon
-            color: ThemeService.backgroundContent; font.pixelSize: 18
+            color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 18
             opacity: hhIcon.hovered ? 1.0 : 0.7
             Behavior on opacity { NumberAnimation { duration: 200 } }
             TapHandler { onTapped: root.iconClicked() }
@@ -65,7 +65,7 @@ Rectangle {
             Rectangle {
                 anchors.centerIn: parent
                 width: parent.width; height: 6; radius: 3; color: "black"; opacity: 0.6
-                border.color: ThemeService.outlineVariant; border.width: 1
+                border.color: ThemeManager.outlineVariantColor; border.width: 1
             }
             Rectangle {
                 id: fillBar
@@ -96,7 +96,7 @@ Rectangle {
 
         Text {
             text: Math.round(root.value * 100)
-            color: ThemeService.backgroundContent; font.pixelSize: 12; font.weight: Font.Black; opacity: 0.3
+            color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 12; font.weight: Font.Black; opacity: 0.3
             Layout.preferredWidth: 25; horizontalAlignment: Text.AlignRight
         }
     }

@@ -19,8 +19,8 @@ Item {
             anchors.fill: parent
             scale: 1.05
             transform: Translate {
-                x: root.mouseX * -ThemeService.lockParallaxIntensity
-                y: root.mouseY * -ThemeService.lockParallaxIntensity
+                x: root.mouseX * -ThemeManager.lockParallaxIntensity
+                y: root.mouseY * -ThemeManager.lockParallaxIntensity
                 Behavior on x { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
                 Behavior on y { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
             }
@@ -28,14 +28,14 @@ Item {
             Image {
                 id: wallpaper
                 anchors.fill: parent
-                source: (WallpaperService.activeWallpaper.startsWith("/") ? "file://" : "") + WallpaperService.activeWallpaper
+                source: (WallpaperManager.activeWallpaperPath.startsWith("/") ? "file://" : "") + WallpaperManager.activeWallpaperPath
                 fillMode: Image.PreserveAspectCrop
-                visible: WallpaperService.activeWallpaper !== ""
+                visible: WallpaperManager.activeWallpaperPath !== ""
                 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     blurEnabled: true
-                    blur: ThemeService.lockBackgroundBlur
+                    blur: ThemeManager.lockBackgroundBlur
                     blurMax: 64
                 }
             }
@@ -43,15 +43,15 @@ Item {
             Image {
                 id: trackArtBg
                 anchors.fill: parent
-                source: MusicService.activePlayer ? MusicService.activePlayer.trackArtUrl : ""
+                source: MusicManager.activePlayer ? MusicManager.activePlayer.trackArtUrl : ""
                 fillMode: Image.PreserveAspectCrop
-                opacity: (MusicService.activePlayer && MusicService.activePlayer.trackArtUrl && MusicService.activePlayer.playbackState === MprisPlaybackState.Playing) ? 0.35 : 0
+                opacity: (MusicManager.activePlayer && MusicManager.activePlayer.trackArtUrl && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing) ? 0.35 : 0
                 Behavior on opacity { NumberAnimation { duration: 1000 } }
                 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     blurEnabled: true
-                    blur: ThemeService.lockBackgroundBlur
+                    blur: ThemeManager.lockBackgroundBlur
                     blurMax: 128
                 }
             }
@@ -59,8 +59,8 @@ Item {
         
         Rectangle {
             anchors.fill: parent
-            color: ThemeService.backgroundMain
-            opacity: wallpaper.visible ? ThemeService.lockBackgroundOpacity : 1.0
+            color: ThemeManager.backgroundPrimaryColor
+            opacity: wallpaper.visible ? ThemeManager.lockBackgroundOpacity : 1.0
         }
 
         Rectangle {

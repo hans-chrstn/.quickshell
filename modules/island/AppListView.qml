@@ -64,11 +64,11 @@ Item {
 
         path: Path {
             startX: -view.width * 0.2; startY: view.height / 2
-            PathAttribute { name: "itemOpacity"; value: ThemeService.appIslandMinOpacity }
+            PathAttribute { name: "itemOpacity"; value: ThemeManager.appIslandMinOpacity }
             PathLine { x: view.width * 0.5; y: view.height / 2 }
             PathAttribute { name: "itemOpacity"; value: 1.0 }
             PathLine { x: view.width * 1.2; y: view.height / 2 }
-            PathAttribute { name: "itemOpacity"; value: ThemeService.appIslandMinOpacity }
+            PathAttribute { name: "itemOpacity"; value: ThemeManager.appIslandMinOpacity }
         }
 
         ListModel { id: appListModel }

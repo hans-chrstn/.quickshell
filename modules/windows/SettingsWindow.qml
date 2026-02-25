@@ -25,7 +25,7 @@ PanelWindow {
     Shortcut {
         sequence: "Escape"
         enabled: root.visible
-        onActivated: ViewService.closeWindow("settings")
+        onActivated: ViewManager.closeWindowByType("settings")
     }
 
     onVisibleChanged: {
@@ -38,13 +38,13 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: ThemeService.shadowMain
-        opacity: (root.visible && !ViewService.closingSettings) ? 0.4 : 0
+        color: ThemeManager.shadowPrimaryColor
+        opacity: (root.visible && !ViewManager.isSettingsClosing) ? 0.4 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
         
         MouseArea {
             anchors.fill: parent
-            onClicked: ViewService.closeWindow("settings")
+            onClicked: ViewManager.closeWindowByType("settings")
         }
     }
 
@@ -53,11 +53,11 @@ PanelWindow {
         width: 850; height: 550
         anchors.centerIn: parent
         radius: 28
-        color: ThemeService.backgroundMain
-        border.color: ThemeService.outlineMain
+        color: ThemeManager.backgroundPrimaryColor
+        border.color: ThemeManager.outlinePrimaryColor
         border.width: 1
-        opacity: (root.visible && !ViewService.closingSettings) ? 1.0 : 0
-        scale: (root.visible && !ViewService.closingSettings) ? 1.0 : 0.95
+        opacity: (root.visible && !ViewManager.isSettingsClosing) ? 1.0 : 0
+        scale: (root.visible && !ViewManager.isSettingsClosing) ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -98,15 +98,15 @@ PanelWindow {
                     spacing: 24
 
                     Text {
-                        text: ThemeService.settingsStructure[sidebar.currentIndex].category
-                        color: ThemeService.backgroundContent
+                        text: ThemeManager.settingsStructure[sidebar.currentIndex].category
+                        color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 32; font.weight: Font.Bold
                     }
 
                     ListView {
                         id: settingsList
                         Layout.fillWidth: true; Layout.fillHeight: true
-                        model: ThemeService.settingsStructure[sidebar.currentIndex].items
+                        model: ThemeManager.settingsStructure[sidebar.currentIndex].items
                         clip: true
                         spacing: 20
                         interactive: true

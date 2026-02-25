@@ -39,6 +39,10 @@
         pkgs.wf-recorder
         pkgs.swww
         pkgs.kdePackages.qtmultimedia
+        pkgs.kdePackages.kirigami.unwrapped
+        pkgs.kdePackages.sonnet
+        pkgs.kdePackages.qtimageformats
+        pkgs.kdePackages.kimageformats
       ];
     };
   };

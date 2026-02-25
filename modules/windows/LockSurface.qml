@@ -19,7 +19,7 @@ WlSessionLockSurface {
     Connections {
         target: root.lock
         function onUnlock(): void {
-            SfxService.playComplete()
+            SoundManager.playSuccess()
             unlockAnim.start()
         }
     }
@@ -76,10 +76,10 @@ WlSessionLockSurface {
             }
             
             if (event.text.length === 1 || event.key === Qt.Key_Backspace) {
-                SfxService.playButton1()
+                SoundManager.playClick()
             }
             
-            LockService.handleKey(event)
+            LockManager.processKeyEvent(event)
         }
 
         LockBackground {
@@ -102,8 +102,8 @@ WlSessionLockSurface {
             opacity: 0
             
             transform: Translate {
-                x: mainRect.mouseX * (ThemeService.lockParallaxIntensity / 2)
-                y: mainRect.mouseY * (ThemeService.lockParallaxIntensity / 2)
+                x: mainRect.mouseX * (ThemeManager.lockParallaxIntensity / 2)
+                y: mainRect.mouseY * (ThemeManager.lockParallaxIntensity / 2)
                 Behavior on x { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
                 Behavior on y { NumberAnimation { duration: 1000; easing.type: Easing.OutCubic } }
             }
@@ -111,7 +111,7 @@ WlSessionLockSurface {
             ColumnLayout {
                 id: innerLayout
                 anchors.centerIn: parent
-                spacing: ThemeService.lockContentSpacing
+                spacing: ThemeManager.lockContentSpacing
                 
                 LockClock { }
 
@@ -122,8 +122,8 @@ WlSessionLockSurface {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredWidth: 350
                     horizontalAlignment: Text.AlignHCenter
-                    text: LockService.message
-                    color: LockService.messageIsError ? ThemeService.dangerColor : "white"
+                    text: LockManager.statusMessage
+                    color: LockManager.isErrorMessage ? ThemeManager.dangerColor : "white"
                     font.pixelSize: 13
                     font.weight: Font.Medium
                     wrapMode: Text.Wrap

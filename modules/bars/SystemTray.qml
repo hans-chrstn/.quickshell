@@ -8,27 +8,27 @@ import qs.components
 Item {
     id: root
     width: 14
-    height: ThemeService.thickness
+    height: ThemeManager.globalThickness
     
-    visible: SystemTrayService.count > 0
+    visible: SystemTrayManager.itemCount > 0
 
     Rectangle {
         id: indicatorPill
         anchors.centerIn: parent
         width: 10; height: 10; radius: 5
         
-        readonly property var firstItem: SystemTrayService.values.length > 0 ? SystemTrayService.values[0] : null
+        readonly property var firstItem: SystemTrayManager.items.length > 0 ? SystemTrayManager.items[0] : null
         readonly property bool needsAttention: {
-            for (let item of SystemTrayService.values) {
+            for (let item of SystemTrayManager.items) {
                 if (item.status === SystemTrayItem.NeedsAttention) return true
             }
             return false
         }
 
-        color: needsAttention ? ThemeService.dangerMain : 
-               ((SystemTrayService.hoveredIndex !== -1) 
-                ? Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 1.0)
-                : Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.5))
+        color: needsAttention ? ThemeManager.dangerPrimaryColor : 
+               ((SystemTrayManager.hoveredIndex !== -1) 
+                ? Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 1.0)
+                : Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.5))
 
         Behavior on color { ColorAnimation { duration: 300 } }
 
@@ -43,7 +43,7 @@ Item {
     HoverHandler { 
         id: hh
         onHoveredChanged: {
-            if (hovered) SystemTrayService.hoveredIndex = 0
+            if (hovered) SystemTrayManager.hoveredIndex = 0
             else unhoverTimer.restart()
         }
     }
@@ -51,6 +51,6 @@ Item {
     Timer {
         id: unhoverTimer
         interval: 350 
-        onTriggered: if (!hh.hovered) SystemTrayService.hoveredIndex = -1
+        onTriggered: if (!hh.hovered) SystemTrayManager.hoveredIndex = -1
     }
 }

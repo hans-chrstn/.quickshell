@@ -19,5 +19,5 @@ ScreenCorner {
     customTL: 0
     customTR: 0
     customBL: 0
-    customBR: ThemeService.dynamicIslandCornerRadius
+    customBR: ThemeManager.dynamicIslandCornerRadius
 }

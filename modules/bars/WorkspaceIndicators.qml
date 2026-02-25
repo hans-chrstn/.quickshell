@@ -10,7 +10,7 @@ RowLayout {
     property string screenName: ""
 
     Repeater {
-        model: NiriService.workspaces
+        model: NiriManager.workspaces
         delegate: Rectangle {
             readonly property bool onCurrentScreen: model.output === root.screenName
             visible: onCurrentScreen
@@ -19,9 +19,9 @@ RowLayout {
             Layout.preferredHeight: visible ? 6 : 0
             
             radius: 3
-            color: model.isFocused ? ThemeService.accentColor : 
-                   model.isActive ? Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.5) : 
-                                    Qt.rgba(ThemeService.backgroundContent.r, ThemeService.backgroundContent.g, ThemeService.backgroundContent.b, 0.2)
+            color: model.isFocused ? ThemeManager.accentColor : 
+                   model.isActive ? Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.5) : 
+                                    Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.2)
             
             Behavior on color { ColorAnimation { duration: 200 } }
             Behavior on Layout.preferredWidth { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
@@ -31,7 +31,7 @@ RowLayout {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: NiriService.focusWorkspace(model.id)
+                onClicked: NiriManager.focusWorkspaceById(model.id)
             }
         }
     }

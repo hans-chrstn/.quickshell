@@ -1,0 +1,10 @@
+[32m  INFO[0m: Launching config: "/home/jin/.config/quickshell/shell.qml"
+[32m  INFO[0m: Shell ID: "27ff4a15c855067dc4f5b18cba0dde4a" Path ID "27ff4a15c855067dc4f5b18cba0dde4a"
+[32m  INFO[0m: Saving logs to "/run/user/1000/quickshell/by-id/zeh64bbzat/log.qslog"
+[34m DEBUG[97m qml[0m: [NiriService] Connected to Niri IPC
+[32m  INFO[97m qt.multimedia.ffmpeg[0m: Using Qt multimedia with FFmpeg version 8.0.1 GPL version 3 or later
+[32m  INFO[0m: Configuration Loaded
+[33m  WARN[97m quickshell.dbus.properties[0m: Error updating properties of org.mpris.MediaPlayer2.playerctld/org/mpris/MediaPlayer2/org.mpris.MediaPlayer2 via GetAll
+[33m  WARN[97m quickshell.dbus.properties[0m: QDBusError("com.github.altdesktop.playerctld.NoActivePlayer", "No player is being controlled by playerctld")
+[33m  WARN[97m quickshell.dbus.properties[0m: Error updating properties of org.mpris.MediaPlayer2.playerctld/org/mpris/MediaPlayer2/org.mpris.MediaPlayer2.Player via GetAll
+[33m  WARN[97m quickshell.dbus.properties[0m: QDBusError("com.github.altdesktop.playerctld.NoActivePlayer", "No player is being controlled by playerctld")

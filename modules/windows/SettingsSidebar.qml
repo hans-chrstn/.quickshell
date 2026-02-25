@@ -29,7 +29,7 @@ FocusScope {
 
     Rectangle {
         anchors.fill: parent
-        color: ThemeService.surfaceSubtle
+        color: ThemeManager.surfaceSubtleColor
     }
 
     Connections {
@@ -45,16 +45,16 @@ FocusScope {
     }
 
     Connections {
-        target: ViewService
-        function onClosingSettingsChanged() {
-            if (ViewService.closingSettings) {
+        target: ViewManager
+        function onIsSettingsClosingChanged() {
+            if (ViewManager.isSettingsClosing) {
                 cascadeActive = false
             }
         }
     }
 
     property bool cascadeActive: false
-    property real itemOpacity: (cascadeActive && !ViewService.closingSettings) ? 1.0 : 0
+    property real itemOpacity: (cascadeActive && !ViewManager.isSettingsClosing) ? 1.0 : 0
     Behavior on itemOpacity { NumberAnimation { duration: 300 } }
 
     Timer {
@@ -71,7 +71,7 @@ FocusScope {
         Text {
             id: headerText
             text: "SETTINGS"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 12; font.weight: Font.Black; font.letterSpacing: 2
             opacity: 0.4 * root.itemOpacity
             Layout.margins: 16
@@ -85,7 +85,7 @@ FocusScope {
         ListView {
             id: categoryList
             Layout.fillWidth: true; Layout.fillHeight: true
-            model: ThemeService.settingsStructure
+            model: ThemeManager.settingsStructure
             clip: true
             currentIndex: 0
             spacing: 4
@@ -105,19 +105,19 @@ FocusScope {
                 width: categoryList.width
                 height: 48; radius: 12
                 
-                color: ListView.isCurrentItem ? ThemeService.surfaceVariant : "transparent"
+                color: ListView.isCurrentItem ? ThemeManager.surfaceVariantColor : "transparent"
                 opacity: root.itemOpacity
                 Behavior on color { ColorAnimation { duration: 200 } }
 
                 transform: Translate {
-                    x: (root.cascadeActive && !ViewService.closingSettings) ? 0 : -40
+                    x: (root.cascadeActive && !ViewManager.isSettingsClosing) ? 0 : -40
                     Behavior on x { 
                         SequentialAnimation {
                             PauseAnimation { 
-                                duration: (root.cascadeActive && !ViewService.closingSettings) ? (index * 35) : ((categoryList.count - index) * 15) 
+                                duration: (root.cascadeActive && !ViewManager.isSettingsClosing) ? (index * 35) : ((categoryList.count - index) * 15) 
                             }
                             NumberAnimation { 
-                                duration: (root.cascadeActive && !ViewService.closingSettings) ? 500 : 150
+                                duration: (root.cascadeActive && !ViewManager.isSettingsClosing) ? 500 : 150
                                 easing.type: Easing.OutExpo 
                             }
                         }
@@ -129,7 +129,7 @@ FocusScope {
                     anchors.leftMargin: 4
                     width: (ListView.isCurrentItem && categoryList.activeFocus) ? 4 : 0
                     height: 24; radius: 2
-                    color: ThemeService.primaryMain
+                    color: ThemeManager.primaryColor
                     Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
                 }
 
@@ -142,7 +142,7 @@ FocusScope {
                         Text {
                             anchors.centerIn: parent
                             text: modelData.icon
-                            color: ThemeService.backgroundContent
+                            color: ThemeManager.contentOnBackgroundColor
                             font.pixelSize: 20
                             opacity: ListView.isCurrentItem ? 1.0 : 0.4
                             Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -152,7 +152,7 @@ FocusScope {
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: modelData.category
-                        color: ThemeService.backgroundContent
+                        color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 14; font.weight: ListView.isCurrentItem ? Font.DemiBold : Font.Normal
                         opacity: ListView.isCurrentItem ? 1.0 : 0.6
                         Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -170,7 +170,7 @@ FocusScope {
                 
                 Rectangle {
                     anchors.fill: parent; radius: 12
-                    color: ThemeService.backgroundContent; opacity: hh.hovered && !ListView.isCurrentItem ? 0.04 : 0
+                    color: ThemeManager.contentOnBackgroundColor; opacity: hh.hovered && !ListView.isCurrentItem ? 0.04 : 0
                 }
             }
         }
@@ -178,21 +178,21 @@ FocusScope {
         Rectangle {
             id: resetBtn
             Layout.fillWidth: true; Layout.preferredHeight: 50; radius: 12
-            color: ThemeService.dangerSurface
-            border.color: activeFocus ? "white" : ThemeService.outlineMain
+            color: ThemeManager.dangerSurfaceColor
+            border.color: activeFocus ? "white" : ThemeManager.outlinePrimaryColor
             border.width: activeFocus ? 2 : 1
             opacity: root.itemOpacity
             
             focus: true
-            Keys.onSpacePressed: ThemeService.reset()
-            Keys.onEnterPressed: ThemeService.reset()
-            Keys.onReturnPressed: ThemeService.reset()
+            Keys.onSpacePressed: ThemeManager.resetToDefaults()
+            Keys.onEnterPressed: ThemeManager.resetToDefaults()
+            Keys.onReturnPressed: ThemeManager.resetToDefaults()
 
             transform: Translate {
-                x: (root.cascadeActive && !ViewService.closingSettings) ? 0 : -40
+                x: (root.cascadeActive && !ViewManager.isSettingsClosing) ? 0 : -40
                 Behavior on x { 
                     SequentialAnimation {
-                        PauseAnimation { duration: (root.cascadeActive && !ViewService.closingSettings) ? 300 : 0 }
+                        PauseAnimation { duration: (root.cascadeActive && !ViewManager.isSettingsClosing) ? 300 : 0 }
                         NumberAnimation { duration: 400; easing.type: Easing.OutExpo }
                     }
                 }
@@ -201,18 +201,18 @@ FocusScope {
             Text {
                 anchors.centerIn: parent
                 text: "RESET DEFAULTS"
-                color: ThemeService.dangerMain
+                color: ThemeManager.dangerPrimaryColor
                 font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1
             }
             
-            TapHandler { onTapped: ThemeService.reset() }
+            TapHandler { onTapped: ThemeManager.resetToDefaults() }
             HoverHandler { id: rhh; cursorShape: Qt.PointingHandCursor }
-            Rectangle { anchors.fill: parent; color: ThemeService.backgroundContent; opacity: rhh.hovered ? 0.1 : 0; radius: 12 }
+            Rectangle { anchors.fill: parent; color: ThemeManager.contentOnBackgroundColor; opacity: rhh.hovered ? 0.1 : 0; radius: 12 }
         }
     }
 
     Rectangle {
         anchors.right: parent.right; height: parent.height; width: 1
-        color: ThemeService.backgroundContent; opacity: 0.05
+        color: ThemeManager.contentOnBackgroundColor; opacity: 0.05
     }
 }

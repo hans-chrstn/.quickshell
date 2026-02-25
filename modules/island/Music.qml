@@ -16,10 +16,10 @@ Item {
         spacing: 20
         
         Item {
-            Layout.preferredWidth: ThemeService.musicArtSize
-            Layout.preferredHeight: ThemeService.musicArtSize
+            Layout.preferredWidth: ThemeManager.musicArtSize
+            Layout.preferredHeight: ThemeManager.musicArtSize
             Layout.alignment: Qt.AlignVCenter
-            visible: ThemeService.showMusicArt
+            visible: ThemeManager.isMusicArtVisible
             
             Item {
                 id: vinylDisk
@@ -29,21 +29,21 @@ Item {
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
-                    shadowOpacity: ThemeService.musicArtShadowOpacity
+                    shadowOpacity: ThemeManager.musicArtShadowOpacity
                     shadowBlur: 0.4
                     shadowVerticalOffset: 2
                 }                
                 NumberAnimation on rotation {
                     from: 0; to: 360
-                    duration: ThemeService.musicRotationDuration
+                    duration: ThemeManager.musicRotationDuration
                     loops: Animation.Infinite
                     running: root.player && root.player.playbackState === MprisPlaybackState.Playing
                 }
                 
                 ClippingRectangle { 
                     anchors.fill: parent
-                    radius: ThemeService.musicArtRadius
-                    color: ThemeService.surfaceVariant
+                    radius: ThemeManager.musicArtRadius
+                    color: ThemeManager.surfaceVariantColor
                     
                     Image {
                         id: artImage
@@ -56,18 +56,18 @@ Item {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "󰝚"; color: ThemeService.backgroundContent; opacity: 0.2; font.pixelSize: 24
+                        text: "󰝚"; color: ThemeManager.contentOnBackgroundColor; opacity: 0.2; font.pixelSize: 24
                         visible: !root.player || !root.player.trackArtUrl || (parent.children[0] && parent.children[0].status !== Image.Ready)
                     }
                 }
                 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: ThemeService.musicHoleSize
-                    height: ThemeService.musicHoleSize
+                    width: ThemeManager.musicHoleSize
+                    height: ThemeManager.musicHoleSize
                     radius: width / 2
-                    color: ThemeService.backgroundMain
-                    border.color: ThemeService.outlineVariant; border.width: 1
+                    color: ThemeManager.backgroundPrimaryColor
+                    border.color: ThemeManager.outlineVariantColor; border.width: 1
                 }
             }
         }
@@ -79,13 +79,13 @@ Item {
             Text { 
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackTitle) || "No Music"
-                color: ThemeService.backgroundContent; font.weight: Font.DemiBold; font.pixelSize: 14
+                color: ThemeManager.contentOnBackgroundColor; font.weight: Font.DemiBold; font.pixelSize: 14
                 elide: Text.ElideRight 
             }
             Text { 
                 Layout.fillWidth: true
                 text: (root.player && root.player.trackArtist) || "Nothing playing"
-                color: ThemeService.secondaryContent; opacity: 0.8; font.pixelSize: 11
+                color: ThemeManager.contentSecondaryColor; opacity: 0.8; font.pixelSize: 11
                 elide: Text.ElideRight 
             }
             
@@ -98,10 +98,10 @@ Item {
                 height: hovered || dragging ? 8 : 4
                 Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                 
-                Rectangle { anchors.fill: parent; radius: 2; color: ThemeService.backgroundContent; opacity: 0.1 }
+                Rectangle { anchors.fill: parent; radius: 2; color: ThemeManager.contentOnBackgroundColor; opacity: 0.1 }
                 
                 Rectangle {
-                    height: parent.height; radius: 2; color: ThemeService.backgroundContent; opacity: 0.8
+                    height: parent.height; radius: 2; color: ThemeManager.contentOnBackgroundColor; opacity: 0.8
                     width: (root.player && root.player.length > 0) ? parent.width * (root.player.position / root.player.length) : 0
                 }
                 
@@ -127,13 +127,13 @@ Item {
 
             RowLayout { 
                 Layout.fillWidth: true; Layout.topMargin: 8
-                spacing: ThemeService.musicControlSpacing
+                spacing: ThemeManager.musicControlSpacing
                 Layout.alignment: Qt.AlignHCenter
                 
                 Item { Layout.fillWidth: true }
                 
                 Text { 
-                    text: "󰒮"; color: ThemeService.backgroundContent; opacity: 0.6; font.pixelSize: 20
+                    text: "󰒮"; color: ThemeManager.contentOnBackgroundColor; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thPrev.pressed ? 0.9 : (hhPrev.hovered ? 1.2 : 1.0)
@@ -145,7 +145,7 @@ Item {
                 
                 Text { 
                     text: (root.player && root.player.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
-                    color: ThemeService.backgroundContent; font.pixelSize: 28
+                    color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 28
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thPlay.pressed ? 0.9 : (hhPlay.hovered ? 1.2 : 1.0)
@@ -156,7 +156,7 @@ Item {
                 }
                 
                 Text { 
-                    text: "󰒭"; color: ThemeService.backgroundContent; opacity: 0.6; font.pixelSize: 20
+                    text: "󰒭"; color: ThemeManager.contentOnBackgroundColor; opacity: 0.6; font.pixelSize: 20
                     Layout.alignment: Qt.AlignVCenter
                     
                     scale: thNext.pressed ? 0.9 : (hhNext.hovered ? 1.2 : 1.0)

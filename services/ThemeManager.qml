@@ -6,13 +6,13 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property color primaryMain: root.accentColor
-    readonly property color primaryAccent: root.accentColor
-    readonly property color primaryContent: "#000000"
-    readonly property color secondaryContent: root.secondaryTextColor
+    readonly property color primaryColor: root.accentColor
+    readonly property color highlightColor: root.accentColor
+    readonly property color contentPrimaryColor: "#000000"
+    readonly property color contentSecondaryColor: root.secondaryTextColor
     
-    readonly property color backgroundMain: root.color
-    readonly property color backgroundContent: "#FFFFFF"
+    readonly property color backgroundPrimaryColor: root.backgroundColor
+    readonly property color contentOnBackgroundColor: "#FFFFFF"
     
     property real lockBackgroundOpacity: 0.45
     property real lockBackgroundBlur: 1.0
@@ -25,49 +25,49 @@ Singleton {
     property bool lockDynamicAccents: true
     property int lockParallaxIntensity: 20
 
-    readonly property color surfaceMain: Qt.rgba(1, 1, 1, 0.05)
-    readonly property color surfaceStrong: Qt.rgba(1, 1, 1, 0.1)
-    readonly property color surfaceSubtle: Qt.rgba(1, 1, 1, 0.02)
-    readonly property color surfaceContent: "#FFFFFF"
+    readonly property color surfacePrimaryColor: Qt.rgba(1, 1, 1, 0.05)
+    readonly property color surfaceStrongColor: Qt.rgba(1, 1, 1, 0.1)
+    readonly property color surfaceSubtleColor: Qt.rgba(1, 1, 1, 0.02)
+    readonly property color surfaceContentColor: "#FFFFFF"
     
-    readonly property color surfaceVariant: Qt.rgba(1, 1, 1, 0.08)
-    readonly property color surfaceVariantContent: "#AAAAAA"
-    readonly property color surfaceVariantStrong: Qt.rgba(1, 1, 1, 0.15)
+    readonly property color surfaceVariantColor: Qt.rgba(1, 1, 1, 0.08)
+    readonly property color surfaceVariantContentColor: "#AAAAAA"
+    readonly property color surfaceVariantStrongColor: Qt.rgba(1, 1, 1, 0.15)
     
-    readonly property color outlineMain: Qt.rgba(1, 1, 1, 0.1)
-    readonly property color outlineStrong: Qt.rgba(1, 1, 1, 0.2)
-    readonly property color outlineVariant: Qt.rgba(1, 1, 1, 0.05)
+    readonly property color outlinePrimaryColor: Qt.rgba(1, 1, 1, 0.1)
+    readonly property color outlineStrongColor: Qt.rgba(1, 1, 1, 0.2)
+    readonly property color outlineVariantColor: Qt.rgba(1, 1, 1, 0.05)
     
-    readonly property color dangerMain: root.dangerColor
-    readonly property color dangerContent: "#FFFFFF"
-    readonly property color dangerSurface: {
-        let c = Qt.color(root.dangerColor);
-        return Qt.rgba(c.r, c.g, c.b, 0.3);
+    readonly property color dangerPrimaryColor: root.dangerColor
+    readonly property color dangerContentColor: "#FFFFFF"
+    readonly property color dangerSurfaceColor: {
+        let color = Qt.color(root.dangerColor);
+        return Qt.rgba(color.r, color.g, color.b, 0.3);
     }
     
-    readonly property color shadowMain: "#000000"
+    readonly property color shadowPrimaryColor: "#000000"
 
-    property int thickness: 16
-    property int cornerRadius: 12
-    property color color: "#0D0D0F"
+    property int globalThickness: 16
+    property int globalCornerRadius: 12
+    property color backgroundColor: "#0D0D0F"
     property color accentColor: "#FFFFFF"
     property color dangerColor: "#FF5555"
-    property color highlightColor: "#FFFFFF"
-    property real highlightOpacity: 0.08
+    property color visualHighlightColor: "#FFFFFF"
+    property real visualHighlightOpacity: 0.08
     property color secondaryTextColor: "#888888"
 
-    property int animDuration: 400
-    property int animEasing: Easing.OutQuart
+    property int animationDuration: 400
+    property int animationEasing: Easing.OutQuart
 
     property real shadowOpacity: 0.4
-    property int shadowBlur: 15
+    property int shadowBlurRadius: 15
     property int shadowVerticalOffset: 4
 
     property int dynamicIslandCornerRadius: 30
     property int dynamicIslandExpandedWidth: 420
     property int dynamicIslandExpandedHeight: 130
     property int dynamicIslandCollapsedWidth: 160
-    property int collapseTimerDelay: 200
+    property int islandCollapseDelay: 200
     
     property int appIslandExpandedWidth: 600
     property int appIslandExpandedHeight: 110
@@ -90,14 +90,14 @@ Singleton {
     property real musicArtShadowOpacity: 0.3
     property int musicControlSpacing: 24
 
-    property bool showMusicArt: true
-    property bool showWeather: true
+    property bool isMusicArtVisible: true
+    property bool isWeatherVisible: true
 
-    property int notifItemHeight: 60
-    property int notifIconSize: 36
-    property int notifSpacing: 4
-    property real notifOpacity: 0.04
-    property real notifHoverOpacity: 0.08
+    property int notificationItemHeight: 60
+    property int notificationIconSize: 36
+    property int notificationSpacing: 4
+    property real notificationOpacity: 0.04
+    property real notificationHoverOpacity: 0.08
 
     property int cavaBarCount: 20
     property int cavaSpacing: 3
@@ -128,10 +128,10 @@ Singleton {
     property int indicatorRowBottomMargin: 10
     property int indicatorRowSpacing: 6
 
-    property bool ready: false
-    readonly property string cachePath: Quickshell.cachePath("config.json")
+    property bool isReady: false
+    readonly property string configurationCachePath: Quickshell.cachePath("config.json")
     
-    signal resetOccurred()
+    signal themeResetOccurred()
     
     property var settingsStructure: [
         {
@@ -157,17 +157,17 @@ Singleton {
             icon: "󰔉",
             items: [
                 { type: "header", label: "Colors" },
-                { type: "color", label: "Background", property: "color", default: "#0D0D0F" },
+                { type: "color", label: "Background", property: "backgroundColor", default: "#0D0D0F" },
                 { type: "color", label: "Accent", property: "accentColor", default: "#FFFFFF" },
                 { type: "color", label: "Danger", property: "dangerColor", default: "#FF5555" },
-                { type: "color", label: "Highlight", property: "highlightColor", default: "#FFFFFF" },
+                { type: "color", label: "Highlight", property: "visualHighlightColor", default: "#FFFFFF" },
                 { type: "color", label: "Secondary Text", property: "secondaryTextColor", default: "#888888" },
                 { type: "header", label: "Geometry" },
-                { type: "slider", label: "Thickness", property: "thickness", default: 16, min: 10, max: 100 },
-                { type: "slider", label: "Corner Radius", property: "cornerRadius", default: 12, min: 0, max: 60 },
+                { type: "slider", label: "Thickness", property: "globalThickness", default: 16, min: 10, max: 100 },
+                { type: "slider", label: "Corner Radius", property: "globalCornerRadius", default: 12, min: 0, max: 60 },
                 { type: "header", label: "Shadows" },
                 { type: "slider", label: "Opacity", property: "shadowOpacity", default: 0.4, min: 0.0, max: 1.0, step: 0.05 },
-                { type: "slider", label: "Blur", property: "shadowBlur", default: 15, min: 0, max: 50 },
+                { type: "slider", label: "Blur", property: "shadowBlurRadius", default: 15, min: 0, max: 50 },
                 { type: "slider", label: "Offset Y", property: "shadowVerticalOffset", default: 4, min: 0, max: 20 },
                 { type: "header", label: "Formats" },
                 { type: "text", label: "Time Format", property: "timeFormat", default: "hh:mm" },
@@ -231,11 +231,11 @@ Singleton {
             icon: "󰂚",
             items: [
                 { type: "header", label: "Appearance" },
-                { type: "slider", label: "Item Height", property: "notifItemHeight", default: 60, min: 40, max: 100 },
-                { type: "slider", label: "Icon Size", property: "notifIconSize", default: 36, min: 20, max: 60 },
-                { type: "slider", label: "Spacing", property: "notifSpacing", default: 4, min: 0, max: 20 },
-                { type: "slider", label: "Opacity", property: "notifOpacity", default: 0.04, min: 0.0, max: 1.0, step: 0.01 },
-                { type: "slider", label: "Hover Opacity", property: "notifHoverOpacity", default: 0.08, min: 0.0, max: 1.0, step: 0.01 }
+                { type: "slider", label: "Item Height", property: "notificationItemHeight", default: 60, min: 40, max: 100 },
+                { type: "slider", label: "Icon Size", property: "notificationIconSize", default: 36, min: 20, max: 60 },
+                { type: "slider", label: "Spacing", property: "notificationSpacing", default: 4, min: 0, max: 20 },
+                { type: "slider", label: "Opacity", property: "notificationOpacity", default: 0.04, min: 0.0, max: 1.0, step: 0.01 },
+                { type: "slider", label: "Hover Opacity", property: "notificationHoverOpacity", default: 0.08, min: 0.0, max: 1.0, step: 0.01 }
             ]
         },
         {
@@ -270,62 +270,64 @@ Singleton {
             icon: "󰄔",
             items: [
                 { type: "header", label: "Toggles" },
-                { type: "switch", label: "Show Music Art", property: "showMusicArt", default: true },
-                { type: "switch", label: "Show Weather", property: "showWeather", default: true }
+                { type: "switch", label: "Show Music Art", property: "isMusicArtVisible", default: true },
+                { type: "switch", label: "Show Weather", property: "isWeatherVisible", default: true }
             ]
         }
     ]
 
     FileView {
-        id: cacheFile
-        path: root.cachePath
+        id: configurationCacheFile
+        path: root.configurationCachePath
         blockLoading: true
         printErrors: true
-        onLoaded: root.load()
-        onInternalTextChanged: root.load()
+        onLoaded: root.loadConfiguration()
+        onInternalTextChanged: root.loadConfiguration()
     }
 
-    function save(): void {
-        let data = {}
+    function saveConfiguration() {
+        let configurationData = {}
         for (let i = 0; i < root.settingsStructure.length; i++) {
-            let items = root.settingsStructure[i].items
-            for (let j = 0; j < items.length; j++) {
-                if (items[j].property) {
-                    data[items[j].property] = root[items[j].property]
+            let categoryItems = root.settingsStructure[i].items
+            for (let j = 0; j < categoryItems.length; j++) {
+                if (categoryItems[j].property) {
+                    configurationData[categoryItems[j].property] = root[categoryItems[j].property]
                 }
             }
         }
-        cacheFile.setText(JSON.stringify(data, null, 4))
+        configurationCacheFile.setText(JSON.stringify(configurationData, null, 4))
     }
 
-    function load(): void {
-        if (!root.ready) return
-        let content = cacheFile.text()
-        if (content) {
+    function loadConfiguration() {
+        if (!root.isReady) return
+        let configurationContent = configurationCacheFile.text()
+        if (configurationContent) {
             try {
-                let data = JSON.parse(content)
-                for (let key in data) {
-                    if (root[key] !== undefined) root[key] = data[key]
+                let configurationData = JSON.parse(configurationContent)
+                for (let settingKey in configurationData) {
+                    if (root[settingKey] !== undefined) {
+                        root[settingKey] = configurationData[settingKey]
+                    }
                 }
-            } catch (e) {}
+            } catch (error) {}
         }
     }
 
-    function reset(): void {
+    function resetToDefaults() {
         for (let i = 0; i < root.settingsStructure.length; i++) {
-            let items = root.settingsStructure[i].items
-            for (let j = 0; j < items.length; j++) {
-                if (items[j].property && items[j].default !== undefined) {
-                    root[items[j].property] = items[j].default
+            let categoryItems = root.settingsStructure[i].items
+            for (let j = 0; j < categoryItems.length; j++) {
+                if (categoryItems[j].property && categoryItems[j].default !== undefined) {
+                    root[categoryItems[j].property] = categoryItems[j].default
                 }
             }
         }
-        root.save()
-        root.resetOccurred()
+        root.saveConfiguration()
+        root.themeResetOccurred()
     }
 
     Component.onCompleted: {
-        root.ready = true
-        root.load()
+        root.isReady = true
+        root.loadConfiguration()
     }
 }

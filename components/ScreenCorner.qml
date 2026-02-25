@@ -18,10 +18,10 @@ PanelWindow {
     property bool activeLeft: false
     property bool activeRight: false
 
-    property int sThick: ThemeService.thickness
+    property int sThick: ThemeManager.globalThickness
     property int iRadius: 10
     property int sRadius: sThick + iRadius
-    property color sColor: ThemeService.color
+    property color sColor: ThemeManager.backgroundColor
     
     property bool hoverEnabled: false
     property int expandedWidth: 200

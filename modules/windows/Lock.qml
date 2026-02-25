@@ -95,6 +95,6 @@ Scope {
     }
 
     Component.onCompleted: {
-        LockService.registerLock(root, lock, pam)
+        LockManager.register(root, lock, pam)
     }
 }

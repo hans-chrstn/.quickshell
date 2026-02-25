@@ -27,7 +27,7 @@ FocusScope {
                 spacing: 4
                 Text { 
                     text: rootHeader.showSettings ? "SETTINGS" : "EXPLORER"
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 10
                     font.weight: Font.Black
                     font.letterSpacing: 3
@@ -37,17 +37,17 @@ FocusScope {
                     Layout.preferredHeight: 24
                     Layout.preferredWidth: Math.min(pathText.implicitWidth + 24, 250)
                     radius: 12
-                    color: ThemeService.backgroundContent
+                    color: ThemeManager.contentOnBackgroundColor
                     opacity: 0.12
-                    border.color: ThemeService.outlineMain
+                    border.color: ThemeManager.outlinePrimaryColor
                     border.width: 1
                     visible: !rootHeader.showSettings
                     
                     Text { 
                         id: pathText
                         anchors.centerIn: parent
-                        text: FileBrowserService.currentPath
-                        color: ThemeService.backgroundContent
+                        text: FileBrowserManager.currentPath
+                        color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 9
                         font.family: "Monospace"
                         opacity: 1.0
@@ -65,7 +65,7 @@ FocusScope {
                 Rectangle {
                     id: settingsButton
                     width: 36; height: 36; radius: 10
-                    color: (rootHeader.showSettings || activeFocus) ? ThemeService.accentColor : ThemeService.backgroundContent
+                    color: (rootHeader.showSettings || activeFocus) ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
                     opacity: (rootHeader.showSettings || activeFocus) ? 1.0 : 0.1
                     
                     focus: true
@@ -76,7 +76,7 @@ FocusScope {
 
                     Text { 
                         anchors.centerIn: parent; text: "󰒓"
-                        color: (rootHeader.showSettings || parent.activeFocus) ? ThemeService.primaryContent : ThemeService.backgroundContent
+                        color: (rootHeader.showSettings || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 18 
                     }
                     
@@ -92,25 +92,25 @@ FocusScope {
                 Rectangle {
                     id: hiddenBtn
                     width: 36; height: 36; radius: 10
-                    color: (FileBrowserService.showHidden || activeFocus) ? ThemeService.accentColor : ThemeService.backgroundContent
-                    opacity: (FileBrowserService.showHidden || activeFocus) ? 1.0 : 0.1
+                    color: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
+                    opacity: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? 1.0 : 0.1
                     visible: !rootHeader.showSettings
                     
-                    Keys.onSpacePressed: FileBrowserService.showHidden = !FileBrowserService.showHidden
-                    Keys.onEnterPressed: FileBrowserService.showHidden = !FileBrowserService.showHidden
-                    Keys.onReturnPressed: FileBrowserService.showHidden = !FileBrowserService.showHidden
+                    Keys.onSpacePressed: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles
+                    Keys.onEnterPressed: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles
+                    Keys.onReturnPressed: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles
                     Keys.onLeftPressed: settingsButton.forceActiveFocus()
 
                     Text { 
                         anchors.centerIn: parent; text: "󰈈"
-                        color: (FileBrowserService.showHidden || parent.activeFocus) ? ThemeService.primaryContent : ThemeService.backgroundContent
+                        color: (FileBrowserManager.isShowingHiddenFiles || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 18 
                     }
                     
                     border.color: activeFocus ? "white" : "transparent"
                     border.width: activeFocus ? 2 : 0
 
-                    TapHandler { onTapped: FileBrowserService.showHidden = !FileBrowserService.showHidden }
+                    TapHandler { onTapped: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles }
                     HoverHandler { id: hHidden; cursorShape: Qt.PointingHandCursor }
                     scale: (hHidden.hovered || activeFocus) ? 1.1 : 1.0
                     Behavior on scale { NumberAnimation { duration: 200 } }
@@ -132,7 +132,7 @@ FocusScope {
                     id: grid
                     anchors.fill: parent
                     anchors.margins: 10
-                    model: FileBrowserService.model
+                    model: FileBrowserManager.fileModel
                     cellWidth: 124
                     cellHeight: 124
                     clip: false
@@ -141,13 +141,13 @@ FocusScope {
                         positionViewAtIndex(currentIndex, GridView.Contain)
                         let item = model.get(currentIndex)
                         if (item && !item.isDir) {
-                            WallpaperService.previewWallpaper = item.path
+                            WallpaperManager.previewWallpaperPath = item.path
                         }
                     }
                     
                     function activateItem() {
                         let item = model.get(currentIndex)
-                        if (item && item.isDir) FileBrowserService.changeDirectory(item.path)
+                        if (item && item.isDir) FileBrowserManager.navigateToPath(item.path)
                     }
 
                     Keys.onReturnPressed: activateItem()
@@ -160,22 +160,22 @@ FocusScope {
                         width: 114
                         height: 114
                         
-                        readonly property bool isSelected: WallpaperService.previewWallpaper === model.path
+                        readonly property bool isSelected: WallpaperManager.previewWallpaperPath === model.path
                         readonly property bool isFocused: GridView.isCurrentItem && grid.activeFocus
                         readonly property bool isActive: isFocused || hh.hovered || isSelected
 
                         Rectangle { 
                             anchors.fill: parent
                             radius: 20
-                            color: ThemeService.backgroundMain
+                            color: ThemeManager.backgroundPrimaryColor
                             
-                            border.color: isFocused ? "white" : (isActive ? ThemeService.accentColor : ThemeService.outlineVariant)
+                            border.color: isFocused ? "white" : (isActive ? ThemeManager.accentColor : ThemeManager.outlineVariantColor)
                             border.width: isActive ? 2 : 1
                             clip: true
                             
                             Rectangle {
                                 anchors.fill: parent
-                                radius: 20; color: ThemeService.backgroundContent
+                                radius: 20; color: ThemeManager.contentOnBackgroundColor
                                 opacity: isFocused ? 0.1 : (hh.hovered ? 0.05 : 0)
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
                             }
@@ -191,7 +191,7 @@ FocusScope {
                                     Text { 
                                         anchors.centerIn: parent
                                         text: model.path === ".." ? "󰁝" : (model.isDir ? "󰉋" : "󰸉")
-                                        color: model.isDir ? ThemeService.accentColor : ThemeService.backgroundContent
+                                        color: model.isDir ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
                                         font.pixelSize: model.isDir ? 42 : 36
                                         opacity: isActive ? 1.0 : 0.3
                                         Behavior on opacity { NumberAnimation { duration: 200 } } 
@@ -200,7 +200,7 @@ FocusScope {
                                 
                                 Text { 
                                     text: model.name
-                                    color: ThemeService.backgroundContent
+                                    color: ThemeManager.contentOnBackgroundColor
                                     font.pixelSize: 10
                                     font.weight: Font.Medium
                                     opacity: isActive ? 0.9 : 0.4
@@ -216,8 +216,8 @@ FocusScope {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: { 
                                     grid.currentIndex = index
-                                    if (model.isDir) FileBrowserService.changeDirectory(model.path)
-                                    else WallpaperService.previewWallpaper = model.path 
+                                    if (model.isDir) FileBrowserManager.navigateToPath(model.path)
+                                    else WallpaperManager.previewWallpaperPath = model.path 
                                     grid.forceActiveFocus()
                                 } 
                             }

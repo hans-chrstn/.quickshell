@@ -16,9 +16,9 @@ Item {
     property alias tabModelRef: tabModel
 
     Connections {
-        target: SystemTrayService
+        target: SystemTrayManager
         function onHoveredIndexChanged() {
-            if (SystemTrayService.hoveredIndex !== -1) {
+            if (SystemTrayManager.hoveredIndex !== -1) {
                 for (let i = 0; i < tabModel.count; i++) {
                     if (tabModel.get(i).type === "tray") {
                         view.currentIndex = i
@@ -105,8 +105,8 @@ Item {
             append({ "type": "timeDate" })
             append({ "type": "music" })
             append({ "type": "notif" })
-            if (BatteryService.hasUPower && BatteryService.device && BatteryService.device.type !== 0) append({ "type": "battery" })
-            if (ThemeService.showWeather) append({ "type": "weather" })
+            if (BatteryManager.isUPowerAvailable && BatteryManager.mainDevice && BatteryManager.mainDevice.type !== 0) append({ "type": "battery" })
+            if (ThemeManager.isWeatherVisible) append({ "type": "weather" })
             append({ "type": "cc" })
             append({ "type": "tray" })
         }
@@ -114,12 +114,12 @@ Item {
     }
     
     Connections {
-        target: ThemeService
-        function onShowWeatherChanged() { tabModel.updateModel() }
+        target: ThemeManager
+        function onIsWeatherVisibleChanged() { tabModel.updateModel() }
     }
     
     Connections {
-        target: BatteryService
-        function onHasUPowerChanged() { tabModel.updateModel() }
+        target: BatteryManager
+        function onIsUPowerAvailableChanged() { tabModel.updateModel() }
     }
 }

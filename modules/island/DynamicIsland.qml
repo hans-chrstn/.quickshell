@@ -9,9 +9,9 @@ import qs.modules.island
 BaseIsland {
     id: root
     
-    expandedWidth: ThemeService.dynamicIslandExpandedWidth
-    expandedHeight: ThemeService.dynamicIslandExpandedHeight
-    collapsedWidth: ThemeService.dynamicIslandCollapsedWidth
+    expandedWidth: ThemeManager.dynamicIslandExpandedWidth
+    expandedHeight: ThemeManager.dynamicIslandExpandedHeight
+    collapsedWidth: ThemeManager.dynamicIslandCollapsedWidth
     isTop: true
     isBottom: false
     isCorner: false
@@ -32,7 +32,7 @@ BaseIsland {
         Loader {
             id: cavaLoader; anchors.bottom: pageIndicator.top; anchors.bottomMargin: 14; anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 40; height: 24
-            readonly property bool musicPlaying: MusicService.activePlayer && MusicService.activePlayer.playbackState === MprisPlaybackState.Playing
+            readonly property bool musicPlaying: MusicManager.activePlayer && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing
             
             readonly property bool musicTabActive: tabView.currentIndex === 1
             
@@ -44,7 +44,7 @@ BaseIsland {
         IslandTabView {
             id: tabView
             anchors.fill: parent
-            activePlayer: MusicService.activePlayer            
+            activePlayer: MusicManager.activePlayer            
             transform: Translate {
                 y: root.expanded ? 0 : 15
                 Behavior on y { NumberAnimation { duration: 500; easing.type: Easing.OutExpo } }
@@ -55,7 +55,7 @@ BaseIsland {
         PageIndicator {
             id: pageIndicator
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: ThemeService.indicatorRowBottomMargin
+            anchors.bottomMargin: ThemeManager.indicatorRowBottomMargin
             count: tabView.count
             currentIndex: tabView.currentIndex
             

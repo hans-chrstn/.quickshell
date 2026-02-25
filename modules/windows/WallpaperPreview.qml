@@ -17,7 +17,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         Text { 
             text: "DESKTOP PREVIEW"
-            color: ThemeService.backgroundContent
+            color: ThemeManager.contentOnBackgroundColor
             font.pixelSize: 10
             font.weight: Font.Black
             font.letterSpacing: 4
@@ -28,7 +28,7 @@ ColumnLayout {
             width: 40
             height: 2
             radius: 1
-            color: ThemeService.accentColor
+            color: ThemeManager.accentColor
             opacity: 0.4
             Layout.alignment: Qt.AlignHCenter 
         }
@@ -43,7 +43,7 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: -10
             radius: 30
-            color: ThemeService.accentColor
+            color: ThemeManager.accentColor
             opacity: 0.04
             layer.enabled: true
             layer.effect: MultiEffect { 
@@ -55,8 +55,8 @@ ColumnLayout {
             id: monitorFrame
             anchors.fill: parent
             radius: 24
-            color: ThemeService.backgroundMain
-            border.color: ThemeService.outlineMain
+            color: ThemeManager.backgroundPrimaryColor
+            border.color: ThemeManager.outlinePrimaryColor
             border.width: 1
             
             ClippingRectangle {
@@ -68,7 +68,7 @@ ColumnLayout {
                 Image { 
                     id: previewImg
                     anchors.fill: parent
-                    source: WallpaperService.previewWallpaper !== "" ? "file://" + WallpaperService.previewWallpaper : ""
+                    source: WallpaperManager.previewWallpaperPath !== "" ? "file://" + WallpaperManager.previewWallpaperPath : ""
                     fillMode: Image.PreserveAspectCrop
                     opacity: status === Image.Ready ? 1.0 : 0.1
                     Behavior on source { PropertyAnimation { duration: 600 } } 

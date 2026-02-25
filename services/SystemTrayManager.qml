@@ -6,22 +6,22 @@ import Quickshell.Services.SystemTray
 Singleton {
     id: root
 
-    readonly property var model: SystemTray.items
+    readonly property var itemModel: SystemTray.items
     
-    property var values: []
+    property var items: []
 
     Connections {
         target: SystemTray.items
         function onValuesChanged() {
-            root.values = [...SystemTray.items.values]
+            root.items = [...SystemTray.items.values]
         }
     }
 
-    readonly property int count: (values && values.length) ? values.length : 0
+    readonly property int itemCount: items ? items.length : 0
     
     property int hoveredIndex: -1
 
     Component.onCompleted: {
-        root.values = [...SystemTray.items.values]
+        root.items = [...SystemTray.items.values]
     }
 }

@@ -8,7 +8,7 @@ ColumnLayout {
     spacing: -10
     Layout.alignment: Qt.AlignHCenter
 
-    readonly property color accent: ColorService.accent
+    readonly property color accent: ColorManager.accentColor
 
     SystemClock {
         id: sysClock
@@ -38,7 +38,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         text: Qt.formatDateTime(sysClock.date, "hh:mm")
         color: "white"
-        font.pixelSize: ThemeService.lockClockFontSize
+        font.pixelSize: ThemeManager.lockClockFontSize
         font.weight: Font.Black
         font.letterSpacing: -2
     }
@@ -47,9 +47,9 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         text: formattedDate()
         color: root.accent
-        opacity: ThemeService.lockDateOpacity
-        font.pixelSize: ThemeService.lockDateFontSize
-        font.letterSpacing: ThemeService.lockDateLetterSpacing
+        opacity: ThemeManager.lockDateOpacity
+        font.pixelSize: ThemeManager.lockDateFontSize
+        font.letterSpacing: ThemeManager.lockDateLetterSpacing
         font.weight: Font.Bold
     }
 }

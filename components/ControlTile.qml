@@ -7,15 +7,15 @@ Rectangle {
     
     property string icon: ""
     property bool active: false
-    property color activeColor: ThemeService.accentColor
+    property color activeColor: ThemeManager.accentColor
     
     signal clicked()
 
-    width: ThemeService.controlCenterTileSize
-    height: ThemeService.controlCenterTileSize
-    radius: ThemeService.controlCenterTileRadius
+    width: ThemeManager.controlCenterTileSize
+    height: ThemeManager.controlCenterTileSize
+    radius: ThemeManager.controlCenterTileRadius
     
-    color: active ? activeColor : ThemeService.backgroundContent
+    color: active ? activeColor : ThemeManager.contentOnBackgroundColor
     
     opacity: active ? 1.0 : (hh.hovered ? 0.15 : 0.1)
     
@@ -29,7 +29,7 @@ Rectangle {
         anchors.centerIn: parent
         text: root.icon
         font.pixelSize: 18
-        color: root.active ? ThemeService.primaryContent : ThemeService.backgroundContent
+        color: root.active ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
     }
 
     TapHandler {
