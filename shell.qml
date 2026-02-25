@@ -11,12 +11,12 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
-import qs.modules.bars
-import qs.modules.island
-import qs.components
-import qs.services
-import qs.modules.windows
-import qs.modules.notifications
+import qs.ui.panels
+import qs.ui.features.island
+import qs.ui.shared
+import qs.core
+import qs.ui.screens
+import qs.ui.features.notifications
 
 ShellRoot {
     Lock { }
