@@ -1,24 +1,29 @@
 import QtQuick
+import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import qs.core
 import qs.ui.shared
+import qs.ui.features.island
 
 CornerContainer {
     id: root
+    
     isAtBottom: true
     isAtRight: true
     aboveWindows: true
     isHoverEnabled: true
-    expandedWidth: 160
-    expandedHeight: 140
+    
+    expandedWidth: 180
+    expandedHeight: 220
     
     firstFilletRotation: 90
     firstFilletX: -20 - 10
-    firstFilletY: 140 - 26 - 20
+    firstFilletY: root.height - surfaceCornerRadius - 20
     
     secondFilletRotation: 90
-    secondFilletX: 160 - 20 - 16 - 10
+    secondFilletX: root.width - 20 - 16 - 10
     secondFilletY: -20 + 1 - 10
 
     customTopLeftRadius: ThemeManager.dynamicIslandCornerRadius
@@ -26,106 +31,211 @@ CornerContainer {
     customBottomLeftRadius: 0
     customBottomRightRadius: 0
 
-    property string confirmAction: ""
+    property string currentAction: ""
+    readonly property bool isConfirming: currentAction !== ""
+
+    onIsExpandedChanged: {
+        if (!isExpanded) {
+            currentAction = ""
+        }
+    }
 
     surfaceContent: Item {
+        id: mainContainer
         anchors.fill: parent
-        
-        Column {
-            anchors.centerIn: parent
-            spacing: 8
-            visible: confirmAction === ""
-            
+        clip: true
+
+        ColumnLayout {
+            id: headerContainer
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: 2
+            opacity: root.isConfirming ? 0 : 1
+            Behavior on opacity { NumberAnimation { duration: 300 } }
+
+            Text {
+                id: sessionLabel
+                text: "SESSION"
+                color: ThemeManager.contentOnBackgroundColor
+                font.pixelSize: 8
+                font.weight: Font.Black
+                font.letterSpacing: 2
+                opacity: 0.4
+                Layout.alignment: Qt.AlignHCenter
+            }
             Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 100; height: 32; radius: 16; color: "white"
-                opacity: lockMouse.containsMouse ? 0.2 : 0.1
-                scale: lockMouse.containsMouse ? 1.02 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200 } }
-                Text { anchors.centerIn: parent; text: "LOCK"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
-                MouseArea { 
-                    id: lockMouse
-                    anchors.fill: parent; hoverEnabled: true
-                    onClicked: {
-                        LockManager.lock()
-                        root.isExpanded = false
-                    }
+                id: headerLine
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 2
+                radius: 1
+                color: ThemeManager.accentColor
+                opacity: 0.3
+                Layout.alignment: Qt.AlignHCenter
+            }
+        }
+
+        ColumnLayout {
+            id: actionsListContainer
+            anchors.centerIn: parent
+            anchors.verticalCenterOffset: 10
+            spacing: 12
+            
+            opacity: root.isConfirming ? 0 : 1
+            scale: root.isConfirming ? 0.9 : 1.0
+            visible: opacity > 0.01
+            
+            Behavior on opacity { NumberAnimation { duration: 300 } }
+            Behavior on scale { 
+                NumberAnimation { 
+                    duration: 400
+                    easing.type: Easing.OutBack 
+                } 
+            }
+
+            SessionActionTile {
+                actionIcon: "󰌾"
+                actionLabel: "LOCK"
+                onActionTriggered: {
+                    LockManager.lock()
+                    root.isExpanded = false
                 }
             }
 
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 100; height: 32; radius: 16; color: "white"
-                opacity: logoutMouse.containsMouse ? 0.2 : 0.1
-                scale: logoutMouse.containsMouse ? 1.02 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200 } }
-                Text { anchors.centerIn: parent; text: "LOGOUT"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
-                MouseArea { 
-                    id: logoutMouse
-                    anchors.fill: parent; hoverEnabled: true
-                    onClicked: confirmAction = "logout"
-                }
+            SessionActionTile {
+                actionIcon: "󰍃"
+                actionLabel: "LOGOUT"
+                onActionTriggered: root.currentAction = "logout"
             }
-            
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 100; height: 32; radius: 16; color: ThemeManager.dangerColor
-                opacity: pwrMouse.containsMouse ? 0.3 : 0.2
-                scale: pwrMouse.containsMouse ? 1.02 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200 } }
-                Text { anchors.centerIn: parent; text: "POWER OFF"; color: ThemeManager.dangerColor; font.pixelSize: 10; font.weight: Font.Bold; font.letterSpacing: 1 }
-                MouseArea { 
-                    id: pwrMouse
-                    anchors.fill: parent; hoverEnabled: true
-                    onClicked: confirmAction = "poweroff"
-                }
+
+            SessionActionTile {
+                actionIcon: "󰐥"
+                actionLabel: "POWER"
+                actionHighlightColor: ThemeManager.dangerPrimaryColor
+                onActionTriggered: root.currentAction = "poweroff"
             }
         }
-        
-        Column {
+
+        ColumnLayout {
+            id: confirmationContainer
             anchors.centerIn: parent
-            spacing: 12
-            visible: confirmAction !== ""
+            spacing: 20
             
-            Text { 
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "CONFIRM ACTION?"
-                color: "white"; opacity: 0.6; font.pixelSize: 9
-                font.weight: Font.Bold; font.letterSpacing: 1.5 
+            opacity: root.isConfirming ? 1 : 0
+            scale: root.isConfirming ? 1.0 : 1.1
+            visible: opacity > 0.01
+            
+            Behavior on opacity { NumberAnimation { duration: 300 } }
+            Behavior on scale { 
+                NumberAnimation { 
+                    duration: 400
+                    easing.type: Easing.OutExpo 
+                } 
             }
-            
-            Row {
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 12
+
+            ColumnLayout {
+                spacing: 4
+                Layout.alignment: Qt.AlignHCenter
                 
-                Rectangle { 
-                    width: 60; height: 32; radius: 16; color: ThemeManager.dangerColor
-                    Text { anchors.centerIn: parent; text: "YES"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
-                    MouseArea { 
-                        anchors.fill: parent
-                        onClicked: { 
-                            if (confirmAction === "logout") {
+                Text {
+                    id: confirmationQuestionLabel
+                    text: "ARE YOU SURE?"
+                    color: ThemeManager.contentOnBackgroundColor
+                    font.pixelSize: 10
+                    font.weight: Font.Black
+                    font.letterSpacing: 1
+                    Layout.alignment: Qt.AlignHCenter
+                }
+                Text {
+                    id: actionTypeLabel
+                    text: root.currentAction.toUpperCase()
+                    color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
+                    font.pixelSize: 12
+                    font.weight: Font.Bold
+                    font.letterSpacing: 2
+                    Layout.alignment: Qt.AlignHCenter
+                }
+            }
+
+            RowLayout {
+                spacing: 16
+                Layout.alignment: Qt.AlignHCenter
+
+                Rectangle {
+                    id: confirmYesButton
+                    Layout.preferredWidth: 60
+                    Layout.preferredHeight: 40
+                    radius: 20
+                    color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
+                    
+                    Text {
+                        anchors.centerIn: parent
+                        text: "YES"
+                        color: ThemeManager.contentPrimaryColor
+                        font.pixelSize: 11
+                        font.weight: Font.Black
+                    }
+                    
+                    TapHandler {
+                        onTapped: {
+                            SoundManager.playSuccess()
+                            if (root.currentAction === "logout") {
                                 Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")]);
                             } else {
                                 Quickshell.execDetached(["systemctl", "poweroff"]);
                             }
+                        }
+                    }
+                    
+                    HoverHandler { 
+                        id: confirmYesHoverHandler
+                        cursorShape: Qt.PointingHandCursor 
+                    }
+                    scale: confirmYesHoverHandler.hovered ? 1.05 : 1.0
+                    Behavior on scale { 
+                        NumberAnimation { 
+                            duration: 200
+                            easing.type: Easing.OutBack 
                         } 
-                    } 
+                    }
                 }
-                
-                Rectangle { 
-                    width: 60; height: 32; radius: 16; color: "white"; opacity: 0.1
-                    Text { anchors.centerIn: parent; text: "NO"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
-                    MouseArea { 
-                        anchors.fill: parent; onClicked: confirmAction = "" 
-                    } 
+
+                Rectangle {
+                    id: confirmNoButton
+                    Layout.preferredWidth: 60
+                    Layout.preferredHeight: 40
+                    radius: 20
+                    color: ThemeManager.contentOnBackgroundColor
+                    opacity: confirmNoHoverHandler.hovered ? 0.15 : 0.1
+                    
+                    Text {
+                        anchors.centerIn: parent
+                        text: "NO"
+                        color: ThemeManager.contentOnBackgroundColor
+                        font.pixelSize: 11
+                        font.weight: Font.Bold
+                    }
+                    
+                    TapHandler {
+                        onTapped: {
+                            SoundManager.playClick()
+                            root.currentAction = ""
+                        }
+                    }
+                    
+                    HoverHandler { 
+                        id: confirmNoHoverHandler
+                        cursorShape: Qt.PointingHandCursor 
+                    }
+                    scale: confirmNoHoverHandler.hovered ? 1.05 : 1.0
+                    Behavior on scale { 
+                        NumberAnimation { 
+                            duration: 200
+                            easing.type: Easing.OutBack 
+                        } 
+                    }
                 }
             }
         }
     }
-    
-    onIsExpandedChanged: if (!isExpanded) confirmAction = ""
 }
