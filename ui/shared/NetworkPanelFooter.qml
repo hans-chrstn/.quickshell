@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.core
+import qs.ui.shared
 
 RowLayout {
     id: root
@@ -22,55 +23,54 @@ RowLayout {
     
     Item { Layout.fillWidth: true }
 
-    Rectangle {
+    BaseButton {
         width: 120
         height: 40
-        radius: 20
-        color: ThemeManager.surfaceVariantStrongColor
         visible: panelType === "bluetooth" && root.isComponentEnabled
+        onClicked: BluetoothManager.startScan()
         
-        Text {
-            anchors.centerIn: parent
-            text: BluetoothManager.isScanning ? "SCANNING..." : "SCAN FOR DEVICES"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 9
-            font.weight: Font.Black
-        }
-        
-        TapHandler {
-            onTapped: BluetoothManager.startScan()
-        }
-        HoverHandler { cursorShape: Qt.PointingHandCursor }
-    }
-    
-    Rectangle {
-        id: toggleButton
-        width: 100
-        height: 40
-        radius: 20
-        color: root.isComponentEnabled ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
-        opacity: root.isComponentEnabled ? 1.0 : 0.1
-        
-        Text {
-            anchors.centerIn: parent
-            text: root.isComponentEnabled ? "ENABLED" : "DISABLED"
-            color: root.isComponentEnabled ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 9
-            font.weight: Font.Black
-        }
-        
-        TapHandler {
-            onTapped: {
-                if (root.panelType === "wifi") {
-                    WifiManager.togglePower()
-                } else {
-                    BluetoothManager.togglePower()
-                }
+        Rectangle {
+            anchors.fill: parent
+            radius: 20
+            color: ThemeManager.surfaceVariantStrongColor
+            
+            Text {
+                anchors.centerIn: parent
+                text: BluetoothManager.isScanning ? "SCANNING..." : "SCAN FOR DEVICES"
+                color: ThemeManager.contentOnBackgroundColor
+                font.pixelSize: 9
+                font.weight: Font.Black
             }
         }
-        HoverHandler { 
-            id: toggleHoverHandler
-            cursorShape: Qt.PointingHandCursor 
+    }
+    
+    BaseButton {
+        width: 100
+        height: 40
+        onClicked: {
+            if (root.panelType === "wifi") {
+                WifiManager.togglePower()
+            } else {
+                BluetoothManager.togglePower()
+            }
+        }
+        
+        Rectangle {
+            id: toggleButton
+            anchors.fill: parent
+            radius: 20
+            color: root.isComponentEnabled ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
+            opacity: root.isComponentEnabled ? 1.0 : 0.1
+            Behavior on color { ColorAnimation { duration: 200 } }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+            
+            Text {
+                anchors.centerIn: parent
+                text: root.isComponentEnabled ? "ENABLED" : "DISABLED"
+                color: root.isComponentEnabled ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
+                font.pixelSize: 9
+                font.weight: Font.Black
+            }
         }
     }
 }

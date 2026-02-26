@@ -47,27 +47,33 @@ Item {
         path: Path {
             startX: -view.width * 2; startY: view.height / 2
             PathAttribute { name: "itemOpacity"; value: 0.0 }
+            PathAttribute { name: "itemScale"; value: 0.6 }
             
             PathLine { x: -view.width * 0.5; y: view.height / 2 }
             PathPercent { value: 0.48 }
             PathAttribute { name: "itemOpacity"; value: 0.0 }
+            PathAttribute { name: "itemScale"; value: 0.8 }
             
             PathLine { x: view.width * 0.5; y: view.height / 2 }
             PathPercent { value: 0.5 }
             PathAttribute { name: "itemOpacity"; value: 1.0 }
+            PathAttribute { name: "itemScale"; value: 1.0 }
             
             PathLine { x: view.width * 1.5; y: view.height / 2 }
             PathPercent { value: 0.52 }
             PathAttribute { name: "itemOpacity"; value: 0.0 }
+            PathAttribute { name: "itemScale"; value: 0.8 }
             
             PathLine { x: view.width * 3; y: view.height / 2 }
             PathPercent { value: 1.0 }
             PathAttribute { name: "itemOpacity"; value: 0.0 }
+            PathAttribute { name: "itemScale"; value: 0.6 }
         }
 
         delegate: Item {
             width: view.width; height: view.height
             opacity: PathView.itemOpacity
+            scale: PathView.itemScale
             enabled: PathView.isCurrentItem
 
             Loader {

@@ -19,11 +19,11 @@ CornerContainer {
     expandedHeight: 220
     
     firstFilletRotation: 90
-    firstFilletX: -20 - 10
-    firstFilletY: root.height - surfaceCornerRadius - 20
+    firstFilletX: -30
+    firstFilletY: 174
     
     secondFilletRotation: 90
-    secondFilletX: root.width - 20 - 16 - 10
+    secondFilletX: 134
     secondFilletY: -20 + 1 - 10
 
     customTopLeftRadius: ThemeManager.dynamicIslandCornerRadius
@@ -161,78 +161,57 @@ CornerContainer {
                 spacing: 16
                 Layout.alignment: Qt.AlignHCenter
 
-                Rectangle {
+                BaseButton {
                     id: confirmYesButton
                     Layout.preferredWidth: 60
                     Layout.preferredHeight: 40
-                    radius: 20
-                    color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
-                    
-                    Text {
-                        anchors.centerIn: parent
-                        text: "YES"
-                        color: ThemeManager.contentPrimaryColor
-                        font.pixelSize: 11
-                        font.weight: Font.Black
-                    }
-                    
-                    TapHandler {
-                        onTapped: {
-                            SoundManager.playSuccess()
-                            if (root.currentAction === "logout") {
-                                Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")]);
-                            } else {
-                                Quickshell.execDetached(["systemctl", "poweroff"]);
-                            }
+                    onClicked: {
+                        SoundManager.playSuccess()
+                        if (root.currentAction === "logout") {
+                            Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")]);
+                        } else {
+                            Quickshell.execDetached(["systemctl", "poweroff"]);
                         }
                     }
                     
-                    HoverHandler { 
-                        id: confirmYesHoverHandler
-                        cursorShape: Qt.PointingHandCursor 
-                    }
-                    scale: confirmYesHoverHandler.hovered ? 1.05 : 1.0
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutBack 
-                        } 
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 20
+                        color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "YES"
+                            color: ThemeManager.contentPrimaryColor
+                            font.pixelSize: 11
+                            font.weight: Font.Black
+                        }
                     }
                 }
 
-                Rectangle {
+                BaseButton {
                     id: confirmNoButton
                     Layout.preferredWidth: 60
                     Layout.preferredHeight: 40
-                    radius: 20
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: confirmNoHoverHandler.hovered ? 0.15 : 0.1
+                    onClicked: {
+                        SoundManager.playClick()
+                        root.currentAction = ""
+                    }
                     
-                    Text {
-                        anchors.centerIn: parent
-                        text: "NO"
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 20
                         color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 11
-                        font.weight: Font.Bold
-                    }
-                    
-                    TapHandler {
-                        onTapped: {
-                            SoundManager.playClick()
-                            root.currentAction = ""
+                        opacity: confirmNoButton.isHovered ? 0.15 : 0.1
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "NO"
+                            color: ThemeManager.contentOnBackgroundColor
+                            font.pixelSize: 11
+                            font.weight: Font.Bold
                         }
-                    }
-                    
-                    HoverHandler { 
-                        id: confirmNoHoverHandler
-                        cursorShape: Qt.PointingHandCursor 
-                    }
-                    scale: confirmNoHoverHandler.hovered ? 1.05 : 1.0
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutBack 
-                        } 
                     }
                 }
             }

@@ -1,8 +1,9 @@
 import QtQuick
 import Quickshell
 import qs.core
+import qs.ui.shared
 
-Rectangle {
+BaseButton {
     id: root
     
     property string tileIcon: ""
@@ -10,39 +11,25 @@ Rectangle {
     property color activeTileColor: ThemeManager.accentColor
     
     signal tileClicked()
+    onClicked: tileClicked()
 
     width: ThemeManager.controlCenterTileSize
     height: ThemeManager.controlCenterTileSize
-    radius: ThemeManager.controlCenterTileRadius
     
-    color: isTileActive ? activeTileColor : ThemeManager.contentOnBackgroundColor
-    
-    opacity: isTileActive ? 1.0 : (hoverInteractionHandler.hovered ? 0.15 : 0.1)
-    
-    Behavior on color { ColorAnimation { duration: 200 } }
-    Behavior on opacity { NumberAnimation { duration: 200 } }
-    Behavior on scale { 
-        NumberAnimation { 
-            duration: 300
-            easing.type: Easing.OutBack 
-        } 
-    }
-    
-    scale: hoverInteractionHandler.hovered ? 1.05 : 1.0
+    Rectangle {
+        anchors.fill: parent
+        radius: ThemeManager.controlCenterTileRadius
+        color: root.isTileActive ? root.activeTileColor : ThemeManager.contentOnBackgroundColor
+        opacity: root.isTileActive ? 1.0 : (root.isHovered ? 0.15 : 0.1)
+        
+        Behavior on color { ColorAnimation { duration: 200 } }
+        Behavior on opacity { NumberAnimation { duration: 200 } }
 
-    Text {
-        anchors.centerIn: parent
-        text: root.tileIcon
-        font.pixelSize: 18
-        color: root.isTileActive ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
-    }
-
-    TapHandler {
-        onTapped: root.tileClicked()
-    }
-
-    HoverHandler {
-        id: hoverInteractionHandler
-        cursorShape: Qt.PointingHandCursor
+        Text {
+            anchors.centerIn: parent
+            text: root.tileIcon
+            font.pixelSize: 18
+            color: root.isTileActive ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
+        }
     }
 }

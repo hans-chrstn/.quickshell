@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
 
-Item {
+BaseButton {
     id: root
     
     Layout.preferredWidth: 140
@@ -14,15 +14,19 @@ Item {
     property color actionHighlightColor: ThemeManager.accentColor
     
     signal actionTriggered()
+    onClicked: {
+        SoundManager.playClick()
+        root.actionTriggered()
+    }
 
     Rectangle {
         id: backgroundVisual
         anchors.fill: parent
         radius: 12
         color: ThemeManager.contentOnBackgroundColor
-        opacity: interactionHoverHandler.hovered ? 0.12 : 0.06
+        opacity: root.isHovered ? 0.12 : 0.06
         border.color: root.actionHighlightColor
-        border.width: interactionHoverHandler.hovered ? 1 : 0
+        border.width: root.isHovered ? 1 : 0
         
         Behavior on opacity { 
             NumberAnimation { 
@@ -46,7 +50,7 @@ Item {
         Text {
             id: iconVisual
             text: root.actionIcon
-            color: interactionHoverHandler.hovered ? root.actionHighlightColor : ThemeManager.contentOnBackgroundColor
+            color: root.isHovered ? root.actionHighlightColor : ThemeManager.contentOnBackgroundColor
             font.pixelSize: 18
             Behavior on color { 
                 ColorAnimation { 
@@ -69,7 +73,7 @@ Item {
             id: arrowIndicator
             text: "󰁔"
             color: ThemeManager.contentOnBackgroundColor
-            opacity: interactionHoverHandler.hovered ? 0.4 : 0
+            opacity: root.isHovered ? 0.4 : 0
             font.pixelSize: 14
             Behavior on opacity { 
                 NumberAnimation { 
@@ -77,25 +81,5 @@ Item {
                 } 
             }
         }
-    }
-
-    TapHandler {
-        onTapped: {
-            SoundManager.playClick()
-            root.actionTriggered()
-        }
-    }
-    
-    HoverHandler { 
-        id: interactionHoverHandler
-        cursorShape: Qt.PointingHandCursor 
-    }
-    
-    scale: interactionHoverHandler.hovered ? 1.02 : 1.0
-    Behavior on scale { 
-        NumberAnimation { 
-            duration: 300
-            easing.type: Easing.OutBack 
-        } 
     }
 }

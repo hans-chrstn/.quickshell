@@ -327,9 +327,10 @@ PanelWindow {
                         }
                     }
 
-                    Item {
+                    BaseButton {
                         Layout.alignment: Qt.AlignHCenter
                         width: 320; height: 30
+                        onClicked: mainContentRect.showSessionPicker = !mainContentRect.showSessionPicker
                         
                         Rectangle {
                             anchors.fill: parent
@@ -353,12 +354,6 @@ PanelWindow {
                                     font.pixelSize: 10
                                     opacity: 0.8
                                 }
-                            }
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: mainContentRect.showSessionPicker = !mainContentRect.showSessionPicker
                             }
                         }
                     }
@@ -427,24 +422,25 @@ PanelWindow {
                                 Text { text: "EXEC COMMAND"; visible: !parent.text; color: "gray"; font.pixelSize: 10; anchors.centerIn: parent }
                             }
                         }
-                        Rectangle {
-                            width: 80; height: 36; radius: 18
+                        BaseButton {
+                            width: 80; height: 36
                             readonly property bool canAdd: newSessionName.text.trim() !== "" && newSessionExec.text.trim() !== ""
-                            color: canAdd ? ColorManager.accentColor : Qt.rgba(1, 1, 1, 0.1)
-                            opacity: canAdd ? 1.0 : 0.5
-                            
-                            Text { 
-                                anchors.centerIn: parent; text: "ADD"
-                                font.pixelSize: 10; font.weight: Font.Bold
-                                color: parent.canAdd ? "black" : "white"
+                            enabled: canAdd
+                            onClicked: {
+                                SessionManager.addSession(newSessionName.text.trim(), newSessionExec.text.trim())
+                                newSessionName.text = ""; newSessionExec.text = ""
                             }
                             
-                            MouseArea {
-                                anchors.fill: parent; cursorShape: parent.canAdd ? Qt.PointingHandCursor : Qt.ArrowCursor
-                                enabled: parent.canAdd
-                                onClicked: {
-                                    SessionManager.addSession(newSessionName.text.trim(), newSessionExec.text.trim())
-                                    newSessionName.text = ""; newSessionExec.text = ""
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 18
+                                color: parent.canAdd ? ColorManager.accentColor : Qt.rgba(1, 1, 1, 0.1)
+                                opacity: parent.canAdd ? 1.0 : 0.5
+                                
+                                Text { 
+                                    anchors.centerIn: parent; text: "ADD"
+                                    font.pixelSize: 10; font.weight: Font.Bold
+                                    color: parent.parent.canAdd ? "black" : "white"
                                 }
                             }
                         }
@@ -458,34 +454,36 @@ PanelWindow {
                         model: SessionManager.model
                         delegate: RowLayout {
                             spacing: 10
-                            Rectangle {
-                                width: 400; height: 44; radius: 22
-                                color: SessionManager.currentSessionName === name ? Qt.rgba(ColorManager.accentColor.r, ColorManager.accentColor.g, ColorManager.accentColor.b, 0.2) : Qt.rgba(1, 1, 1, 0.05)
-                                border.color: SessionManager.currentSessionName === name ? ColorManager.accentColor : "transparent"
-                                
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: name.toUpperCase() + "  (" + exec + ")"
-                                    color: ThemeManager.contentOnBackgroundColor
-                                    font.pixelSize: 11; font.letterSpacing: 1; opacity: 0.8
+                            BaseButton {
+                                width: 400; height: 44
+                                onClicked: {
+                                    SessionManager.selectSession(index)
+                                    mainContentRect.showSessionPicker = false
                                 }
-
-                                MouseArea {
-                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        SessionManager.selectSession(index)
-                                        mainContentRect.showSessionPicker = false
+                                
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 22
+                                    color: SessionManager.currentSessionName === name ? Qt.rgba(ColorManager.accentColor.r, ColorManager.accentColor.g, ColorManager.accentColor.b, 0.2) : Qt.rgba(1, 1, 1, 0.05)
+                                    border.color: SessionManager.currentSessionName === name ? ColorManager.accentColor : "transparent"
+                                    
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: name.toUpperCase() + "  (" + exec + ")"
+                                        color: ThemeManager.contentOnBackgroundColor
+                                        font.pixelSize: 11; font.letterSpacing: 1; opacity: 0.8
                                     }
                                 }
                             }
                             
-                            Rectangle {
-                                width: 44; height: 44; radius: 22
-                                color: Qt.rgba(1, 0, 0, 0.1); border.color: Qt.rgba(1, 0, 0, 0.2)
-                                Text { anchors.centerIn: parent; text: "󰆴"; color: "#ff5555"; font.pixelSize: 16 }
-                                MouseArea {
-                                    anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                                    onClicked: SessionManager.deleteSession(index)
+                            BaseButton {
+                                width: 44; height: 44
+                                onClicked: SessionManager.deleteSession(index)
+                                
+                                Rectangle {
+                                    anchors.fill: parent; radius: 22
+                                    color: Qt.rgba(1, 0, 0, 0.1); border.color: Qt.rgba(1, 0, 0, 0.2)
+                                    Text { anchors.centerIn: parent; text: "󰆴"; color: "#ff5555"; font.pixelSize: 16 }
                                 }
                             }
                         }
@@ -495,20 +493,20 @@ PanelWindow {
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 20
-                    Rectangle {
-                        width: 180; height: 36; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
-                        Text { anchors.centerIn: parent; text: "RESET TO DEFAULTS"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
-                        MouseArea {
-                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: SessionManager.resetToDefaults()
+                    BaseButton {
+                        width: 180; height: 36
+                        onClicked: SessionManager.resetToDefaults()
+                        Rectangle {
+                            anchors.fill: parent; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
+                            Text { anchors.centerIn: parent; text: "RESET TO DEFAULTS"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
                         }
                     }
-                    Rectangle {
-                        width: 100; height: 36; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
-                        Text { anchors.centerIn: parent; text: "CLOSE"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
-                        MouseArea {
-                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: mainContentRect.showSessionPicker = false
+                    BaseButton {
+                        width: 100; height: 36
+                        onClicked: mainContentRect.showSessionPicker = false
+                        Rectangle {
+                            anchors.fill: parent; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
+                            Text { anchors.centerIn: parent; text: "CLOSE"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
                         }
                     }
                 }
@@ -522,28 +520,34 @@ PanelWindow {
             spacing: 40
             opacity: 0.4
             
-            Text {
-                text: "󰐥  POWER OFF"
-                color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
-                TapHandler { onTapped: Quickshell.execDetached(["systemctl", "poweroff"]) }
-                HoverHandler { id: hPwr; cursorShape: Qt.PointingHandCursor }
-                opacity: hPwr.hovered ? 1.0 : 0.6
+            BaseButton {
+                id: pwrBtn
+                onClicked: Quickshell.execDetached(["systemctl", "poweroff"])
+                Text {
+                    text: "󰐥  POWER OFF"
+                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    opacity: pwrBtn.isHovered ? 1.0 : 0.6
+                }
             }
 
-            Text {
-                text: "󰜉  REBOOT"
-                color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
-                TapHandler { onTapped: Quickshell.execDetached(["systemctl", "reboot"]) }
-                HoverHandler { id: hReb; cursorShape: Qt.PointingHandCursor }
-                opacity: hReb.hovered ? 1.0 : 0.6
+            BaseButton {
+                id: rebBtn
+                onClicked: Quickshell.execDetached(["systemctl", "reboot"])
+                Text {
+                    text: "󰜉  REBOOT"
+                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    opacity: rebBtn.isHovered ? 1.0 : 0.6
+                }
             }
 
-            Text {
-                text: "󰈆  EXIT TO TTY"
-                color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
-                TapHandler { onTapped: Quickshell.execDetached(["chvt", "2"]) }
-                HoverHandler { id: hExit; cursorShape: Qt.PointingHandCursor }
-                opacity: hExit.hovered ? 1.0 : 0.6
+            BaseButton {
+                id: ttyBtn
+                onClicked: Quickshell.execDetached(["chvt", "2"])
+                Text {
+                    text: "󰈆  EXIT TO TTY"
+                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    opacity: ttyBtn.isHovered ? 1.0 : 0.6
+                }
             }
         }
     }

@@ -51,25 +51,22 @@ CornerContainer {
         
         Column {
             spacing: 6
-            Rectangle {
+            BaseButton {
                 id: wallBtn
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 44; height: 44; radius: 22; color: "white"
-                opacity: wallMouse.containsMouse ? 0.2 : 0.1
-                scale: wallMouse.containsMouse ? 1.05 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                Text { anchors.centerIn: parent; text: "󰸉"; color: "white"; font.pixelSize: 22 }
-                MouseArea {
-                    id: wallMouse; anchors.fill: parent; hoverEnabled: true
-                    onClicked: {
-                        ViewManager.toggleWallpaper()
-                    }
+                width: 44; height: 44
+                onClicked: ViewManager.toggleWallpaper()
+                
+                Rectangle {
+                    anchors.fill: parent; radius: 22; color: "white"
+                    opacity: wallBtn.isHovered ? 0.2 : 0.1
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Text { anchors.centerIn: parent; text: "󰸉"; color: "white"; font.pixelSize: 22 }
                 }
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter; text: "WALL"
-                color: "white"; opacity: wallMouse.containsMouse ? 1.0 : 0.6; font.pixelSize: 9
+                color: "white"; opacity: wallBtn.isHovered ? 1.0 : 0.6; font.pixelSize: 9
                 font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
@@ -77,25 +74,22 @@ CornerContainer {
 
         Column {
             spacing: 6
-            Rectangle {
+            BaseButton {
                 id: snapBtn
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 44; height: 44; radius: 22; color: "white"
-                opacity: snapMouse.containsMouse ? 0.2 : 0.1
-                scale: snapMouse.containsMouse ? 1.05 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                Text { anchors.centerIn: parent; text: "󰄀"; color: "white"; font.pixelSize: 22 }
-                MouseArea {
-                    id: snapMouse; anchors.fill: parent; hoverEnabled: true
-                    onClicked: {
-                        Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
-                    }
+                width: 44; height: 44
+                onClicked: Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
+                
+                Rectangle {
+                    anchors.fill: parent; radius: 22; color: "white"
+                    opacity: snapBtn.isHovered ? 0.2 : 0.1
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Text { anchors.centerIn: parent; text: "󰄀"; color: "white"; font.pixelSize: 22 }
                 }
             }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"
-                color: "white"; opacity: snapMouse.containsMouse ? 1.0 : 0.6; font.pixelSize: 9
+                color: "white"; opacity: snapBtn.isHovered ? 1.0 : 0.6; font.pixelSize: 9
                 font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
@@ -103,26 +97,27 @@ CornerContainer {
         
         Column {
             spacing: 6
-            Rectangle {
+            BaseButton {
                 id: recBtn
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 44; height: 44; radius: 22
-                color: recorder.running ? ThemeManager.dangerColor : "white"
-                opacity: recorder.running ? 1.0 : (recMouse.containsMouse ? 0.3 : 0.1)
-                scale: recMouse.containsMouse ? 1.05 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-                Rectangle {
-                    anchors.centerIn: parent; width: recorder.running ? 14 : 18; height: width
-                    radius: recorder.running ? 3 : 9; color: "white"
-                    Behavior on width { NumberAnimation { duration: 200 } }
-                    Behavior on radius { NumberAnimation { duration: 200 } }
+                width: 44; height: 44
+                onClicked: {
+                    if (!recorder.running) recorder.startRecording();
+                    else recorder.signal(2);
                 }
-                MouseArea {
-                    id: recMouse; anchors.fill: parent; hoverEnabled: true
-                    onClicked: {
-                        if (!recorder.running) recorder.startRecording();
-                        else recorder.signal(2);
+                
+                Rectangle {
+                    anchors.fill: parent; radius: 22
+                    color: recorder.running ? ThemeManager.dangerColor : "white"
+                    opacity: recorder.running ? 1.0 : (recBtn.isHovered ? 0.3 : 0.1)
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
+                    
+                    Rectangle {
+                        anchors.centerIn: parent; width: recorder.running ? 14 : 18; height: width
+                        radius: recorder.running ? 3 : 9; color: "white"
+                        Behavior on width { NumberAnimation { duration: 200 } }
+                        Behavior on radius { NumberAnimation { duration: 200 } }
                     }
                 }
             }
@@ -130,7 +125,7 @@ CornerContainer {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: recorder.running ? "STOP" : "REC"
                 color: recorder.running ? ThemeManager.dangerColor : "white"
-                opacity: (recMouse.containsMouse || recorder.running) ? 1.0 : 0.6
+                opacity: (recBtn.isHovered || recorder.running) ? 1.0 : 0.6
                 font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }

@@ -6,6 +6,7 @@ import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.core
 import qs.shared
+import qs.ui.shared
 
 Item {
     id: root
@@ -167,77 +168,47 @@ Item {
                 
                 Item { Layout.fillWidth: true }
                 
-                Text { 
-                    text: "󰒮"
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.6
-                    font.pixelSize: 20
+                BaseButton {
                     Layout.alignment: Qt.AlignVCenter
+                    width: 24; height: 24
+                    hoverScale: 1.2
+                    onClicked: root.mediaPlayer.previous()
                     
-                    scale: previousTapHandler.pressed ? 0.9 : (previousHoverHandler.hovered ? 1.2 : 1.0)
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutBack 
-                        } 
-                    }
-                    
-                    TapHandler { 
-                        id: previousTapHandler
-                        onTapped: root.mediaPlayer.previous() 
-                    } 
-                    HoverHandler { 
-                        id: previousHoverHandler
-                        cursorShape: Qt.PointingHandCursor 
+                    Text { 
+                        anchors.centerIn: parent
+                        text: "󰒮"
+                        color: ThemeManager.contentOnBackgroundColor
+                        opacity: 0.6
+                        font.pixelSize: 20
                     }
                 }
                 
-                Text { 
-                    text: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 28
+                BaseButton {
                     Layout.alignment: Qt.AlignVCenter
+                    width: 32; height: 32
+                    hoverScale: 1.2
+                    onClicked: root.mediaPlayer.togglePlaying()
                     
-                    scale: playPauseTapHandler.pressed ? 0.9 : (playPauseHoverHandler.hovered ? 1.2 : 1.0)
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutBack 
-                        } 
-                    }
-                    
-                    TapHandler { 
-                        id: playPauseTapHandler
-                        onTapped: root.mediaPlayer.togglePlaying() 
-                    }
-                    HoverHandler { 
-                        id: playPauseHoverHandler
-                        cursorShape: Qt.PointingHandCursor 
+                    Text { 
+                        anchors.centerIn: parent
+                        text: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
+                        color: ThemeManager.contentOnBackgroundColor
+                        font.pixelSize: 28
                     }
                 }
                 
-                Text { 
-                    text: "󰒭"
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.6
-                    font.pixelSize: 20
+                BaseButton {
                     Layout.alignment: Qt.AlignVCenter
+                    width: 24; height: 24
+                    hoverScale: 1.2
+                    onClicked: root.mediaPlayer.next()
                     
-                    scale: nextTapHandler.pressed ? 0.9 : (nextHoverHandler.hovered ? 1.2 : 1.0)
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200
-                            easing.type: Easing.OutBack 
-                        } 
-                    }
-                    
-                    TapHandler { 
-                        id: nextTapHandler
-                        onTapped: root.mediaPlayer.next() 
-                    }
-                    HoverHandler { 
-                        id: nextHoverHandler
-                        cursorShape: Qt.PointingHandCursor 
+                    Text { 
+                        anchors.centerIn: parent
+                        text: "󰒭"
+                        color: ThemeManager.contentOnBackgroundColor
+                        opacity: 0.6
+                        font.pixelSize: 20
                     }
                 }
                 
