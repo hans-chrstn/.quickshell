@@ -27,6 +27,7 @@
       pkgs = import nixpkgs {inherit system;};
       qtMultimedia = pkgs.kdePackages.qtmultimedia;
       qtImageFormats = pkgs.kdePackages.qtimageformats;
+      kirigami = pkgs.kdePackages.kirigami.unwrapped;
       qmlNiri = qml-niri.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
     in rec {
       config = pkgs.stdenv.mkDerivation {
@@ -38,19 +39,21 @@
         '';
       };
 
-      # A properly wrapped version of quickshell that includes all dependencies
       quickshell = pkgs.symlinkJoin {
         name = "quickshell-wrapped";
         paths = [qmlNiri];
         nativeBuildInputs = [pkgs.makeWrapper];
         postBuild = ''
-          wrapProgram $out/bin/quickshell \
-            --prefix QML2_IMPORT_PATH : "${qtMultimedia}/lib/qt-6/qml" \
-            --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
-            --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
-            --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
-            --set QS_LOG_FILE /dev/stderr \
-            --add-flags "--verbose"
+          for bin in $out/bin/*; do
+            wrapProgram "$bin" \
+              --prefix QML2_IMPORT_PATH : "${qtMultimedia}/lib/qt-6/qml" \
+              --prefix QML2_IMPORT_PATH : "${kirigami}/lib/qt-6/qml" \
+              --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
+              --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
+              --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
+              --set QS_LOG_FILE /dev/stderr \
+              --add-flags "--verbose"
+          done
         '';
       };
 
@@ -129,6 +132,8 @@
 
     devShells = forAllSystems (system: let
       pkgs = import nixpkgs {inherit system;};
+      kirigami = pkgs.kdePackages.kirigami.unwrapped;
+      qtMultimedia = pkgs.kdePackages.qtmultimedia;
     in {
       default = pkgs.mkShell {
         nativeBuildInputs = [
@@ -140,11 +145,15 @@
           pkgs.wf-recorder
           pkgs.swww
           pkgs.kdePackages.qtmultimedia
-          pkgs.kdePackages.kirigami.unwrapped
+          kirigami
           pkgs.kdePackages.sonnet
           pkgs.kdePackages.qtimageformats
           pkgs.kdePackages.kimageformats
         ];
+
+        shellHook = ''
+          export QML2_IMPORT_PATH="${qtMultimedia}/lib/qt-6/qml:${kirigami}/lib/qt-6/qml:$QML2_IMPORT_PATH"
+        '';
       };
     });
   };
