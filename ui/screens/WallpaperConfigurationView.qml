@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs.core
+import qs.ui.shared
 
 ColumnLayout {
     id: root
@@ -14,13 +15,10 @@ ColumnLayout {
         spacing: 12
         Layout.fillWidth: true
         
-        Text { 
+        StyledLabel { 
             id: transitionTypeLabel
             text: "TRANSITION TYPE"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 10
-            font.weight: Font.Black
-            font.letterSpacing: 2
+            type: "configHeader"
             opacity: 0.4 
         }
         
@@ -37,15 +35,15 @@ ColumnLayout {
                     width: 70
                     height: 32
                     radius: 16
-                    color: WallpaperManager.transitionType === modelData ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
-                    opacity: WallpaperManager.transitionType === modelData ? 1.0 : 0.05
+                    color: WallpaperManager.transitionType === modelData ? ThemeManager.accentColor : ThemeManager.surfacePrimaryColor
+                    opacity: WallpaperManager.transitionType === modelData ? 1.0 : (optionHoverHandler.hovered ? 0.8 : 0.5)
                     
-                    Text { 
+                    StyledLabel { 
                         anchors.centerIn: parent
                         text: modelData.toUpperCase()
-                        color: WallpaperManager.transitionType === modelData ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 8
+                        type: "caption"
                         font.weight: Font.Bold 
+                        customColor: WallpaperManager.transitionType === modelData ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
                     }
                     
                     TapHandler { 
@@ -59,11 +57,9 @@ ColumnLayout {
                     }
                     
                     scale: optionHoverHandler.hovered ? 1.05 : 1.0
-                    Behavior on scale { 
-                        NumberAnimation { 
-                            duration: 200 
-                        } 
-                    }
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
                 }
             }
         }
@@ -73,13 +69,10 @@ ColumnLayout {
         spacing: 12
         Layout.fillWidth: true
         
-        Text { 
+        StyledLabel { 
             id: slideshowIntervalLabel
             text: "SLIDESHOW INTERVAL"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 10
-            font.weight: Font.Black
-            font.letterSpacing: 2
+            type: "configHeader"
             opacity: 0.4 
         }
         
@@ -99,11 +92,10 @@ ColumnLayout {
                 }
             }
             
-            Text { 
+            StyledLabel { 
                 id: intervalValueLabel
                 text: Math.round(WallpaperManager.slideshowInterval / 60000) + "m"
-                color: ThemeManager.contentOnBackgroundColor
-                font.pixelSize: 12
+                type: "body"
                 font.weight: Font.Bold
                 opacity: 0.6
                 Layout.preferredWidth: 40 

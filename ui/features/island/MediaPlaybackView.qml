@@ -44,6 +44,13 @@ Item {
                     loops: Animation.Infinite
                     running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
                 }
+
+                SequentialAnimation on scale {
+                    running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 1.05; duration: 2000; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0; duration: 2000; easing.type: Easing.InOutSine }
+                }
                 
                 ClippingRectangle { 
                     anchors.fill: parent
@@ -90,21 +97,20 @@ Item {
             spacing: 4
             Layout.alignment: Qt.AlignVCenter
             
-            Text { 
+            StyledLabel { 
                 Layout.fillWidth: true
+                type: "body"
                 text: (root.mediaPlayer && root.mediaPlayer.trackTitle) || "No Media Playing"
-                color: ThemeManager.contentOnBackgroundColor
                 font.weight: Font.DemiBold
-                font.pixelSize: 14
-                elide: Text.ElideRight 
+                elideMode: Text.ElideRight 
             }
-            Text { 
+            StyledLabel { 
                 Layout.fillWidth: true
+                type: "caption"
                 text: (root.mediaPlayer && root.mediaPlayer.trackArtist) || "Unknown Artist"
-                color: ThemeManager.contentSecondaryColor
+                customColor: ThemeManager.contentSecondaryColor
                 opacity: 0.8
-                font.pixelSize: 11
-                elide: Text.ElideRight 
+                elideMode: Text.ElideRight 
             }
             
             Item {

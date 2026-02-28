@@ -6,16 +6,17 @@ import qs.core
 QQC2.Label {
     id: root
     
-    property string type: "label"
+    property string type: "body"
     
     property color customColor: ThemeManager.contentOnBackgroundColor
     
     color: customColor
     
     font {
-        pixelSize: ThemeManager.typography[type].pixelSize
-        weight: ThemeManager.typography[type].weight
-        letterSpacing: ThemeManager.typography[type].letterSpacing
+        family: ThemeManager.fontFamily
+        pixelSize: ThemeManager.typography[type] ? ThemeManager.typography[type].pixelSize : 14
+        weight: ThemeManager.typography[type] ? ThemeManager.typography[type].weight : Font.Normal
+        letterSpacing: ThemeManager.typography[type] ? ThemeManager.typography[type].letterSpacing : 0
         pointSize: -1
     }
     

@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import qs.core
+import qs.ui.shared
 
 Item {
     id: root
@@ -62,11 +63,10 @@ Item {
                 }
             }
 
-            Text { 
+            StyledLabel { 
                 anchors.centerIn: parent
                 text: root.batteryDevice ? Math.round(root.batteryDevice.percentage * 100) + "%" : "--"
-                color: ThemeManager.contentOnBackgroundColor
-                font.weight: Font.Black
+                type: "pillValue"
                 font.pixelSize: 11
             }
         }
@@ -76,15 +76,15 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             spacing: 0
             
-            Text { 
+            StyledLabel { 
                 text: "SYSTEM POWER"
-                color: ThemeManager.contentOnBackgroundColor
+                type: "caption"
                 opacity: 0.4
                 font.weight: Font.Black
                 font.pixelSize: 9
-                font.letterSpacing: 2
+                letterSpacing: 2
             }
-            Text { 
+            StyledLabel { 
                 text: {
                     if (!root.batteryDevice) return "STANDBY"
                     switch (root.batteryDevice.state) {
@@ -93,19 +93,18 @@ Item {
                         default: return "POWERED"
                     }
                 }
-                color: ThemeManager.contentOnBackgroundColor
-                font.weight: Font.Bold
-                font.pixelSize: 15
+                type: "powerStatus"
             }
-            Text { 
+            StyledLabel { 
                 text: root.batteryDevice && root.batteryDevice.state === 2 
                     ? (Math.round(root.batteryDevice.timeToEmpty / 60) + " MIN REMAINING") 
                     : "STABLE"
-                color: ThemeManager.accentColor
+                type: "caption"
+                customColor: ThemeManager.accentColor
                 opacity: 0.6
-                font.pixelSize: 9
                 font.weight: Font.Black
-                font.letterSpacing: 1
+                font.pixelSize: 9
+                letterSpacing: 1
                 Layout.topMargin: 2
             }
         }

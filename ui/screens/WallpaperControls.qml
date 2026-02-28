@@ -60,9 +60,10 @@ FocusScope {
                 color: ThemeManager.surfaceVariantStrongColor
                 border.color: parent.activeFocus ? "white" : (hSlide.hovered ? ThemeManager.accentColor : ThemeManager.outlinePrimaryColor)
                 border.width: parent.activeFocus ? 2 : 1
-                Text { 
+                StyledLabel { 
                     anchors.centerIn: parent; text: "󰐊  SLIDESHOW"
-                    color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hSlide.hovered || parent.activeFocus) ? 1.0 : 0.6 
+                    type: "caption"
+                    font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 11; opacity: (hSlide.hovered || parent.activeFocus) ? 1.0 : 0.6 
                 }
                 scale: (hSlide.hovered || parent.activeFocus) ? 1.02 : 1.0
                 Behavior on scale { NumberAnimation { duration: 200 } }
@@ -85,9 +86,10 @@ FocusScope {
                 color: ThemeManager.surfaceVariantStrongColor
                 border.color: parent.activeFocus ? "white" : (hRev.hovered ? ThemeManager.contentOnBackgroundColor : ThemeManager.outlinePrimaryColor)
                 border.width: parent.activeFocus ? 2 : 1
-                Text { 
+                StyledLabel { 
                     anchors.centerIn: parent; text: "󰕌  REVERT"
-                    color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 11; font.weight: Font.Bold; font.letterSpacing: 1; opacity: (hRev.hovered || parent.activeFocus) ? 1.0 : 0.6 
+                    type: "caption"
+                    font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 11; opacity: (hRev.hovered || parent.activeFocus) ? 1.0 : 0.6 
                 }
                 scale: (hRev.hovered || parent.activeFocus) ? 1.02 : 1.0
                 Behavior on scale { NumberAnimation { duration: 200 } }
@@ -126,9 +128,10 @@ FocusScope {
                     shadowBlur: 0.6
                 }
 
-                Text { 
+                StyledLabel { 
                     anchors.centerIn: parent; text: "󰄬  CONFIRM CHANGES"
-                    color: ThemeManager.contentPrimaryColor; font.pixelSize: 11; font.weight: Font.Black; font.letterSpacing: 1 
+                    type: "caption"
+                    customColor: ThemeManager.contentPrimaryColor; font.weight: Font.Black; font.letterSpacing: 1; font.pixelSize: 11 
                 }
                 scale: (hApp.hovered || parent.activeFocus) ? 1.03 : 1.0
                 Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutBack } }

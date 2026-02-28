@@ -71,26 +71,43 @@ Item {
         }
 
         delegate: Item {
+            id: delegateRoot
             width: view.width; height: view.height
             opacity: PathView.itemOpacity
             scale: PathView.itemScale
             enabled: PathView.isCurrentItem
 
-            Loader {
+            Item {
+                id: tabContainer
                 anchors.fill: parent
                 anchors.leftMargin: 20; anchors.rightMargin: 20
                 clip: true
-                
-                sourceComponent: {
-                    if (!model) return null;
-                    if (model.type === "timeDate") return timeDateComp
-                    if (model.type === "music") return musicComp
-                    if (model.type === "weather") return weatherComp
-                    if (model.type === "battery") return batteryComp
-                    if (model.type === "notif") return notifComp
-                    if (model.type === "cc") return ccComp
-                    if (model.type === "tray") return trayComp
-                    return null
+
+                LazyLoader {
+                    id: tabLoader
+                    
+                    activeAsync: true
+                    
+                    property var tabComponent: {
+                        if (!model) return null;
+                        if (model.type === "timeDate") return timeDateComp
+                        if (model.type === "music") return musicComp
+                        if (model.type === "weather") return weatherComp
+                        if (model.type === "battery") return batteryComp
+                        if (model.type === "notif") return notifComp
+                        if (model.type === "cc") return ccComp
+                        if (model.type === "tray") return trayComp
+                        return null
+                    }
+                    
+                    component: tabComponent
+
+                    onItemChanged: {
+                        if (item) {
+                            item.parent = tabContainer
+                            item.anchors.fill = tabContainer
+                        }
+                    }
                 }
             }
         }

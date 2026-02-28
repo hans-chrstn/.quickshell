@@ -35,21 +35,20 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
             }
 
-            Text {
+            StyledLabel {
                 text: "OPEN SETTINGS 󰒓"
-                color: ThemeManager.accentColor
-                font.pixelSize: 8
+                type: "caption"
                 font.weight: Font.Black
-                font.letterSpacing: 1
+                font.pixelSize: 8
+                letterSpacing: 1
+                customColor: ThemeManager.accentColor
                 Layout.alignment: Qt.AlignRight
                 Layout.topMargin: 2
                 
                 opacity: settingsInteractionHandler.hovered ? 1.0 : 0.6
-                Behavior on opacity { 
-                    NumberAnimation { 
-                        duration: 200 
-                    } 
-                }
+                scale: settingsInteractionHandler.hovered ? 1.05 : 1.0
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                 
                 TapHandler { 
                     onTapped: { 

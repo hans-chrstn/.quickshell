@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.core
+import qs.ui.shared
 
 ColumnLayout {
     id: root
@@ -9,11 +10,10 @@ ColumnLayout {
     
     signal interactionFinished()
 
-    Text {
+    StyledLabel {
         id: headerLabel
+        type: "caption"
         text: "ENTER COORDINATES"
-        color: ThemeManager.contentOnBackgroundColor
-        font.pixelSize: 10
         font.weight: Font.Bold
         Layout.alignment: Qt.AlignHCenter
         opacity: 0.6
@@ -30,6 +30,9 @@ ColumnLayout {
         border.color: ThemeManager.contentOnBackgroundColor
         border.width: coordinateInput.activeFocus ? 1 : 0
         
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on border.width { NumberAnimation { duration: 200 } }
+        
         TextInput {
             id: coordinateInput
             anchors.fill: parent
@@ -38,6 +41,7 @@ ColumnLayout {
             verticalAlignment: TextInput.AlignVCenter
             horizontalAlignment: TextInput.AlignHCenter
             color: ThemeManager.contentOnBackgroundColor
+            font.family: ThemeManager.fontFamily
             font.pixelSize: 14
             selectByMouse: true
             
@@ -47,10 +51,10 @@ ColumnLayout {
             }
             Keys.onEscapePressed: root.interactionFinished()
             
-            Text {
+            StyledLabel {
                 id: placeholderText
+                type: "body"
                 text: "lat,lon"
-                color: ThemeManager.contentOnBackgroundColor
                 opacity: 0.3
                 visible: !parent.text && !parent.activeFocus
                 anchors.centerIn: parent
@@ -61,26 +65,26 @@ ColumnLayout {
             onTapped: coordinateInput.forceActiveFocus()
         }
 
-        Text {
+        StyledLabel {
             id: clearButton
             anchors.right: parent.right
             anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             text: "✕"
-            color: ThemeManager.contentOnBackgroundColor
-            opacity: 0.5
-            font.pixelSize: 12
+            type: "body"
+            opacity: clearHover.hovered ? 1.0 : 0.5
             
             TapHandler {
                 onTapped: root.interactionFinished()
             }
+            HoverHandler { id: clearHover; cursorShape: Qt.PointingHandCursor }
         }
     }
     
-    Text {
+    StyledLabel {
         id: instructionsLabel
+        type: "caption"
         text: "PRESS ENTER TO SAVE"
-        color: ThemeManager.contentOnBackgroundColor
         opacity: 0.3
         font.pixelSize: 8
         Layout.alignment: Qt.AlignHCenter

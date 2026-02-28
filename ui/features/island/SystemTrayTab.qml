@@ -11,30 +11,30 @@ Item {
     id: root
     anchors.fill: parent
 
-    RowLayout {
+    Item {
         anchors.centerIn: parent
         width: Math.min(parent.width - 40, layoutContent.implicitWidth)
         height: 70
-        spacing: 20
 
         RowLayout {
             id: layoutContent
+            anchors.centerIn: parent
             spacing: 20
             Layout.alignment: Qt.AlignVCenter
 
             ColumnLayout {
                 spacing: 0
                 Layout.alignment: Qt.AlignVCenter
-                Text {
+                StyledLabel {
                     text: "SYSTEM"
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 2
+                    type: "caption"
+                    font.weight: Font.Black; font.letterSpacing: 2; font.pixelSize: 8
                     opacity: 0.4
                 }
-                Text {
+                StyledLabel {
                     text: "SERVICES"
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 12; font.weight: Font.Bold
+                    type: "body"
+                    font.weight: Font.Bold; font.pixelSize: 12
                 }
             }
 
@@ -97,18 +97,17 @@ Item {
                             ColumnLayout {
                                 anchors.centerIn: parent
                                 spacing: 0
-                                Text {
+                                StyledLabel {
                                     id: lbl
                                     text: (modelData.title || "APP").toUpperCase()
-                                    color: ThemeManager.contentOnBackgroundColor
-                                    font.pixelSize: 8; font.weight: Font.Black; font.letterSpacing: 1
+                                    type: "trayTooltip"
                                     Layout.alignment: Qt.AlignHCenter
                                 }
-                                Text {
+                                StyledLabel {
                                     id: desc
                                     text: modelData.tooltipDescription || ""
-                                    color: ThemeManager.contentOnBackgroundColor
-                                    font.pixelSize: 7; font.weight: Font.Medium; opacity: 0.5
+                                    type: "caption"
+                                    font.weight: Font.Medium; font.pixelSize: 7; opacity: 0.5
                                     visible: text !== ""
                                     Layout.alignment: Qt.AlignHCenter
                                 }

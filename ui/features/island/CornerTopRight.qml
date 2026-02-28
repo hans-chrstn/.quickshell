@@ -10,7 +10,18 @@ CornerContainer {
     isAtRight: true
     aboveWindows: true
     isHoverEnabled: true
-    expandedWidth: 220
+    
+    readonly property int activeButtons: {
+        let count = 0;
+        if (ThemeManager.showCornerWallpaper) count++;
+        if (ThemeManager.showCornerSnap) count++;
+        if (ThemeManager.showCornerRecord) count++;
+        if (ThemeManager.showCornerTasks) count++;
+        if (ThemeManager.showCornerNotes) count++;
+        return count;
+    }
+
+    expandedWidth: Math.max(80, activeButtons * 70)
     expandedHeight: 100
     
     firstFilletRotation: 0
@@ -18,7 +29,7 @@ CornerContainer {
     firstFilletY: 16
     
     secondFilletRotation: 0
-    secondFilletX: 220 - 20 - 16 - 10
+    secondFilletX: expandedWidth - 20 - 16 - 10
     secondFilletY: 100 - 1
 
     customTopLeftRadius: 0
@@ -47,10 +58,11 @@ CornerContainer {
 
     Row {
         anchors.centerIn: parent
-        spacing: 24
+        spacing: 20
         
         Column {
             spacing: 6
+            visible: ThemeManager.showCornerWallpaper
             BaseButton {
                 id: wallBtn
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -61,19 +73,19 @@ CornerContainer {
                     anchors.fill: parent; radius: 22; color: "white"
                     opacity: wallBtn.isHovered ? 0.2 : 0.1
                     Behavior on opacity { NumberAnimation { duration: 200 } }
-                    Text { anchors.centerIn: parent; text: "󰸉"; color: "white"; font.pixelSize: 22 }
+                    StyledLabel { anchors.centerIn: parent; text: "󰸉"; type: "icon"; font.pixelSize: 22 }
                 }
             }
-            Text {
+            StyledLabel {
                 anchors.horizontalCenter: parent.horizontalCenter; text: "WALL"
-                color: "white"; opacity: wallBtn.isHovered ? 1.0 : 0.6; font.pixelSize: 9
-                font.weight: Font.Bold; font.letterSpacing: 1
+                type: "caption"; opacity: wallBtn.isHovered ? 1.0 : 0.6; font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
         }
 
         Column {
             spacing: 6
+            visible: ThemeManager.showCornerSnap
             BaseButton {
                 id: snapBtn
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -84,19 +96,19 @@ CornerContainer {
                     anchors.fill: parent; radius: 22; color: "white"
                     opacity: snapBtn.isHovered ? 0.2 : 0.1
                     Behavior on opacity { NumberAnimation { duration: 200 } }
-                    Text { anchors.centerIn: parent; text: "󰄀"; color: "white"; font.pixelSize: 22 }
+                    StyledLabel { anchors.centerIn: parent; text: "󰄀"; type: "icon"; font.pixelSize: 22 }
                 }
             }
-            Text {
+            StyledLabel {
                 anchors.horizontalCenter: parent.horizontalCenter; text: "SNAP"
-                color: "white"; opacity: snapBtn.isHovered ? 1.0 : 0.6; font.pixelSize: 9
-                font.weight: Font.Bold; font.letterSpacing: 1
+                type: "caption"; opacity: snapBtn.isHovered ? 1.0 : 0.6; font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
         }
         
         Column {
             spacing: 6
+            visible: ThemeManager.showCornerRecord
             BaseButton {
                 id: recBtn
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -121,12 +133,59 @@ CornerContainer {
                     }
                 }
             }
-            Text {
+            StyledLabel {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: recorder.running ? "STOP" : "REC"
-                color: recorder.running ? ThemeManager.dangerColor : "white"
+                type: "caption"
+                customColor: recorder.running ? ThemeManager.dangerColor : "white"
                 opacity: (recBtn.isHovered || recorder.running) ? 1.0 : 0.6
-                font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                font.weight: Font.Bold; font.letterSpacing: 1
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+            }
+        }
+
+        Column {
+            spacing: 6
+            visible: ThemeManager.showCornerTasks
+            BaseButton {
+                id: taskBtn
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 44; height: 44
+                onClicked: ViewManager.toggleTaskManager()
+                
+                Rectangle {
+                    anchors.fill: parent; radius: 22; color: "white"
+                    opacity: taskBtn.isHovered ? 0.2 : 0.1
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    StyledLabel { anchors.centerIn: parent; text: "󰍛"; type: "icon"; font.pixelSize: 22 }
+                }
+            }
+            StyledLabel {
+                anchors.horizontalCenter: parent.horizontalCenter; text: "TASKS"
+                type: "caption"; opacity: taskBtn.isHovered ? 1.0 : 0.6; font.weight: Font.Bold; font.letterSpacing: 1
+                Behavior on opacity { NumberAnimation { duration: 200 } }
+            }
+        }
+
+        Column {
+            spacing: 6
+            visible: ThemeManager.showCornerNotes
+            BaseButton {
+                id: notesBtn
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 44; height: 44
+                onClicked: ViewManager.toggleNotes()
+                
+                Rectangle {
+                    anchors.fill: parent; radius: 22; color: "white"
+                    opacity: notesBtn.isHovered ? 0.2 : 0.1
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    StyledLabel { anchors.centerIn: parent; text: "󰠮"; type: "icon"; font.pixelSize: 22 }
+                }
+            }
+            StyledLabel {
+                anchors.horizontalCenter: parent.horizontalCenter; text: "NOTES"
+                type: "caption"; opacity: notesBtn.isHovered ? 1.0 : 0.6; font.weight: Font.Bold; font.letterSpacing: 1
                 Behavior on opacity { NumberAnimation { duration: 200 } }
             }
         }

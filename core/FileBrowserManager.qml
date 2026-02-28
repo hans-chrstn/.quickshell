@@ -13,6 +13,7 @@ Singleton {
 
     property alias currentPath: internalFileSystem.currentPath
     property alias isShowingHiddenFiles: internalFileSystem.isShowingHiddenFiles
+    property alias filterMode: internalFileSystem.filterMode
     readonly property alias fileModel: internalFileSystem.fileModel
     readonly property alias containsImages: internalFileSystem.containsImages
 

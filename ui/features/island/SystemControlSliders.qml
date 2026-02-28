@@ -12,13 +12,10 @@ ColumnLayout {
     ColumnLayout {
         spacing: 2
         
-        Text { 
+        StyledLabel { 
             id: brightnessHeaderLabel
             text: "BRIGHTNESS"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 8
-            font.weight: Font.Black
-            font.letterSpacing: 1.5
+            type: "sliderHeader"
             opacity: 0.3
             height: 10
             verticalAlignment: Text.AlignBottom
@@ -39,13 +36,10 @@ ColumnLayout {
     ColumnLayout {
         spacing: 2
         
-        Text { 
+        StyledLabel { 
             id: volumeHeaderLabel
             text: "VOLUME"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 8
-            font.weight: Font.Black
-            font.letterSpacing: 1.5
+            type: "sliderHeader"
             opacity: 0.3
             height: 10
             verticalAlignment: Text.AlignBottom

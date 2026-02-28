@@ -1,5 +1,6 @@
 import QtQuick
 import qs.core
+import qs.ui.shared
 
 Rectangle {
     id: root
@@ -20,12 +21,11 @@ Rectangle {
         Repeater {
             model: root.alphabetItems
             
-            delegate: Text {
+            delegate: StyledLabel {
                 id: letterVisual
                 text: modelData
-                font.pixelSize: ThemeManager.appIslandScrubberFontSize
+                type: "caption"
                 font.weight: root.activeLetter === modelData ? Font.Black : Font.Medium
-                color: ThemeManager.contentOnBackgroundColor
                 horizontalAlignment: Text.AlignHCenter
 
                 readonly property real mouseDistance: {

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
@@ -25,12 +26,9 @@ FocusScope {
 
             ColumnLayout {
                 spacing: 4
-                Text { 
+                StyledLabel { 
                     text: rootHeader.showSettings ? "SETTINGS" : "EXPLORER"
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 10
-                    font.weight: Font.Black
-                    font.letterSpacing: 3
+                    type: "configHeader"
                     opacity: 0.3 
                 }
                 Rectangle { 
@@ -43,15 +41,14 @@ FocusScope {
                     border.width: 1
                     visible: !rootHeader.showSettings
                     
-                    Text { 
+                    StyledLabel { 
                         id: pathText
                         anchors.centerIn: parent
                         text: FileBrowserManager.currentPath
-                        color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 9
-                        font.family: "Monospace"
+                        type: "monospace"
+                        font.family: "Fira Code"
                         opacity: 1.0
-                        elide: Text.ElideLeft
+                        elideMode: Text.ElideLeft
                         width: parent.width - 20 
                     }
                 }
@@ -65,8 +62,8 @@ FocusScope {
                 Rectangle {
                     id: settingsButton
                     width: 36; height: 36; radius: 10
-                    color: (rootHeader.showSettings || activeFocus) ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
-                    opacity: (rootHeader.showSettings || activeFocus) ? 1.0 : 0.1
+                    color: (rootHeader.showSettings || activeFocus) ? ThemeManager.accentColor : ThemeManager.surfacePrimaryColor
+                    opacity: (rootHeader.showSettings || activeFocus) ? 1.0 : (hSet.hovered ? 0.8 : 0.5)
                     
                     focus: true
                     Keys.onSpacePressed: rootHeader.showSettings = !rootHeader.showSettings
@@ -74,10 +71,10 @@ FocusScope {
                     Keys.onReturnPressed: rootHeader.showSettings = !rootHeader.showSettings
                     Keys.onRightPressed: hiddenBtn.forceActiveFocus()
 
-                    Text { 
+                    StyledLabel { 
                         anchors.centerIn: parent; text: "󰒓"
-                        color: (rootHeader.showSettings || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 18 
+                        type: "icon"
+                        customColor: (rootHeader.showSettings || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
                     }
                     
                     border.color: activeFocus ? "white" : "transparent"
@@ -86,14 +83,16 @@ FocusScope {
                     TapHandler { onTapped: rootHeader.showSettings = !rootHeader.showSettings }
                     HoverHandler { id: hSet; cursorShape: Qt.PointingHandCursor }
                     scale: (hSet.hovered || activeFocus) ? 1.1 : 1.0
-                    Behavior on scale { NumberAnimation { duration: 200 } }
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
                 }
                 
                 Rectangle {
                     id: hiddenBtn
                     width: 36; height: 36; radius: 10
-                    color: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
-                    opacity: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? 1.0 : 0.1
+                    color: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? ThemeManager.accentColor : ThemeManager.surfacePrimaryColor
+                    opacity: (FileBrowserManager.isShowingHiddenFiles || activeFocus) ? 1.0 : (hHidden.hovered ? 0.8 : 0.5)
                     visible: !rootHeader.showSettings
                     
                     Keys.onSpacePressed: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles
@@ -101,10 +100,10 @@ FocusScope {
                     Keys.onReturnPressed: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles
                     Keys.onLeftPressed: settingsButton.forceActiveFocus()
 
-                    Text { 
+                    StyledLabel { 
                         anchors.centerIn: parent; text: "󰈈"
-                        color: (FileBrowserManager.isShowingHiddenFiles || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 18 
+                        type: "icon"
+                        customColor: (FileBrowserManager.isShowingHiddenFiles || parent.activeFocus) ? ThemeManager.contentPrimaryColor : ThemeManager.contentOnBackgroundColor
                     }
                     
                     border.color: activeFocus ? "white" : "transparent"
@@ -113,7 +112,9 @@ FocusScope {
                     TapHandler { onTapped: FileBrowserManager.isShowingHiddenFiles = !FileBrowserManager.isShowingHiddenFiles }
                     HoverHandler { id: hHidden; cursorShape: Qt.PointingHandCursor }
                     scale: (hHidden.hovered || activeFocus) ? 1.1 : 1.0
-                    Behavior on scale { NumberAnimation { duration: 200 } }
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                    Behavior on opacity { NumberAnimation { duration: 200 } }
+                    Behavior on color { ColorAnimation { duration: 200 } }
                 }
             }
         }
@@ -157,10 +158,12 @@ FocusScope {
                     Behavior on contentY { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
                     
                     delegate: Item { 
+                        id: delegateRoot
                         width: 114
                         height: 114
                         
-                        readonly property bool isSelected: WallpaperManager.previewWallpaperPath === model.path
+                        readonly property string itemPath: model.path
+                        readonly property bool isSelected: WallpaperManager.previewWallpaperPath === delegateRoot.itemPath
                         readonly property bool isFocused: GridView.isCurrentItem && grid.activeFocus
                         readonly property bool isActive: isFocused || hh.hovered || isSelected
 
@@ -182,31 +185,51 @@ FocusScope {
 
                             ColumnLayout { 
                                 anchors.fill: parent
-                                anchors.margins: 14
-                                spacing: 10
+                                anchors.margins: 4
+                                spacing: 4
                                 
-                                Item { 
+                                ClippingRectangle { 
+                                    id: thumbContainer
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
-                                    Text { 
+                                    radius: 16
+                                    color: "transparent"
+                                    
+                                    Image {
+                                        id: thumbImage
+                                        anchors.fill: parent
+                                        visible: !model.isDir && model.path !== ".."
+                                        source: visible ? "file://" + model.path : ""
+                                        sourceSize: Qt.size(200, 200)
+                                        fillMode: Image.PreserveAspectCrop
+                                        asynchronous: true
+                                        opacity: status === Image.Ready ? 1.0 : 0.0
+                                        Behavior on opacity { NumberAnimation { duration: 300 } }
+                                    }
+
+                                    StyledLabel { 
                                         anchors.centerIn: parent
+                                        visible: model.isDir || (thumbImage.visible && thumbImage.status !== Image.Ready)
                                         text: model.path === ".." ? "󰁝" : (model.isDir ? "󰉋" : "󰸉")
-                                        color: model.isDir ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
+                                        type: "heading"
+                                        customColor: model.isDir ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
                                         font.pixelSize: model.isDir ? 42 : 36
                                         opacity: isActive ? 1.0 : 0.3
                                         Behavior on opacity { NumberAnimation { duration: 200 } } 
                                     }
                                 }
                                 
-                                Text { 
+                                StyledLabel { 
                                     text: model.name
-                                    color: ThemeManager.contentOnBackgroundColor
-                                    font.pixelSize: 10
+                                    type: "caption"
                                     font.weight: Font.Medium
                                     opacity: isActive ? 0.9 : 0.4
                                     Layout.fillWidth: true
                                     horizontalAlignment: Text.AlignHCenter
-                                    elide: Text.ElideRight 
+                                    elideMode: Text.ElideRight 
+                                    Layout.leftMargin: 8
+                                    Layout.rightMargin: 8
+                                    Layout.bottomMargin: 4
                                 }
                             }
                             
@@ -216,8 +239,8 @@ FocusScope {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: { 
                                     grid.currentIndex = index
-                                    if (model.isDir) FileBrowserManager.navigateToPath(model.path)
-                                    else WallpaperManager.previewWallpaperPath = model.path 
+                                    if (model.isDir) FileBrowserManager.navigateToPath(delegateRoot.itemPath)
+                                    else WallpaperManager.previewWallpaperPath = delegateRoot.itemPath 
                                     grid.forceActiveFocus()
                                 } 
                             }

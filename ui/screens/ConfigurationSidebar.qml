@@ -74,13 +74,10 @@ FocusScope {
         anchors.margins: 16
         spacing: 8
 
-        Text {
+        StyledLabel {
             id: sidebarHeaderLabel
             text: "SETTINGS"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 12
-            font.weight: Font.Black
-            font.letterSpacing: 2
+            type: "sidebarHeader"
             opacity: 0.4 * root.sidebarItemOpacity
             Layout.margins: 16
             
@@ -100,7 +97,7 @@ FocusScope {
             Layout.fillWidth: true
             Layout.fillHeight: true
             model: ThemeManager.settingsStructure
-            clip: true
+            clip: false
             currentIndex: 0
             spacing: 4
             interactive: true
@@ -137,7 +134,9 @@ FocusScope {
                     
                     color: ListView.isCurrentItem ? ThemeManager.surfaceVariantColor : "transparent"
                     opacity: root.sidebarItemOpacity
+                    scale: categoryItemDelegate.isHovered && !ListView.isCurrentItem ? 1.02 : 1.0
                     Behavior on color { ColorAnimation { duration: 200 } }
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 
                     transform: Translate {
                         x: (root.isCascadeAnimationActive && !ViewManager.isSettingsClosing) ? 0 : -40
@@ -179,21 +178,19 @@ FocusScope {
                             width: 28
                             height: parent.height
                             
-                            Text {
+                            StyledLabel {
                                 anchors.centerIn: parent
                                 text: modelData.icon
-                                color: ThemeManager.contentOnBackgroundColor
-                                font.pixelSize: 20
+                                type: "icon"
                                 opacity: ListView.isCurrentItem ? 1.0 : 0.4
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
                             }
                         }
                         
-                        Text {
+                        StyledLabel {
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData.category
-                            color: ThemeManager.contentOnBackgroundColor
-                            font.pixelSize: 14
+                            type: "body"
                             font.weight: ListView.isCurrentItem ? Font.DemiBold : Font.Normal
                             opacity: ListView.isCurrentItem ? 1.0 : 0.6
                             Behavior on opacity { NumberAnimation { duration: 200 } }
@@ -240,13 +237,13 @@ FocusScope {
                     }
                 }
                 
-                Text {
+                StyledLabel {
                     anchors.centerIn: parent
                     text: "RESET DEFAULTS"
-                    color: ThemeManager.dangerPrimaryColor
-                    font.pixelSize: 11
+                    type: "caption"
+                    customColor: ThemeManager.dangerPrimaryColor
                     font.weight: Font.Bold
-                    font.letterSpacing: 1
+                    letterSpacing: 1
                 }
                 
                 Rectangle { 

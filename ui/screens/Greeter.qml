@@ -276,14 +276,11 @@ PanelWindow {
                             }
                         }
 
-                        Text {
+                        StyledLabel {
                             id: userDisplayLabel
                             Layout.alignment: Qt.AlignHCenter
                             text: root.isUserSelected ? Greetd.user.toUpperCase() : (mainContentRect.usernameBuffer || "TYPE USERNAME").toUpperCase()
-                            color: ThemeManager.contentOnBackgroundColor
-                            font.pixelSize: 18
-                            font.weight: Font.Black
-                            font.letterSpacing: 2
+                            type: "greeterUser"
                             opacity: mainContentRect.usernameBuffer || root.isUserSelected ? 0.9 : 0.2
                             Behavior on opacity { NumberAnimation { duration: 200 } }
                         }
@@ -312,20 +309,21 @@ PanelWindow {
                                 }
                             }
 
-                            Text {
+                            StyledLabel {
                                 id: usernameDisplayLabel
                                 anchors.centerIn: parent
                                 visible: !root.isUserSelected
                                 text: mainContentRect.usernameBuffer
-                                color: ThemeManager.contentOnBackgroundColor
-                                font.pixelSize: 16; font.weight: Font.Medium
+                                type: "body"
+                                font.weight: Font.Medium
+                                font.pixelSize: 16
                             }
                             
-                            Text {
+                            StyledLabel {
                                 anchors.centerIn: parent
                                 text: root.isUserSelected ? (mainContentRect.passwordBuffer.length === 0 ? "PASSWORD" : "") : ""
-                                color: ThemeManager.contentOnBackgroundColor
-                                opacity: 0.2; font.pixelSize: 12; font.weight: Font.Black; font.letterSpacing: 1
+                                type: "caption"
+                                opacity: 0.2; font.weight: Font.Black; font.letterSpacing: 1; font.pixelSize: 12
                             }
 
                             Rectangle {
@@ -356,13 +354,15 @@ PanelWindow {
                         spacing: 15
                         opacity: 0.3
                         
-                        Text {
+                        StyledLabel {
                             text: root.isUserSelected ? "󰌾  ESC TO CHANGE USER" : "󰌾  ENTER TO SELECT"
-                            color: ThemeManager.contentOnBackgroundColor; font.pixelSize: 8; font.weight: Font.Bold; font.letterSpacing: 1
+                            type: "caption"
+                            font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 8
                         }
                     }
 
                     BaseButton {
+                        id: sessionPickerBtn
                         Layout.alignment: Qt.AlignHCenter
                         width: 320; height: 30
                         onClicked: mainContentRect.showSessionPicker = !mainContentRect.showSessionPicker
@@ -373,19 +373,22 @@ PanelWindow {
                             radius: 15
                             border.color: Qt.rgba(1, 1, 1, 0.1)
                             border.width: 1
+                            scale: sessionPickerBtn.isHovered ? 1.02 : 1.0
+                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
 
                             RowLayout {
                                 anchors.centerIn: parent
                                 spacing: 10
-                                Text {
+                                StyledLabel {
                                     text: "󰊠  " + SessionManager.currentSessionName.toUpperCase()
-                                    color: ThemeManager.contentOnBackgroundColor
-                                    font.pixelSize: 10; font.weight: Font.Black; font.letterSpacing: 1
+                                    type: "caption"
+                                    font.weight: Font.Black; font.letterSpacing: 1; font.pixelSize: 10
                                     opacity: 0.6
                                 }
-                                Text {
+                                StyledLabel {
                                     text: "󱗘"
-                                    color: ColorManager.accentColor
+                                    type: "caption"
+                                    customColor: ColorManager.accentColor
                                     font.pixelSize: 10
                                     opacity: 0.8
                                 }
@@ -399,11 +402,12 @@ PanelWindow {
                     Layout.preferredWidth: 350
                     Layout.preferredHeight: 30
                     
-                    Text {
+                    StyledLabel {
                         anchors.centerIn: parent
                         text: mainContentRect.statusMessage.toUpperCase()
-                        color: mainContentRect.isErrorMessage ? ThemeManager.dangerColor : ThemeManager.accentColor
-                        font.pixelSize: 10; font.weight: Font.Black; font.letterSpacing: 1.5
+                        type: "caption"
+                        customColor: mainContentRect.isErrorMessage ? ThemeManager.dangerColor : ThemeManager.accentColor
+                        font.weight: Font.Black; font.letterSpacing: 1.5; font.pixelSize: 10
                         opacity: text ? 0.8 : 0.0
                         Behavior on opacity { NumberAnimation { duration: 200 } }
                     }
@@ -422,11 +426,12 @@ PanelWindow {
                 anchors.centerIn: parent
                 spacing: 30
                 
-                Text {
+                StyledLabel {
                     Layout.alignment: Qt.AlignHCenter
                     text: "SESSION MANAGEMENT"
-                    color: ColorManager.accentColor
-                    font.pixelSize: 16; font.weight: Font.Black; font.letterSpacing: 3
+                    type: "title"
+                    customColor: ColorManager.accentColor
+                    font.weight: Font.Black; font.letterSpacing: 3; font.pixelSize: 16
                 }
 
                 ColumnLayout {
@@ -441,9 +446,9 @@ PanelWindow {
                             TextInput {
                                 id: newSessionName
                                 anchors.fill: parent; anchors.margins: 10
-                                color: "white"; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
+                                color: "white"; font.family: ThemeManager.fontFamily; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
                                 clip: true
-                                Text { text: "NAME"; visible: !parent.text; color: "gray"; font.pixelSize: 10; anchors.centerIn: parent }
+                                StyledLabel { text: "NAME"; type: "caption"; visible: !parent.text; opacity: 0.5; font.pixelSize: 10; anchors.centerIn: parent }
                             }
                         }
                         Rectangle {
@@ -452,12 +457,13 @@ PanelWindow {
                             TextInput {
                                 id: newSessionExec
                                 anchors.fill: parent; anchors.margins: 10
-                                color: "white"; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
+                                color: "white"; font.family: ThemeManager.fontFamily; font.pixelSize: 12; verticalAlignment: Text.AlignVCenter
                                 clip: true
-                                Text { text: "EXEC COMMAND"; visible: !parent.text; color: "gray"; font.pixelSize: 10; anchors.centerIn: parent }
+                                StyledLabel { text: "EXEC COMMAND"; type: "caption"; visible: !parent.text; opacity: 0.5; font.pixelSize: 10; anchors.centerIn: parent }
                             }
                         }
                         BaseButton {
+                            id: addSessionBtn
                             width: 80; height: 36
                             readonly property bool canAdd: newSessionName.text.trim() !== "" && newSessionExec.text.trim() !== ""
                             enabled: canAdd
@@ -469,13 +475,16 @@ PanelWindow {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 18
-                                color: parent.canAdd ? ColorManager.accentColor : Qt.rgba(1, 1, 1, 0.1)
-                                opacity: parent.canAdd ? 1.0 : 0.5
+                                color: addSessionBtn.canAdd ? ColorManager.accentColor : Qt.rgba(1, 1, 1, 0.1)
+                                opacity: addSessionBtn.canAdd ? 1.0 : 0.5
+                                scale: addSessionBtn.isHovered && addSessionBtn.canAdd ? 1.05 : 1.0
+                                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                                 
-                                Text { 
+                                StyledLabel { 
                                     anchors.centerIn: parent; text: "ADD"
-                                    font.pixelSize: 10; font.weight: Font.Bold
-                                    color: parent.parent.canAdd ? "black" : "white"
+                                    type: "caption"
+                                    font.weight: Font.Bold; font.pixelSize: 10
+                                    customColor: addSessionBtn.canAdd ? "black" : "white"
                                 }
                             }
                         }
@@ -490,6 +499,7 @@ PanelWindow {
                         delegate: RowLayout {
                             spacing: 10
                             BaseButton {
+                                id: sessionItemBtn
                                 width: 400; height: 44
                                 onClicked: {
                                     SessionManager.selectSession(index)
@@ -501,24 +511,29 @@ PanelWindow {
                                     radius: 22
                                     color: SessionManager.currentSessionName === name ? Qt.rgba(ColorManager.accentColor.r, ColorManager.accentColor.g, ColorManager.accentColor.b, 0.2) : Qt.rgba(1, 1, 1, 0.05)
                                     border.color: SessionManager.currentSessionName === name ? ColorManager.accentColor : "transparent"
+                                    scale: sessionItemBtn.isHovered ? 1.02 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                                     
-                                    Text {
+                                    StyledLabel {
                                         anchors.centerIn: parent
                                         text: name.toUpperCase() + "  (" + exec + ")"
-                                        color: ThemeManager.contentOnBackgroundColor
+                                        type: "body"
                                         font.pixelSize: 11; font.letterSpacing: 1; opacity: 0.8
                                     }
                                 }
                             }
                             
                             BaseButton {
+                                id: deleteSessionBtn
                                 width: 44; height: 44
                                 onClicked: SessionManager.deleteSession(index)
                                 
                                 Rectangle {
                                     anchors.fill: parent; radius: 22
                                     color: Qt.rgba(1, 0, 0, 0.1); border.color: Qt.rgba(1, 0, 0, 0.2)
-                                    Text { anchors.centerIn: parent; text: "󰆴"; color: "#ff5555"; font.pixelSize: 16 }
+                                    scale: deleteSessionBtn.isHovered ? 1.1 : 1.0
+                                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                                    StyledLabel { anchors.centerIn: parent; text: "󰆴"; type: "body"; customColor: "#ff5555"; font.pixelSize: 16 }
                                 }
                             }
                         }
@@ -529,19 +544,25 @@ PanelWindow {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 20
                     BaseButton {
+                        id: resetSessionsBtn
                         width: 180; height: 36
                         onClicked: SessionManager.resetToDefaults()
                         Rectangle {
                             anchors.fill: parent; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
-                            Text { anchors.centerIn: parent; text: "RESET TO DEFAULTS"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
+                            scale: resetSessionsBtn.isHovered ? 1.05 : 1.0
+                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                            StyledLabel { anchors.centerIn: parent; text: "RESET TO DEFAULTS"; type: "caption"; font.weight: Font.Bold; font.pixelSize: 10 }
                         }
                     }
                     BaseButton {
+                        id: closePickerBtn
                         width: 100; height: 36
                         onClicked: mainContentRect.showSessionPicker = false
                         Rectangle {
                             anchors.fill: parent; radius: 18; color: "transparent"; border.color: Qt.rgba(1, 1, 1, 0.2)
-                            Text { anchors.centerIn: parent; text: "CLOSE"; color: "white"; font.pixelSize: 10; font.weight: Font.Bold }
+                            scale: closePickerBtn.isHovered ? 1.05 : 1.0
+                            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                            StyledLabel { anchors.centerIn: parent; text: "CLOSE"; type: "caption"; font.weight: Font.Bold; font.pixelSize: 10 }
                         }
                     }
                 }
@@ -558,9 +579,10 @@ PanelWindow {
             BaseButton {
                 id: pwrBtn
                 onClicked: Quickshell.execDetached(["systemctl", "poweroff"])
-                Text {
+                StyledLabel {
                     text: "󰐥  POWER OFF"
-                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    type: "caption"
+                    font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 9
                     opacity: pwrBtn.isHovered ? 1.0 : 0.6
                 }
             }
@@ -568,9 +590,10 @@ PanelWindow {
             BaseButton {
                 id: rebBtn
                 onClicked: Quickshell.execDetached(["systemctl", "reboot"])
-                Text {
+                StyledLabel {
                     text: "󰜉  REBOOT"
-                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    type: "caption"
+                    font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 9
                     opacity: rebBtn.isHovered ? 1.0 : 0.6
                 }
             }
@@ -578,9 +601,10 @@ PanelWindow {
             BaseButton {
                 id: ttyBtn
                 onClicked: Quickshell.execDetached(["chvt", "2"])
-                Text {
+                StyledLabel {
                     text: "󰈆  EXIT TO TTY"
-                    color: "white"; font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    type: "caption"
+                    font.weight: Font.Bold; font.letterSpacing: 1; font.pixelSize: 9
                     opacity: ttyBtn.isHovered ? 1.0 : 0.6
                 }
             }

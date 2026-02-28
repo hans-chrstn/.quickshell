@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.core
+import qs.ui.shared
 
 Rectangle {
     id: root
@@ -11,6 +12,10 @@ Rectangle {
     radius: 16
     color: ThemeManager.contentOnBackgroundColor
     opacity: interactionHandler.hovered ? 0.08 : 0.04
+    scale: interactionHandler.hovered ? 1.01 : 1.0
+    
+    Behavior on opacity { NumberAnimation { duration: 200 } }
+    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
     
     property string panelType: "wifi"
 
@@ -19,37 +24,35 @@ Rectangle {
         anchors.margins: 16
         spacing: 16
         
-        Text { 
+        StyledLabel { 
             text: root.panelType === "wifi" ? "󰖩" : "󰂯"
-            color: model.isActive ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
+            type: "icon"
+            customColor: model.isActive ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
             opacity: 0.5
-            font.pixelSize: 20 
         }
         
         ColumnLayout {
             spacing: 0
-            Text { 
+            StyledLabel { 
                 text: model.name || "Unknown Device"
-                color: ThemeManager.contentOnBackgroundColor
-                font.weight: Font.Medium
-                font.pixelSize: 13 
+                type: "networkLabel"
             }
-            Text { 
+            StyledLabel { 
                 text: root.panelType === "wifi" 
                     ? (model.isActive ? "Connected" : "Signal: " + model.signal + "%") 
                     : (model.address || "Available")
-                color: model.isActive ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
-                font.pixelSize: 10
+                type: "caption"
+                customColor: model.isActive ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
                 opacity: 0.6 
             }
         }
         
         Item { Layout.fillWidth: true }
         
-        Text { 
+        StyledLabel { 
             text: model.isActive ? "󰄬" : ""
-            color: ThemeManager.accentColor
-            font.pixelSize: 18 
+            type: "icon"
+            customColor: ThemeManager.accentColor
         }
     }
     

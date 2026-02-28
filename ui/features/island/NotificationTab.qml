@@ -1,8 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
+import org.kde.kirigami as Kirigami
 import Quickshell
 import Quickshell.Services.Notifications
 import qs.core
+import qs.ui.shared
 
 Item {
     id: root
@@ -29,7 +31,9 @@ Item {
                 border.width: 1
                 
                 opacity: hh.hovered ? ThemeManager.notificationHoverOpacity * 10 : ThemeManager.notificationOpacity * 10
+                scale: hh.hovered ? 1.02 : 1.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
+                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
                 
                 RowLayout {
                     anchors.fill: parent
@@ -62,20 +66,18 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
-                        Text {
+                        StyledLabel {
+                            type: "label"
                             text: model.summary || "Notification"
-                            color: ThemeManager.contentOnBackgroundColor
                             font.weight: Font.Bold
-                            font.pixelSize: 12
-                            elide: Text.ElideRight
+                            elideMode: Text.ElideRight
                             Layout.fillWidth: true
                         }
-                        Text {
+                        StyledLabel {
+                            type: "caption"
                             text: model.body || ""
-                            color: ThemeManager.contentOnBackgroundColor
                             opacity: 0.6
-                            font.pixelSize: 10
-                            elide: Text.ElideRight
+                            elideMode: Text.ElideRight
                             Layout.fillWidth: true
                             visible: text !== ""
                         }
@@ -100,14 +102,13 @@ Item {
             HoverHandler { id: hh }
         }
         
-        Text {
+        StyledLabel {
             anchors.centerIn: parent
+            type: "caption"
             text: "NO NOTIFICATIONS"
-            color: ThemeManager.contentOnBackgroundColor
             opacity: 0.2
-            font.pixelSize: 10
             font.weight: Font.Black
-            font.letterSpacing: 2
+            letterSpacing: 2
             visible: notifList.count === 0
         }
 
@@ -123,11 +124,12 @@ Item {
                 border.color: ThemeManager.outlinePrimaryColor
                 border.width: 1
                 
-                Text {
+                StyledLabel {
                     anchors.centerIn: parent
-                    text: "CLEAR ALL history"
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 9; font.weight: Font.Bold; font.letterSpacing: 1
+                    type: "caption"
+                    text: "CLEAR HISTORY"
+                    font.weight: Font.Bold
+                    letterSpacing: 1
                     opacity: hhClear.hovered ? 1.0 : 0.6
                 }
                 

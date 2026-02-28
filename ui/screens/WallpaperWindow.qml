@@ -28,17 +28,22 @@ PanelWindow {
         onActivated: ViewManager.closeWindowByType("wallpaper")
     }
 
+    property bool entryStarted: false
     onVisibleChanged: {
         if (visible) {
+            FileBrowserManager.filterMode = "images"
             Qt.callLater(() => {
                 explorer.forceActiveFocus()
+                entryStarted = true
             })
+        } else {
+            entryStarted = false
         }
     }
 
     Rectangle {
         anchors.fill: parent; color: ThemeManager.shadowPrimaryColor
-        opacity: (root.visible && !ViewManager.isWallpaperClosing) ? 0.6 : 0
+        opacity: root.entryStarted ? 0.6 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
         MouseArea { anchors.fill: parent; onClicked: ViewManager.closeWindowByType("wallpaper") }
     }
@@ -49,8 +54,8 @@ PanelWindow {
         anchors.centerIn: parent; radius: 36
         color: ThemeManager.backgroundPrimaryColor; border.color: ThemeManager.outlinePrimaryColor; border.width: 1
         
-        opacity: (root.visible && !ViewManager.isWallpaperClosing) ? 1.0 : 0
-        scale: (root.visible && !ViewManager.isWallpaperClosing) ? 1.0 : 0.95
+        opacity: root.entryStarted ? 1.0 : 0
+        scale: root.entryStarted ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs.core
+import qs.ui.shared
 
 Loader {
     id: root
@@ -9,6 +10,7 @@ Loader {
     width: parent ? parent.width : 0
     
     property var configurationItemData: null
+    property bool labelVisible: true
 
     readonly property bool isCurrentlyFocused: item && item.activeFocus
 
@@ -58,10 +60,9 @@ Loader {
                 anchors.rightMargin: 12
                 spacing: 16
                 
-                Text { 
+                StyledLabel { 
                     text: configurationItemData ? configurationItemData.label : ""
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 15
+                    type: "configLabel"
                     opacity: 0.9
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter 
@@ -73,7 +74,7 @@ Loader {
                     focus: true
                     color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 13
-                    font.family: "Monospace"
+                    font.family: "SF Pro"
                     Layout.alignment: Qt.AlignVCenter
                     text: configurationItemData ? ThemeManager[configurationItemData.property] : ""
                     activeFocusOnTab: false
@@ -102,15 +103,12 @@ Loader {
             height: 40
             width: root.width
             
-            Text {
+            StyledLabel {
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 8
                 anchors.leftMargin: 12
                 text: configurationItemData ? configurationItemData.label.toUpperCase() : ""
-                color: ThemeManager.accentColor
-                font.pixelSize: 11
-                font.weight: Font.Black
-                font.letterSpacing: 1.5
+                type: "configHeader"
                 opacity: 0.5
             }
         }
@@ -132,21 +130,18 @@ Loader {
                 RowLayout {
                     Layout.fillWidth: true
                     
-                    Text { 
+                    StyledLabel { 
                         text: configurationItemData ? configurationItemData.label : ""
-                        color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 15
+                        type: "configLabel"
                         opacity: 0.9
                         Layout.alignment: Qt.AlignVCenter 
                     }
                     
                     Item { Layout.fillWidth: true }
                     
-                    Text { 
+                    StyledLabel { 
                         text: configurationItemData ? (configurationItemData.step < 1 ? ThemeManager[configurationItemData.property].toFixed(2) : Math.round(ThemeManager[configurationItemData.property])) : ""
-                        color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 13
-                        font.weight: Font.Bold
+                        type: "configValue"
                         opacity: 0.5
                         Layout.alignment: Qt.AlignVCenter 
                     }
@@ -251,10 +246,9 @@ Loader {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
                 
-                Text { 
+                StyledLabel { 
                     text: configurationItemData ? configurationItemData.label : ""
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 15
+                    type: "configLabel"
                     opacity: 0.9
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter 
@@ -311,10 +305,9 @@ Loader {
                 anchors.rightMargin: 12
                 spacing: 16
                 
-                Text { 
+                StyledLabel { 
                     text: configurationItemData ? configurationItemData.label : ""
-                    color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 15
+                    type: "configLabel"
                     opacity: 0.9
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter 
@@ -325,7 +318,7 @@ Loader {
                     Layout.preferredWidth: 100
                     color: ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 13
-                    font.family: "Monospace"
+                    font.family: "Fira Code"
                     focus: true
                     Layout.alignment: Qt.AlignVCenter
                     text: configurationItemData ? ThemeManager[configurationItemData.property] : ""

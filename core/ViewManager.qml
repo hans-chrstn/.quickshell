@@ -6,32 +6,72 @@ import qs.ui.screens
 Singleton {
     id: root
 
-    readonly property SettingsWindow settingsWindow: SettingsWindow {
-        visible: false
-        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    readonly property var primaryScreen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+
+    property bool settingsRequested: false
+    property bool wallpaperRequested: false
+    property bool controlPanelRequested: false
+    property bool taskManagerRequested: false
+    property bool notesRequested: false
+
+    LazyLoader { 
+        id: settingsLdr
+        activeAsync: true 
+        SettingsWindow { 
+            visible: root.settingsRequested && !root.isSettingsClosing
+            screen: root.primaryScreen 
+        } 
+    }
+    
+    LazyLoader { 
+        id: wallpaperLdr
+        activeAsync: true 
+        WallpaperWindow { 
+            visible: root.wallpaperRequested && !root.isWallpaperClosing
+            screen: root.primaryScreen 
+        } 
+    }
+    
+    LazyLoader { 
+        id: controlPanelLdr
+        activeAsync: true 
+        ControlPanelWindow { 
+            visible: root.controlPanelRequested && !root.isControlPanelClosing
+            screen: root.primaryScreen 
+        } 
+    }
+    
+    LazyLoader { 
+        id: taskManagerLdr
+        activeAsync: true 
+        TaskManagerWindow { 
+            visible: root.taskManagerRequested && !root.isTaskManagerClosing
+            screen: root.primaryScreen 
+        } 
     }
 
-    readonly property WallpaperWindow wallpaperWindow: WallpaperWindow {
-        visible: false
-        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
-    }
-
-    readonly property ControlPanelWindow controlPanelWindow: ControlPanelWindow {
-        visible: false
-        screen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    LazyLoader { 
+        id: notesLdr
+        activeAsync: true 
+        NotesWindow { 
+            visible: root.notesRequested && !root.isNotesClosing
+            screen: root.primaryScreen 
+        } 
     }
 
     property bool isSettingsClosing: false
     property bool isControlPanelClosing: false
     property bool isWallpaperClosing: false
+    property bool isTaskManagerClosing: false
+    property bool isNotesClosing: false
 
     function openSettings() {
         root.isSettingsClosing = false
-        settingsWindow.visible = true
+        root.settingsRequested = true
     }
 
     function toggleSettings() {
-        if (settingsWindow.visible) {
+        if (root.settingsRequested) {
             closeWindowByType("settings")
         } else {
             openSettings()
@@ -40,25 +80,53 @@ Singleton {
 
     function openControlPanel(page = "wifi") {
         root.isControlPanelClosing = false
-        controlPanelWindow.activePage = page
-        controlPanelWindow.visible = true
+        if (controlPanelLdr.item) {
+            controlPanelLdr.item.activePage = page
+        }
+        root.controlPanelRequested = true
     }
 
     function toggleControlPanel(page = "wifi") {
-        if (controlPanelWindow.visible && controlPanelWindow.activePage === page) {
+        if (root.controlPanelRequested && controlPanelLdr.item && controlPanelLdr.item.activePage === page) {
             closeWindowByType("controlPanel")
         } else {
             openControlPanel(page)
         }
     }
 
+    function openTaskManager() {
+        root.isTaskManagerClosing = false
+        root.taskManagerRequested = true
+    }
+
+    function toggleTaskManager() {
+        if (root.taskManagerRequested) {
+            closeWindowByType("taskManager")
+        } else {
+            openTaskManager()
+        }
+    }
+
+    function openNotes() {
+        root.isNotesClosing = false
+        root.notesRequested = true
+    }
+
+    function toggleNotes() {
+        if (root.notesRequested) {
+            closeWindowByType("notes")
+        } else {
+            openNotes()
+        }
+    }
+
     function openWallpaper() {
         root.isWallpaperClosing = false
-        wallpaperWindow.visible = true
+        root.wallpaperRequested = true
     }
 
     function toggleWallpaper() {
-        if (wallpaperWindow.visible) {
+        if (root.wallpaperRequested) {
             closeWindowByType("wallpaper")
         } else {
             openWallpaper()
@@ -75,6 +143,12 @@ Singleton {
         } else if (windowType === "wallpaper") {
             root.isWallpaperClosing = true
             wallpaperCloseTimer.restart()
+        } else if (windowType === "taskManager") {
+            root.isTaskManagerClosing = true
+            taskManagerCloseTimer.restart()
+        } else if (windowType === "notes") {
+            root.isNotesClosing = true
+            notesCloseTimer.restart()
         }
     }
 
@@ -82,7 +156,7 @@ Singleton {
         id: settingsCloseTimer
         interval: 350
         onTriggered: { 
-            settingsWindow.visible = false
+            root.settingsRequested = false
             root.isSettingsClosing = false 
         } 
     }
@@ -91,7 +165,7 @@ Singleton {
         id: controlPanelCloseTimer
         interval: 350
         onTriggered: { 
-            controlPanelWindow.visible = false
+            root.controlPanelRequested = false
             root.isControlPanelClosing = false 
         } 
     }
@@ -100,8 +174,26 @@ Singleton {
         id: wallpaperCloseTimer
         interval: 350
         onTriggered: { 
-            wallpaperWindow.visible = false
+            root.wallpaperRequested = false
             root.isWallpaperClosing = false 
+        } 
+    }
+
+    Timer { 
+        id: taskManagerCloseTimer
+        interval: 350
+        onTriggered: { 
+            root.taskManagerRequested = false
+            root.isTaskManagerClosing = false 
+        } 
+    }
+
+    Timer { 
+        id: notesCloseTimer
+        interval: 350
+        onTriggered: { 
+            root.notesRequested = false
+            root.isNotesClosing = false 
         } 
     }
 }

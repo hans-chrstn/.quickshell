@@ -28,16 +28,8 @@ BaseButton {
         border.color: root.actionHighlightColor
         border.width: root.isHovered ? 1 : 0
         
-        Behavior on opacity { 
-            NumberAnimation { 
-                duration: 200 
-            } 
-        }
-        Behavior on border.width { 
-            NumberAnimation { 
-                duration: 200 
-            } 
-        }
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+        Behavior on border.width { NumberAnimation { duration: 200 } }
     }
 
     RowLayout {
@@ -47,39 +39,30 @@ BaseButton {
         anchors.rightMargin: 16
         spacing: 12
 
-        Text {
+        StyledLabel {
             id: iconVisual
             text: root.actionIcon
-            color: root.isHovered ? root.actionHighlightColor : ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 18
-            Behavior on color { 
-                ColorAnimation { 
-                    duration: 200 
-                } 
-            }
+            type: "icon"
+            customColor: root.isHovered ? root.actionHighlightColor : ThemeManager.contentOnBackgroundColor
+            Behavior on customColor { ColorAnimation { duration: 200 } }
         }
 
-        Text {
+        StyledLabel {
             id: labelVisual
             text: root.actionLabel
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 11
+            type: "caption"
             font.weight: Font.Bold
-            font.letterSpacing: 1
+            letterSpacing: 1
             Layout.fillWidth: true
         }
         
-        Text {
+        StyledLabel {
             id: arrowIndicator
             text: "󰁔"
-            color: ThemeManager.contentOnBackgroundColor
-            opacity: root.isHovered ? 0.4 : 0
+            type: "icon"
             font.pixelSize: 14
-            Behavior on opacity { 
-                NumberAnimation { 
-                    duration: 200 
-                } 
-            }
+            opacity: root.isHovered ? 0.4 : 0
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
     }
 }

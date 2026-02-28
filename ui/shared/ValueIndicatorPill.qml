@@ -77,10 +77,9 @@ Rectangle {
         spacing: 14
         z: 1
 
-        Text {
+        StyledLabel {
             text: root.statusIcon
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 18
+            type: "icon"
             opacity: iconHoverHandler.hovered ? 1.0 : 0.7
             Behavior on opacity { NumberAnimation { duration: 200 } }
             TapHandler { onTapped: root.iconInteracted() }
@@ -159,11 +158,9 @@ Rectangle {
             }
         }
 
-        Text {
+        StyledLabel {
             text: Math.round(root.indicatorValue * 100)
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 12
-            font.weight: Font.Black
+            type: "pillValue"
             opacity: 0.3
             Layout.preferredWidth: 25
             horizontalAlignment: Text.AlignRight

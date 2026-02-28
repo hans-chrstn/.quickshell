@@ -28,18 +28,22 @@ PanelWindow {
         onActivated: ViewManager.closeWindowByType("settings")
     }
 
+    property bool entryStarted: false
     onVisibleChanged: {
         if (visible) {
             Qt.callLater(() => {
                 sidebar.forceActiveFocus()
+                entryStarted = true
             })
+        } else {
+            entryStarted = false
         }
     }
 
     Rectangle {
         anchors.fill: parent
         color: ThemeManager.shadowPrimaryColor
-        opacity: (root.visible && !ViewManager.isSettingsClosing) ? 0.4 : 0
+        opacity: root.entryStarted ? 0.4 : 0
         Behavior on opacity { NumberAnimation { duration: 300 } }
         
         MouseArea {
@@ -56,8 +60,8 @@ PanelWindow {
         color: ThemeManager.backgroundPrimaryColor
         border.color: ThemeManager.outlinePrimaryColor
         border.width: 1
-        opacity: (root.visible && !ViewManager.isSettingsClosing) ? 1.0 : 0
-        scale: (root.visible && !ViewManager.isSettingsClosing) ? 1.0 : 0.95
+        opacity: root.entryStarted ? 1.0 : 0
+        scale: root.entryStarted ? 1.0 : 0.95
         
         Behavior on opacity { NumberAnimation { duration: 300 } }
         Behavior on scale { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
@@ -97,10 +101,9 @@ PanelWindow {
                     anchors.margins: 40
                     spacing: 24
 
-                    Text {
+                    StyledLabel {
                         text: ThemeManager.settingsStructure[sidebar.currentCategoryIndex].category
-                        color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 32; font.weight: Font.Bold
+                        type: "heading"
                     }
 
                     ListView {

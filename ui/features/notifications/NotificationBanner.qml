@@ -19,7 +19,7 @@ Item {
     
     SoundEffect {
         id: dismissSound
-        source: Quickshell.shellPath("assets/sfx/button1.wav")
+        source: Quickshell.shellPath("assets/audio/button1.wav")
         volume: 0.4
     }
     

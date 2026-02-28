@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.core
+import qs.ui.shared
 
 Item {
     id: root
@@ -15,14 +16,10 @@ Item {
         anchors.centerIn: parent
         spacing: -4
 
-        Text {
+        StyledLabel {
             id: formattedTimeText
+            type: "clock"
             text: Qt.formatDateTime(globalSystemClock.date, ThemeManager.timeFormat)
-            color: ThemeManager.contentOnBackgroundColor
-            font.weight: Font.DemiBold
-            font.pixelSize: 52
-            font.letterSpacing: -2
-            renderType: Text.NativeRendering
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -32,30 +29,37 @@ Item {
             Layout.topMargin: 2
 
             Rectangle {
-                width: 4
-                height: 4
-                radius: 2
+                width: 4; height: 4; radius: 2
                 color: ThemeManager.accentColor
                 opacity: 0.8
+                
+                SequentialAnimation on scale {
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 1.2; duration: 1500; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutSine }
+                }
             }
 
-            Text {
+            StyledLabel {
                 id: formattedDateText
+                type: "caption"
                 text: Qt.formatDateTime(globalSystemClock.date, ThemeManager.dateFormat).toUpperCase()
-                color: ThemeManager.contentOnBackgroundColor
                 opacity: 0.4
+                font.weight: Font.Bold
                 font.pixelSize: 9
                 font.letterSpacing: 2
-                font.weight: Font.Bold
-                renderType: Text.NativeRendering
             }
 
             Rectangle {
-                width: 4
-                height: 4
-                radius: 2
+                width: 4; height: 4; radius: 2
                 color: ThemeManager.accentColor
                 opacity: 0.8
+                
+                SequentialAnimation on scale {
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 1.2; duration: 1500; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0; duration: 1500; easing.type: Easing.InOutSine }
+                }
             }
         }
     }

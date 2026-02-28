@@ -10,7 +10,13 @@ Item {
     property bool isIslandExpanded: false
     property alias currentIndex: view.currentIndex
     
-    onFilterTextChanged: updateApps()
+    onFilterTextChanged: updateDebounce.restart()
+
+    Timer {
+        id: updateDebounce
+        interval: 150
+        onTriggered: root.updateApps()
+    }
 
     function updateApps() {
         let apps = DesktopEntries.applications.values.slice();
@@ -19,6 +25,7 @@ Item {
             apps = apps.filter(app => app.name.toLowerCase().includes(filter) || (app.description && app.description.toLowerCase().includes(filter)));
         }
         apps.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+        
         appListModel.clear();
         for (let i = 0; i < apps.length; i++) appListModel.append({ "app": apps[i] });
     }

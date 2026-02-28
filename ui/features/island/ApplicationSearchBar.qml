@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.core
+import qs.ui.shared
 
 Rectangle {
     id: root
@@ -61,9 +62,10 @@ Rectangle {
             } 
         }
         
-        Text { 
+        StyledLabel { 
             text: "󰍉"
-            color: ThemeManager.contentOnBackgroundColor
+            type: "body"
+            customColor: ThemeManager.contentOnBackgroundColor
             opacity: 0.5
             font.pixelSize: 18 
         }
@@ -73,23 +75,26 @@ Rectangle {
             Layout.fillWidth: true
             verticalAlignment: TextInput.AlignVCenter
             color: ThemeManager.appIslandSearchBarColor
+            font.family: ThemeManager.fontFamily
             font.pixelSize: ThemeManager.appIslandSearchInputFontSize
             font.weight: Font.Medium
             selectionColor: ThemeManager.accentColor
             
-            Text {
+            StyledLabel {
                 text: "Search applications..."
-                color: ThemeManager.contentOnBackgroundColor
+                type: "body"
+                customColor: ThemeManager.contentOnBackgroundColor
                 opacity: 0.3
                 font.pixelSize: 14
                 visible: !searchInput.text && !searchInput.activeFocus
             }
         }
         
-        Text { 
+        StyledLabel { 
             text: "󰅖"
-            color: ThemeManager.contentOnBackgroundColor
-            opacity: 0.4
+            type: "body"
+            customColor: ThemeManager.contentOnBackgroundColor
+            opacity: closeHoverHandler.hovered ? 1.0 : 0.4
             font.pixelSize: 16 
             
             TapHandler { 
@@ -100,11 +105,8 @@ Rectangle {
             HoverHandler { cursorShape: Qt.PointingHandCursor }
             
             scale: closeHoverHandler.hovered ? 1.2 : 1.0
-            Behavior on scale { 
-                NumberAnimation { 
-                    duration: 200 
-                } 
-            }
+            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
             HoverHandler { id: closeHoverHandler }
         }
     }

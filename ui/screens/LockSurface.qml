@@ -112,15 +112,14 @@ WlSessionLockSurface {
 
                 LockScreenAuthenticationView { }
                 
-                Text {
+                StyledLabel {
                     id: statusMsg
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredWidth: 350
                     horizontalAlignment: Text.AlignHCenter
                     text: LockManager.statusMessage
-                    color: LockManager.isErrorMessage ? ThemeManager.dangerColor : "white"
-                    font.pixelSize: 13
-                    font.weight: Font.Medium
+                    type: "lockStatus"
+                    customColor: LockManager.isErrorMessage ? ThemeManager.dangerColor : "white"
                     wrapMode: Text.Wrap
                     opacity: text ? 0.8 : 0.0
                     Behavior on opacity { NumberAnimation { duration: 200 } }

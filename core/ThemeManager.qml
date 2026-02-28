@@ -29,6 +29,7 @@ Singleton {
     readonly property color surfaceStrongColor: Qt.rgba(1, 1, 1, 0.1)
     readonly property color surfaceSubtleColor: Qt.rgba(1, 1, 1, 0.02)
     readonly property color surfaceContentColor: "#FFFFFF"
+    readonly property color surfaceContentSecondaryColor: "#DDDDDD"
     
     readonly property color surfaceVariantColor: Qt.rgba(1, 1, 1, 0.08)
     readonly property color surfaceVariantContentColor: "#AAAAAA"
@@ -42,7 +43,12 @@ Singleton {
     readonly property color dangerContentColor: "#FFFFFF"
     readonly property color dangerSurfaceColor: {
         let color = Qt.color(root.dangerColor);
-        return Qt.rgba(color.r, color.g, color.b, 0.3);
+        return Qt.rgba(
+            color.r, 
+            color.g, 
+            color.b, 
+            0.3
+        );
     }
     
     readonly property color shadowPrimaryColor: "#000000"
@@ -55,6 +61,116 @@ Singleton {
     property color visualHighlightColor: "#FFFFFF"
     property real visualHighlightOpacity: 0.08
     property color secondaryTextColor: "#888888"
+
+    property string fontFamily: "SF Pro"
+    
+    readonly property var typography: ({
+        "heading": {
+            "pixelSize": 32,
+            "weight": Font.Bold,
+            "letterSpacing": 0
+        },
+        "clock": {
+            "pixelSize": 52,
+            "weight": Font.DemiBold,
+            "letterSpacing": -2
+        },
+        "weatherTemp": {
+            "pixelSize": 42,
+            "weight": Font.DemiBold,
+            "letterSpacing": -1
+        },
+        "title": {
+            "pixelSize": 20,
+            "weight": Font.DemiBold,
+            "letterSpacing": 0
+        },
+        "body": {
+            "pixelSize": 14,
+            "weight": Font.Normal,
+            "letterSpacing": 0
+        },
+        "label": {
+            "pixelSize": 12,
+            "weight": Font.Medium,
+            "letterSpacing": 0.2
+        },
+        "caption": {
+            "pixelSize": 10,
+            "weight": Font.Normal,
+            "letterSpacing": 0.5
+        },
+        "icon": {
+            "pixelSize": 18,
+            "weight": Font.Normal,
+            "letterSpacing": 0
+        },
+        "sliderHeader": {
+            "pixelSize": 8,
+            "weight": Font.Black,
+            "letterSpacing": 1.5
+        },
+        "pillValue": {
+            "pixelSize": 12,
+            "weight": Font.Black,
+            "letterSpacing": 0
+        },
+        "sidebarHeader": {
+            "pixelSize": 12,
+            "weight": Font.Black,
+            "letterSpacing": 2
+        },
+        "controlPanelHeader": {
+            "pixelSize": 14,
+            "weight": Font.Black,
+            "letterSpacing": 2
+        },
+        "lockStatus": {
+            "pixelSize": 13,
+            "weight": Font.Medium,
+            "letterSpacing": 0
+        },
+        "trayTooltip": {
+            "pixelSize": 8,
+            "weight": Font.Black,
+            "letterSpacing": 1
+        },
+        "greeterUser": {
+            "pixelSize": 18,
+            "weight": Font.Black,
+            "letterSpacing": 2
+        },
+        "configHeader": {
+            "pixelSize": 10,
+            "weight": Font.Black,
+            "letterSpacing": 2
+        },
+        "monospace": {
+            "pixelSize": 9,
+            "weight": Font.Normal,
+            "letterSpacing": 0
+        },
+        "configLabel": {
+            "pixelSize": 15,
+            "weight": Font.Normal,
+            "letterSpacing": 0
+        },
+        "configValue": {
+            "pixelSize": 13,
+            "weight": Font.Bold,
+            "letterSpacing": 0
+        },
+        "networkLabel": {
+            "pixelSize": 13,
+            "weight": Font.Medium,
+            "letterSpacing": 0
+        },
+        "powerStatus": {
+            "pixelSize": 15,
+            "weight": Font.Bold,
+            "letterSpacing": 0
+        }
+    })
 
     property int animationDuration: 400
     property int animationEasing: Easing.OutQuart
@@ -92,6 +208,15 @@ Singleton {
 
     property bool isMusicArtVisible: true
     property bool isWeatherVisible: true
+
+    property bool showCornerWallpaper: true
+    property bool showCornerSnap: true
+    property bool showCornerRecord: true
+    property bool showCornerTasks: true
+    property bool showCornerNotes: true
+
+    property int taskManagerInterval: 5000
+    property int taskManagerProcessLimit: 25
 
     property int notificationItemHeight: 60
     property int notificationIconSize: 36
@@ -150,6 +275,14 @@ Singleton {
                 { type: "header", label: "Layout" },
                 { type: "slider", label: "Content Spacing", property: "lockContentSpacing", default: 50, min: 10, max: 150 },
                 { type: "slider", label: "Password Opacity", property: "lockPasswordOpacity", default: 0.06, min: 0.0, max: 0.5, step: 0.01 }
+            ]
+        },
+        {
+            category: "Typography",
+            icon: "󰬶",
+            items: [
+                { type: "header", label: "Font Settings" },
+                { type: "text", label: "Font Family", property: "fontFamily", default: "SF Pro" }
             ]
         },
         {
@@ -269,9 +402,24 @@ Singleton {
             category: "Features",
             icon: "󰄔",
             items: [
-                { type: "header", label: "Toggles" },
+                { type: "header", label: "General" },
                 { type: "switch", label: "Show Music Art", property: "isMusicArtVisible", default: true },
-                { type: "switch", label: "Show Weather", property: "isWeatherVisible", default: true }
+                { type: "switch", label: "Show Weather", property: "isWeatherVisible", default: true },
+                { type: "header", label: "Utility Corner" },
+                { type: "switch", label: "Wallpaper Button", property: "showCornerWallpaper", default: true },
+                { type: "switch", label: "Screenshot Button", property: "showCornerSnap", default: true },
+                { type: "switch", label: "Recorder Button", property: "showCornerRecord", default: true },
+                { type: "switch", label: "Task Manager Button", property: "showCornerTasks", default: true },
+                { type: "switch", label: "Notes Button", property: "showCornerNotes", default: true }
+            ]
+        },
+        {
+            category: "System",
+            icon: "󰍛",
+            items: [
+                { type: "header", label: "Task Manager" },
+                { type: "slider", label: "Refresh (ms)", property: "taskManagerInterval", default: 5000, min: 1000, max: 30000, step: 500 },
+                { type: "slider", label: "Process Limit", property: "taskManagerProcessLimit", default: 25, min: 5, max: 100 }
             ]
         }
     ]
@@ -281,8 +429,12 @@ Singleton {
         path: root.configurationCachePath
         blockLoading: true
         printErrors: true
-        onLoaded: root.loadConfiguration()
-        onInternalTextChanged: root.loadConfiguration()
+        onLoaded: {
+            root.loadConfiguration()
+        }
+        onInternalTextChanged: {
+            root.loadConfiguration()
+        }
     }
 
     function saveConfiguration() {
@@ -299,7 +451,9 @@ Singleton {
     }
 
     function loadConfiguration() {
-        if (!root.isReady) return
+        if (!root.isReady) {
+            return
+        }
         let configurationContent = configurationCacheFile.text()
         if (configurationContent) {
             try {
@@ -309,7 +463,9 @@ Singleton {
                         root[settingKey] = configurationData[settingKey]
                     }
                 }
-            } catch (error) {}
+            } catch (error) {
+                console.error("Failed to parse configuration")
+            }
         }
     }
 

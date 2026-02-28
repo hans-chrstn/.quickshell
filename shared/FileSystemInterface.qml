@@ -9,17 +9,22 @@ Item {
     property bool isShowingHiddenFiles: false
     property bool containsImages: false
     
+    property string filterMode: "all"
+    
     readonly property alias fileModel: fileListModel
     ListModel { id: fileListModel }
 
     Process {
         id: listProcess
-        command: ["ls", root.isShowingHiddenFiles ? "-1ap" : "-1p", root.currentPath]
+        command: [
+            "ls", 
+            root.isShowingHiddenFiles ? "-1ap" : "-1p", 
+            root.currentPath
+        ]
         stdout: StdioCollector {
             onStreamFinished: {
                 fileListModel.clear()
-                let lines = text.trim().split("
-")
+                let lines = text.trim().split("\n")
                 let imageCount = 0
                 
                 if (root.currentPath !== "/") {
@@ -35,29 +40,46 @@ Item {
                 
                 for (let line of lines) {
                     let trimmedLine = line.trim()
-                    if (trimmedLine === "" || trimmedLine === "./" || trimmedLine === "../" || trimmedLine === ".") continue
+                    if (trimmedLine === "" || trimmedLine === "./" || trimmedLine === "../" || trimmedLine === ".") {
+                        continue
+                    }
                     
                     let isDirectory = trimmedLine.endsWith("/")
                     let fileName = isDirectory ? trimmedLine.slice(0, -1) : trimmedLine
                     let absolutePath = root.currentPath + (root.currentPath === "/" ? "" : "/") + fileName
                     
                     let isImageFile = !!fileName.match(/\.(jpg|jpeg|png|webp)$/i)
+                    let isNoteFile = !!fileName.match(/\.(md|txt)$/i)
                     
-                    if (isDirectory || isImageFile) {
+                    let shouldInclude = isDirectory
+                    if (root.filterMode === "images") {
+                        shouldInclude = shouldInclude || isImageFile
+                    } else if (root.filterMode === "notes") {
+                        shouldInclude = shouldInclude || isNoteFile
+                    } else {
+                        shouldInclude = true
+                    }
+                    
+                    if (shouldInclude) {
                         fileItems.push({ 
                             "name": fileName, 
                             "path": absolutePath, 
                             "isDir": isDirectory, 
-                            "isImage": isImageFile 
+                            "isImage": isImageFile,
+                            "isNote": isNoteFile 
                         })
-                        if (!isDirectory && isImageFile) imageCount++
+                        if (!isDirectory && isImageFile) {
+                            imageCount++
+                        }
                     }
                 }
                 
                 root.containsImages = imageCount > 0
                 
                 fileItems.sort((a, b) => {
-                    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1
+                    if (a.isDir !== b.isDir) {
+                        return a.isDir ? -1 : 1
+                    }
                     return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
                 })
                 
@@ -68,9 +90,20 @@ Item {
         }
     }
 
+    Timer {
+        id: restartTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            listProcess.running = true
+        }
+    }
+
     function refresh() {
-        listProcess.running = false
-        Qt.callLater(() => { listProcess.running = true })
+        if (listProcess.running) {
+            listProcess.running = false
+        }
+        restartTimer.start()
     }
 
     function navigateToPath(path) {
@@ -96,6 +129,11 @@ Item {
         root.refresh()
     }
 
-    onIsShowingHiddenFilesChanged: root.refresh()
-    onCurrentPathChanged: root.refresh()
+    onIsShowingHiddenFilesChanged: {
+        root.refresh()
+    }
+
+    onCurrentPathChanged: {
+        root.refresh()
+    }
 }

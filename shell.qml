@@ -20,50 +20,107 @@ import qs.ui.features.notifications
 ShellRoot {
     id: root
 
-    Lock { }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: TopBar { aboveWindows: true }
+    LazyLoader {
+        activeAsync: true
+        Lock {
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: LeftBar { aboveWindows: true }
+        delegate: Item {
+            id: topBarDelegate
+            required property var modelData
+            LazyLoader {
+                activeAsync: true
+                TopBar { 
+                    aboveWindows: true 
+                    screen: topBarDelegate.modelData
+                }
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: RightBar { aboveWindows: true }
+        delegate: Item {
+            id: leftBarDelegate
+            required property var modelData
+            LazyLoader {
+                activeAsync: true
+                LeftBar { 
+                    aboveWindows: true 
+                    screen: leftBarDelegate.modelData
+                }
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: BottomBar { aboveWindows: true }
+        delegate: Item {
+            id: rightBarDelegate
+            required property var modelData
+            LazyLoader {
+                activeAsync: true
+                RightBar { 
+                    aboveWindows: true 
+                    screen: rightBarDelegate.modelData
+                }
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerTopLeft { }
+        delegate: Item {
+            id: bottomBarDelegate
+            required property var modelData
+            LazyLoader {
+                activeAsync: true
+                BottomBar { 
+                    aboveWindows: true 
+                    screen: bottomBarDelegate.modelData
+                }
+            }
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerTopRight { }
+        delegate: CornerTopLeft {
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerBottomLeft { }
+        delegate: CornerTopRight {
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerBottomRight { }
+        delegate: CornerBottomLeft {
+        }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: NotificationPopup { }
+        delegate: CornerBottomRight {
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: Item {
+            id: notificationDelegate
+            required property var modelData
+            LazyLoader {
+                activeAsync: true
+                NotificationPopup { 
+                    modelData: notificationDelegate.modelData
+                }
+            }
+        }
     }
 }
