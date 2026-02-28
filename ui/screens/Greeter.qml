@@ -25,11 +25,6 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
     focusable: true
     
-    Shortcut {
-        sequence: "Shift+Alt+E"
-        onActivated: Qt.quit()
-    }
-
     property bool isAuthenticated: false
     property bool isUserSelected: Greetd.user !== ""
     
@@ -83,39 +78,77 @@ PanelWindow {
         Keys.onPressed: (event) => {
             if (mainContentRect.showSessionPicker) return
 
-            if (event.text.length === 1 || event.key === Qt.Key_Backspace) {
+            if (event.key === Qt.Key_C && (event.modifiers & Qt.ControlModifier)) {
+                event.accepted = true
+                return
+            }
+
+            if (event.key === Qt.Key_Backspace) {
                 SoundManager.playClick()
+                if (event.modifiers & Qt.ControlModifier) {
+                    if (!root.isUserSelected) mainContentRect.usernameBuffer = ""
+                    else mainContentRect.passwordBuffer = ""
+                } else {
+                    if (!root.isUserSelected) {
+                        if (mainContentRect.usernameBuffer.length > 0)
+                            mainContentRect.usernameBuffer = mainContentRect.usernameBuffer.slice(0, -1)
+                    } else {
+                        if (mainContentRect.passwordBuffer.length > 0)
+                            mainContentRect.passwordBuffer = mainContentRect.passwordBuffer.slice(0, -1)
+                    }
+                }
+                event.accepted = true
+                return
             }
             
             if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
                 if (!root.isUserSelected) {
-                    if (usernameBuffer.length > 0) {
-                        Greetd.createSession(usernameBuffer)
-                        statusMessage = "Authenticating..."
-                        isErrorMessage = false
+                    if (mainContentRect.usernameBuffer.length > 0) {
+                        mainContentRect.statusMessage = "Authenticating..."
+                        mainContentRect.isErrorMessage = false
+                        Greetd.createSession(mainContentRect.usernameBuffer)
                     }
                 } else {
-                    Greetd.respond(passwordBuffer)
-                    passwordBuffer = ""
+                    if (Greetd.state === GreetdState.Authenticating) {
+                        mainContentRect.statusMessage = "Verifying..."
+                        mainContentRect.isErrorMessage = false
+                        Greetd.respond(mainContentRect.passwordBuffer)
+                        mainContentRect.passwordBuffer = ""
+                    } else if (Greetd.state === GreetdState.Inactive) {
+                        mainContentRect.statusMessage = "Authenticating..."
+                        mainContentRect.isErrorMessage = false
+                        Greetd.createSession(Greetd.user)
+                    } else if (Greetd.state === GreetdState.ReadyToLaunch) {
+                        mainContentRect.statusMessage = "Launching Session..."
+                        launchTimer.start()
+                    }
                 }
-            } else if (event.key === Qt.Key_Backspace) {
-                if (event.modifiers & Qt.ControlModifier) {
-                    if (!root.isUserSelected) usernameBuffer = ""
-                    else passwordBuffer = ""
-                } else {
-                    if (!root.isUserSelected) usernameBuffer = usernameBuffer.slice(0, -1)
-                    else passwordBuffer = passwordBuffer.slice(0, -1)
-                }
-            } else if (event.key === Qt.Key_Escape) {
+                event.accepted = true
+                return
+            }
+            
+            if (event.key === Qt.Key_Escape) {
                 if (root.isUserSelected) {
                     Greetd.cancelSession()
-                    passwordBuffer = ""
-                    statusMessage = "Enter Username"
-                    isErrorMessage = false
+                    Greetd.createSession("")
+                    mainContentRect.passwordBuffer = ""
+                    mainContentRect.usernameBuffer = ""
+                    mainContentRect.statusMessage = "Enter Username"
+                    mainContentRect.isErrorMessage = false
+                    SoundManager.playOff()
                 }
-            } else if (event.text.length === 1 && event.text !== "\r" && event.text !== "\n") {
-                if (!root.isUserSelected) usernameBuffer += event.text
-                else passwordBuffer += event.text
+                event.accepted = true
+                return
+            }
+            
+            if (event.text.length === 1 && event.text !== "\r" && event.text !== "\n") {
+                SoundManager.playClick()
+                if (!root.isUserSelected) {
+                    mainContentRect.usernameBuffer += event.text
+                } else {
+                    mainContentRect.passwordBuffer += event.text
+                }
+                event.accepted = true
             }
         }
 
@@ -140,6 +173,7 @@ PanelWindow {
             }
             
             function onReadyToLaunch() {
+                root.visible = false
                 root.isAuthenticated = true
                 SoundManager.playSuccess()
                 lastUserFile.setText(Greetd.user)
@@ -154,18 +188,19 @@ PanelWindow {
 
         Timer {
             id: launchTimer
-            interval: 600
+            interval: 1000
             onTriggered: {
+                root.visible = false
                 let cmdString = SessionManager.currentSessionExec
-                if (cmdString === "") {
-                    Greetd.launch([])
-                } else {
-                    let cmd = cmdString.match(/[^\s"']+|"([^"]*)"|'([^']*)'/g).map(arg => {
+                let cmd = []
+                if (cmdString !== "") {
+                    cmd = cmdString.match(/[^\s"']+|"([^"]*)"|'([^']*)'/g).map(arg => {
                         if (arg.startsWith('"') || arg.startsWith("'")) return arg.slice(1, -1)
                         return arg
                     })
-                    Greetd.launch(cmd)
                 }
+                
+                Greetd.launch(cmd, ["XDG_SESSION_TYPE=wayland"])
             }
         }
 

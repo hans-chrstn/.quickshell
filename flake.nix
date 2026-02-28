@@ -93,7 +93,7 @@
             default_session = {
               command = let
                 niriConfig = pkgs.writeText "greeter-niri.kdl" ''
-                  spawn-at-startup "${cfg.package}/bin/quickshell" "--path" "${cfg.configPackage}/greeter.qml"
+                  spawn-at-startup "sh" "-c" "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; niri msg action quit --skip-confirmation"
                   hotkey-overlay {
                     skip-at-startup
                   }

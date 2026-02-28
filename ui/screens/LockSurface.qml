@@ -69,12 +69,7 @@ WlSessionLockSurface {
             }
         }
 
-        Keys.onPressed: (event) => {
-            if (event.modifiers === (Qt.ShiftModifier | Qt.AltModifier) && event.key === Qt.Key_U) {
-                root.lock.unlock()
-                return
-            }
-            
+        Keys.onPressed: (event) => {           
             if (event.text.length === 1 || event.key === Qt.Key_Backspace) {
                 SoundManager.playClick()
             }
@@ -144,17 +139,6 @@ WlSessionLockSurface {
 
             LockScreenNotificationIndicator { 
                 Layout.alignment: Qt.AlignHCenter
-            }
-
-            Text { 
-                id: emergencyHint
-                Layout.alignment: Qt.AlignHCenter
-                text: "SHIFT + ALT + U TO BYPASS"
-                color: "white"
-                opacity: 0.15
-                font.pixelSize: 9
-                font.letterSpacing: 3
-                font.weight: Font.Black
             }
         }
     }
