@@ -7,7 +7,7 @@ import qs.core
 ColumnLayout {
     id: root
     
-    spacing: 15
+    spacing: 12
     Layout.alignment: Qt.AlignHCenter
     Layout.topMargin: 20
     visible: !!MusicManager.activePlayer && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing
@@ -41,9 +41,35 @@ ColumnLayout {
         }
     }
 
+    Item {
+        id: progressContainer
+        Layout.alignment: Qt.AlignHCenter
+        Layout.preferredWidth: 240
+        Layout.preferredHeight: 4
+        Layout.topMargin: 8
+        Layout.bottomMargin: 8
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 2
+            color: ThemeManager.contentOnBackgroundColor
+            opacity: 0.1
+        }
+
+        Rectangle {
+            id: progressBar
+            height: parent.height
+            radius: 2
+            color: root.accentColor
+            width: (MusicManager.activePlayer && MusicManager.activePlayer.length > 0) 
+                ? (MusicManager.activePlayer.position / MusicManager.activePlayer.length) * parent.width 
+                : 0
+        }
+    }
+
     RowLayout {
         Layout.alignment: Qt.AlignHCenter
-        spacing: 30
+        spacing: 40
         
         Text { 
             id: previousTrackIcon
@@ -66,35 +92,12 @@ ColumnLayout {
         
         Rectangle {
             id: playPauseButtonContainer
-            width: 50
-            height: 50
-            radius: 25
+            width: 54
+            height: 54
+            radius: 27
             color: Qt.rgba(1, 1, 1, 0.1)
             border.color: root.accentColor
             border.width: 1
-            
-            Rectangle { 
-                id: trackProgressTrack
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 3
-                radius: 1.5
-                color: root.accentColor
-                opacity: 0.5
-                clip: true
-                
-                Rectangle { 
-                    id: trackProgressBar
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: (MusicManager.activePlayer && MusicManager.activePlayer.length > 0) 
-                        ? (MusicManager.activePlayer.position / MusicManager.activePlayer.length) * parent.width 
-                        : 0
-                    color: root.accentColor 
-                }
-            }
             
             Text { 
                 id: playPauseIcon

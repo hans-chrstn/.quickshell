@@ -136,4 +136,8 @@ Item {
     onCurrentPathChanged: {
         root.refresh()
     }
+
+    onFilterModeChanged: {
+        root.refresh()
+    }
 }

@@ -13,93 +13,141 @@ Singleton {
     property bool isScanning: false
 
     readonly property alias deviceModel: bluetoothListModel
-    ListModel { id: bluetoothListModel }
+    ListModel {
+        id: bluetoothListModel
+    }
 
     function togglePower() {
-        if (!isAvailable) return
-        Quickshell.execDetached(["rfkill", root.isEnabled ? "block" : "unblock", "bluetooth"])
+        if (!isAvailable) {
+            return
+        }
+        let target = root.isEnabled ? "off" : "on"
+        Quickshell.execDetached(["bluetoothctl", "power", target])
         root.isEnabled = !root.isEnabled
-        updateDevices()
+        
+        toggleTimer.restart()
     }
 
     function updateDevices() {
         if (isAvailable) {
             statusCheckProcess.running = true
             deviceListProcess.running = true
+            pairedListProcess.running = true
         }
     }
 
     function startScan() {
-        if (!isEnabled) return
+        if (!isEnabled) {
+            return
+        }
         isScanning = true
         scanProcess.running = true
     }
 
-    Process { 
-        id: deviceListProcess
-        command: ["bluetoothctl", "devices"]
-        stdout: StdioCollector { 
-            onStreamFinished: { 
-                bluetoothListModel.clear()
-                parseDeviceOutput(text) 
-            } 
-        } 
+    Timer {
+        id: toggleTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            root.updateDevices()
+        }
     }
 
-    Process { 
+    Process {
+        id: deviceListProcess
+        command: ["bluetoothctl", "devices"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.parseDeviceOutput(text, false)
+            }
+        }
+    }
+
+    Process {
+        id: pairedListProcess
+        command: ["bluetoothctl", "devices", "Paired"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.parseDeviceOutput(text, true)
+            }
+        }
+    }
+
+    Process {
         id: scanProcess
         command: ["bluetoothctl", "--timeout", "10", "scan", "on"]
         onExited: (code) => {
             root.isScanning = false
-            deviceListProcess.running = true 
+            deviceListProcess.running = true
+            pairedListProcess.running = true
         }
     }
 
-    function parseDeviceOutput(text) {
+    function parseDeviceOutput(text, isPairedList) {
         let lines = text.trim().split("\n")
-        for (let line of lines) { 
+        for (let line of lines) {
             let parts = line.split(" ")
             if (parts.length >= 3) {
                 let address = parts[1]
                 let name = parts.slice(2).join(" ")
-                let alreadyExists = false
-                for(let i = 0; i < bluetoothListModel.count; i++) {
-                    if(bluetoothListModel.get(i).address === address) {
-                        alreadyExists = true
+                
+                let found = false
+                for (let i = 0; i < bluetoothListModel.count; i++) {
+                    let item = bluetoothListModel.get(i)
+                    if (item.address === address) {
+                        if (isPairedList) {
+                            bluetoothListModel.setProperty(i, "isPaired", true)
+                        }
+                        found = true
                         break
                     }
                 }
-                if (!alreadyExists) {
-                    bluetoothListModel.append({ 
-                        "name": name, 
-                        "address": address, 
-                        "isActive": false 
-                    }) 
+                
+                if (!found && !isPairedList) {
+                    bluetoothListModel.append({
+                        "name": name,
+                        "address": address,
+                        "isActive": false,
+                        "isPaired": false
+                    })
+                } else if (!found && isPairedList) {
+                    bluetoothListModel.append({
+                        "name": name,
+                        "address": address,
+                        "isActive": false,
+                        "isPaired": true
+                    })
                 }
             }
-        } 
-    }
-
-    Process { 
-        id: statusCheckProcess
-        command: ["rfkill", "list", "bluetooth"]
-        stdout: StdioCollector {
-            onStreamFinished: root.isEnabled = !text.includes("soft blocked: yes")
         }
     }
 
-    DependencyChecker { 
+    Process {
+        id: statusCheckProcess
+        command: ["bluetoothctl", "show"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                root.isEnabled = text.toLowerCase().includes("powered: yes")
+            }
+        }
+    }
+
+    DependencyChecker {
         binaryName: "bluetoothctl"
         onIsAvailableChanged: {
             root.isAvailable = isAvailable
-            if (isAvailable) root.updateDevices()
-        } 
+            if (isAvailable) {
+                root.updateDevices()
+            }
+        }
     }
 
-    Timer { 
+    Timer {
         interval: 10000
         running: true
         repeat: true
-        onTriggered: root.updateDevices() 
+        onTriggered: {
+            root.updateDevices()
+        }
     }
 }

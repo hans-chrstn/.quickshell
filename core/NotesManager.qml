@@ -16,11 +16,13 @@ Singleton {
     property bool isReady: false
     property bool hasUnsavedChanges: false
 
+    readonly property string defaultContent: "# New Note\n\n"
+
     function createNewNote() {
         if (hasUnsavedChanges) {
             saveNotes()
         }
-        root.content = "# New Note\n\n"
+        root.content = root.defaultContent
         root.currentFilePath = "" 
         root.hasUnsavedChanges = false
     }
@@ -46,10 +48,13 @@ Singleton {
         if (!isReady) {
             return
         }
-        
+
         if (!root.currentFilePath) {
+            if (root.content === root.defaultContent || root.content.trim() === "") {
+                return
+            }
             let filename = "note_" + new Date().getTime() + ".md"
-            root.currentFilePath = FileBrowserManager.currentPath + "/" + filename
+            root.currentFilePath = root.defaultNotesDir + "/" + filename
         }
         
         notesFile.path = root.currentFilePath
@@ -82,7 +87,7 @@ Singleton {
         
         if (root.currentFilePath === path) {
             root.currentFilePath = ""
-            root.content = "# New Note\n\n"
+            root.content = root.defaultContent
             root.hasUnsavedChanges = false
         }
         
@@ -121,7 +126,13 @@ Singleton {
         let text = recentFilesStore.text()
         if (text) {
             try {
-                root.recentFiles = JSON.parse(text)
+                let parsed = JSON.parse(text)
+                if (Array.isArray(parsed)) {
+                    root.recentFiles = parsed
+                    if (root.recentFiles.length > 0 && root.currentFilePath === "") {
+                        root.openFile(root.recentFiles[0])
+                    }
+                }
             } catch(e) {
                 console.error("Failed to parse recent files")
             }
@@ -167,7 +178,7 @@ Singleton {
     }
 
     onContentChanged: {
-        if (isReady && currentFilePath !== "") {
+        if (isReady && content !== root.defaultContent) {
             root.hasUnsavedChanges = true
             autoSaveTimer.restart()
         }

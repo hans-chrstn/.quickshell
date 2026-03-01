@@ -7,22 +7,27 @@ import qs.ui.features.island
 import qs.core
 import qs.ui.panels
 import qs.ui.shared
+import qs.ui.panels.topbar
 
 SystemPanel {
     id: root
-    
+
     anchors.top: true
     anchors.left: true
     anchors.right: true
-    
+
     implicitHeight: ThemeManager.dynamicIslandExpandedHeight
     exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
     focusable: dIsland.isExpanded
 
     mask: Region {
-        Region { item: barRect }
-        Region { item: dIsland }
+        Region {
+            item: barRect
+        }
+        Region {
+            item: dIsland
+        }
     }
 
     Rectangle {
@@ -47,7 +52,7 @@ SystemPanel {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         z: 2
-        
+
         barHeight: ThemeManager.globalThickness
         backgroundColor: ThemeManager.backgroundColor
     }
@@ -58,9 +63,15 @@ SystemPanel {
         width: dIsland.isExpanded ? ThemeManager.dynamicIslandExpandedWidth : ThemeManager.dynamicIslandCollapsedWidth
         height: dIsland.isExpanded ? ThemeManager.dynamicIslandExpandedHeight : ThemeManager.globalThickness
         hoverEnabled: true
-        onEntered: dIsland.isExpanded = true
-        onExited: dIsland.isExpanded = false
+        onEntered: {
+            dIsland.isExpanded = true
+        }
+        onExited: {
+            dIsland.isExpanded = false
+        }
         propagateComposedEvents: true
-        onPressed: (mouse) => mouse.accepted = false
+        onPressed: (mouse) => {
+            mouse.accepted = false
+        }
     }
 }

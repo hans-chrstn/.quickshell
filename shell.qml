@@ -12,6 +12,7 @@ import Quickshell
 import Quickshell.Io
 import qs.ui.panels
 import qs.ui.features.island
+import qs.ui.features.island.corners
 import qs.ui.shared
 import qs.core
 import qs.ui.screens

@@ -61,7 +61,7 @@ Item {
             
             Text { 
                 id: wifiStatusIcon
-                text: WifiManager.isEnabled ? "󰖩" : "󰖪"
+                text: NetworkManager.statusIcon
                 color: ThemeManager.contentOnBackgroundColor
                 font.pixelSize: 20
                 opacity: 0.8 

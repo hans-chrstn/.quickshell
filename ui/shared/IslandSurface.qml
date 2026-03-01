@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
+import qs.ui.shared.shapes
 
 Item {
     id: root
@@ -57,18 +58,44 @@ Item {
         State {
             name: "expanded"
             when: root.isExpanded
-            PropertyChanges { target: root; width: root.expandedWidth; height: root.expandedHeight }
-            PropertyChanges { target: islandContentArea; opacity: 1 }
-            PropertyChanges { target: firstFillet; opacity: 1.0 }
-            PropertyChanges { target: secondFillet; opacity: 1.0 }
+            PropertyChanges { 
+                target: root
+                width: root.expandedWidth
+                height: root.expandedHeight 
+            }
+            PropertyChanges { 
+                target: islandContentArea
+                opacity: 1 
+            }
+            PropertyChanges { 
+                target: firstFillet
+                opacity: 1.0 
+            }
+            PropertyChanges { 
+                target: secondFillet
+                opacity: 1.0 
+            }
         },
         State {
             name: "collapsed"
             when: !root.isExpanded
-            PropertyChanges { target: root; width: root.collapsedWidth; height: root.barHeight }
-            PropertyChanges { target: islandContentArea; opacity: 0 }
-            PropertyChanges { target: firstFillet; opacity: 0.0 }
-            PropertyChanges { target: secondFillet; opacity: 0.0 }
+            PropertyChanges { 
+                target: root
+                width: root.collapsedWidth
+                height: root.barHeight 
+            }
+            PropertyChanges { 
+                target: islandContentArea
+                opacity: 0 
+            }
+            PropertyChanges { 
+                target: firstFillet
+                opacity: 0.0 
+            }
+            PropertyChanges { 
+                target: secondFillet
+                opacity: 0.0 
+            }
         }
     ]
 
@@ -109,7 +136,11 @@ Item {
                 shadowBlur: ThemeManager.shadowBlurRadius / 30.0
                 shadowVerticalOffset: ThemeManager.shadowVerticalOffset
             }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on opacity { 
+                NumberAnimation { 
+                    duration: 200 
+                } 
+            }
         }
 
         InvertedCorner {
@@ -145,7 +176,9 @@ Item {
             bottomLeftRadius: root.bottomLeftRadius
             bottomRightRadius: root.bottomRightRadius
             
-            HoverHandler { id: hoverHandler }
+            HoverHandler { 
+                id: hoverHandler 
+            }
             Item { 
                 id: islandContentArea
                 anchors.fill: parent

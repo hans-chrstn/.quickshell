@@ -5,6 +5,7 @@ import qs.core
 import qs.ui.panels
 import qs.ui.features.island
 import qs.ui.shared
+import qs.ui.panels.bottombar
 
 SystemPanel {
     id: root
@@ -14,18 +15,22 @@ SystemPanel {
     anchors.bottom: true
     anchors.left: true
     anchors.right: true
-    
+
     exclusionMode: ExclusionMode.Ignore
     exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
-    
+
     focusable: true
     WlrLayershell.keyboardFocus: appIsland.searchVisible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: Region {
-        Region { item: barRect }
-        Region { item: islandTrigger }
-        Region { 
+        Region {
+            item: barRect
+        }
+        Region {
+            item: islandTrigger
+        }
+        Region {
             item: (osdPill.isPillActive && osdPill.opacity > 0.1) ? osdPill : null
         }
     }
@@ -52,7 +57,7 @@ SystemPanel {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         z: 2
-        
+
         barHeight: ThemeManager.globalThickness
         backgroundColor: ThemeManager.backgroundColor
     }
@@ -67,7 +72,7 @@ SystemPanel {
 
     MouseArea {
         anchors.fill: parent
-        z: 1 
+        z: 1
         enabled: appIsland.searchVisible
         onPressed: {
             appIsland.searchVisible = false
