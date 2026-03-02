@@ -1,5 +1,5 @@
 **/temp/
 **/.direnv/
-**/notes/
+/notes/
 **/.envrc
 **/result
