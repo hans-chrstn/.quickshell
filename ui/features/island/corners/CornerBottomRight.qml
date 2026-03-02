@@ -23,12 +23,12 @@ CornerContainer {
     expandedHeight: 100
     
     firstFilletRotation: 90
-    firstFilletX: -ThemeManager.dynamicIslandCornerRadius + 1
-    firstFilletY: height - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
+    firstFilletX: -ThemeManager.dynamicIslandCornerRadius
+    firstFilletY: 110 - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
     
-    secondFilletRotation: 180
-    secondFilletX: width - 1
-    secondFilletY: height - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
+    secondFilletRotation: 90
+    secondFilletX: 294
+    secondFilletY: 26 - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
 
     customTopLeftRadius: ThemeManager.dynamicIslandCornerRadius
     customTopRightRadius: 0
@@ -72,7 +72,7 @@ CornerContainer {
             }
 
             UtilityButton {
-                iconText: "󰌾"
+                iconText: ThemeManager.iconLock
                 labelText: "LOCK"
                 onClicked: {
                     LockManager.lock()
@@ -81,7 +81,7 @@ CornerContainer {
             }
 
             UtilityButton {
-                iconText: "󰍃"
+                iconText: ThemeManager.iconLogout
                 labelText: "LOGOUT"
                 onClicked: {
                     root.currentAction = "logout"
@@ -89,7 +89,7 @@ CornerContainer {
             }
 
             UtilityButton {
-                iconText: "󰑓"
+                iconText: ThemeManager.iconReboot
                 labelText: "REBOOT"
                 onClicked: {
                     root.currentAction = "reboot"
@@ -97,7 +97,7 @@ CornerContainer {
             }
 
             UtilityButton {
-                iconText: "󰐥"
+                iconText: ThemeManager.iconPower
                 labelText: "POWER"
                 onClicked: {
                     root.currentAction = "poweroff"

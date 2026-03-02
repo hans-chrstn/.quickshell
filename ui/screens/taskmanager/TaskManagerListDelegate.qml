@@ -16,7 +16,7 @@ Item {
         anchors.fill: parent
         active: true
         
-        component: Item {
+        Item {
             id: delegateContent
             anchors.fill: parent
 
@@ -88,7 +88,7 @@ Item {
                     
                     StyledLabel {
                         anchors.centerIn: parent
-                        text: "󰅖"
+                        text: ThemeManager.iconClose
                         type: "icon"
                         font.pixelSize: 12
                         customColor: ThemeManager.dangerColor

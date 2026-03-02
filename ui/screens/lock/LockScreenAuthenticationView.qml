@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Wayland
 import qs.core
+import qs.ui.shared
 
 ColumnLayout {
     id: root
@@ -26,20 +28,20 @@ ColumnLayout {
             border.color: root.accentColor
             border.width: 1
             
-            Text { 
+            StyledLabel { 
                 anchors.centerIn: parent
-                text: "󰀉"
+                text: ThemeManager.iconUser
+                type: "heading"
                 font.pixelSize: 40
-                color: ThemeManager.contentOnBackgroundColor 
+                customColor: ThemeManager.contentOnBackgroundColor 
             }
         }
         
-        Text {
+        StyledLabel {
             id: userNameLabel
             Layout.alignment: Qt.AlignHCenter
             text: LockManager.authenticationContext ? LockManager.authenticationContext.user : "User"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 20
+            type: "title"
             font.weight: Font.DemiBold
             opacity: 0.9
         }
@@ -52,9 +54,7 @@ ColumnLayout {
         height: 48
         radius: 24
         color: Qt.rgba(1, 1, 1, ThemeManager.lockPasswordOpacity)
-        border.color: LockManager.isErrorMessage 
-            ? ThemeManager.dangerColor 
-            : Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.3)
+        border.color: LockManager.isErrorMessage ? ThemeManager.dangerColor : Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.3)
         border.width: 1
         
         Rectangle {
@@ -100,21 +100,24 @@ ColumnLayout {
                 
                 SequentialAnimation on opacity {
                     loops: Animation.Infinite
-                    NumberAnimation { to: 0; duration: 500 }
-                    NumberAnimation { to: 1; duration: 500 }
+                    NumberAnimation {
+                        to: 0
+                        duration: 500
+                    }
+                    NumberAnimation {
+                        to: 1
+                        duration: 500
+                    }
                 }
             }
         }
 
-        Text {
+        StyledLabel {
             id: passwordPlaceholderLabel
             anchors.centerIn: parent
-            text: (LockManager.authenticationContext && LockManager.authenticationContext.isActive) 
-                ? "Verifying..." 
-                : "Password"
-            color: ThemeManager.contentOnBackgroundColor
+            text: (LockManager.authenticationContext && LockManager.authenticationContext.isActive) ? "Verifying..." : "Password"
+            type: "body"
             opacity: 0.2
-            font.pixelSize: 14
             visible: LockManager.passwordBuffer.length === 0
         }
     }

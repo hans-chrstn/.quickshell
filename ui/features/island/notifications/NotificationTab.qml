@@ -8,6 +8,7 @@ import qs.ui.shared
 
 Item {
     id: root
+    
     anchors.fill: parent
 
     ListView {
@@ -32,8 +33,18 @@ Item {
                 
                 opacity: hh.hovered ? ThemeManager.notificationHoverOpacity * 10 : ThemeManager.notificationOpacity * 10
                 scale: hh.hovered ? 1.02 : 1.0
-                Behavior on opacity { NumberAnimation { duration: 200 } }
-                Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 200
+                    }
+                }
+                Behavior on scale {
+                    NumberAnimation {
+                        duration: 200
+                        easing.type: Easing.OutQuart
+                    }
+                }
                 
                 RowLayout {
                     anchors.fill: parent
@@ -49,7 +60,7 @@ Item {
                         
                         Text {
                             anchors.centerIn: parent
-                            text: model.icon ? "" : "󰂚"
+                            text: model.icon ? "" : ThemeManager.iconNotification
                             color: ThemeManager.primaryColor
                             font.pixelSize: 18
                         }
@@ -66,6 +77,7 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
+                        
                         StyledLabel {
                             type: "label"
                             text: model.summary || "Notification"
@@ -73,6 +85,7 @@ Item {
                             elideMode: Text.ElideRight
                             Layout.fillWidth: true
                         }
+                        
                         StyledLabel {
                             type: "caption"
                             text: model.body || ""
@@ -86,20 +99,31 @@ Item {
                     Item {
                         Layout.preferredWidth: 24
                         Layout.preferredHeight: 24
+                        
                         Text {
                             anchors.centerIn: parent
-                            text: "󰅖"
+                            text: ThemeManager.iconClose
                             color: ThemeManager.contentOnBackgroundColor
                             opacity: hhDel.hovered ? 1.0 : 0.3
                             font.pixelSize: 14
                         }
-                        TapHandler { onTapped: NotificationManager.clearHistoryItem(index) }
-                        HoverHandler { id: hhDel; cursorShape: Qt.PointingHandCursor }
+                        
+                        TapHandler {
+                            onTapped: {
+                                NotificationManager.clearHistoryItem(index)
+                            }
+                        }
+                        HoverHandler {
+                            id: hhDel
+                            cursorShape: Qt.PointingHandCursor
+                        }
                     }
                 }
             }
             
-            HoverHandler { id: hh }
+            HoverHandler {
+                id: hh
+            }
         }
         
         StyledLabel {
@@ -119,7 +143,9 @@ Item {
             
             Rectangle {
                 anchors.centerIn: parent
-                width: 120; height: 30; radius: 15
+                width: 120
+                height: 30
+                radius: 15
                 color: ThemeManager.surfaceVariantStrongColor
                 border.color: ThemeManager.outlinePrimaryColor
                 border.width: 1
@@ -139,7 +165,10 @@ Item {
                         SoundManager.playSuccess()
                     }
                 }
-                HoverHandler { id: hhClear; cursorShape: Qt.PointingHandCursor }
+                HoverHandler {
+                    id: hhClear
+                    cursorShape: Qt.PointingHandCursor
+                }
             }
         }
     }

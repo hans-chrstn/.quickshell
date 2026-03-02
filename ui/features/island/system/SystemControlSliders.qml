@@ -13,7 +13,6 @@ ColumnLayout {
         spacing: 2
         
         StyledLabel { 
-            id: brightnessHeaderLabel
             text: "BRIGHTNESS"
             type: "sliderHeader"
             opacity: 0.3
@@ -27,9 +26,11 @@ ColumnLayout {
             height: 24
             isSliderEnabled: BrightnessManager.isAvailable
             sliderValue: BrightnessManager.level
-            sliderIcon: "󰃠"
+            sliderIcon: ThemeManager.iconBrightness
             sliderBarColor: "#FFCC00"
-            onSliderMoved: (value) => BrightnessManager.setLevel(value)
+            onSliderMoved: (value) => {
+                BrightnessManager.setLevel(value)
+            }
         }
     }
 
@@ -37,7 +38,6 @@ ColumnLayout {
         spacing: 2
         
         StyledLabel { 
-            id: volumeHeaderLabel
             text: "VOLUME"
             type: "sliderHeader"
             opacity: 0.3
@@ -51,9 +51,11 @@ ColumnLayout {
             height: 24
             isSliderEnabled: AudioManager.isAudioAvailable
             sliderValue: AudioManager.volume
-            sliderIcon: AudioManager.isMuted ? "󰝟" : "󰕾"
+            sliderIcon: AudioManager.isMuted ? ThemeManager.iconMute : ThemeManager.iconVolume
             sliderBarColor: ThemeManager.contentOnBackgroundColor
-            onSliderMoved: (value) => AudioManager.setVolume(value)
+            onSliderMoved: (value) => {
+                AudioManager.setVolume(value)
+            }
         }
     }
 }

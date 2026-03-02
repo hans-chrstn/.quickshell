@@ -15,18 +15,18 @@ Singleton {
     property bool isAirplaneModeEnabled: false
     
     property string activeInterface: ""
-    property string activeType: "none"
+    property string activeType: "none" // "wifi", "ethernet", "none"
     property string activeState: "disconnected"
     property int signalStrength: 0
 
     readonly property string statusIcon: {
         if (root.activeType === "ethernet") {
-            return "󰈀"
+            return ThemeManager.iconEthernet
         }
         if (root.activeType === "wifi") {
-            return root.isEnabled ? "󰖩" : "󰖪"
+            return root.isEnabled ? ThemeManager.iconWifi : ThemeManager.iconWifiOff
         }
-        return "󰖪"
+        return ThemeManager.iconWifiOff
     }
 
     property ListModel deviceModel: ListModel { }
@@ -99,7 +99,9 @@ Singleton {
                 let nmDevices = []
                 for (let line of lines) {
                     let parts = line.split(":")
-                    if (parts.length < 3) continue
+                    if (parts.length < 3) {
+                        continue
+                    }
                     
                     let device = parts[0]
                     let type = parts[1]
@@ -146,7 +148,9 @@ Singleton {
                 let ndDevices = []
                 for (let line of lines) {
                     let parts = line.trim().split(/\s+/)
-                    if (parts.length < 3) continue
+                    if (parts.length < 3) {
+                        continue
+                    }
                     
                     let device = parts[1]
                     let type = parts[2]

@@ -41,7 +41,7 @@ ClippingRectangle {
             
             Text {
                 anchors.centerIn: parent
-                text: "󰂚"
+                text: ThemeManager.iconNotification
                 color: ThemeManager.accentColor
                 font.pixelSize: 20
             }
@@ -77,10 +77,11 @@ ClippingRectangle {
             
             Text {
                 anchors.centerIn: parent
-                text: "󰅖"
+                text: ThemeManager.iconClose
                 color: ThemeManager.contentOnBackgroundColor
                 opacity: root.isCloseHovered ? 0.8 : 0.3
                 font.pixelSize: 16
+                
                 Behavior on opacity { 
                     NumberAnimation { 
                         duration: 200 
@@ -89,7 +90,9 @@ ClippingRectangle {
             }
             
             TapHandler { 
-                onTapped: root.closeClicked() 
+                onTapped: {
+                    root.closeClicked()
+                }
             }
             HoverHandler { 
                 id: hh

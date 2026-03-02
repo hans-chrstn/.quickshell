@@ -35,9 +35,9 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             visible: ThemeManager.isMusicArtVisible
 
-            LazyLoader {
+            LazyContainer {
                 id: vinylLoader
-                activeAsync: true
+                active: true
                 
                 Item {
                     id: vinylDiskVisual
@@ -63,8 +63,16 @@ Item {
                     SequentialAnimation on scale {
                         running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
                         loops: Animation.Infinite
-                        NumberAnimation { to: 1.05; duration: 2000; easing.type: Easing.InOutSine }
-                        NumberAnimation { to: 1.0; duration: 2000; easing.type: Easing.InOutSine }
+                        NumberAnimation {
+                            to: 1.05
+                            duration: 2000
+                            easing.type: Easing.InOutSine
+                        }
+                        NumberAnimation {
+                            to: 1.0
+                            duration: 2000
+                            easing.type: Easing.InOutSine
+                        }
                     }
 
                     ClippingRectangle {
@@ -87,7 +95,7 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "󰝚"
+                            text: ThemeManager.iconMusic
                             color: ThemeManager.contentOnBackgroundColor
                             opacity: 0.2
                             font.pixelSize: 24
@@ -103,12 +111,6 @@ Item {
                         color: ThemeManager.backgroundPrimaryColor
                         border.color: ThemeManager.outlineVariantColor
                         border.width: 1
-                    }
-                }
-
-                onItemChanged: {
-                    if (item) {
-                        item.parent = vinylContainer
                     }
                 }
             }
@@ -226,7 +228,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "󰒮"
+                        text: ThemeManager.iconPrevious
                         color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 22
                     }
@@ -243,7 +245,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? "󰏤" : "󰐊"
+                        text: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? ThemeManager.iconPause : ThemeManager.iconPlay
                         color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 32
                     }
@@ -266,7 +268,7 @@ Item {
 
                     Text {
                         anchors.centerIn: parent
-                        text: "󰒭"
+                        text: ThemeManager.iconNext
                         color: ThemeManager.contentOnBackgroundColor
                         font.pixelSize: 22
                     }

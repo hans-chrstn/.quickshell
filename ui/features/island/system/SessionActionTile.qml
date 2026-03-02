@@ -20,7 +20,6 @@ BaseButton {
     }
 
     Rectangle {
-        id: backgroundVisual
         anchors.fill: parent
         radius: 12
         color: ThemeManager.contentOnBackgroundColor
@@ -28,37 +27,46 @@ BaseButton {
         border.color: root.actionHighlightColor
         border.width: root.isHovered ? 1 : 0
         
-        Behavior on opacity { NumberAnimation { duration: 200 } }
-        Behavior on border.width { NumberAnimation { duration: 200 } }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 200
+            }
+        }
+        Behavior on border.width {
+            NumberAnimation {
+                duration: 200
+            }
+        }
     }
 
     RowLayout {
-        id: contentLayout
         anchors.fill: parent
         anchors.leftMargin: 16
         anchors.rightMargin: 16
         spacing: 12
-
+        
         StyledLabel {
-            id: iconVisual
             text: root.actionIcon
             type: "icon"
+            font.pixelSize: 18
             customColor: root.isHovered ? root.actionHighlightColor : ThemeManager.contentOnBackgroundColor
+            opacity: root.isHovered ? 1.0 : 0.6
             Behavior on customColor { ColorAnimation { duration: 200 } }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
-
+        
         StyledLabel {
-            id: labelVisual
             text: root.actionLabel
             type: "caption"
             font.weight: Font.Bold
             letterSpacing: 1
             Layout.fillWidth: true
+            opacity: root.isHovered ? 1.0 : 0.4
+            Behavior on opacity { NumberAnimation { duration: 200 } }
         }
         
         StyledLabel {
-            id: arrowIndicator
-            text: "󰁔"
+            text: ThemeManager.iconRightArrow
             type: "icon"
             font.pixelSize: 14
             opacity: root.isHovered ? 0.4 : 0

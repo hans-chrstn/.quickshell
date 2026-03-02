@@ -10,7 +10,7 @@ RowLayout {
     spacing: 16
 
     StyledLabel {
-        text: "󰍛"
+        text: ThemeManager.iconTasks
         type: "heading"
         customColor: ThemeManager.accentColor
         font.pixelSize: 32
@@ -83,7 +83,7 @@ RowLayout {
             
             StyledLabel {
                 anchors.centerIn: parent
-                text: "󰅖"
+                text: ThemeManager.iconClose
                 type: "icon"
             }
         }

@@ -6,15 +6,14 @@ Item {
     id: root
     
     property bool active: true
-    property Component component: null
+    default property alias component: loader.component
     readonly property alias item: loader.item
     readonly property bool loading: loader.loading
     
     LazyLoader {
         id: loader
         activeAsync: root.active
-        component: root.component
-        
+        component: root.component       
         onItemChanged: {
             if (item && item.hasOwnProperty("parent")) {
                 item.parent = root

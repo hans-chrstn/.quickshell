@@ -35,17 +35,50 @@ Rectangle {
     border.color: ThemeManager.contentOnBackgroundColor
     border.width: root.isSearchActive ? 1 : 0
     
-    Behavior on width { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-    Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-    Behavior on anchors.topMargin { NumberAnimation { duration: 400; easing.type: Easing.OutExpo } }
-    Behavior on radius { NumberAnimation { duration: 400 } }
-    Behavior on color { ColorAnimation { duration: 400 } }
-    Behavior on opacity { NumberAnimation { duration: 400 } }
-    Behavior on border.width { NumberAnimation { duration: 400 } }
+    Behavior on width {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutExpo
+        }
+    }
+    Behavior on height {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutExpo
+        }
+    }
+    Behavior on anchors.topMargin {
+        NumberAnimation {
+            duration: 400
+            easing.type: Easing.OutExpo
+        }
+    }
+    Behavior on radius {
+        NumberAnimation {
+            duration: 400
+        }
+    }
+    Behavior on color {
+        ColorAnimation {
+            duration: 400
+        }
+    }
+    Behavior on opacity {
+        NumberAnimation {
+            duration: 400
+        }
+    }
+    Behavior on border.width {
+        NumberAnimation {
+            duration: 400
+        }
+    }
 
     MouseArea {
         anchors.fill: parent
-        onPressed: (mouse) => mouse.accepted = true
+        onPressed: (mouse) => {
+            mouse.accepted = true
+        }
     }
 
     RowLayout {
@@ -63,7 +96,7 @@ Rectangle {
         }
         
         StyledLabel { 
-            text: "󰍉"
+            text: ThemeManager.iconSearch
             type: "body"
             customColor: ThemeManager.contentOnBackgroundColor
             opacity: 0.5
@@ -91,7 +124,7 @@ Rectangle {
         }
         
         StyledLabel { 
-            text: "󰅖"
+            text: ThemeManager.iconClose
             type: "body"
             customColor: ThemeManager.contentOnBackgroundColor
             opacity: closeHoverHandler.hovered ? 1.0 : 0.4
@@ -102,12 +135,26 @@ Rectangle {
                     root.isSearchActive = false
                 }
             }
-            HoverHandler { cursorShape: Qt.PointingHandCursor }
+            
+            HoverHandler {
+                cursorShape: Qt.PointingHandCursor
+            }
             
             scale: closeHoverHandler.hovered ? 1.2 : 1.0
-            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-            HoverHandler { id: closeHoverHandler }
+            Behavior on scale {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutBack
+                }
+            }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 200
+                }
+            }
+            HoverHandler {
+                id: closeHoverHandler
+            }
         }
     }
 

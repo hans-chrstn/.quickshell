@@ -51,42 +51,50 @@ Item {
         }
     }
 
-    LazyContainer {
-        id: iconLoader
-        active: root.visualOffset < 10
+    Rectangle {
+        anchors.fill: parent
+        radius: 12
+        color: ThemeManager.surfaceVariantColor
+        visible: appIcon.status !== Image.Ready
         
-        component: Image {
-            id: appIcon
-            anchors.fill: parent
-            sourceSize: Qt.size(ThemeManager.appIslandIconSize * 2, ThemeManager.appIslandIconSize * 2) 
-            layer.enabled: root.isHovered
-            layer.effect: MultiEffect { 
-                brightness: 0.15
-                saturation: 0.1 
-            }
-            source: {
-                if (!root.app || !root.app.icon) {
-                    return ""
-                }
-                if (root.app.icon.startsWith("/")) {
-                    return "file://" + root.app.icon
-                }
-                if (root.app.icon === "utilities-system-monitor" || root.app.icon === "system-run") {
-                    return ""
-                }
-                return Quickshell.iconPath(root.app.icon)
-            }
-            fillMode: Image.PreserveAspectFit
+        StyledLabel {
+            anchors.centerIn: parent
+            text: root.app ? root.app.name.substring(0, 1).toUpperCase() : "?"
+            type: "title"
+            font.weight: Font.Black
+            opacity: 0.5
         }
     }
-    
-    StyledLabel {
-        anchors.centerIn: parent
-        visible: !iconLoader.item || iconLoader.item.status !== Image.Ready
-        text: root.app ? root.app.name.substring(0, 1).toUpperCase() : "?"
-        type: "title"
-        font.weight: Font.Black
-        opacity: 0.2
+
+    Image {
+        id: appIcon
+        anchors.fill: parent
+        asynchronous: true
+        sourceSize: Qt.size(ThemeManager.appIslandIconSize * 2, ThemeManager.appIslandIconSize * 2) 
+        
+        layer.enabled: root.isHovered
+        layer.effect: MultiEffect { 
+            brightness: 0.15
+            saturation: 0.1 
+        }
+        
+        source: {
+            if (!root.app || !root.app.icon) {
+                return ""
+            }
+            if (root.app.icon.startsWith("/")) {
+                return "file://" + root.app.icon
+            }
+            return Quickshell.iconPath(root.app.icon)
+        }
+        
+        fillMode: Image.PreserveAspectFit
+        opacity: status === Image.Ready ? 1.0 : 0.0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 200
+            }
+        }
     }
     
     Rectangle {

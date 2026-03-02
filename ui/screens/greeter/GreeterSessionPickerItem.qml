@@ -72,7 +72,7 @@ RowLayout {
             
             StyledLabel {
                 anchors.centerIn: parent
-                text: "󰆴"
+                text: ThemeManager.iconTrash
                 type: "body"
                 customColor: "#ff5555"
                 font.pixelSize: 16

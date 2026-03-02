@@ -33,7 +33,7 @@ GridLayout {
 
     InteractionTile {
         id: bluetoothInteractionTile
-        tileIcon: BluetoothManager.isEnabled ? "󰂯" : "󰂲"
+        tileIcon: BluetoothManager.isEnabled ? ThemeManager.iconBluetooth : ThemeManager.iconBluetoothOff
         isTileActive: !!BluetoothManager.isEnabled
         enabled: BluetoothManager.isAvailable
         
@@ -53,7 +53,7 @@ GridLayout {
 
     InteractionTile {
         id: airplaneModeInteractionTile
-        tileIcon: "󰀝"
+        tileIcon: ThemeManager.iconAirplane
         isTileActive: !!NetworkManager.isAirplaneModeEnabled
         enabled: NetworkManager.isAvailable
         
@@ -65,7 +65,7 @@ GridLayout {
 
     InteractionTile {
         id: doNotDisturbInteractionTile
-        tileIcon: NotificationManager.isDoNotDisturbEnabled ? "󰖔" : "󰂚"
+        tileIcon: NotificationManager.isDoNotDisturbEnabled ? ThemeManager.iconDND : ThemeManager.iconNotification
         isTileActive: !!NotificationManager.isDoNotDisturbEnabled
         
         onTileClicked: {

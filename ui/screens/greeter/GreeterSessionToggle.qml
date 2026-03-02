@@ -35,7 +35,7 @@ BaseButton {
             spacing: 10
             
             StyledLabel {
-                text: "󰊠  " + SessionManager.currentSessionName.toUpperCase()
+                text: ThemeManager.iconLauncher + "  " + SessionManager.currentSessionName.toUpperCase()
                 type: "caption"
                 font.weight: Font.Black
                 font.letterSpacing: 1
@@ -44,7 +44,7 @@ BaseButton {
             }
             
             StyledLabel {
-                text: "󱗘"
+                text: ThemeManager.iconSelector
                 type: "caption"
                 customColor: ColorManager.accentColor
                 font.pixelSize: 10

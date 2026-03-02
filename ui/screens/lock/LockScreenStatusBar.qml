@@ -65,7 +65,7 @@ Item {
             
             Text { 
                 id: bluetoothStatusIcon
-                text: BluetoothManager.isEnabled ? "󰂯" : "󰂲"
+                text: BluetoothManager.isEnabled ? ThemeManager.iconBluetooth : ThemeManager.iconBluetoothOff
                 color: ThemeManager.contentOnBackgroundColor
                 font.pixelSize: 20
                 opacity: 0.8 
@@ -87,7 +87,7 @@ Item {
                 
                 Text { 
                     id: batteryIcon
-                    text: BatteryManager.mainDevice ? (BatteryManager.mainDevice.state === 1 ? "󱐋" : "󰁹") : "󰂄"
+                    text: BatteryManager.mainDevice ? (BatteryManager.mainDevice.state === 1 ? ThemeManager.iconCharging : ThemeManager.iconBattery) : ThemeManager.iconBattery
                     color: BatteryManager.mainDevice && BatteryManager.mainDevice.percentage < 0.2 
                         ? ThemeManager.dangerColor 
                         : ThemeManager.contentOnBackgroundColor

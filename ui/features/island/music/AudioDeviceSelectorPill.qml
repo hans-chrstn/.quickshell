@@ -25,7 +25,7 @@ ExpandingPill {
         spacing: 3
 
         StyledLabel {
-            text: "󰓃"
+            text: ThemeManager.iconAudioInput
             type: "caption"
             font.pixelSize: 8
             opacity: 0.6
@@ -41,7 +41,7 @@ ExpandingPill {
         }
 
         StyledLabel {
-            text: root.isExpanded ? "󰅖" : "󱗘"
+            text: root.isExpanded ? ThemeManager.iconClose : ThemeManager.iconSelector
             type: "caption"
             font.pixelSize: 7
             opacity: 0.4
@@ -54,6 +54,7 @@ ExpandingPill {
         Layout.fillHeight: true
         visible: root.isExpanded
         opacity: root.isExpanded ? 1 : 0
+        
         Behavior on opacity {
             NumberAnimation {
                 duration: 250
@@ -92,11 +93,15 @@ ExpandingPill {
                     spacing: 4
 
                     StyledLabel {
-                        text: "󰓄"
+                        text: ThemeManager.iconAudioOutput
                         type: "caption"
                         font.pixelSize: 8
                         opacity: isHovered ? 0.8 : 0.4
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: 200
+                            }
+                        }
                     }
 
                     StyledLabel {
@@ -106,7 +111,11 @@ ExpandingPill {
                         font.pixelSize: 7
                         elideMode: Text.ElideRight
                         opacity: isHovered ? 1.0 : 0.7
-                        Behavior on opacity { NumberAnimation { duration: 200 } }
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: 200
+                            }
+                        }
                     }
                 }
             }

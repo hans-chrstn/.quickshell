@@ -38,12 +38,12 @@ CornerContainer {
     expandedHeight: 100
     
     firstFilletRotation: 0
-    firstFilletX: -20 - 10
+    firstFilletX: -ThemeManager.dynamicIslandCornerRadius
     firstFilletY: 16
     
     secondFilletRotation: 0
-    secondFilletX: expandedWidth - 20 - 16 - 10
-    secondFilletY: 100 - 1
+    secondFilletX: expandedWidth - ThemeManager.dynamicIslandCornerRadius - 16 
+    secondFilletY: 100
 
     customTopLeftRadius: 0
     customTopRightRadius: 0
@@ -56,7 +56,7 @@ CornerContainer {
         
         UtilityButton {
             visible: ThemeManager.showCornerWallpaper
-            iconText: "󰸉"
+            iconText: ThemeManager.iconImage
             labelText: "WALL"
             onClicked: {
                 ViewManager.toggleWallpaper()
@@ -65,7 +65,7 @@ CornerContainer {
 
         UtilityButton {
             visible: ThemeManager.showCornerSnap
-            iconText: "󰄀"
+            iconText: ThemeManager.iconSnap
             labelText: "SNAP"
             onClicked: {
                 Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
@@ -79,7 +79,7 @@ CornerContainer {
 
         UtilityButton {
             visible: ThemeManager.showCornerTasks
-            iconText: "󰍛"
+            iconText: ThemeManager.iconTasks
             labelText: "TASKS"
             onClicked: {
                 ViewManager.toggleTaskManager()
@@ -88,7 +88,7 @@ CornerContainer {
 
         UtilityButton {
             visible: ThemeManager.showCornerNotes
-            iconText: "󰠮"
+            iconText: ThemeManager.iconFile
             labelText: "NOTES"
             onClicked: {
                 ViewManager.toggleNotes()

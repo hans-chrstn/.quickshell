@@ -40,7 +40,7 @@ Item {
                 }
 
                 StyledLabel {
-                    text: "OPEN SETTINGS 󰒓"
+                    text: "OPEN SETTINGS " + ThemeManager.iconSettings
                     type: "caption"
                     font.weight: Font.Black
                     font.pixelSize: 8
@@ -51,6 +51,7 @@ Item {
                     
                     opacity: settingsInteractionHandler.hovered ? 1.0 : 0.6
                     scale: settingsInteractionHandler.hovered ? 1.05 : 1.0
+                    
                     Behavior on opacity {
                         NumberAnimation {
                             duration: 200

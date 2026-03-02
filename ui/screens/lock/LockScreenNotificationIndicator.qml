@@ -37,7 +37,7 @@ Rectangle {
         
         Text { 
             id: notificationIcon
-            text: "󰂚"
+            text: ThemeManager.iconNotification
             color: ColorManager.accentColor || ThemeManager.accentColor
             font.pixelSize: 14
             opacity: 0.8 

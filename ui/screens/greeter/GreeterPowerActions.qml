@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.ui.shared
+import qs.core
 
 Row {
     id: root
@@ -21,7 +22,7 @@ Row {
 
         StyledLabel {
             id: pwrLabel
-            text: "󰐥  POWER OFF"
+            text: ThemeManager.iconPower + "  POWER OFF"
             type: "caption"
             font.weight: Font.Bold
             font.letterSpacing: 1
@@ -40,7 +41,7 @@ Row {
 
         StyledLabel {
             id: rebLabel
-            text: "󰜉  REBOOT"
+            text: ThemeManager.iconRebootGreeter + "  REBOOT"
             type: "caption"
             font.weight: Font.Bold
             font.letterSpacing: 1
@@ -59,7 +60,7 @@ Row {
 
         StyledLabel {
             id: ttyLabel
-            text: "󰈆  EXIT TO TTY"
+            text: ThemeManager.iconExitTTY + "  EXIT TO TTY"
             type: "caption"
             font.weight: Font.Bold
             font.letterSpacing: 1

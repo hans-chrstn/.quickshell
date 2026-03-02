@@ -111,6 +111,7 @@ Menu {
 
     StyledLabel {
         visible: root.windowsList.length > 0
+        height: visible ? implicitHeight : 0
         text: "RUNNING WINDOWS"
         type: "caption"
         font.weight: Font.Black
@@ -132,7 +133,7 @@ Menu {
                 spacing: 10
                 
                 StyledLabel { 
-                    text: "󰖯"
+                    text: ThemeManager.iconWindow
                     type: "body"
                     font.pixelSize: 14
                     customColor: winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
@@ -165,7 +166,7 @@ Menu {
                         color: closeBtn.isHovered ? ThemeManager.dangerSurfaceColor : "transparent"
                         
                         StyledLabel { 
-                            text: "󰅖"
+                            text: ThemeManager.iconClose
                             type: "body"
                             anchors.centerIn: parent
                             customColor: closeBtn.isHovered ? ThemeManager.dangerPrimaryColor : (winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor)
@@ -188,9 +189,10 @@ Menu {
 
     MenuSeparator {
         visible: root.windowsList.length > 0
+        height: visible ? implicitHeight : 0
         contentItem: Rectangle {
             implicitWidth: 200
-            implicitHeight: 1
+            implicitHeight: root.windowsList.length > 0 ? 1 : 0
             color: ThemeManager.contentOnBackgroundColor
             opacity: 0.05
         }
@@ -205,7 +207,7 @@ Menu {
             spacing: 12
             
             StyledLabel { 
-                text: "󰐕"
+                text: ThemeManager.iconAppNew
                 type: "body"
                 font.pixelSize: 16
                 customColor: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.accentColor
@@ -242,7 +244,7 @@ Menu {
             spacing: 12
             
             StyledLabel { 
-                text: "󰉋"
+                text: ThemeManager.iconAppLocation
                 type: "body"
                 font.pixelSize: 16
                 customColor: locationItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
@@ -279,7 +281,7 @@ Menu {
             spacing: 12
             
             StyledLabel { 
-                text: "󰋽"
+                text: ThemeManager.iconAppDetails
                 type: "body"
                 font.pixelSize: 16
                 customColor: infoItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor

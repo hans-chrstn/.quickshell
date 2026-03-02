@@ -64,6 +64,59 @@ Singleton {
 
     property string fontFamily: "SF Pro"
     
+    property string iconLock: "󰌾"
+    property string iconLogout: "󰍃"
+    property string iconReboot: "󰑓"
+    property string iconPower: "󰐥"
+    property string iconRebootGreeter: "󰜉"
+    property string iconExitTTY: "󰈆"
+    
+    property string iconWifi: "󰖩"
+    property string iconWifiOff: "󰖪"
+    property string iconEthernet: "󰈀"
+    property string iconBluetooth: "󰂯"
+    property string iconBluetoothOff: "󰂲"
+    property string iconAirplane: "󰀝"
+    
+    property string iconPlay: "󰐊"
+    property string iconPause: "󰏤"
+    property string iconPrevious: "󰒮"
+    property string iconNext: "󰒭"
+    property string iconMute: "󰝟"
+    property string iconVolume: "󰕾"
+    property string iconMusic: "󰝚"
+    property string iconAudioInput: "󰓃"
+    property string iconAudioOutput: "󰓄"
+    property string iconSelector: "󱗘"
+    
+    property string iconBrightness: "󰃠"
+    property string iconWeather: "󰖐"
+    property string iconDND: "󰖔"
+    property string iconNotification: "󰂚"
+    property string iconSettings: "󰒓"
+    property string iconClose: "󰅖"
+    property string iconCheck: "󰄬"
+    property string iconTrash: "󰆴"
+    property string iconSearch: "󰍉"
+    property string iconParentDir: "󰁝"
+    property string iconFolder: "󰉋"
+    property string iconFile: "󰠮"
+    property string iconImage: "󰸉"
+    property string iconSnap: "󰄀"
+    property string iconTasks: "󰍛"
+    property string iconUser: "󰀉"
+    property string iconWindow: "󰖯"
+    property string iconLauncher: "󰊠"
+    property string iconHidden: "󰈈"
+    property string iconRightArrow: "󰁔"
+    property string iconClock: "󰥔"
+    property string iconBattery: "󰁹"
+    property string iconCharging: "󱐋"
+    property string iconRevert: "󰕌"
+    property string iconAppNew: "󰐕"
+    property string iconAppLocation: "󰉋"
+    property string iconAppDetails: "󰋽"
+
     readonly property var typography: ({
         "heading": {
             "pixelSize": 32,
@@ -283,6 +336,35 @@ Singleton {
             items: [
                 { type: "header", label: "Font Settings" },
                 { type: "text", label: "Font Family", property: "fontFamily", default: "SF Pro" }
+            ]
+        },
+        {
+            category: "Iconography",
+            icon: "󰬶",
+            items: [
+                { type: "header", label: "Session Icons" },
+                { type: "text", label: "Lock", property: "iconLock", default: "󰌾" },
+                { type: "text", label: "Logout", property: "iconLogout", default: "󰍃" },
+                { type: "text", label: "Reboot", property: "iconReboot", default: "󰑓" },
+                { type: "text", label: "Power", property: "iconPower", default: "󰐥" },
+                { type: "header", label: "Network Icons" },
+                { type: "text", label: "Wifi", property: "iconWifi", default: "󰖩" },
+                { type: "text", label: "Wifi Off", property: "iconWifiOff", default: "󰖪" },
+                { type: "text", label: "Ethernet", property: "iconEthernet", default: "󰈀" },
+                { type: "text", label: "Bluetooth", property: "iconBluetooth", default: "󰂯" },
+                { type: "text", label: "Bluetooth Off", property: "iconBluetoothOff", default: "󰂲" },
+                { type: "header", label: "Media Icons" },
+                { type: "text", label: "Play", property: "iconPlay", default: "󰐊" },
+                { type: "text", label: "Pause", property: "iconPause", default: "󰏤" },
+                { type: "text", label: "Previous", property: "iconPrevious", default: "󰒮" },
+                { type: "text", label: "Next", property: "iconNext", default: "󰒭" },
+                { type: "text", label: "Mute", property: "iconMute", default: "󰝟" },
+                { type: "text", label: "Volume", property: "iconVolume", default: "󰕾" },
+                { type: "header", label: "App & Dir Icons" },
+                { type: "text", label: "Folder", property: "iconFolder", default: "󰉋" },
+                { type: "text", label: "File", property: "iconFile", default: "󰠮" },
+                { type: "text", label: "Image", property: "iconImage", default: "󰸉" },
+                { type: "text", label: "Window", property: "iconWindow", default: "󰖯" }
             ]
         },
         {

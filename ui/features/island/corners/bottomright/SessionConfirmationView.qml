@@ -101,7 +101,7 @@ Item {
 
                     StyledLabel {
                         anchors.centerIn: parent
-                        text: "󰄬"
+                        text: ThemeManager.iconCheck
                         type: "icon"
                         font.pixelSize: 20
                         customColor: ThemeManager.contentPrimaryColor
@@ -134,7 +134,7 @@ Item {
 
                     StyledLabel {
                         anchors.centerIn: parent
-                        text: "󰅖"
+                        text: ThemeManager.iconClose
                         type: "icon"
                         font.pixelSize: 20
                         customColor: ThemeManager.contentOnBackgroundColor

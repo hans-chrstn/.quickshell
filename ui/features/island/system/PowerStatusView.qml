@@ -89,7 +89,7 @@ Item {
                         
                         StyledLabel {
                             anchors.centerIn: parent
-                            text: BluetoothManager.isEnabled ? "󰂯" : "󰂲"
+                            text: BluetoothManager.isEnabled ? ThemeManager.iconBluetooth : ThemeManager.iconBluetoothOff
                             type: "icon"
                             font.pixelSize: 18
                         }
