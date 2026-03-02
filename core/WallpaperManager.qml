@@ -125,6 +125,5 @@ Singleton {
 
     Component.onCompleted: {
         Quickshell.execDetached(["swww-daemon"])
-        FileBrowserManager.currentPath = Quickshell.env("HOME") + "/Pictures"
     }
 }

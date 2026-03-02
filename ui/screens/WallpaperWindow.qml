@@ -40,7 +40,7 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            FileBrowserManager.filterMode = "images"
+            FileBrowserManager.switchToWallpaper()
             Qt.callLater(() => {
                 explorer.forceActiveFocus()
                 entryActive = true

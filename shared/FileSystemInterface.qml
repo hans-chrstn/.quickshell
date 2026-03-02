@@ -12,7 +12,9 @@ Item {
     property string filterMode: "all"
     
     readonly property alias fileModel: fileListModel
-    ListModel { id: fileListModel }
+    ListModel {
+        id: fileListModel
+    }
 
     Process {
         id: listProcess
@@ -95,7 +97,9 @@ Item {
         interval: 50
         repeat: false
         onTriggered: {
-            listProcess.running = true
+            if (root.currentPath !== "") {
+                listProcess.running = true
+            }
         }
     }
 

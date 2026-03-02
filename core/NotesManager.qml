@@ -7,7 +7,7 @@ Singleton {
     id: root
 
     readonly property string homeDir: Quickshell.env("HOME")
-    readonly property string defaultNotesDir: homeDir + "/Documents"
+    readonly property string fallbackNotesDir: homeDir + "/Documents"
     readonly property string recentFilesCachePath: Quickshell.cachePath("recent_notes.json")
     
     property string content: ""
@@ -53,8 +53,13 @@ Singleton {
             if (root.content === root.defaultContent || root.content.trim() === "") {
                 return
             }
+            
+            let targetDir = (typeof FileBrowserManager !== "undefined" && FileBrowserManager.currentPath) 
+                ? FileBrowserManager.currentPath 
+                : root.fallbackNotesDir
+                
             let filename = "note_" + new Date().getTime() + ".md"
-            root.currentFilePath = root.defaultNotesDir + "/" + filename
+            root.currentFilePath = targetDir + "/" + filename
         }
         
         notesFile.path = root.currentFilePath
@@ -173,7 +178,9 @@ Singleton {
         interval: 500
         repeat: false
         onTriggered: {
-            FileBrowserManager.refresh()
+            if (typeof FileBrowserManager !== "undefined") {
+                FileBrowserManager.refresh()
+            }
         }
     }
 
