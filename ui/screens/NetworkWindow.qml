@@ -23,7 +23,6 @@ PanelWindow {
     exclusionMode: visible ? ExclusionMode.Normal : ExclusionMode.Ignore
     focusable: visible && !closing
 
-    property string activePage: "wifi"
     property bool closing: false
     property bool entryActive: false
 
@@ -31,11 +30,17 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            Qt.callLater(() => {
-                entryActive = true
-            })
+            entryTimer.restart()
         } else {
             entryActive = false
+        }
+    }
+
+    Timer {
+        id: entryTimer
+        interval: 50
+        onTriggered: {
+            entryActive = true
         }
     }
 
@@ -43,15 +48,17 @@ PanelWindow {
         anchors.fill: parent
         color: ThemeManager.shadowPrimaryColor
         opacity: root.showContent ? 0.6 : 0
+        
         Behavior on opacity {
             NumberAnimation {
                 duration: 300
             }
         }
+        
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                ViewManager.closeWindowByType("controlPanel")
+                ViewManager.closeWindowByType("network")
             }
         }
     }
@@ -103,7 +110,7 @@ PanelWindow {
             spacing: 20
 
             ControlPanelHeader {
-                activePage: root.activePage
+                activePage: "wifi"
             }
 
             Rectangle {
@@ -114,7 +121,7 @@ PanelWindow {
             }
 
             ControlPanelList {
-                activePage: root.activePage
+                activePage: "wifi"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: 10
@@ -122,9 +129,15 @@ PanelWindow {
             }
 
             NetworkPanelFooter {
-                panelType: root.activePage
+                panelType: "wifi"
                 Layout.fillWidth: true
             }
+        }
+    }
+
+    Component.onCompleted: {
+        if (visible) {
+            entryTimer.start()
         }
     }
 }

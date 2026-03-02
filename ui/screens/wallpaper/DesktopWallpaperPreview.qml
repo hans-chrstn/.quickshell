@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import Quickshell
 import Quickshell.Widgets
 import qs.ui.shared
 import qs.core
@@ -40,62 +41,78 @@ ColumnLayout {
     }
 
     Item {
-        id: monitorVisualContainer
+        id: previewContainer
         width: 600
         height: 337
         Layout.alignment: Qt.AlignHCenter
-        
-        Rectangle { 
-            id: previewGlowEffect
-            anchors.fill: parent
-            anchors.margins: -10
-            radius: 30
-            color: ThemeManager.accentColor
-            opacity: 0.04
+
+        LazyLoader {
+            id: previewLoader
+            activeAsync: true
             
-            layer.enabled: true
-            layer.effect: MultiEffect { 
-                blurEnabled: true
-                blur: 0.8
-            } 
-        }
-        
-        Rectangle {
-            id: monitorDeviceFrame
-            anchors.fill: parent
-            radius: 24
-            color: ThemeManager.backgroundPrimaryColor
-            border.color: ThemeManager.outlinePrimaryColor
-            border.width: 1
-            
-            ClippingRectangle {
+            Item {
+                id: monitorVisualContainer
                 anchors.fill: parent
-                anchors.margins: 6
-                radius: 18
-                color: "black"
                 
-                Image { 
-                    id: wallpaperPreviewImage
+                Rectangle { 
+                    id: previewGlowEffect
                     anchors.fill: parent
-                    source: WallpaperManager.previewWallpaperPath !== "" ? "file://" + WallpaperManager.previewWallpaperPath : ""
-                    fillMode: Image.PreserveAspectCrop
-                    opacity: status === Image.Ready ? 1.0 : 0.1
+                    anchors.margins: -10
+                    radius: 30
+                    color: ThemeManager.accentColor
+                    opacity: 0.04
                     
-                    Behavior on source { 
-                        PropertyAnimation { 
-                            duration: 600 
-                        } 
+                    layer.enabled: true
+                    layer.effect: MultiEffect { 
+                        blurEnabled: true
+                        blur: 0.8
                     } 
                 }
                 
-                Rectangle { 
-                    id: innerFrameBorder
+                Rectangle {
+                    id: monitorDeviceFrame
                     anchors.fill: parent
-                    radius: 18
-                    color: "transparent"
-                    border.color: "black"
-                    border.width: 2
-                    opacity: 0.4 
+                    radius: 24
+                    color: ThemeManager.backgroundPrimaryColor
+                    border.color: ThemeManager.outlinePrimaryColor
+                    border.width: 1
+                    
+                    ClippingRectangle {
+                        anchors.fill: parent
+                        anchors.margins: 6
+                        radius: 18
+                        color: "black"
+                        
+                        Image { 
+                            id: wallpaperPreviewImage
+                            anchors.fill: parent
+                            source: WallpaperManager.previewWallpaperPath !== "" ? "file://" + WallpaperManager.previewWallpaperPath : ""
+                            fillMode: Image.PreserveAspectCrop
+                            opacity: status === Image.Ready ? 1.0 : 0.1
+                            
+                            Behavior on source { 
+                                PropertyAnimation { 
+                                    duration: 600 
+                                } 
+                            } 
+                        }
+                        
+                        Rectangle { 
+                            id: innerFrameBorder
+                            anchors.fill: parent
+                            radius: 18
+                            color: "transparent"
+                            border.color: "black"
+                            border.width: 2
+                            opacity: 0.4 
+                        }
+                    }
+                }
+            }
+
+            onItemChanged: {
+                if (item) {
+                    item.parent = previewContainer
                 }
             }
         }

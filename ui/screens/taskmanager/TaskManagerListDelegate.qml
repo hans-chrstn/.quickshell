@@ -1,97 +1,103 @@
 import QtQuick
-import Quickshell
+import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
 
 Item {
-    id: delegateWrapper
+    id: root
     
-    property var modelData
+    property var modelData: null
     
-    LazyLoader {
-        id: cardLdr
-        property var proc: delegateWrapper.modelData
+    implicitWidth: parent ? parent.width : 0
+    implicitHeight: 44
+
+    LazyContainer {
+        id: container
+        anchors.fill: parent
+        active: true
         
-        loading: true
-        activeAsync: true
-        
-        component: Component {
+        component: Item {
+            id: delegateContent
+            anchors.fill: parent
+
             Rectangle {
+                anchors.fill: parent
                 radius: 12
-                color: hHover.hovered ? ThemeManager.surfacePrimaryColor : ThemeManager.surfaceSubtleColor
-                border.color: ThemeManager.outlinePrimaryColor
-                border.width: 1
+                color: ThemeManager.contentOnBackgroundColor
+                opacity: interactionHandler.hovered ? 0.08 : 0.04
                 
-                Row {
-                    anchors.fill: parent
-                    anchors.leftMargin: 16
-                    anchors.rightMargin: 16
-                    spacing: 12
-                    
-                    StyledLabel {
-                        text: cardLdr.proc ? cardLdr.proc.pid : ""
-                        type: "monospace"
-                        width: 80
-                        anchors.verticalCenter: parent.verticalCenter
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 200
                     }
-                    
-                    StyledLabel {
-                        text: cardLdr.proc ? cardLdr.proc.name : ""
-                        type: "body"
-                        font.weight: Font.Bold
-                        width: 600
-                        elideMode: Text.ElideRight
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                    
-                    StyledLabel {
-                        text: cardLdr.proc ? cardLdr.proc.cpu.toFixed(1) + "%" : ""
-                        type: "monospace"
-                        width: 80
-                        horizontalAlignment: Text.AlignRight
-                        anchors.verticalCenter: parent.verticalCenter
-                        customColor: (cardLdr.proc && cardLdr.proc.cpu > 50) ? ThemeManager.dangerPrimaryColor : ThemeManager.contentOnBackgroundColor
-                    }
-                    
-                    StyledLabel {
-                        text: cardLdr.proc ? cardLdr.proc.mem.toFixed(1) + "%" : ""
-                        type: "monospace"
-                        width: 80
-                        horizontalAlignment: Text.AlignRight
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                    
-                    BaseButton {
-                        width: 24
-                        height: 24
-                        anchors.verticalCenter: parent.verticalCenter
-                        onClicked: {
-                            if (cardLdr.proc) {
-                                ProcessManager.killProcess(cardLdr.proc.pid)
-                            }
-                        }
-                        
-                        StyledLabel {
-                            anchors.centerIn: parent
-                            text: "󰆴"
-                            type: "icon"
-                            font.pixelSize: 14
-                            opacity: parent.isHovered ? 1.0 : 0.2
-                            customColor: ThemeManager.dangerPrimaryColor
-                        }
-                    }
-                }
-                
-                HoverHandler {
-                    id: hHover
                 }
             }
-        }
 
-        onItemChanged: {
-            if (item) {
-                item.parent = delegateWrapper
-                item.anchors.fill = delegateWrapper
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 16
+                anchors.rightMargin: 16
+                spacing: 12
+
+                StyledLabel {
+                    text: root.modelData ? root.modelData.pid : ""
+                    type: "caption"
+                    width: 80
+                    opacity: 0.5
+                }
+
+                StyledLabel {
+                    text: root.modelData ? root.modelData.name : ""
+                    type: "body"
+                    Layout.fillWidth: true
+                    elideMode: Text.ElideRight
+                    font.weight: Font.Medium
+                }
+
+                StyledLabel {
+                    text: root.modelData ? root.modelData.cpu.toFixed(1) + "%" : "0.0%"
+                    type: "caption"
+                    width: 80
+                    horizontalAlignment: Text.AlignRight
+                    customColor: (root.modelData && root.modelData.cpu > 20) ? ThemeManager.dangerColor : ThemeManager.accentColor
+                }
+
+                StyledLabel {
+                    text: root.modelData ? root.modelData.mem.toFixed(1) + "%" : "0.0%"
+                    type: "caption"
+                    width: 80
+                    horizontalAlignment: Text.AlignRight
+                }
+
+                BaseButton {
+                    width: 28
+                    height: 28
+                    visible: interactionHandler.hovered
+                    onClicked: {
+                        if (root.modelData) {
+                            ProcessManager.killProcess(root.modelData.pid)
+                        }
+                    }
+                    
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 14
+                        color: ThemeManager.dangerSurfaceColor
+                        opacity: 0.2
+                    }
+                    
+                    StyledLabel {
+                        anchors.centerIn: parent
+                        text: "󰅖"
+                        type: "icon"
+                        font.pixelSize: 12
+                        customColor: ThemeManager.dangerColor
+                    }
+                }
+            }
+
+            HoverHandler {
+                id: interactionHandler
             }
         }
     }

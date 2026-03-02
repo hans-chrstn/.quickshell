@@ -51,14 +51,12 @@ Item {
         }
     }
 
-    LazyLoader {
+    LazyContainer {
         id: iconLoader
-        loading: root.visualOffset < 10
-        activeAsync: root.visualOffset < 5
+        active: root.visualOffset < 10
         
-        Image {
+        component: Image {
             id: appIcon
-            parent: root
             anchors.fill: parent
             sourceSize: Qt.size(ThemeManager.appIslandIconSize * 2, ThemeManager.appIslandIconSize * 2) 
             layer.enabled: root.isHovered
@@ -67,9 +65,15 @@ Item {
                 saturation: 0.1 
             }
             source: {
-                if (!root.app || !root.app.icon) return ""
-                if (root.app.icon.startsWith("/")) return "file://" + root.app.icon
-                if (root.app.icon === "utilities-system-monitor" || root.app.icon === "system-run") return ""
+                if (!root.app || !root.app.icon) {
+                    return ""
+                }
+                if (root.app.icon.startsWith("/")) {
+                    return "file://" + root.app.icon
+                }
+                if (root.app.icon === "utilities-system-monitor" || root.app.icon === "system-run") {
+                    return ""
+                }
                 return Quickshell.iconPath(root.app.icon)
             }
             fillMode: Image.PreserveAspectFit

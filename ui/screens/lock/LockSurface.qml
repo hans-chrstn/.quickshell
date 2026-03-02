@@ -28,21 +28,55 @@ WlSessionLockSurface {
         id: unlockAnim
 
         ParallelAnimation {
-            NumberAnimation { target: background; property: "opacity"; to: 0; duration: 500 }
-            NumberAnimation { target: content; property: "scale"; to: 0.8; duration: 500; easing.type: Easing.InBack }
-            NumberAnimation { target: content; property: "opacity"; to: 0; duration: 500 }
+            NumberAnimation { 
+                target: backgroundContainer
+                property: "opacity"
+                to: 0
+                duration: 500 
+            }
+            NumberAnimation { 
+                target: content
+                property: "scale"
+                to: 0.8
+                duration: 500
+                easing.type: Easing.InBack 
+            }
+            NumberAnimation { 
+                target: content
+                property: "opacity"
+                to: 0
+                duration: 500 
+            }
         }
         
-        PropertyAction { target: root.lock; property: "locked"; value: false }
+        PropertyAction { 
+            target: root.lock; property: "locked"; value: false 
+        }
     }
 
     ParallelAnimation {
         id: initAnim
         running: true
         
-        NumberAnimation { target: background; property: "opacity"; to: 1; duration: 500 }
-        NumberAnimation { target: content; property: "scale"; to: 1; duration: 500; easing.type: Easing.OutBack }
-        NumberAnimation { target: content; property: "opacity"; to: 1; duration: 500 }
+        NumberAnimation { 
+            target: backgroundContainer
+            property: "opacity"
+            to: 1
+            duration: 500 
+        }
+        NumberAnimation { 
+            target: content
+            property: "scale"
+            to: 1
+            duration: 500
+            easing.type: Easing.OutBack 
+        }
+        NumberAnimation { 
+            target: content
+            property: "opacity"
+            to: 1
+            duration: 500 
+        }
     }
 
     Rectangle {
@@ -51,8 +85,14 @@ WlSessionLockSurface {
         color: "black"
         
         focus: true
-        onActiveFocusChanged: if (!activeFocus) mainRect.forceActiveFocus()
-        Component.onCompleted: mainRect.forceActiveFocus()
+        onActiveFocusChanged: {
+            if (!activeFocus) {
+                mainRect.forceActiveFocus()
+            }
+        }
+        Component.onCompleted: {
+            mainRect.forceActiveFocus()
+        }
 
         property real mouseX: 0
         property real mouseY: 0
@@ -77,15 +117,29 @@ WlSessionLockSurface {
             LockManager.processKeyEvent(event)
         }
 
-        LockScreenBackground {
-            id: background
+        LazyContainer {
+            id: backgroundContainer
+            anchors.fill: parent
             opacity: 0
-            relativeMouseX: mainRect.mouseX
-            relativeMouseY: mainRect.mouseY
+            
+            component: LockScreenBackground {
+                relativeMouseX: mainRect.mouseX
+                relativeMouseY: mainRect.mouseY
+            }
         }
 
-        LockScreenStatusBar {
+        LazyContainer {
+            id: statusBarContainer
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.topMargin: 60
+            anchors.leftMargin: 60
+            anchors.rightMargin: 60
+            height: 60
             opacity: content.opacity
+            
+            component: LockScreenStatusBar { }
         }
 
         Item {
@@ -125,7 +179,14 @@ WlSessionLockSurface {
                     Behavior on opacity { NumberAnimation { duration: 200 } }
                 }
 
-                LockScreenMediaControls { }
+                LazyContainer {
+                    id: mediaControlsWrapper
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: 400
+                    Layout.preferredHeight: 150
+                    
+                    component: LockScreenMediaControls { }
+                }
             }
         }
 
@@ -136,8 +197,13 @@ WlSessionLockSurface {
             spacing: 15
             opacity: content.opacity
 
-            LockScreenNotificationIndicator { 
+            LazyContainer {
+                id: notifIndicatorWrapper
                 Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 300
+                Layout.preferredHeight: 32
+                
+                component: LockScreenNotificationIndicator { }
             }
         }
     }

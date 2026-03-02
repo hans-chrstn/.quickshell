@@ -148,12 +148,17 @@ Item {
                 anchors.rightMargin: 20
                 clip: true
 
-                LazyLoader {
+                LazyContainer {
                     id: tabLoader
+                    anchors.fill: parent
+                    
+                    active: {
+                        let dist = Math.abs(index - view.currentIndex)
+                        let circularDist = Math.min(dist, view.count - dist)
+                        return circularDist <= 1
+                    }
 
-                    activeAsync: true
-
-                    property var tabComponent: {
+                    component: {
                         if (!model) {
                             return null
                         }
@@ -179,15 +184,6 @@ Item {
                             return trayComp
                         }
                         return null
-                    }
-
-                    component: tabComponent
-
-                    onItemChanged: {
-                        if (item) {
-                            item.parent = tabContainer
-                            item.anchors.fill = tabContainer
-                        }
                     }
                 }
             }

@@ -21,106 +21,119 @@ import qs.ui.features.notifications
 ShellRoot {
     id: root
 
-    LazyLoader {
-        activeAsync: true
-        Lock {
-        }
+    LazyContainer {
+        active: true
+        component: Lock { }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: Item {
+        delegate: LazyContainer {
             id: topBarDelegate
             required property var modelData
-            LazyLoader {
-                activeAsync: true
-                TopBar { 
-                    aboveWindows: true 
-                    screen: topBarDelegate.modelData
-                }
+            
+            component: TopBar { 
+                aboveWindows: true 
+                screen: topBarDelegate.modelData
             }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: Item {
+        delegate: LazyContainer {
             id: leftBarDelegate
             required property var modelData
-            LazyLoader {
-                activeAsync: true
-                LeftBar { 
-                    aboveWindows: true 
-                    screen: leftBarDelegate.modelData
-                }
+            
+            component: LeftBar { 
+                aboveWindows: true 
+                screen: leftBarDelegate.modelData
             }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: Item {
+        delegate: LazyContainer {
             id: rightBarDelegate
             required property var modelData
-            LazyLoader {
-                activeAsync: true
-                RightBar { 
-                    aboveWindows: true 
-                    screen: rightBarDelegate.modelData
-                }
+            
+            component: RightBar { 
+                aboveWindows: true 
+                screen: rightBarDelegate.modelData
             }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: Item {
+        delegate: LazyContainer {
             id: bottomBarDelegate
             required property var modelData
-            LazyLoader {
-                activeAsync: true
-                BottomBar { 
-                    aboveWindows: true 
-                    screen: bottomBarDelegate.modelData
-                }
+            
+            component: BottomBar { 
+                aboveWindows: true 
+                screen: bottomBarDelegate.modelData
             }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerTopLeft {
+        delegate: LazyContainer {
+            id: topLeftDelegate
+            required property var modelData
+            
+            component: CornerTopLeft {
+                screen: topLeftDelegate.modelData
+            }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerTopRight {
+        delegate: LazyContainer {
+            id: topRightDelegate
+            required property var modelData
+            
+            component: CornerTopRight {
+                screen: topRightDelegate.modelData
+            }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerBottomLeft {
+        delegate: LazyContainer {
+            id: bottomLeftDelegate
+            required property var modelData
+            
+            component: CornerBottomLeft {
+                screen: bottomLeftDelegate.modelData
+            }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: CornerBottomRight {
+        delegate: LazyContainer {
+            id: bottomRightDelegate
+            required property var modelData
+            
+            component: CornerBottomRight {
+                screen: bottomRightDelegate.modelData
+            }
         }
     }
 
     Variants {
         model: Quickshell.screens
-        delegate: Item {
+        delegate: LazyContainer {
             id: notificationDelegate
             required property var modelData
-            LazyLoader {
-                activeAsync: true
-                NotificationPopup { 
-                    modelData: notificationDelegate.modelData
-                }
+            
+            component: NotificationPopup { 
+                modelData: notificationDelegate.modelData
             }
         }
     }

@@ -4,9 +4,9 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Widgets
-import qs.core
 import qs.ui.shared
-import "./taskmanager"
+import qs.core
+import qs.ui.screens.controlpanel
 
 PanelWindow {
     id: root
@@ -20,21 +20,18 @@ PanelWindow {
         top: true
         bottom: true
     }
-
     exclusionMode: visible ? ExclusionMode.Normal : ExclusionMode.Ignore
     focusable: visible && !closing
-    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     property bool closing: false
     property bool entryActive: false
+
     readonly property bool showContent: visible && !closing && entryActive
 
     onVisibleChanged: {
         if (visible) {
-            ProcessManager.startMonitoring()
             entryTimer.restart()
         } else {
-            ProcessManager.stopMonitoring()
             entryActive = false
         }
     }
@@ -61,17 +58,17 @@ PanelWindow {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                ViewManager.closeWindowByType("taskManager")
+                ViewManager.closeWindowByType("bluetooth")
             }
         }
     }
 
     ClippingRectangle {
         id: windowFrame
-        width: 1000
-        height: 700
+        width: 600
+        height: 550
         anchors.centerIn: parent
-        radius: 36
+        radius: 32
         color: ThemeManager.backgroundPrimaryColor
         border.color: ThemeManager.outlinePrimaryColor
         border.width: 1
@@ -91,12 +88,30 @@ PanelWindow {
             }
         }
 
+        Rectangle {
+            anchors.fill: parent
+            radius: 32
+            color: "transparent"
+            gradient: Gradient {
+                GradientStop {
+                    position: 0.0
+                    color: Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.02)
+                }
+                GradientStop {
+                    position: 0.5
+                    color: "transparent"
+                }
+            }
+        }
+
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 32
-            spacing: 24
+            spacing: 20
 
-            TaskManagerHeader { }
+            ControlPanelHeader {
+                activePage: "bluetooth"
+            }
 
             Rectangle {
                 Layout.fillWidth: true
@@ -105,57 +120,17 @@ PanelWindow {
                 opacity: 0.05
             }
 
-            ListView {
-                id: processList
+            ControlPanelList {
+                activePage: "bluetooth"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                model: ProcessManager.model
-                spacing: 4
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
+                Layout.topMargin: 10
+                Layout.bottomMargin: 10
+            }
 
-                header: Item {
-                    width: processList.width
-                    height: 30
-                    Row {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-                        
-                        StyledLabel {
-                            text: "PID"
-                            type: "caption"
-                            width: 80
-                            opacity: 0.4
-                        }
-                        StyledLabel {
-                            text: "NAME"
-                            type: "caption"
-                            width: 600
-                            opacity: 0.4
-                        }
-                        StyledLabel {
-                            text: "CPU %"
-                            type: "caption"
-                            width: 80
-                            horizontalAlignment: Text.AlignRight
-                            opacity: 0.4
-                        }
-                        StyledLabel {
-                            text: "MEM %"
-                            type: "caption"
-                            width: 80
-                            horizontalAlignment: Text.AlignRight
-                            opacity: 0.4
-                        }
-                    }
-                }
-
-                delegate: TaskManagerListDelegate {
-                    width: processList.width
-                    height: 44
-                    modelData: model
-                }
+            NetworkPanelFooter {
+                panelType: "bluetooth"
+                Layout.fillWidth: true
             }
         }
     }

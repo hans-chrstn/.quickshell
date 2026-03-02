@@ -26,7 +26,7 @@ GridLayout {
             acceptedButtons: Qt.RightButton
             onTapped: {
                 SoundManager.playToggle()
-                ViewManager.openControlPanel("wifi")
+                ViewManager.toggleNetwork()
             }
         }
     }
@@ -46,7 +46,7 @@ GridLayout {
             acceptedButtons: Qt.RightButton
             onTapped: {
                 SoundManager.playToggle()
-                ViewManager.openControlPanel("bluetooth")
+                ViewManager.toggleBluetooth()
             }
         }
     }

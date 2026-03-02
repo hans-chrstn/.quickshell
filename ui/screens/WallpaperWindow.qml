@@ -41,12 +41,18 @@ PanelWindow {
     onVisibleChanged: {
         if (visible) {
             FileBrowserManager.switchToWallpaper()
-            Qt.callLater(() => {
-                explorer.forceActiveFocus()
-                entryActive = true
-            })
+            entryTimer.restart()
         } else {
             entryActive = false
+        }
+    }
+
+    Timer {
+        id: entryTimer
+        interval: 50
+        onTriggered: {
+            entryActive = true
+            explorer.forceActiveFocus()
         }
     }
 
@@ -178,6 +184,12 @@ PanelWindow {
                     }
                 }
             }
+        }
+    }
+
+    Component.onCompleted: {
+        if (visible) {
+            entryTimer.start()
         }
     }
 }

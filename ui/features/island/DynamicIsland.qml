@@ -40,6 +40,22 @@ IslandSurface {
         }
     }
 
+    Connections {
+        target: ViewManager
+        function onWindowOpening(windowType) {
+            if (windowType === "network" || windowType === "bluetooth" || windowType === "settings") {
+                root.activeMenus++
+            }
+        }
+        function onWindowClosing(windowType) {
+            if (windowType === "network" || windowType === "bluetooth" || windowType === "settings") {
+                root.activeMenus--
+            }
+        }
+    }
+
+    property int activeMenus: 0
+
     surfaceContent: Item {
         anchors.fill: parent
 
@@ -58,6 +74,7 @@ IslandSurface {
             source: "music/AudioVisualizer.qml"
             visible: active && opacity > 0
             opacity: active ? 1 : 0
+            
             Behavior on opacity {
                 NumberAnimation {
                     duration: 200
@@ -92,6 +109,7 @@ IslandSurface {
 
             opacity: root.isExpanded ? 1 : 0
             visible: opacity > 0.01
+            
             Behavior on opacity {
                 SequentialAnimation {
                     PauseAnimation {

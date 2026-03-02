@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.ui.screens
+import qs.ui.shared
 
 Singleton {
     id: root
@@ -10,12 +11,14 @@ Singleton {
 
     property bool settingsRequested: false
     property bool wallpaperRequested: false
-    property bool controlPanelRequested: false
+    property bool networkRequested: false
+    property bool bluetoothRequested: false
     property bool taskManagerRequested: false
     property bool notesRequested: false
 
     property bool isSettingsClosing: false
-    property bool isControlPanelClosing: false
+    property bool isNetworkClosing: false
+    property bool isBluetoothClosing: false
     property bool isWallpaperClosing: false
     property bool isTaskManagerClosing: false
     property bool isNotesClosing: false
@@ -23,50 +26,60 @@ Singleton {
     signal windowOpening(string windowType)
     signal windowClosing(string windowType)
 
-    LazyLoader { 
+    LazyContainer { 
         id: settingsLdr
-        activeAsync: true 
-        SettingsWindow { 
+        active: root.settingsRequested
+        component: SettingsWindow { 
             visible: root.settingsRequested
             closing: root.isSettingsClosing
             screen: root.primaryScreen 
         } 
     }
     
-    LazyLoader { 
+    LazyContainer { 
         id: wallpaperLdr
-        activeAsync: true 
-        WallpaperWindow { 
+        active: root.wallpaperRequested
+        component: WallpaperWindow { 
             visible: root.wallpaperRequested
             closing: root.isWallpaperClosing
             screen: root.primaryScreen 
         } 
     }
     
-    LazyLoader { 
-        id: controlPanelLdr
-        activeAsync: true 
-        ControlPanelWindow { 
-            visible: root.controlPanelRequested
-            closing: root.isControlPanelClosing
+    LazyContainer { 
+        id: networkLdr
+        active: root.networkRequested
+        component: NetworkWindow { 
+            visible: root.networkRequested
+            closing: root.isNetworkClosing
+            screen: root.primaryScreen 
+        } 
+    }
+
+    LazyContainer { 
+        id: bluetoothLdr
+        active: root.bluetoothRequested
+        component: BluetoothWindow { 
+            visible: root.bluetoothRequested
+            closing: root.isBluetoothClosing
             screen: root.primaryScreen 
         } 
     }
     
-    LazyLoader { 
+    LazyContainer { 
         id: taskManagerLdr
-        activeAsync: true 
-        TaskManagerWindow { 
+        active: root.taskManagerRequested
+        component: TaskManagerWindow { 
             visible: root.taskManagerRequested
             closing: root.isTaskManagerClosing
             screen: root.primaryScreen 
         } 
     }
 
-    LazyLoader { 
+    LazyContainer { 
         id: notesLdr
-        activeAsync: true 
-        NotesWindow { 
+        active: root.notesRequested
+        component: NotesWindow { 
             visible: root.notesRequested
             closing: root.isNotesClosing
             screen: root.primaryScreen 
@@ -87,20 +100,31 @@ Singleton {
         }
     }
 
-    function openControlPanel(page = "wifi") {
-        root.isControlPanelClosing = false
-        if (controlPanelLdr.item) {
-            controlPanelLdr.item.activePage = page
-        }
-        root.controlPanelRequested = true
-        root.windowOpening("controlPanel")
+    function openNetwork() {
+        root.isNetworkClosing = false
+        root.networkRequested = true
+        root.windowOpening("network")
     }
 
-    function toggleControlPanel(page = "wifi") {
-        if (root.controlPanelRequested && !root.isControlPanelClosing && controlPanelLdr.item && controlPanelLdr.item.activePage === page) {
-            closeWindowByType("controlPanel")
+    function toggleNetwork() {
+        if (root.networkRequested && !root.isNetworkClosing) {
+            closeWindowByType("network")
         } else {
-            openControlPanel(page)
+            openNetwork()
+        }
+    }
+
+    function openBluetooth() {
+        root.isBluetoothClosing = false
+        root.bluetoothRequested = true
+        root.windowOpening("bluetooth")
+    }
+
+    function toggleBluetooth() {
+        if (root.bluetoothRequested && !root.isBluetoothClosing) {
+            closeWindowByType("bluetooth")
+        } else {
+            openBluetooth()
         }
     }
 
@@ -151,10 +175,14 @@ Singleton {
             root.isSettingsClosing = true
             root.windowClosing("settings")
             settingsCloseTimer.restart()
-        } else if (windowType === "controlPanel") {
-            root.isControlPanelClosing = true
-            root.windowClosing("controlPanel")
-            controlPanelCloseTimer.restart()
+        } else if (windowType === "network") {
+            root.isNetworkClosing = true
+            root.windowClosing("network")
+            networkCloseTimer.restart()
+        } else if (windowType === "bluetooth") {
+            root.isBluetoothClosing = true
+            root.windowClosing("bluetooth")
+            bluetoothCloseTimer.restart()
         } else if (windowType === "wallpaper") {
             root.isWallpaperClosing = true
             root.windowClosing("wallpaper")
@@ -180,11 +208,20 @@ Singleton {
     }
 
     Timer { 
-        id: controlPanelCloseTimer
+        id: networkCloseTimer
         interval: 350
         onTriggered: { 
-            root.controlPanelRequested = false
-            root.isControlPanelClosing = false 
+            root.networkRequested = false
+            root.isNetworkClosing = false 
+        } 
+    }
+
+    Timer { 
+        id: bluetoothCloseTimer
+        interval: 350
+        onTriggered: { 
+            root.bluetoothRequested = false
+            root.isBluetoothClosing = false 
         } 
     }
 

@@ -9,6 +9,7 @@ Loader {
     id: root
     
     width: parent ? parent.width : 0
+    asynchronous: true
     
     property var configurationItemData: null
     property bool labelVisible: true
@@ -29,22 +30,37 @@ Loader {
         border.color: ThemeManager.accentColor
         border.width: root.isCurrentlyFocused ? 1 : 0
         z: -1
-        Behavior on opacity { 
-            NumberAnimation { 
-                duration: 200 
-            } 
+        
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 200
+            }
         }
     }
 
     sourceComponent: {
-        if (!configurationItemData) return null;
+        if (!configurationItemData) {
+            return null
+        }
         switch (configurationItemData.type) {
-            case "header": return headerComp;
-            case "slider": return sliderComp;
-            case "color":  return colorComp;
-            case "switch": return switchComp;
-            case "text":   return textComp;
-            default: return null;
+            case "header": {
+                return headerComp
+            }
+            case "slider": {
+                return sliderComp
+            }
+            case "color": {
+                return colorComp
+            }
+            case "switch": {
+                return switchComp
+            }
+            case "text": {
+                return textComp
+            }
+            default: {
+                return null
+            }
         }
     }
 

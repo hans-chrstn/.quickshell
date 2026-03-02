@@ -40,12 +40,18 @@ PanelWindow {
 
     onVisibleChanged: {
         if (visible) {
-            Qt.callLater(() => {
-                sidebar.forceActiveFocus()
-                entryActive = true
-            })
+            entryTimer.restart()
         } else {
             entryActive = false
+        }
+    }
+
+    Timer {
+        id: entryTimer
+        interval: 50
+        onTriggered: {
+            entryActive = true
+            sidebar.forceActiveFocus()
         }
     }
 
@@ -53,6 +59,7 @@ PanelWindow {
         anchors.fill: parent
         color: ThemeManager.shadowPrimaryColor
         opacity: root.showContent ? 0.4 : 0
+        
         Behavior on opacity {
             NumberAnimation {
                 duration: 300
@@ -76,6 +83,7 @@ PanelWindow {
         color: ThemeManager.backgroundPrimaryColor
         border.color: ThemeManager.outlinePrimaryColor
         border.width: 1
+        
         opacity: root.showContent ? 1.0 : 0
         scale: root.showContent ? 1.0 : 0.95
 
@@ -143,6 +151,7 @@ PanelWindow {
                         spacing: 20
                         interactive: true
                         boundsBehavior: Flickable.StopAtBounds
+                        
                         footer: Item {
                             height: 40
                         }
@@ -173,6 +182,12 @@ PanelWindow {
                     }
                 }
             }
+        }
+    }
+
+    Component.onCompleted: {
+        if (visible) {
+            entryTimer.start()
         }
     }
 }

@@ -6,17 +6,12 @@ import qs.core
 Item {
     id: root
     
-    height: 60
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.topMargin: 60
-    anchors.leftMargin: 60
-    anchors.rightMargin: 60
+    implicitHeight: 60
 
     RowLayout {
         id: weatherStatusLayout
         anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
         spacing: 15
         visible: !isNaN(WeatherManager.currentTemperature)
 
@@ -53,6 +48,7 @@ Item {
     RowLayout {
         id: systemStatusLayout
         anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
         spacing: 25
         
         RowLayout {
