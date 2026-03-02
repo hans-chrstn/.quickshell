@@ -5,6 +5,7 @@ import qs.core
 import qs.ui.shared
 import qs.ui.shared.shapes
 import "./topright"
+import qs.ui.features.island.corners.shared
 
 CornerContainer {
     id: root

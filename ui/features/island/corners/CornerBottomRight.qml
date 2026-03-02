@@ -8,6 +8,7 @@ import qs.ui.shared
 import qs.ui.features.island
 import qs.ui.shared.shapes
 import qs.ui.features.island.system
+import qs.ui.features.island.corners.shared
 import "./bottomright"
 
 CornerContainer {
@@ -18,16 +19,16 @@ CornerContainer {
     aboveWindows: true
     isHoverEnabled: true
     
-    expandedWidth: 180
-    expandedHeight: 220
+    expandedWidth: 300
+    expandedHeight: 100
     
     firstFilletRotation: 90
-    firstFilletX: -30
-    firstFilletY: 174
+    firstFilletX: -20 - 10
+    firstFilletY: 100 - 16 - 10 - 1
     
     secondFilletRotation: 90
-    secondFilletX: 134
-    secondFilletY: -20 + 1 - 10
+    secondFilletX: 300 - 20 - 16 - 10
+    secondFilletY: -20 - 10
 
     customTopLeftRadius: ThemeManager.dynamicIslandCornerRadius
     customTopRightRadius: 0
@@ -48,46 +49,10 @@ CornerContainer {
         anchors.fill: parent
         clip: true
 
-        ColumnLayout {
-            id: headerContainer
-            anchors.top: parent.top
-            anchors.topMargin: 20
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 2
-            opacity: root.isConfirming ? 0 : 1
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 300
-                }
-            }
-
-            Text {
-                id: sessionLabel
-                text: "SESSION"
-                color: ThemeManager.contentOnBackgroundColor
-                font.pixelSize: 8
-                font.weight: Font.Black
-                font.letterSpacing: 2
-                opacity: 0.4
-                Layout.alignment: Qt.AlignHCenter
-            }
-            
-            Rectangle {
-                id: headerLine
-                Layout.preferredWidth: 20
-                Layout.preferredHeight: 2
-                radius: 1
-                color: ThemeManager.accentColor
-                opacity: 0.3
-                Layout.alignment: Qt.AlignHCenter
-            }
-        }
-
-        ColumnLayout {
+        Row {
             id: actionsListContainer
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: 10
-            spacing: 12
+            spacing: 20
             
             opacity: root.isConfirming ? 0 : 1
             scale: root.isConfirming ? 0.9 : 1.0
@@ -105,28 +70,35 @@ CornerContainer {
                 } 
             }
 
-            SessionActionTile {
-                actionIcon: "󰌾"
-                actionLabel: "LOCK"
-                onActionTriggered: {
+            UtilityButton {
+                iconText: "󰌾"
+                labelText: "LOCK"
+                onClicked: {
                     LockManager.lock()
                     root.isExpanded = false
                 }
             }
 
-            SessionActionTile {
-                actionIcon: "󰍃"
-                actionLabel: "LOGOUT"
-                onActionTriggered: {
+            UtilityButton {
+                iconText: "󰍃"
+                labelText: "LOGOUT"
+                onClicked: {
                     root.currentAction = "logout"
                 }
             }
 
-            SessionActionTile {
-                actionIcon: "󰐥"
-                actionLabel: "POWER"
-                actionHighlightColor: ThemeManager.dangerPrimaryColor
-                onActionTriggered: {
+            UtilityButton {
+                iconText: "󰑓"
+                labelText: "REBOOT"
+                onClicked: {
+                    root.currentAction = "reboot"
+                }
+            }
+
+            UtilityButton {
+                iconText: "󰐥"
+                labelText: "POWER"
+                onClicked: {
                     root.currentAction = "poweroff"
                 }
             }

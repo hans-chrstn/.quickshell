@@ -44,7 +44,7 @@ ColumnLayout {
         Text {
             id: actionTypeLabel
             text: root.currentAction.toUpperCase()
-            color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
+            color: (root.currentAction === "poweroff" || root.currentAction === "reboot") ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
             font.pixelSize: 12
             font.weight: Font.Bold
             font.letterSpacing: 2
@@ -64,6 +64,8 @@ ColumnLayout {
                 SoundManager.playSuccess()
                 if (root.currentAction === "logout") {
                     Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")])
+                } else if (root.currentAction === "reboot") {
+                    Quickshell.execDetached(["systemctl", "reboot"])
                 } else {
                     Quickshell.execDetached(["systemctl", "poweroff"])
                 }
@@ -72,7 +74,7 @@ ColumnLayout {
             Rectangle {
                 anchors.fill: parent
                 radius: 20
-                color: root.currentAction === "poweroff" ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
+                color: (root.currentAction === "poweroff" || root.currentAction === "reboot") ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
 
                 Text {
                     anchors.centerIn: parent
