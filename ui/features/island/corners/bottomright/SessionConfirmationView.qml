@@ -1,117 +1,144 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import qs.core
 import qs.ui.shared
 
-ColumnLayout {
+Item {
     id: root
 
-    property string currentAction: ""
-    property bool isConfirming: currentAction !== ""
+    property string targetAction: ""
+    property bool active: targetAction !== ""
+    
+    signal cancelRequested()
 
-    spacing: 20
+    implicitWidth: 280
+    implicitHeight: 80
 
-    opacity: root.isConfirming ? 1 : 0
-    scale: root.isConfirming ? 1.0 : 1.1
+    opacity: root.active ? 1.0 : 0
+    scale: root.active ? 1.0 : 0.9
     visible: opacity > 0.01
 
     Behavior on opacity { 
         NumberAnimation { 
-            duration: 300 
+            duration: 400
+            easing.type: Easing.OutCubic
         } 
     }
+    
     Behavior on scale { 
         NumberAnimation { 
-            duration: 400
-            easing.type: Easing.OutExpo 
+            duration: 500
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.4
         } 
-    }
-
-    ColumnLayout {
-        spacing: 4
-        Layout.alignment: Qt.AlignHCenter
-
-        Text {
-            id: confirmationQuestionLabel
-            text: "ARE YOU SURE?"
-            color: ThemeManager.contentOnBackgroundColor
-            font.pixelSize: 10
-            font.weight: Font.Black
-            font.letterSpacing: 1
-            Layout.alignment: Qt.AlignHCenter
-        }
-        Text {
-            id: actionTypeLabel
-            text: root.currentAction.toUpperCase()
-            color: (root.currentAction === "poweroff" || root.currentAction === "reboot") ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
-            font.pixelSize: 12
-            font.weight: Font.Bold
-            font.letterSpacing: 2
-            Layout.alignment: Qt.AlignHCenter
-        }
     }
 
     RowLayout {
-        spacing: 16
-        Layout.alignment: Qt.AlignHCenter
+        anchors.fill: parent
+        anchors.leftMargin: 24
+        anchors.rightMargin: 24
+        spacing: 24
 
-        BaseButton {
-            id: confirmYesButton
-            Layout.preferredWidth: 60
-            Layout.preferredHeight: 40
-            onClicked: {
-                SoundManager.playSuccess()
-                if (root.currentAction === "logout") {
-                    Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")])
-                } else if (root.currentAction === "reboot") {
-                    Quickshell.execDetached(["systemctl", "reboot"])
-                } else {
-                    Quickshell.execDetached(["systemctl", "poweroff"])
-                }
+        ColumnLayout {
+            spacing: 0
+            Layout.fillWidth: true
+            
+            StyledLabel {
+                text: "CONFIRM SESSION"
+                type: "caption"
+                font.weight: Font.Black
+                font.pixelSize: 7
+                letterSpacing: 2
+                opacity: 0.4
             }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: 20
-                color: (root.currentAction === "poweroff" || root.currentAction === "reboot") ? ThemeManager.dangerPrimaryColor : ThemeManager.accentColor
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "YES"
-                    color: ThemeManager.contentPrimaryColor
-                    font.pixelSize: 11
-                    font.weight: Font.Black
-                }
+            
+            StyledLabel {
+                text: root.targetAction.toUpperCase()
+                type: "title"
+                font.weight: Font.Black
+                font.pixelSize: 16
+                letterSpacing: 1
+                customColor: (root.targetAction === "poweroff" || root.targetAction === "reboot") 
+                    ? ThemeManager.dangerPrimaryColor 
+                    : ThemeManager.accentColor
             }
         }
 
-        BaseButton {
-            id: confirmNoButton
-            Layout.preferredWidth: 60
-            Layout.preferredHeight: 40
-            onClicked: {
-                SoundManager.playClick()
-                root.currentAction = ""
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: 20
-                color: ThemeManager.contentOnBackgroundColor
-                opacity: confirmNoButton.isHovered ? 0.15 : 0.1
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: 200
+        RowLayout {
+            spacing: 12
+            
+            BaseButton {
+                id: confirmYesButton
+                width: 48
+                height: 48
+                onClicked: {
+                    SoundManager.playSuccess()
+                    if (root.targetAction === "logout") {
+                        Quickshell.execDetached(["loginctl", "terminate-user", Quickshell.env("USER")])
+                    } else if (root.targetAction === "reboot") {
+                        Quickshell.execDetached(["systemctl", "reboot"])
+                    } else {
+                        Quickshell.execDetached(["systemctl", "poweroff"])
                     }
                 }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "NO"
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 24
+                    color: (root.targetAction === "poweroff" || root.targetAction === "reboot") 
+                        ? ThemeManager.dangerPrimaryColor 
+                        : ThemeManager.accentColor
+                    
+                    layer.enabled: true
+                    layer.effect: MultiEffect {
+                        shadowEnabled: true
+                        shadowOpacity: 0.3
+                        shadowBlur: 0.5
+                        shadowVerticalOffset: 2
+                    }
+
+                    StyledLabel {
+                        anchors.centerIn: parent
+                        text: "󰄬"
+                        type: "icon"
+                        font.pixelSize: 20
+                        customColor: ThemeManager.contentPrimaryColor
+                    }
+                }
+            }
+
+            BaseButton {
+                id: confirmNoButton
+                width: 48
+                height: 48
+                onClicked: {
+                    SoundManager.playClick()
+                    root.cancelRequested()
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 24
                     color: ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 11
-                    font.weight: Font.Bold
+                    opacity: confirmNoButton.isHovered ? 0.12 : 0.05
+                    border.color: ThemeManager.contentOnBackgroundColor
+                    border.width: 1
+                    
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 200
+                        }
+                    }
+
+                    StyledLabel {
+                        anchors.centerIn: parent
+                        text: "󰅖"
+                        type: "icon"
+                        font.pixelSize: 20
+                        customColor: ThemeManager.contentOnBackgroundColor
+                    }
                 }
             }
         }

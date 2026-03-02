@@ -19,16 +19,16 @@ CornerContainer {
     aboveWindows: true
     isHoverEnabled: true
     
-    expandedWidth: 300
+    expandedWidth: 340
     expandedHeight: 100
     
     firstFilletRotation: 90
-    firstFilletX: -20 - 10
-    firstFilletY: 100 - 16 - 10 - 1
+    firstFilletX: -ThemeManager.dynamicIslandCornerRadius + 1
+    firstFilletY: height - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
     
-    secondFilletRotation: 90
-    secondFilletX: 300 - 20 - 16 - 10
-    secondFilletY: -20 - 10
+    secondFilletRotation: 180
+    secondFilletX: width - 1
+    secondFilletY: height - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius
 
     customTopLeftRadius: ThemeManager.dynamicIslandCornerRadius
     customTopRightRadius: 0
@@ -52,20 +52,21 @@ CornerContainer {
         Row {
             id: actionsListContainer
             anchors.centerIn: parent
-            spacing: 20
+            spacing: 24
             
             opacity: root.isConfirming ? 0 : 1
-            scale: root.isConfirming ? 0.9 : 1.0
+            scale: root.isConfirming ? 0.95 : 1.0
             visible: opacity > 0.01
             
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 300
+                    duration: 350
+                    easing.type: Easing.OutCubic
                 }
             }
             Behavior on scale { 
                 NumberAnimation { 
-                    duration: 400
+                    duration: 450
                     easing.type: Easing.OutBack 
                 } 
             }
@@ -105,10 +106,11 @@ CornerContainer {
         }
 
         SessionConfirmationView {
+            id: confirmView
             anchors.centerIn: parent
-            currentAction: root.currentAction
-            onCurrentActionChanged: {
-                root.currentAction = currentAction
+            targetAction: root.currentAction
+            onCancelRequested: {
+                root.currentAction = ""
             }
         }
     }
