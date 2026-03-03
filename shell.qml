@@ -137,4 +137,16 @@ ShellRoot {
             }
         }
     }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: LazyContainer {
+            id: areaPickerDelegate
+            required property var modelData
+            
+            component: AreaPickerWindow { 
+                screen: areaPickerDelegate.modelData
+            }
+        }
+    }
 }

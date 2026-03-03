@@ -11,7 +11,7 @@ ColumnLayout {
     spacing: 25
     Layout.alignment: Qt.AlignHCenter
 
-    readonly property color accentColor: ColorManager.accentColor
+    readonly property color accentColor: ThemeManager.accentColor
 
     ColumnLayout {
         id: userProfileLayout

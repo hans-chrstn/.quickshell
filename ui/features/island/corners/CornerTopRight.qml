@@ -74,7 +74,7 @@ CornerContainer {
         
         RecordButton {
             visible: ThemeManager.showCornerRecord
-            screenIdentifier: root.screenIdentifier
+            screen: root.screen
         }
 
         UtilityButton {

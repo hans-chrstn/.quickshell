@@ -11,6 +11,7 @@ Rectangle {
     id: root
     
     property string statusIcon: ""
+    property string displayType: "volume"
     property real indicatorValue: 0
     property color progressColor: ThemeManager.accentColor
     property bool isPillActive: false

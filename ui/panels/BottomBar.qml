@@ -10,7 +10,7 @@ import qs.ui.panels.bottombar
 SystemPanel {
     id: root
 
-    implicitHeight: ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 20
+    implicitHeight: ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 30
 
     anchors.bottom: true
     anchors.left: true

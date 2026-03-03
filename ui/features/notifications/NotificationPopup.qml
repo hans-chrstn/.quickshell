@@ -43,7 +43,8 @@ PanelWindow {
         anchors.topMargin: 50 
         width: 400
         
-        height: notifList.isStackExpanded ? Math.max(150, Math.min(contentHeight, 750)) : Math.max(80, Math.min(contentHeight, 120))
+        readonly property real targetHeight: isStackExpanded ? 750 : 120
+        height: Math.min(contentHeight > 0 ? contentHeight : 0, targetHeight)
         
         onIsStackExpandedChanged: {
             if (notifList.isStackExpanded) NotificationManager.expandedNotificationCount++

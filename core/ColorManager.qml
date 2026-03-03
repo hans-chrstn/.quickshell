@@ -13,9 +13,9 @@ Singleton {
     
     readonly property color extractedColor: colorQuantizer.colors.length > 0 
         ? colorQuantizer.colors[0] 
-        : ThemeManager.accentColor
+        : ThemeManager.manualAccentColor
     
-    property color accentColor: ThemeManager.accentColor
+    property color accentColor: ThemeManager.manualAccentColor
     
     ColorQuantizer {
         id: colorQuantizer
@@ -24,35 +24,39 @@ Singleton {
         rescaleSize: 64
     }
 
-    Behavior on accentColor { 
-        enabled: ThemeManager.lockDynamicAccents
-        ColorAnimation { 
-            duration: 1000 
-            easing.type: Easing.OutCubic 
-        } 
+    onExtractedColorChanged: {
+        root.accentColor = extractedColor
     }
 
-    onExtractedColorChanged: {
-        if (ThemeManager.lockDynamicAccents) {
-            accentColor = extractedColor
-        } else {
-            accentColor = ThemeManager.accentColor
+    Behavior on accentColor {
+        ColorAnimation {
+            duration: 1000
+            easing.type: Easing.OutCubic
         }
     }
-    
+
     Timer {
-        interval: 1000
+        interval: 2000
         running: true
         repeat: true
+        triggeredOnStart: true
         onTriggered: {
             let musicArtUrl = (MusicManager.activePlayer && MusicManager.activePlayer.trackArtUrl && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing) 
                 ? MusicManager.activePlayer.trackArtUrl 
                 : "";
             
-            if (musicArtUrl !== "") {
+            let isRemote = musicArtUrl.toString().startsWith("http");
+            
+            if (musicArtUrl !== "" && !isRemote) {
                 root.sourceUrl = musicArtUrl;
             } else {
-                root.sourceUrl = (WallpaperManager.activeWallpaperPath.startsWith("/") ? "file://" : "") + WallpaperManager.activeWallpaperPath;
+                let wpPath = WallpaperManager.activeWallpaperPath;
+                if (wpPath) {
+                    let uri = wpPath.startsWith("/") ? "file://" + wpPath : wpPath;
+                    root.sourceUrl = uri;
+                } else {
+                    root.sourceUrl = "";
+                }
             }
         }
     }

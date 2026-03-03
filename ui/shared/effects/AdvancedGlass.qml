@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Effects
+import Quickshell.Widgets
+import qs.core
 
 Item {
     id: root
@@ -10,30 +12,38 @@ Item {
     property real grainIntensity: 0.0
     property color overlayColor: "#000000"
     property real overlayOpacity: 0.6
+    property real cornerRadius: ThemeManager.globalCornerRadius
 
-    KawaseBlur {
-        id: blur
+    ClippingRectangle {
         anchors.fill: parent
-        radius: root.blurRadius
-    }
+        radius: root.cornerRadius
+        color: "transparent"
 
-    ChromaticAberration {
-        id: chromatic
-        anchors.fill: parent
-        source: blur
-        intensity: root.chromaticIntensity
-    }
+        KawaseBlur {
+            id: blur
+            anchors.fill: parent
+            radius: root.blurRadius
+        }
 
-    Vignette {
-        id: vignette
-        anchors.fill: parent
-        source: chromatic
-    }
+        ChromaticAberration {
+            id: chromatic
+            anchors.fill: parent
+            source: blur
+            intensity: root.chromaticIntensity
+        }
 
-    Rectangle {
-        id: overlay
-        anchors.fill: parent
-        color: root.overlayColor
-        opacity: root.overlayOpacity
+        Vignette {
+            id: vignette
+            anchors.fill: parent
+            source: chromatic
+        }
+
+        Rectangle {
+            id: overlay
+            anchors.fill: parent
+            color: root.overlayColor
+            opacity: root.overlayOpacity
+            radius: root.cornerRadius
+        }
     }
 }

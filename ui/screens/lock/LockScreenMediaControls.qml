@@ -11,7 +11,7 @@ Item {
     implicitHeight: 150
     visible: !!MusicManager.activePlayer && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing
 
-    readonly property color accentColor: ColorManager.accentColor
+    readonly property color accentColor: ThemeManager.accentColor
 
     ColumnLayout {
         anchors.fill: parent

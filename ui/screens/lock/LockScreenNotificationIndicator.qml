@@ -11,7 +11,7 @@ Rectangle {
     radius: 16
     color: Qt.rgba(1, 1, 1, 0.1)
     
-    border.color: ColorManager.accentColor || ThemeManager.accentColor
+    border.color: ThemeManager.accentColor
     border.width: 1
     visible: NotificationManager.historyModel.count > 0
 
@@ -38,7 +38,7 @@ Rectangle {
         Text { 
             id: notificationIcon
             text: ThemeManager.iconNotification
-            color: ColorManager.accentColor || ThemeManager.accentColor
+            color: ThemeManager.accentColor
             font.pixelSize: 14
             opacity: 0.8 
         }

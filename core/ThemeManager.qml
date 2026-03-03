@@ -6,8 +6,8 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    readonly property color primaryColor: root.accentColor
-    readonly property color highlightColor: root.accentColor
+    readonly property color primaryColor: ColorManager.accentColor
+    readonly property color highlightColor: ColorManager.accentColor
     readonly property color contentPrimaryColor: "#000000"
     readonly property color contentSecondaryColor: root.secondaryTextColor
     
@@ -22,7 +22,6 @@ Singleton {
     property int lockDateLetterSpacing: 6
     property int lockContentSpacing: 50
     property real lockPasswordOpacity: 0.06
-    property bool lockDynamicAccents: true
     property int lockParallaxIntensity: 20
 
     readonly property color surfacePrimaryColor: Qt.rgba(1, 1, 1, 0.05)
@@ -55,8 +54,12 @@ Singleton {
 
     property int globalThickness: 16
     property int globalCornerRadius: 12
+    property bool useDynamicTheming: false
     property color backgroundColor: "#0D0D0F"
-    property color accentColor: "#FFFFFF"
+    property color manualAccentColor: "#FFFFFF"
+    
+    readonly property color accentColor: useDynamicTheming ? ColorManager.accentColor : manualAccentColor
+    
     property color dangerColor: "#FF5555"
     property color visualHighlightColor: "#FFFFFF"
     property real visualHighlightOpacity: 0.08
@@ -261,6 +264,7 @@ Singleton {
 
     property bool isMusicArtVisible: true
     property bool isWeatherVisible: true
+    property int visualizerStyle: 1
 
     property bool showCornerWallpaper: true
     property bool showCornerSnap: true
@@ -317,7 +321,6 @@ Singleton {
             icon: "󰌾",
             items: [
                 { type: "header", label: "Visuals" },
-                { type: "switch", label: "Dynamic Accents", property: "lockDynamicAccents", default: true },
                 { type: "slider", label: "Wallpaper Opacity", property: "lockBackgroundOpacity", default: 0.45, min: 0.0, max: 1.0, step: 0.05 },
                 { type: "slider", label: "Blur Intensity", property: "lockBackgroundBlur", default: 1.0, min: 0.0, max: 2.0, step: 0.1 },
                 { type: "slider", label: "Parallax Intensity", property: "lockParallaxIntensity", default: 20, min: 0, max: 100 },
@@ -372,8 +375,9 @@ Singleton {
             icon: "󰔉",
             items: [
                 { type: "header", label: "Colors" },
+                { type: "switch", label: "Dynamic Theming", property: "useDynamicTheming", default: false },
                 { type: "color", label: "Background", property: "backgroundColor", default: "#0D0D0F" },
-                { type: "color", label: "Accent", property: "accentColor", default: "#FFFFFF" },
+                { type: "color", label: "Accent", property: "manualAccentColor", default: "#FFFFFF" },
                 { type: "color", label: "Danger", property: "dangerColor", default: "#FF5555" },
                 { type: "color", label: "Highlight", property: "visualHighlightColor", default: "#FFFFFF" },
                 { type: "color", label: "Secondary Text", property: "secondaryTextColor", default: "#888888" },
@@ -425,6 +429,7 @@ Singleton {
                 { type: "slider", label: "Hole Size", property: "musicHoleSize", default: 12, min: 0, max: 40 },
                 { type: "slider", label: "Shadow Opacity", property: "musicArtShadowOpacity", default: 0.3, min: 0.0, max: 1.0, step: 0.05 },
                 { type: "header", label: "Behavior" },
+                { type: "slider", label: "Visualizer Style", property: "visualizerStyle", default: 1, min: 0, max: 1 },
                 { type: "slider", label: "Rotation Speed", property: "musicRotationDuration", default: 8000, min: 2000, max: 20000, step: 500 },
                 { type: "slider", label: "Control Spacing", property: "musicControlSpacing", default: 24, min: 0, max: 50 }
             ]

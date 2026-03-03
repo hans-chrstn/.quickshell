@@ -9,26 +9,52 @@ Column {
     
     spacing: 6
     
-    property string screenIdentifier: ""
+    property var screen: null
+    readonly property string screenIdentifier: screen ? screen.name : ""
     
     Process {
         id: recorder
-        function startRecording() {
+        
+        function startRecording(geometry) {
             let home = Quickshell.env("HOME") || "/tmp"
             let timestamp = new Date().getTime()
             let filename = home + "/Videos/recording_" + root.screenIdentifier + "_" + timestamp + ".mp4"
-            command = ["wf-recorder", "-a", "-o", root.screenIdentifier, "-f", filename]
+            
+            let args = ["wf-recorder", "-a", "-f", filename]
+            
+            if (geometry && geometry !== "") {
+                args.push("-g")
+                args.push(geometry)
+            } else {
+                args.push("-o")
+                args.push(root.screenIdentifier)
+            }
+            
+            command = args
             running = true
-            Quickshell.execDetached(["notify-send", "Recording Started", "Screen: " + root.screenIdentifier + "
-File: " + filename])
+            
+            Quickshell.execDetached(["notify-send", "Recording Started", "Mode: " + (geometry ? "Region" : "Fullscreen") + "\nFile: " + filename])
         }
+
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0 && exitCode !== 130) {
-                Quickshell.execDetached(["notify-send", "Recorder Stopped", "Screen: " + root.screenIdentifier + "
-Error code: " + exitCode])
+                Quickshell.execDetached(["notify-send", "Recorder Stopped", "Error code: " + exitCode])
             } else {
-                Quickshell.execDetached(["notify-send", "Recording Saved", "Screen: " + root.screenIdentifier])
+                Quickshell.execDetached(["notify-send", "Recording Saved", "File saved to Videos/"])
             }
+        }
+    }
+
+    Connections {
+        target: AreaPickerManager
+        function onAreaSelected(area) {
+            if (AreaPickerManager.activeScreenName !== root.screenIdentifier) return
+            
+            let globalX = Math.round(area.x + (root.screen ? root.screen.x : 0))
+            let globalY = Math.round(area.y + (root.screen ? root.screen.y : 0))
+            let geo = globalX + "," + globalY + " " + Math.round(area.width) + "x" + Math.round(area.height)
+            
+            recorder.startRecording(geo)
         }
     }
 
@@ -38,11 +64,13 @@ Error code: " + exitCode])
         width: 44
         height: 44
         cornerRadius: 22
+        
         onClicked: {
             if (!recorder.running) {
-                recorder.startRecording()
+                AreaPickerManager.activeScreenName = root.screenIdentifier
+                AreaPickerManager.start()
             } else {
-                recorder.signal(2)
+                recorder.running = false
             }
         }
         
@@ -51,16 +79,9 @@ Error code: " + exitCode])
             radius: 22
             color: recorder.running ? ThemeManager.dangerColor : "white"
             opacity: recorder.running ? 1.0 : (recBtn.isHovered ? 0.3 : 0.1)
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: 200
-                }
-            }
-            Behavior on color {
-                ColorAnimation {
-                    duration: 200
-                }
-            }
+            
+            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on color { ColorAnimation { duration: 200 } }
             
             Rectangle {
                 anchors.centerIn: parent
@@ -68,16 +89,9 @@ Error code: " + exitCode])
                 height: width
                 radius: recorder.running ? 3 : 9
                 color: "white"
-                Behavior on width {
-                    NumberAnimation {
-                        duration: 200
-                    }
-                }
-                Behavior on radius {
-                    NumberAnimation {
-                        duration: 200
-                    }
-                }
+                
+                Behavior on width { NumberAnimation { duration: 200 } }
+                Behavior on radius { NumberAnimation { duration: 200 } }
             }
         }
     }
@@ -88,12 +102,9 @@ Error code: " + exitCode])
         type: "caption"
         customColor: recorder.running ? ThemeManager.dangerColor : "white"
         opacity: (recBtn.isHovered || recorder.running) ? 1.0 : 0.6
-        font.weight: Font.Bold
+        font.weight: Font.Black
         font.letterSpacing: 1
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 200
-            }
-        }
+        
+        Behavior on opacity { NumberAnimation { duration: 200 } }
     }
 }

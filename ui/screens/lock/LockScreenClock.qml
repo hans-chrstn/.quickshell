@@ -9,7 +9,7 @@ ColumnLayout {
     spacing: -10
     Layout.alignment: Qt.AlignHCenter
 
-    readonly property color accentColor: ColorManager.accentColor
+    readonly property color accentColor: ThemeManager.accentColor
 
     SystemClock {
         id: internalSystemClock
