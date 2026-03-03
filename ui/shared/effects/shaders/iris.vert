@@ -9,6 +9,7 @@ layout(std140, binding = 0) uniform buf {
     float uWidth;
     float uHeight;
     float radius;
+    float aspectRatio;
 };
 void main() {
     qt_TexCoord0 = qt_MultiTexCoord0;

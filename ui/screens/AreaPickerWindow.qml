@@ -22,7 +22,7 @@ PanelWindow {
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     
     readonly property string screenName: (root.screen) ? root.screen.name : ""
-    visible: AreaPickerManager.active && (AreaPickerManager.activeScreenName === screenName)
+    visible: AreaPickerManager.active && (ViewManager.lastActiveScreenName === screenName)
 
     onVisibleChanged: {
         if (visible) {

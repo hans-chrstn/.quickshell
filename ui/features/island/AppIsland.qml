@@ -9,7 +9,7 @@ IslandSurface {
     id: appIslandRoot
 
     expandedWidth: ThemeManager.appIslandExpandedWidth
-    expandedHeight: searchBar.isSearchActive ? (ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 10) : ThemeManager.appIslandExpandedHeight
+    expandedHeight: ThemeManager.appIslandExpandedHeight
     collapsedWidth: ThemeManager.dynamicIslandCollapsedWidth
 
     isAtTop: false
@@ -24,14 +24,13 @@ IslandSurface {
     secondFilletX: width - 1
     secondFilletY: height - barHeight - cornerRadius
 
-    property alias searchVisible: searchBar.isSearchActive
     property int activeMenus: 0
 
     onIsHoveredChanged: {
         if (isHovered) {
             collapseTimer.stop()
             appIslandRoot.isExpanded = true
-        } else if (!searchVisible && activeMenus === 0) {
+        } else if (activeMenus === 0) {
             collapseTimer.restart()
         }
     }
@@ -40,19 +39,9 @@ IslandSurface {
         if (activeMenus > 0) {
             collapseTimer.stop()
             appIslandRoot.isExpanded = true
-        } else if (!isHovered && !searchVisible) {
+        } else if (!isHovered) {
             collapseTimer.restart()
         }
-    }
-
-    onIsExpandedChanged: {
-        if (!isExpanded) {
-            searchBar.isSearchActive = false
-        }
-    }
-
-    AppListLogic {
-        id: appListLogic
     }
 
     Timer {
@@ -85,27 +74,13 @@ IslandSurface {
         AppListView {
             id: appListView
             anchors.fill: parent
-            logic: appListLogic
-            filterText: searchBar.searchText
             isIslandExpanded: appIslandRoot.isExpanded
-
-            anchors.topMargin: searchBar.isSearchActive ? (ThemeManager.appIslandSearchBarHeight + 8) : 0
-            
-            Behavior on anchors.topMargin {
-                NumberAnimation {
-                    duration: 400
-                    easing.type: Easing.OutExpo
-                }
-            }
         }
 
         ApplicationSearchBar {
             id: searchBar
-            onIsSearchActiveChanged: {
-                if (!isSearchActive) {
-                    searchText = ""
-                }
-            }
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
         }
     }
 }

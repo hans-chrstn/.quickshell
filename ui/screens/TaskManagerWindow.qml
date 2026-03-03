@@ -10,8 +10,9 @@ import "./taskmanager"
 
 PanelWindow {
     id: root
-
-    visible: false
+    
+    readonly property string screenName: (root.screen) ? root.screen.name : ""
+    visible: ViewManager.taskManagerRequested && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -157,12 +158,6 @@ PanelWindow {
                     modelData: model
                 }
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (visible) {
-            entryTimer.start()
         }
     }
 }

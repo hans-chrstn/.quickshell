@@ -25,6 +25,7 @@ Item {
         property real uWidth: root.width
         property real uHeight: root.height
         property real radius: root.cornerRadius
+        property real aspectRatio: root.width / root.height
 
         vertexShader: Qt.resolvedUrl("shaders/iris.vert.qsb")
         fragmentShader: Qt.resolvedUrl("shaders/iris.frag.qsb")

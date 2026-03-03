@@ -14,7 +14,6 @@ Singleton {
     
     property int expandedNotificationCount: 0
     property real interactionDragPosition: 0
-    property string activeScreenName: ""
         
     signal popupsUpdated()
     
@@ -95,11 +94,5 @@ Singleton {
         
         dismissAnimationTimer.start()
         root.popupsUpdated()
-    }
-
-    Component.onCompleted: {
-        if (Quickshell.screens.length > 0) {
-            root.activeScreenName = Quickshell.screens[0].name
-        }
     }
 }

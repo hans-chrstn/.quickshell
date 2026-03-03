@@ -14,16 +14,18 @@ PanelWindow {
     screen: modelData
     
     Connections {
+        target: ViewManager
+        function onLastActiveScreenNameChanged() { updateVisibility() }
+    }
+
+    Connections {
         target: NotificationManager
-        function onActiveScreenNameChanged() { updateVisibility() }
         function onPopupsUpdated() { updateVisibility() }
     }
 
     function updateVisibility() {
-        root.visible = (screen && screen.name === NotificationManager.activeScreenName && NotificationManager.popupModel.count > 0)
+        root.visible = (screen && screen.name === ViewManager.lastActiveScreenName && NotificationManager.popupModel.count > 0)
     }
-
-    Component.onCompleted: updateVisibility()
 
     implicitWidth: 450
     implicitHeight: 800

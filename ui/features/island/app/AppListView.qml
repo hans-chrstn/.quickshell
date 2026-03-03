@@ -5,25 +5,26 @@ import qs.core
 Item {
     id: root
 
-    property string filterText: ""
     property bool isIslandExpanded: false
     property alias currentIndex: view.currentIndex
-    property var logic
-
-    onFilterTextChanged: {
-        if (logic) {
-            logic.filterText = filterText
-            logic.updateDebounce.restart()
-        }
-    }
 
     ApplicationScrubber {
         id: alphabetScrubber
         width: parent.width
         anchors.top: parent.top
         onLetterSelected: (letter) => {
-            if (logic) {
-                logic.selectLetter(letter, alphabetScrubber)
+            for (let i = 0; i < LauncherManager.model.count; i++) {
+                let item = LauncherManager.model.get(i)
+                if (item && item.app) {
+                    let firstLetter = item.app.name.substring(0, 1).toUpperCase()
+                    if (letter === "#" && !"ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
+                        view.currentIndex = i
+                        break
+                    } else if (firstLetter === letter) {
+                        view.currentIndex = i
+                        break
+                    }
+                }
             }
         }
     }
@@ -41,15 +42,19 @@ Item {
         preferredHighlightBegin: 0.5
         preferredHighlightEnd: 0.5
         dragMargin: 40
-        model: logic ? logic.model : null
+        model: LauncherManager.model
 
         delegate: AppIslandDelegate {
             isIslandExpanded: root.isIslandExpanded
         }
 
         onCurrentIndexChanged: {
-            if (logic) {
-                logic.handleCurrentIndexChanged(currentIndex, alphabetScrubber)
+            if (currentIndex >= 0 && currentIndex < LauncherManager.model.count) {
+                let item = LauncherManager.model.get(currentIndex)
+                if (item && item.app) {
+                    let firstLetter = item.app.name.substring(0, 1).toUpperCase()
+                    alphabetScrubber.activeLetter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter) ? firstLetter : "#"
+                }
             }
         }
 
@@ -76,12 +81,6 @@ Item {
                 name: "itemOpacity"
                 value: ThemeManager.appIslandMinOpacity
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (logic) {
-            logic.view = view
         }
     }
 }

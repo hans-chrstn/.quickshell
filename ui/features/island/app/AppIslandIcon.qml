@@ -14,9 +14,10 @@ Item {
     property bool isHovered: false
     property bool isRunning: false
     property real visualOffset: 0
+    property int iconSize: ThemeManager.appIslandIconSize
     
-    Layout.preferredWidth: ThemeManager.appIslandIconSize
-    Layout.preferredHeight: ThemeManager.appIslandIconSize
+    Layout.preferredWidth: iconSize
+    Layout.preferredHeight: iconSize
     Layout.alignment: Qt.AlignHCenter
 
     readonly property real mouseX: hHandler.point.position.x
@@ -147,7 +148,7 @@ Item {
             id: appIcon
             anchors.fill: parent
             asynchronous: true
-            sourceSize: Qt.size(ThemeManager.appIslandIconSize * 2, ThemeManager.appIslandIconSize * 2) 
+            sourceSize: Qt.size(root.iconSize * 2, root.iconSize * 2) 
             smooth: true
             mipmap: true
             

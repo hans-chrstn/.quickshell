@@ -11,8 +11,9 @@ import "./wallpaper"
 
 PanelWindow {
     id: root
-
-    visible: false
+    
+    readonly property string screenName: (root.screen) ? root.screen.name : ""
+    visible: ViewManager.wallpaperRequested && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -184,12 +185,6 @@ PanelWindow {
                     }
                 }
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (visible) {
-            entryTimer.start()
         }
     }
 }

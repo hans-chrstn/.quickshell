@@ -8,7 +8,6 @@ Singleton {
     id: root
 
     property bool active: false
-    property string activeScreenName: ""
     property point startPoint: Qt.point(0, 0)
     property rect selection: Qt.rect(0, 0, 0, 0)
     

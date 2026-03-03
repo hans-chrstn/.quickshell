@@ -30,7 +30,7 @@ Item {
 
     onIsHoveredChanged: {
         if (isHovered && screenName !== "") {
-            NotificationManager.activeScreenName = screenName
+            ViewManager.trackScreen(screenName)
         }
     }
     

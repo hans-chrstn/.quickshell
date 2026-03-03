@@ -48,7 +48,7 @@ Column {
     Connections {
         target: AreaPickerManager
         function onAreaSelected(area) {
-            if (AreaPickerManager.activeScreenName !== root.screenIdentifier) return
+            if (ViewManager.lastActiveScreenName !== root.screenIdentifier) return
             
             let globalX = Math.round(area.x + (root.screen ? root.screen.x : 0))
             let globalY = Math.round(area.y + (root.screen ? root.screen.y : 0))
@@ -67,7 +67,6 @@ Column {
         
         onClicked: {
             if (!recorder.running) {
-                AreaPickerManager.activeScreenName = root.screenIdentifier
                 AreaPickerManager.start()
             } else {
                 recorder.running = false

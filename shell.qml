@@ -9,14 +9,9 @@
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
-import qs.ui.panels
-import qs.ui.features.island
-import qs.ui.features.island.corners
-import qs.ui.shared
 import qs.core
 import qs.ui.screens
-import qs.ui.features.notifications
+import qs.ui.shared
 
 ShellRoot {
     id: root
@@ -26,127 +21,9 @@ ShellRoot {
         component: Lock { }
     }
 
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: topBarDelegate
-            required property var modelData
-            
-            component: TopBar { 
-                aboveWindows: true 
-                screen: topBarDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: leftBarDelegate
-            required property var modelData
-            
-            component: LeftBar { 
-                aboveWindows: true 
-                screen: leftBarDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: rightBarDelegate
-            required property var modelData
-            
-            component: RightBar { 
-                aboveWindows: true 
-                screen: rightBarDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: bottomBarDelegate
-            required property var modelData
-            
-            component: BottomBar { 
-                aboveWindows: true 
-                screen: bottomBarDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: topLeftDelegate
-            required property var modelData
-            
-            component: CornerTopLeft {
-                screen: topLeftDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: topRightDelegate
-            required property var modelData
-            
-            component: CornerTopRight {
-                screen: topRightDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: bottomLeftDelegate
-            required property var modelData
-            
-            component: CornerBottomLeft {
-                screen: bottomLeftDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: bottomRightDelegate
-            required property var modelData
-            
-            component: CornerBottomRight {
-                screen: bottomRightDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: notificationDelegate
-            required property var modelData
-            
-            component: NotificationPopup { 
-                modelData: notificationDelegate.modelData
-            }
-        }
-    }
-
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: areaPickerDelegate
-            required property var modelData
-            
-            component: AreaPickerWindow { 
-                screen: areaPickerDelegate.modelData
-            }
-        }
+    Loader {
+        id: orchestratorLoader
+        active: true
+        sourceComponent: WindowOrchestrator { }
     }
 }

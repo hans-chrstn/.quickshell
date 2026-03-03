@@ -10,8 +10,9 @@ import qs.ui.screens.controlpanel
 
 PanelWindow {
     id: root
-
-    visible: false
+    
+    readonly property string screenName: (root.screen) ? root.screen.name : ""
+    visible: ViewManager.networkRequested && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -132,12 +133,6 @@ PanelWindow {
                 panelType: "wifi"
                 Layout.fillWidth: true
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (visible) {
-            entryTimer.start()
         }
     }
 }

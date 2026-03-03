@@ -16,6 +16,14 @@ SystemPanel {
     anchors.left: true
     anchors.right: true
 
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered && root.screen) {
+                ViewManager.trackScreen(root.screen.name)
+            }
+        }
+    }
+
     implicitHeight: ThemeManager.dynamicIslandExpandedHeight
     exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
@@ -55,23 +63,5 @@ SystemPanel {
 
         barHeight: ThemeManager.globalThickness
         backgroundColor: ThemeManager.backgroundColor
-    }
-
-    MouseArea {
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        width: dIsland.isExpanded ? ThemeManager.dynamicIslandExpandedWidth : ThemeManager.dynamicIslandCollapsedWidth
-        height: dIsland.isExpanded ? ThemeManager.dynamicIslandExpandedHeight : ThemeManager.globalThickness
-        hoverEnabled: true
-        onEntered: {
-            dIsland.isExpanded = true
-        }
-        onExited: {
-            dIsland.isExpanded = false
-        }
-        propagateComposedEvents: true
-        onPressed: (mouse) => {
-            mouse.accepted = false
-        }
     }
 }

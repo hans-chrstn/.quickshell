@@ -10,6 +10,7 @@ layout(std140, binding = 0) uniform buf {
     float uWidth;
     float uHeight;
     float radius;
+    float aspectRatio;
 };
 
 layout(binding = 1) uniform sampler2D source;
@@ -33,16 +34,24 @@ void main() {
     }
 
     vec2 uv = qt_TexCoord0;
-    float bloomDist = distance(uv, vec2(0.5));
-    float bloomRadius = progress * 0.8; 
-    float bloomEdge = 0.15;
-    float bloomMask = 1.0 - smoothstep(bloomRadius - bloomEdge, bloomRadius, bloomDist);
+    vec2 distVec = uv - vec2(0.5);
+    distVec.x *= aspectRatio;
+    float bloomDist = length(distVec);
     
-    float flare = smoothstep(bloomRadius - 0.1, bloomRadius, bloomDist) * 
-                  (1.0 - smoothstep(bloomRadius, bloomRadius + 0.02, bloomDist));
+    float maxDist = length(vec2(0.5 * aspectRatio, 0.5));
+    float bloomRadius = progress * maxDist * 1.1; 
+    
+    float bloomEdge = 0.25;
+    float mask = 1.0 - smoothstep(bloomRadius - bloomEdge, bloomRadius, bloomDist);
+    
+    float edgeWidth = 0.08;
+    float shimmer = smoothstep(bloomRadius - edgeWidth, bloomRadius, bloomDist) * 
+                    (1.0 - smoothstep(bloomRadius, bloomRadius + 0.02, bloomDist));
     
     vec4 color = texture(source, uv);
-    vec4 finalColor = (color * bloomMask) + (vec4(1.0) * flare * 0.5 * progress);
     
-    fragColor = finalColor * pillMask * qt_Opacity;
+    vec4 finalColor = color * mask;
+    finalColor.rgb += (vec3(1.0) * shimmer * 0.3 * progress);
+    
+    fragColor = finalColor * pillMask * progress * qt_Opacity;
 }

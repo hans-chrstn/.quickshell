@@ -1,13 +1,17 @@
 pragma Singleton
 import QtQuick
 import Quickshell
-import qs.ui.screens
-import qs.ui.shared
 
 Singleton {
     id: root
 
-    readonly property var primaryScreen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
+
+    function trackScreen(name) {
+        if (name && name !== "") {
+            lastActiveScreenName = name
+        }
+    }
 
     property bool settingsRequested: false
     property bool wallpaperRequested: false
@@ -25,66 +29,6 @@ Singleton {
 
     signal windowOpening(string windowType)
     signal windowClosing(string windowType)
-
-    LazyContainer { 
-        id: settingsLdr
-        active: root.settingsRequested
-        component: SettingsWindow { 
-            visible: root.settingsRequested
-            closing: root.isSettingsClosing
-            screen: root.primaryScreen 
-        } 
-    }
-    
-    LazyContainer { 
-        id: wallpaperLdr
-        active: root.wallpaperRequested
-        component: WallpaperWindow { 
-            visible: root.wallpaperRequested
-            closing: root.isWallpaperClosing
-            screen: root.primaryScreen 
-        } 
-    }
-    
-    LazyContainer { 
-        id: networkLdr
-        active: root.networkRequested
-        component: NetworkWindow { 
-            visible: root.networkRequested
-            closing: root.isNetworkClosing
-            screen: root.primaryScreen 
-        } 
-    }
-
-    LazyContainer { 
-        id: bluetoothLdr
-        active: root.bluetoothRequested
-        component: BluetoothWindow { 
-            visible: root.bluetoothRequested
-            closing: root.isBluetoothClosing
-            screen: root.primaryScreen 
-        } 
-    }
-    
-    LazyContainer { 
-        id: taskManagerLdr
-        active: root.taskManagerRequested
-        component: TaskManagerWindow { 
-            visible: root.taskManagerRequested
-            closing: root.isTaskManagerClosing
-            screen: root.primaryScreen 
-        } 
-    }
-
-    LazyContainer { 
-        id: notesLdr
-        active: root.notesRequested
-        component: NotesWindow { 
-            visible: root.notesRequested
-            closing: root.isNotesClosing
-            screen: root.primaryScreen 
-        } 
-    }
 
     function openSettings() {
         root.isSettingsClosing = false
@@ -220,8 +164,8 @@ Singleton {
         id: bluetoothCloseTimer
         interval: 350
         onTriggered: { 
-            root.bluetoothRequested = false
-            root.isBluetoothClosing = false 
+            root.isBluetoothClosing = false
+            root.bluetoothRequested = false 
         } 
     }
 

@@ -11,8 +11,9 @@ import "./notes"
 
 PanelWindow {
     id: root
-
-    visible: false
+    
+    readonly property string screenName: (root.screen) ? root.screen.name : ""
+    visible: ViewManager.notesRequested && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -159,12 +160,6 @@ PanelWindow {
 
         NotesOverlays {
             logic: logic
-        }
-    }
-
-    Component.onCompleted: {
-        if (visible) {
-            entryTimer.start()
         }
     }
 }

@@ -6,6 +6,16 @@ import qs.ui.panels
 import qs.ui.shared
 
 SystemPanel {
+    id: root
+
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered && root.screen) {
+                ViewManager.trackScreen(root.screen.name)
+            }
+        }
+    }
+
     anchors.left: true
     anchors.top: true
     anchors.bottom: true

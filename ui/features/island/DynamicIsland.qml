@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.Mpris
-import Quickshell.Services.Notifications
 import qs.core
 import qs.ui.shared
 import qs.ui.features.island
@@ -39,22 +38,6 @@ IslandSurface {
             tabView.collapseSelectors()
         }
     }
-
-    Connections {
-        target: ViewManager
-        function onWindowOpening(windowType) {
-            if (windowType === "network" || windowType === "bluetooth" || windowType === "settings") {
-                root.activeMenus++
-            }
-        }
-        function onWindowClosing(windowType) {
-            if (windowType === "network" || windowType === "bluetooth" || windowType === "settings") {
-                root.activeMenus--
-            }
-        }
-    }
-
-    property int activeMenus: 0
 
     surfaceContent: Item {
         anchors.fill: parent

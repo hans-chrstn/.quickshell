@@ -16,7 +16,6 @@ Singleton {
         id: niri
         Component.onCompleted: connect()
         
-        onConnected: console.log("[NiriManager] Connected to Niri IPC")
         onErrorOccurred: (err) => console.error("[NiriManager] Error:", err)
     }
 

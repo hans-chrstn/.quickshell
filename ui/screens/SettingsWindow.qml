@@ -11,8 +11,9 @@ import qs.ui.screens.settings
 
 PanelWindow {
     id: root
-
-    visible: false
+    
+    readonly property string screenName: (root.screen) ? root.screen.name : ""
+    visible: ViewManager.settingsRequested && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -182,12 +183,6 @@ PanelWindow {
                     }
                 }
             }
-        }
-    }
-
-    Component.onCompleted: {
-        if (visible) {
-            entryTimer.start()
         }
     }
 }

@@ -10,7 +10,15 @@ import qs.ui.panels.bottombar
 SystemPanel {
     id: root
 
-    implicitHeight: ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 30
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered && root.screen) {
+                ViewManager.trackScreen(root.screen.name)
+            }
+        }
+    }
+
+    implicitHeight: ThemeManager.appIslandExpandedHeight + 30
 
     anchors.bottom: true
     anchors.left: true
@@ -21,7 +29,7 @@ SystemPanel {
     color: "transparent"
 
     focusable: true
-    WlrLayershell.keyboardFocus: appIsland.searchVisible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     mask: Region {
         Region {
@@ -68,15 +76,5 @@ SystemPanel {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: appIsland.height + 20
         z: 5
-    }
-
-    MouseArea {
-        anchors.fill: parent
-        z: 1
-        enabled: appIsland.searchVisible
-        onPressed: {
-            appIsland.searchVisible = false
-            appIsland.isExpanded = false
-        }
     }
 }
