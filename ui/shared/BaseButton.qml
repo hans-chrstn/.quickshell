@@ -1,5 +1,6 @@
 import QtQuick
 import qs.core
+import qs.ui.shared.effects
 
 Item {
     id: root
@@ -7,6 +8,7 @@ Item {
     property bool isPressed: tapHandler.pressed
     property bool isHovered: hoverHandler.hovered
     property alias cursorShape: hoverHandler.cursorShape
+    property real cornerRadius: ThemeManager.globalCornerRadius
     
     property real hoverScale: 1.05
     property real pressScale: 0.92
@@ -23,6 +25,15 @@ Item {
             easing.type: root.isPressed ? Easing.OutCubic : Easing.OutBack
             easing.overshoot: 1.2
         } 
+    }
+
+    StateLayer {
+        anchors.fill: parent
+        cornerRadius: root.cornerRadius
+        isPressed: root.isPressed
+        mouseX: tapHandler.point.position.x
+        mouseY: tapHandler.point.position.y
+        z: 10
     }
 
     TapHandler {

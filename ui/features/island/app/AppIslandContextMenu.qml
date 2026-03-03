@@ -110,8 +110,8 @@ Menu {
     }
 
     StyledLabel {
+        Layout.preferredHeight: root.windowsList.length > 0 ? implicitHeight : 0
         visible: root.windowsList.length > 0
-        height: visible ? implicitHeight : 0
         text: "RUNNING WINDOWS"
         type: "caption"
         font.weight: Font.Black
@@ -154,6 +154,7 @@ Menu {
                     id: closeBtn
                     width: 28
                     height: 28
+                    cornerRadius: 14
                     Layout.rightMargin: 6
                     onClicked: {
                         NiriManager.closeWindowById(modelData.id)
@@ -189,7 +190,7 @@ Menu {
 
     MenuSeparator {
         visible: root.windowsList.length > 0
-        height: visible ? implicitHeight : 0
+        Layout.preferredHeight: visible ? implicitHeight : 0
         contentItem: Rectangle {
             implicitWidth: 200
             implicitHeight: root.windowsList.length > 0 ? 1 : 0

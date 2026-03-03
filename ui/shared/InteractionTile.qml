@@ -12,6 +12,7 @@ BaseButton {
     property string tileLabel: ""
     property bool isTileActive: false
     property color activeTileColor: ThemeManager.accentColor
+    cornerRadius: ThemeManager.controlCenterTileRadius
     
     signal tileClicked()
     onClicked: {

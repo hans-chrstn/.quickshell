@@ -66,12 +66,12 @@ Item {
                         NumberAnimation {
                             to: 1.05
                             duration: 2000
-                            easing.type: Easing.InOutSine
+                            easing.type: Easing.OutSine
                         }
                         NumberAnimation {
                             to: 1.0
                             duration: 2000
-                            easing.type: Easing.InOutSine
+                            easing.type: Easing.OutSine
                         }
                     }
 
@@ -119,7 +119,7 @@ Item {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 8
+            spacing: 6
 
             ColumnLayout {
                 Layout.fillWidth: true
@@ -206,15 +206,16 @@ Item {
             RowLayout {
                 id: playbackControls
                 Layout.fillWidth: true
-                spacing: ThemeManager.musicControlSpacing
+                spacing: 12
                 Layout.alignment: Qt.AlignHCenter
 
                 Item { Layout.fillWidth: true }
 
                 BaseButton {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 28
-                    height: 28
+                    width: 22
+                    height: 22
+                    cornerRadius: 11
                     hoverScale: 1.2
                     onClicked: {
                         root.mediaPlayer.previous()
@@ -230,14 +231,15 @@ Item {
                         anchors.centerIn: parent
                         text: ThemeManager.iconPrevious
                         color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 22
+                        font.pixelSize: 16
                     }
                 }
 
                 BaseButton {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 36
-                    height: 36
+                    width: 28
+                    height: 28
+                    cornerRadius: 14
                     hoverScale: 1.2
                     onClicked: {
                         root.mediaPlayer.togglePlaying()
@@ -247,14 +249,15 @@ Item {
                         anchors.centerIn: parent
                         text: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? ThemeManager.iconPause : ThemeManager.iconPlay
                         color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 32
+                        font.pixelSize: 24
                     }
                 }
 
                 BaseButton {
                     Layout.alignment: Qt.AlignVCenter
-                    width: 28
-                    height: 28
+                    width: 22
+                    height: 22
+                    cornerRadius: 11
                     hoverScale: 1.2
                     onClicked: {
                         root.mediaPlayer.next()
@@ -270,7 +273,7 @@ Item {
                         anchors.centerIn: parent
                         text: ThemeManager.iconNext
                         color: ThemeManager.contentOnBackgroundColor
-                        font.pixelSize: 22
+                        font.pixelSize: 16
                     }
                 }
 

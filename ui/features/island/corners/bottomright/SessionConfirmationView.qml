@@ -73,6 +73,7 @@ Item {
                 id: confirmYesButton
                 width: 48
                 height: 48
+                cornerRadius: 24
                 onClicked: {
                     SoundManager.playSuccess()
                     if (root.targetAction === "logout") {
@@ -113,6 +114,7 @@ Item {
                 id: confirmNoButton
                 width: 48
                 height: 48
+                cornerRadius: 24
                 onClicked: {
                     SoundManager.playClick()
                     root.cancelRequested()
@@ -123,8 +125,6 @@ Item {
                     radius: 24
                     color: ThemeManager.contentOnBackgroundColor
                     opacity: confirmNoButton.isHovered ? 0.12 : 0.05
-                    border.color: ThemeManager.contentOnBackgroundColor
-                    border.width: 1
                     
                     Behavior on opacity {
                         NumberAnimation {

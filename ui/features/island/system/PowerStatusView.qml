@@ -55,6 +55,7 @@ Item {
                 BaseButton {
                     width: 40
                     height: 40
+                    cornerRadius: 20
                     onClicked: {
                         ViewManager.toggleNetwork()
                     }
@@ -77,6 +78,7 @@ Item {
                 BaseButton {
                     width: 40
                     height: 40
+                    cornerRadius: 20
                     onClicked: {
                         ViewManager.toggleBluetooth()
                     }

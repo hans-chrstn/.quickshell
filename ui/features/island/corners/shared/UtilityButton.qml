@@ -17,6 +17,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         width: 44
         height: 44
+        cornerRadius: 22
         onClicked: {
             root.clicked()
         }

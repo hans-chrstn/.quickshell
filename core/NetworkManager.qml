@@ -15,7 +15,7 @@ Singleton {
     property bool isAirplaneModeEnabled: false
     
     property string activeInterface: ""
-    property string activeType: "none" // "wifi", "ethernet", "none"
+    property string activeType: "none"
     property string activeState: "disconnected"
     property int signalStrength: 0
 

@@ -17,6 +17,7 @@ Item {
 
     property var logic
     property alias currentIndex: view.currentIndex
+    property alias offset: view.offset
     property alias moving: view.moving
     property alias count: view.count
     

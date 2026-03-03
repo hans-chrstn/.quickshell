@@ -8,6 +8,7 @@ BaseButton {
     
     Layout.preferredWidth: 140
     Layout.preferredHeight: 44
+    cornerRadius: 12
     
     property string actionIcon: ""
     property string actionLabel: ""
@@ -24,15 +25,8 @@ BaseButton {
         radius: 12
         color: ThemeManager.contentOnBackgroundColor
         opacity: root.isHovered ? 0.12 : 0.06
-        border.color: root.actionHighlightColor
-        border.width: root.isHovered ? 1 : 0
         
         Behavior on opacity {
-            NumberAnimation {
-                duration: 200
-            }
-        }
-        Behavior on border.width {
             NumberAnimation {
                 duration: 200
             }

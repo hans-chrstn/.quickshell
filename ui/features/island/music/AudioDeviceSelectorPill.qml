@@ -81,6 +81,7 @@ ExpandingPill {
             delegate: BaseButton {
                 width: deviceList.width
                 height: 20
+                cornerRadius: 4
                 onClicked: {
                     AudioManager.selectSink(model.node)
                     root.isExpanded = false
