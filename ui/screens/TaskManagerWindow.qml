@@ -405,6 +405,7 @@ PanelWindow {
                                     dataHistory: ProcessManager.cpuHistory
                                     lineColor: ThemeManager.accentColor
                                     maxValue: 100
+                                    autoScale: false
                                 }
                             }
                         }
@@ -430,6 +431,7 @@ PanelWindow {
                                     dataHistory: ProcessManager.memHistory
                                     lineColor: "#55FF55"
                                     maxValue: 100
+                                    autoScale: false
                                 }
                             }
                         }
