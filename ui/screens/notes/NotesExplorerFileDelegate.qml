@@ -7,20 +7,19 @@ BaseButton {
     id: root
     
     property var logic
-    property var modelData
     
     width: ListView.view ? ListView.view.width : 230
     height: 38
     
     onClicked: {
-        logic.openFile(modelData.path, modelData.isDir)
+        logic.openFile(path, isDir)
     }
 
     Rectangle {
         anchors.fill: parent
         radius: 10
-        color: NotesManager.currentFilePath === modelData.path ? ThemeManager.accentColor : (root.isHovered ? ThemeManager.surfaceStrongColor : ThemeManager.surfacePrimaryColor)
-        border.color: (root.isHovered || NotesManager.currentFilePath === modelData.path) ? ThemeManager.accentColor : ThemeManager.outlineVariantColor
+        color: (NotesManager.currentFilePath === path) ? ThemeManager.surfaceVariantStrongColor : (root.isHovered ? ThemeManager.surfaceStrongColor : ThemeManager.surfaceSubtleColor)
+        border.color: (root.isHovered || NotesManager.currentFilePath === path) ? ThemeManager.accentColor : ThemeManager.outlineVariantColor
         border.width: 1
     }
 
@@ -31,27 +30,29 @@ BaseButton {
         spacing: 10
         
         StyledLabel {
-            text: modelData.isDir ? "󰉋" : "󰠮"
+            text: isDir ? "󰉋" : "󰠮"
             type: "icon"
             font.pixelSize: 14
-            customColor: (NotesManager.currentFilePath === modelData.path) ? ThemeManager.contentPrimaryColor : (modelData.isDir ? ThemeManager.accentColor : ThemeManager.surfaceContentColor)
+            customColor: isDir ? ThemeManager.accentColor : ThemeManager.surfaceContentColor
+            opacity: (NotesManager.currentFilePath === path) ? 1.0 : 0.7
         }
         
         StyledLabel {
-            text: modelData.name
+            text: name
             type: "body"
             Layout.fillWidth: true
             elideMode: Text.ElideRight
-            font.weight: NotesManager.currentFilePath === modelData.path ? Font.Bold : Font.Normal
-            customColor: (NotesManager.currentFilePath === modelData.path) ? ThemeManager.contentPrimaryColor : ThemeManager.surfaceContentColor
+            font.weight: (NotesManager.currentFilePath === path) ? Font.Bold : Font.Normal
+            customColor: ThemeManager.surfaceContentColor
+            opacity: (NotesManager.currentFilePath === path) ? 1.0 : 0.8
         }
         
         BaseButton {
             width: 20
             height: 20
-            visible: root.isHovered && !modelData.isDir && modelData.name !== ".."
+            visible: !!(root.isHovered && !isDir && name !== "..")
             onClicked: {
-                logic.confirmDelete(modelData.path)
+                logic.confirmDelete(path)
             }
             
             StyledLabel {

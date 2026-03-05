@@ -24,6 +24,14 @@ PanelWindow {
     exclusionMode: visible ? ExclusionMode.Normal : ExclusionMode.Ignore
     focusable: visible && !closing
 
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.visible
+        onActivated: {
+            ViewManager.closeWindowByType("bluetooth")
+        }
+    }
+
     property bool closing: false
     property bool entryActive: false
 
@@ -86,6 +94,13 @@ PanelWindow {
             NumberAnimation {
                 duration: 400
                 easing.type: Easing.OutExpo
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onPressed: (mouse) => {
+                mouse.accepted = true
             }
         }
 

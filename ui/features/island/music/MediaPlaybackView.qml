@@ -222,6 +222,7 @@ Item {
                     height: 22
                     cornerRadius: 11
                     hoverScale: 1.2
+                    tooltip: "Previous Track"
                     onClicked: {
                         root.mediaPlayer.previous()
                     }
@@ -246,6 +247,7 @@ Item {
                     height: 28
                     cornerRadius: 14
                     hoverScale: 1.2
+                    tooltip: (root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing) ? "Pause" : "Play"
                     onClicked: {
                         root.mediaPlayer.togglePlaying()
                     }
@@ -264,6 +266,7 @@ Item {
                     height: 22
                     cornerRadius: 11
                     hoverScale: 1.2
+                    tooltip: "Next Track"
                     onClicked: {
                         root.mediaPlayer.next()
                     }

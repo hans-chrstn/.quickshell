@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.core
+import qs.shared
 
 Singleton {
     id: root
@@ -28,6 +29,7 @@ Singleton {
     }
 
     function close() {
+        root.searchText = ""
         root.active = false
     }
 
@@ -36,16 +38,38 @@ Singleton {
         let filter = root.searchText.toLowerCase()
 
         if (filter !== "") {
-            apps = apps.filter(app => {
-                let nameMatch = app.name.toLowerCase().includes(filter)
-                let descMatch = app.description && app.description.toLowerCase().includes(filter)
-                return nameMatch || descMatch
+            let scoredApps = []
+            for (let i = 0; i < apps.length; i++) {
+                let app = apps[i]
+                
+                let nameScore = FuzzySearch.score(filter, app.name)
+                let descScore = app.description ? FuzzySearch.score(filter, app.description) * 0.4 : 0
+                let totalScore = Math.max(nameScore, descScore)
+                
+                if (totalScore > 0) {
+                    scoredApps.push({
+                        "app": app,
+                        "score": totalScore
+                    })
+                }
+            }
+
+            scoredApps.sort((a, b) => {
+                if (Math.abs(b.score - a.score) > 0.001) {
+                    return b.score - a.score
+                }
+                return a.app.name.toLowerCase().localeCompare(b.app.name.toLowerCase())
+            })
+
+            apps = []
+            for (let i = 0; i < scoredApps.length; i++) {
+                apps.push(scoredApps[i].app)
+            }
+        } else {
+            apps.sort((a, b) => {
+                return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
             })
         }
-
-        apps.sort((a, b) => {
-            return a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-        })
 
         appModel.clear()
         for (let i = 0; i < apps.length; i++) {

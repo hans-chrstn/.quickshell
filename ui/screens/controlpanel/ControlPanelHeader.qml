@@ -35,85 +35,61 @@ RowLayout {
     }
 
     Item {
+        Layout.preferredWidth: 20
+    }
+
+    Rectangle {
         Layout.fillWidth: true
+        Layout.preferredHeight: 36
+        Layout.maximumWidth: 300
+        radius: 18
+        color: ThemeManager.surfaceStrongColor
+        border.color: ThemeManager.outlinePrimaryColor
+        border.width: 1
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            spacing: 8
+
+            StyledLabel {
+                text: ThemeManager.iconSearch
+                type: "caption"
+                font.pixelSize: 14
+                opacity: controlSearchInput.activeFocus ? 1.0 : 0.3
+                customColor: ThemeManager.accentColor
+            }
+
+            TextInput {
+                id: controlSearchInput
+                Layout.fillWidth: true
+                color: ThemeManager.contentOnBackgroundColor
+                font.family: ThemeManager.fontFamily
+                font.pixelSize: 12
+                selectionColor: ThemeManager.accentColor
+                text: root.activePage === "wifi" ? NetworkManager.searchText : BluetoothManager.searchText
+                
+                onTextChanged: {
+                    if (root.activePage === "wifi") {
+                        NetworkManager.searchText = text
+                    } else {
+                        BluetoothManager.searchText = text
+                    }
+                }
+
+                StyledLabel {
+                    text: root.activePage === "wifi" ? "Search Wi-Fi..." : "Filter devices..."
+                    type: "caption"
+                    font.pixelSize: 12
+                    opacity: 0.2
+                    visible: !controlSearchInput.text && !controlSearchInput.activeFocus
+                }
+            }
+        }
     }
 
-    Rectangle {
-        width: 36
-        height: 36
-        radius: 18
-        color: ThemeManager.contentOnBackgroundColor
-        opacity: hSet.hovered ? 0.2 : 0.1
-        scale: hSet.hovered ? 1.1 : 1.0
-        
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 200
-            }
-        }
-        Behavior on scale {
-            NumberAnimation {
-                duration: 200
-                easing.type: Easing.OutQuart
-            }
-        }
-
-        StyledLabel {
-            anchors.centerIn: parent
-            text: "󰒓"
-            type: "body"
-            font.pixelSize: 18
-        }
-
-        TapHandler {
-            onTapped: {
-                ViewManager.openSettings()
-                SoundManager.playClick()
-            }
-        }
-
-        HoverHandler {
-            id: hSet
-            cursorShape: Qt.PointingHandCursor
-        }
-    }
-
-    Rectangle {
-        width: 36
-        height: 36
-        radius: 18
-        color: ThemeManager.contentOnBackgroundColor
-        opacity: hClose.hovered ? 0.2 : 0.1
-        scale: hClose.hovered ? 1.1 : 1.0
-        
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 200
-            }
-        }
-        Behavior on scale {
-            NumberAnimation {
-                duration: 200
-                easing.type: Easing.OutQuart
-            }
-        }
-
-        StyledLabel {
-            anchors.centerIn: parent
-            text: "󰅖"
-            type: "body"
-            font.pixelSize: 18
-        }
-
-        TapHandler {
-            onTapped: {
-                ViewManager.closeWindowByType("controlPanel")
-            }
-        }
-
-        HoverHandler {
-            id: hClose
-            cursorShape: Qt.PointingHandCursor
-        }
+    Item {
+        Layout.fillWidth: true
     }
 }

@@ -2,6 +2,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.shared
 
 Singleton {
     id: root
@@ -12,6 +13,7 @@ Singleton {
     
     property string content: ""
     property string currentFilePath: "" 
+    property string searchText: ""
     property var recentFiles: []
     property bool isReady: false
     property bool hasUnsavedChanges: false
@@ -78,7 +80,7 @@ Singleton {
         if (idx !== -1) {
             list.splice(idx, 1)
             root.recentFiles = list
-            recentFilesStore.setText(JSON.stringify(root.recentFiles))
+            recentFilesStore.setText(JSON.stringify(root.recentFiles, null, 4))
         }
     }
 
@@ -114,7 +116,7 @@ Singleton {
     }
 
     function addToRecent(path) {
-        if (!path) {
+        if (!path || path === "") {
             return
         }
         let list = [...root.recentFiles]
@@ -124,18 +126,21 @@ Singleton {
         }
         list.unshift(path)
         root.recentFiles = list.slice(0, 15)
-        recentFilesStore.setText(JSON.stringify(root.recentFiles))
+        recentFilesStore.setText(JSON.stringify(root.recentFiles, null, 4))
     }
 
     function loadRecentFiles() {
-        let text = recentFilesStore.text()
-        if (text) {
+        let content = recentFilesStore.text()
+        if (content && content !== "") {
             try {
-                let parsed = JSON.parse(text)
+                let parsed = JSON.parse(content)
                 if (Array.isArray(parsed)) {
-                    root.recentFiles = parsed
-                    if (root.recentFiles.length > 0 && root.currentFilePath === "") {
-                        root.openFile(root.recentFiles[0])
+                    let cleaned = parsed.filter(p => p && p !== "")
+                    root.recentFiles = cleaned
+                    if (cleaned.length > 0 && root.currentFilePath === "") {
+                        let firstFile = cleaned[0]
+                        root.currentFilePath = firstFile
+                        notesFile.path = firstFile
                     }
                 }
             } catch(e) {
@@ -150,7 +155,10 @@ Singleton {
         blockLoading: true 
         printErrors: false 
         onLoaded: {
-            root.content = text() || ""
+            let fileContent = text()
+            if (fileContent !== undefined && fileContent !== null) {
+                root.content = fileContent
+            }
             root.isReady = true
             root.hasUnsavedChanges = false
         }

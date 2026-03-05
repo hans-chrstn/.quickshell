@@ -12,9 +12,14 @@ Item {
     
     property var app: null
     property bool isHovered: false
+    property bool isPressed: false
     property bool isRunning: false
     property real visualOffset: 0
     property int iconSize: ThemeManager.appIslandIconSize
+    property real cornerRadius: 12
+    
+    width: iconSize
+    height: iconSize
     
     Layout.preferredWidth: iconSize
     Layout.preferredHeight: iconSize
@@ -75,14 +80,14 @@ Item {
     Rectangle {
         id: shadow
         anchors.fill: parent
-        radius: 14
+        radius: root.cornerRadius
         color: ThemeManager.accentColor
-        opacity: root.isHovered ? ThemeManager.visualHighlightOpacity * 4 : ThemeManager.visualHighlightOpacity
-        scale: root.isHovered ? 0.95 : 0.85
+        opacity: root.isHovered ? ThemeManager.visualHighlightOpacity * 3 : ThemeManager.visualHighlightOpacity
+        scale: root.isHovered ? 0.9 : 0.8
         
         transform: Translate {
-            x: root.isHovered ? -root.relX * 12 : 0
-            y: root.isHovered ? 18 - root.relY * 8 : 4
+            x: root.isHovered ? -root.relX * 8 : 0
+            y: root.isHovered ? 12 - root.relY * 4 : 4
             Behavior on x { 
                 NumberAnimation { 
                     duration: 400
@@ -102,7 +107,7 @@ Item {
         layer.enabled: root.isHovered
         layer.effect: MultiEffect { 
             blurEnabled: true
-            blur: 0.5 
+            blur: 0.4 
         }
         
         Behavior on opacity { 
@@ -121,17 +126,26 @@ Item {
     ClippingRectangle {
         id: iconContainer
         anchors.fill: parent
-        radius: 12
+        radius: root.cornerRadius
         color: "transparent"
 
         layer.enabled: true
         layer.smooth: true
         layer.textureSize: Qt.size(width * 2, height * 2)
 
+        StateLayer {
+            anchors.fill: parent
+            cornerRadius: root.cornerRadius
+            isPressed: root.isPressed
+            mouseX: root.mouseX
+            mouseY: root.mouseY
+            z: 10
+        }
+
         Rectangle {
             id: fallbackBackground
             anchors.fill: parent
-            radius: 12
+            radius: root.cornerRadius
             color: ThemeManager.surfaceVariantColor
             visible: appIcon.status !== Image.Ready
             

@@ -4,8 +4,6 @@ import qs.core
 ShaderEffect {
     id: root
     
-    anchors.fill: parent
-    
     property color color: ThemeManager.visualHighlightColor
     property real cornerRadius: 0
     property bool isPressed: false

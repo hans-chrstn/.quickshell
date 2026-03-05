@@ -6,8 +6,29 @@ import qs.ui.shared
 RowLayout {
     id: root
     
+    property bool isSidebarExpanded: true
+    signal toggleSidebar()
+
     Layout.fillWidth: true
     spacing: 16
+
+    BaseButton {
+        width: 36
+        height: 36
+        cornerRadius: 10
+        onClicked: root.toggleSidebar()
+        
+        opacity: isHovered ? 1.0 : 0.6
+        Behavior on opacity { NumberAnimation { duration: 200 } }
+
+        StyledLabel {
+            anchors.centerIn: parent
+            text: root.isSidebarExpanded ? "󰍜" : "󰍝"
+            type: "icon"
+            font.pixelSize: 20
+            customColor: root.isSidebarExpanded ? ThemeManager.accentColor : ThemeManager.surfaceContentColor
+        }
+    }
 
     StyledLabel {
         text: ThemeManager.iconTasks
@@ -34,6 +55,52 @@ RowLayout {
 
     Item {
         Layout.fillWidth: true
+    }
+
+    Rectangle {
+        Layout.preferredWidth: 240
+        Layout.preferredHeight: 36
+        radius: 18
+        color: ThemeManager.surfaceStrongColor
+        border.color: ThemeManager.outlinePrimaryColor
+        border.width: 1
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 12
+            anchors.rightMargin: 12
+            spacing: 8
+
+            StyledLabel {
+                text: ThemeManager.iconSearch
+                type: "caption"
+                font.pixelSize: 14
+                opacity: taskSearchInput.activeFocus ? 1.0 : 0.3
+                customColor: ThemeManager.accentColor
+            }
+
+            TextInput {
+                id: taskSearchInput
+                Layout.fillWidth: true
+                color: ThemeManager.contentOnBackgroundColor
+                font.family: ThemeManager.fontFamily
+                font.pixelSize: 12
+                selectionColor: ThemeManager.accentColor
+                text: ProcessManager.searchText
+                
+                onTextChanged: {
+                    ProcessManager.searchText = text
+                }
+
+                StyledLabel {
+                    text: "Filter tasks..."
+                    type: "caption"
+                    font.pixelSize: 12
+                    opacity: 0.2
+                    visible: !taskSearchInput.text && !taskSearchInput.activeFocus
+                }
+            }
+        }
     }
 
     Row {
@@ -65,26 +132,6 @@ RowLayout {
                 HoverHandler {
                     cursorShape: Qt.PointingHandCursor
                 }
-            }
-        }
-    }
-
-    BaseButton {
-        width: 36
-        height: 36
-        onClicked: {
-            ViewManager.closeWindowByType("taskManager")
-        }
-        
-        Rectangle {
-            anchors.fill: parent
-            radius: 18
-            color: ThemeManager.surfacePrimaryColor
-            
-            StyledLabel {
-                anchors.centerIn: parent
-                text: ThemeManager.iconClose
-                type: "icon"
             }
         }
     }

@@ -139,7 +139,7 @@ Item {
             Scale {
                 origin.x: appDelegate.width / 2
                 origin.y: appDelegate.height / 2
-                xScale: (mouseArea.pressed ? 0.9 : 1.0) * animScale
+                xScale: (mainInteractionBtn.isPressed ? 0.9 : 1.0) * animScale
                 yScale: xScale
             },
             Translate {
@@ -152,35 +152,33 @@ Item {
             }
         ]
 
-        Item {
+        BaseButton {
+            id: mainInteractionBtn
             Layout.preferredWidth: Math.max(iconComp.Layout.preferredWidth, nameText.implicitWidth)
             Layout.preferredHeight: iconComp.Layout.preferredHeight + nameText.implicitHeight + mainLayout.spacing
             Layout.alignment: Qt.AlignHCenter
+            
+            tooltip: appDelegate.app ? appDelegate.app.name : ""
+            highlightTarget: iconComp
 
-            MouseArea {
-                id: mouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: {
+                if (!appDelegate.app) {
+                    return
+                }
                 
-                onClicked: (mouse) => {
-                    if (!appDelegate.app) {
-                        return
+                if (!NiriManager.focusApplication(appDelegate.app.id)) {
+                    appDelegate.app.execute()
+                }
+            }
+            
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: {
+                    if (!contextMenuLoader.item) {
+                        contextMenuLoader.active = true
                     }
-                    if (mouse.button === Qt.RightButton) {
-                        if (!contextMenuLoader.item) {
-                            contextMenuLoader.active = true
-                        }
-                        if (contextMenuLoader.item) {
-                            contextMenuLoader.item.popup()
-                        }
-                    } else {
-                        if (appDelegate.isRunning) {
-                            NiriManager.focusApplication(appDelegate.app.id)
-                        } else {
-                            appDelegate.app.execute()
-                        }
+                    if (contextMenuLoader.item) {
+                        contextMenuLoader.item.popup()
                     }
                 }
             }

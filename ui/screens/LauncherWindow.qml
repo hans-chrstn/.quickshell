@@ -117,7 +117,10 @@ PanelWindow {
 
                             onAccepted: {
                                 if (LauncherManager.model.count > 0) {
-                                    LauncherManager.model.get(0).app.execute()
+                                    let app = LauncherManager.model.get(0).app
+                                    if (!NiriManager.focusApplication(app.id)) {
+                                        app.execute()
+                                    }
                                     LauncherManager.close()
                                 }
                             }
@@ -165,7 +168,7 @@ PanelWindow {
                     SequentialAnimation {
                         running: root.visible
                         PauseAnimation { 
-                            duration: (index % 8) * 40 + (Math.floor(index / 8) * 60) 
+                            duration: Math.max(0, (index % 8) * 40 + (Math.floor(index / 8) * 60))
                         }
                         ParallelAnimation {
                             NumberAnimation { 
@@ -199,19 +202,42 @@ PanelWindow {
                         anchors.fill: parent
                         anchors.margins: 10
                         cornerRadius: 28
+                        highlightCornerRadius: 18
                         hoverScale: 1.1
+                        tooltip: model.app.name
+                        highlightTarget: launcherIconComp
                         
                         onClicked: {
-                            model.app.execute()
+                            if (!NiriManager.focusApplication(model.app.id)) {
+                                model.app.execute()
+                            }
                             LauncherManager.close()
                         }
 
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: 28
-                            color: ThemeManager.contentOnBackgroundColor
-                            opacity: launcherBtn.isHovered ? 0.06 : 0
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                        TapHandler {
+                            acceptedButtons: Qt.RightButton
+                            onTapped: {
+                                if (!launcherContextMenuLoader.item) {
+                                    launcherContextMenuLoader.active = true
+                                }
+                                if (launcherContextMenuLoader.item) {
+                                    launcherContextMenuLoader.item.popup()
+                                }
+                            }
+                        }
+
+                        Loader {
+                            id: launcherContextMenuLoader
+                            active: false
+                            sourceComponent: Component {
+                                AppIslandContextMenu {
+                                    app: model.app
+                                    delegateRoot: delegateRoot
+                                    onClosed: {
+                                        launcherContextMenuLoader.active = false
+                                    }
+                                }
+                            }
                         }
 
                         ColumnLayout {
@@ -219,8 +245,10 @@ PanelWindow {
                             spacing: 16
 
                             AppIslandIcon {
+                                id: launcherIconComp
                                 app: model.app
                                 iconSize: 84
+                                cornerRadius: 18
                                 isHovered: launcherBtn.isHovered
                                 isRunning: typeof NiriManager !== "undefined" ? NiriManager.isApplicationRunning(model.app.id) : false
                             }

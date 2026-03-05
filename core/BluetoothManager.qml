@@ -11,6 +11,24 @@ Singleton {
     property bool isAvailable: false
     property bool isEnabled: false
     property bool isScanning: false
+    property string searchText: ""
+    property var allDevices: []
+
+    function syncModel() {
+        let filtered = root.allDevices
+        if (root.searchText && root.searchText !== "") {
+            filtered = FuzzySearch.filter(root.searchText, root.allDevices, (d) => d.name)
+        }
+
+        bluetoothListModel.clear()
+        for (let d of filtered) {
+            bluetoothListModel.append(d)
+        }
+    }
+
+    onSearchTextChanged: {
+        root.syncModel()
+    }
 
     readonly property alias deviceModel: bluetoothListModel
     ListModel {
@@ -85,41 +103,32 @@ Singleton {
 
     function parseDeviceOutput(text, isPairedList) {
         let lines = text.trim().split("\n")
+        let updatedDevices = [...root.allDevices]
+
         for (let line of lines) {
             let parts = line.split(" ")
             if (parts.length >= 3) {
                 let address = parts[1]
                 let name = parts.slice(2).join(" ")
                 
-                let found = false
-                for (let i = 0; i < bluetoothListModel.count; i++) {
-                    let item = bluetoothListModel.get(i)
-                    if (item.address === address) {
-                        if (isPairedList) {
-                            bluetoothListModel.setProperty(i, "isPaired", true)
-                        }
-                        found = true
-                        break
+                let existingIdx = updatedDevices.findIndex(d => d.address === address)
+                if (existingIdx !== -1) {
+                    if (isPairedList) {
+                        updatedDevices[existingIdx].isPaired = true
                     }
-                }
-                
-                if (!found && !isPairedList) {
-                    bluetoothListModel.append({
+                } else {
+                    updatedDevices.push({
                         "name": name,
                         "address": address,
                         "isActive": false,
-                        "isPaired": false
-                    })
-                } else if (!found && isPairedList) {
-                    bluetoothListModel.append({
-                        "name": name,
-                        "address": address,
-                        "isActive": false,
-                        "isPaired": true
+                        "isPaired": isPairedList
                     })
                 }
             }
         }
+        
+        root.allDevices = updatedDevices
+        root.syncModel()
     }
 
     Process {

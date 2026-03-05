@@ -10,6 +10,12 @@ Item {
     property alias cursorShape: hoverHandler.cursorShape
     property real cornerRadius: ThemeManager.globalCornerRadius
     
+    property string tooltip: ""
+    property string tooltipDescription: ""
+    
+    property Item highlightTarget: null
+    property real highlightCornerRadius: root.cornerRadius
+    
     property real hoverScale: 1.05
     property real pressScale: 0.92
     property int animationDuration: ThemeManager.animationDuration
@@ -27,9 +33,17 @@ Item {
         } 
     }
 
+    onIsPressedChanged: {
+        if (root.highlightTarget && root.highlightTarget.hasOwnProperty("isPressed")) {
+            root.highlightTarget.isPressed = root.isPressed
+        }
+    }
+
     StateLayer {
+        visible: !root.highlightTarget
         anchors.fill: parent
-        cornerRadius: root.cornerRadius
+        
+        cornerRadius: root.highlightCornerRadius
         isPressed: root.isPressed
         mouseX: tapHandler.point.position.x
         mouseY: tapHandler.point.position.y
@@ -44,5 +58,21 @@ Item {
     HoverHandler {
         id: hoverHandler
         cursorShape: Qt.PointingHandCursor
+        onHoveredChanged: {
+            if (hovered && root.tooltip !== "") {
+                tooltipTimer.restart()
+            } else {
+                tooltipTimer.stop()
+                TooltipManager.hide(root)
+            }
+        }
+    }
+
+    Timer {
+        id: tooltipTimer
+        interval: 500
+        onTriggered: {
+            TooltipManager.show(root, root.tooltip, root.tooltipDescription)
+        }
     }
 }

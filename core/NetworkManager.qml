@@ -18,6 +18,11 @@ Singleton {
     property string activeType: "none"
     property string activeState: "disconnected"
     property int signalStrength: 0
+    property string searchText: ""
+
+    onSearchTextChanged: {
+        root.refresh()
+    }
 
     readonly property string statusIcon: {
         if (root.activeType === "ethernet") {
@@ -124,8 +129,13 @@ Singleton {
                 }
                 
                 if (foundActive || !root.hasNetworkd) {
+                    let filtered = nmDevices
+                    if (root.searchText && root.searchText !== "") {
+                        filtered = FuzzySearch.filter(root.searchText, nmDevices, (d) => d.name + " " + d.connection)
+                    }
+                    
                     root.deviceModel.clear()
-                    for (let d of nmDevices) {
+                    for (let d of filtered) {
                         root.deviceModel.append(d)
                     }
                     if (!foundActive) {

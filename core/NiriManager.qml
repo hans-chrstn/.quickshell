@@ -78,23 +78,40 @@ Singleton {
     }
 
     function focusApplication(desktopAppId) {
-        if (!desktopAppId) return
+        if (!desktopAppId) {
+            return false
+        }
         
         let searchId = desktopAppId.toString().replace(".desktop", "").toLowerCase()
+        let appWindows = getApplicationWindows(desktopAppId)
         
-        if (root.runningApplications[searchId]) {
-            let ids = root.runningApplications[searchId]
-            if (ids.length > 0) focusWindowById(ids[ids.length - 1])
-            return
+        if (appWindows.length === 0) {
+            return false
+        }
+        
+        if (appWindows.length === 1) {
+            focusWindowById(appWindows[0].id)
+            return true
         }
 
-        for (let key in root.runningApplications) {
-            if (key.includes(searchId) || searchId.includes(key)) {
-                let ids = root.runningApplications[key]
-                if (ids.length > 0) focusWindowById(ids[ids.length - 1])
-                return
+        let currentFocusedId = focusedWindow ? focusedWindow.id : -1
+        let currentIndex = -1
+        
+        for (let i = 0; i < appWindows.length; i++) {
+            if (appWindows[i].id === currentFocusedId) {
+                currentIndex = i
+                break
             }
         }
+        
+        if (currentIndex !== -1) {
+            let nextIndex = (currentIndex + 1) % appWindows.length
+            focusWindowById(appWindows[nextIndex].id)
+        } else {
+            focusWindowById(appWindows[appWindows.length - 1].id)
+        }
+        
+        return true
     }
 
     function getApplicationWindows(desktopAppId) {

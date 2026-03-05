@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
+import qs.shared
 
 Rectangle {
     id: root
@@ -26,14 +27,16 @@ Rectangle {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 32
+            anchors.leftMargin: 24
+            anchors.rightMargin: 24
             anchors.topMargin: 20
             anchors.bottomMargin: 20
             spacing: 20
 
             RowLayout {
                 Layout.fillWidth: true
+                Layout.leftMargin: 4
+                Layout.rightMargin: 4
                 
                 StyledLabel {
                     text: "EXPLORER"
@@ -62,6 +65,52 @@ Rectangle {
                 }
             }
 
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 36
+                radius: 18
+                color: ThemeManager.surfaceStrongColor
+                border.color: ThemeManager.outlinePrimaryColor
+                border.width: 1
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    spacing: 8
+
+                    StyledLabel {
+                        text: ThemeManager.iconSearch
+                        type: "caption"
+                        font.pixelSize: 14
+                        opacity: noteSearchInput.activeFocus ? 1.0 : 0.3
+                        customColor: ThemeManager.accentColor
+                    }
+
+                    TextInput {
+                        id: noteSearchInput
+                        Layout.fillWidth: true
+                        color: ThemeManager.contentOnBackgroundColor
+                        font.family: ThemeManager.fontFamily
+                        font.pixelSize: 12
+                        selectionColor: ThemeManager.accentColor
+                        text: NotesManager.searchText
+                        
+                        onTextChanged: {
+                            NotesManager.searchText = text
+                        }
+
+                        StyledLabel {
+                            text: "Search notes..."
+                            type: "caption"
+                            font.pixelSize: 12
+                            opacity: 0.2
+                            visible: !noteSearchInput.text && !noteSearchInput.activeFocus
+                        }
+                    }
+                }
+            }
+
             ListView {
                 id: fileList
                 Layout.fillWidth: true
@@ -72,13 +121,31 @@ Rectangle {
 
                 delegate: NotesExplorerFileDelegate {
                     logic: root.logic
-                    modelData: model
+                    
+                    visible: {
+                        let itemName = model ? model.name : ""
+                        if (!NotesManager.searchText || NotesManager.searchText === "" || !itemName) {
+                            return true
+                        }
+                        return FuzzySearch.score(NotesManager.searchText, itemName) > 0
+                    }
+                    
+                    height: visible ? 38 : 0
+                    
+                    Behavior on height {
+                        NumberAnimation {
+                            duration: 200
+                            easing.type: Easing.OutQuart
+                        }
+                    }
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 8
+                Layout.leftMargin: 4
+                Layout.rightMargin: 4
                 
                 StyledLabel {
                     text: "RECENT NOTES"
@@ -106,7 +173,7 @@ Rectangle {
                 spacing: 4
                 
                 delegate: NotesExplorerRecentDelegate {
-                    modelData: model.modelData
+                    notePath: modelData
                 }
             }
         }
