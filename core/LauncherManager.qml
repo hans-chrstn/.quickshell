@@ -37,8 +37,9 @@ Singleton {
 
         if (filter !== "") {
             apps = apps.filter(app => {
-                return app.name.toLowerCase().includes(filter) || 
-                       (app.description && app.description.toLowerCase().includes(filter))
+                let nameMatch = app.name.toLowerCase().includes(filter)
+                let descMatch = app.description && app.description.toLowerCase().includes(filter)
+                return nameMatch || descMatch
             })
         }
 
@@ -48,9 +49,7 @@ Singleton {
 
         appModel.clear()
         for (let i = 0; i < apps.length; i++) {
-            appModel.append({
-                "app": apps[i]
-            })
+            appModel.append({ "app": apps[i] })
         }
     }
 
@@ -60,14 +59,16 @@ Singleton {
 
     Timer {
         id: updateTimer
-        interval: 100
-        onTriggered: root.updateApps()
+        interval: 250
+        onTriggered: {
+            root.updateApps()
+        }
     }
 
     Connections {
         target: DesktopEntries.applications
         function onValuesChanged() {
-            root.updateApps()
+            updateTimer.restart()
         }
     }
 

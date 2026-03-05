@@ -7,15 +7,32 @@ Singleton {
     id: root
 
     readonly property MprisPlayer activePlayer: {
-        if (Mpris.players.values.length === 0) return null
+        let players = Mpris.players.values
+        if (players.length === 0) {
+            return null
+        }
         
-        for (let i = 0; i < Mpris.players.values.length; i++) {
-            let player = Mpris.players.values[i]
+        for (let i = 0; i < players.length; i++) {
+            let player = players[i]
+            if (player.playbackState === MprisPlaybackState.Playing && player.trackTitle !== "") {
+                return player
+            }
+        }
+        
+        for (let i = 0; i < players.length; i++) {
+            let player = players[i]
             if (player.playbackState === MprisPlaybackState.Playing) {
                 return player
             }
         }
         
-        return Mpris.players.values[0]
+        for (let i = 0; i < players.length; i++) {
+            let player = players[i]
+            if (player.trackTitle !== "") {
+                return player
+            }
+        }
+        
+        return players[0]
     }
 }

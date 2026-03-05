@@ -37,80 +37,85 @@ Item {
 
             LazyContainer {
                 id: vinylLoader
+                anchors.fill: parent
                 active: true
                 
-                Item {
-                    id: vinylDiskVisual
-                    anchors.fill: parent
-                    z: 1
-
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        shadowEnabled: true
-                        shadowOpacity: ThemeManager.musicArtShadowOpacity
-                        shadowBlur: 0.4
-                        shadowVerticalOffset: 2
-                    }
-
-                    NumberAnimation on rotation {
-                        from: 0
-                        to: 360
-                        duration: ThemeManager.musicRotationDuration
-                        loops: Animation.Infinite
-                        running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
-                    }
-
-                    SequentialAnimation on scale {
-                        running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
-                        loops: Animation.Infinite
-                        NumberAnimation {
-                            to: 1.05
-                            duration: 2000
-                            easing.type: Easing.OutSine
-                        }
-                        NumberAnimation {
-                            to: 1.0
-                            duration: 2000
-                            easing.type: Easing.OutSine
-                        }
-                    }
-
-                    ClippingRectangle {
+                component: Component {
+                    Item {
+                        id: vinylDiskVisual
                         anchors.fill: parent
-                        radius: ThemeManager.musicArtRadius
-                        color: ThemeManager.surfaceVariantColor
+                        z: 1
 
-                        Image {
-                            id: albumArtImage
-                            anchors.fill: parent
-                            source: (root.mediaPlayer && root.mediaPlayer.trackArtUrl) || ""
-                            fillMode: Image.PreserveAspectCrop
-                            opacity: status === Image.Ready ? 1 : 0
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: 500
-                                }
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            shadowEnabled: true
+                            shadowOpacity: ThemeManager.musicArtShadowOpacity
+                            shadowBlur: 0.4
+                            shadowVerticalOffset: 2
+                        }
+
+                        NumberAnimation on rotation {
+                            from: 0
+                            to: 360
+                            duration: ThemeManager.musicRotationDuration
+                            loops: Animation.Infinite
+                            running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
+                        }
+
+                        SequentialAnimation on scale {
+                            running: root.mediaPlayer && root.mediaPlayer.playbackState === MprisPlaybackState.Playing
+                            loops: Animation.Infinite
+                            NumberAnimation {
+                                to: 1.05
+                                duration: 2000
+                                easing.type: Easing.OutSine
+                            }
+                            NumberAnimation {
+                                to: 1.0
+                                duration: 2000
+                                easing.type: Easing.OutSine
                             }
                         }
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: ThemeManager.iconMusic
-                            color: ThemeManager.contentOnBackgroundColor
-                            opacity: 0.2
-                            font.pixelSize: 24
-                            visible: !root.mediaPlayer || !root.mediaPlayer.trackArtUrl || albumArtImage.status !== Image.Ready
-                        }
-                    }
+                        ClippingRectangle {
+                            anchors.fill: parent
+                            radius: ThemeManager.musicArtRadius
+                            color: ThemeManager.surfaceVariantColor
 
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: ThemeManager.musicHoleSize
-                        height: ThemeManager.musicHoleSize
-                        radius: width / 2
-                        color: ThemeManager.backgroundPrimaryColor
-                        border.color: ThemeManager.outlineVariantColor
-                        border.width: 1
+                            Image {
+                                id: albumArtImage
+                                anchors.fill: parent
+                                source: root.mediaPlayer ? root.mediaPlayer.trackArtUrl : ""
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                cache: true
+                                opacity: status === Image.Ready ? 1 : 0
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 500
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: ThemeManager.iconMusic
+                                color: ThemeManager.contentOnBackgroundColor
+                                opacity: 0.5
+                                font.pixelSize: 28
+                                visible: albumArtImage.status !== Image.Ready
+                            }
+                        }
+
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: ThemeManager.musicHoleSize
+                            height: ThemeManager.musicHoleSize
+                            radius: width / 2
+                            color: ThemeManager.backgroundPrimaryColor
+                            border.color: ThemeManager.outlineVariantColor
+                            border.width: 1
+                        }
                     }
                 }
             }
