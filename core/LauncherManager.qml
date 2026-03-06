@@ -9,13 +9,14 @@ Singleton {
     id: root
 
     property bool active: false
+    property bool isClosing: false
     property string searchText: ""
 
     property ListModel appModel: ListModel { }
     readonly property alias model: root.appModel
 
     function toggle() {
-        if (root.active) {
+        if (root.active && !root.isClosing) {
             root.close()
         } else {
             root.open()
@@ -23,14 +24,26 @@ Singleton {
     }
 
     function open() {
+        root.isClosing = false
         root.searchText = ""
         root.updateApps()
         root.active = true
     }
 
     function close() {
-        root.searchText = ""
-        root.active = false
+        if (!root.active || root.isClosing) return
+        root.isClosing = true
+        closeTimer.restart()
+    }
+
+    Timer {
+        id: closeTimer
+        interval: 350
+        onTriggered: {
+            root.active = false
+            root.isClosing = false
+            root.searchText = ""
+        }
     }
 
     function updateApps() {

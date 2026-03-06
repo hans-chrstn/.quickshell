@@ -167,13 +167,21 @@ Item {
             mipmap: true
             
             source: {
-                if (!root.app || !root.app.icon) {
+                if (!root.app || !root.app.icon || root.app.icon === "") {
                     return ""
                 }
-                if (root.app.icon.startsWith("/")) {
-                    return "file://" + root.app.icon
+                
+                let iconStr = root.app.icon.toString()
+                
+                if (iconStr.includes("/dev/shm")) {
+                    return ""
                 }
-                return Quickshell.iconPath(root.app.icon)
+
+                if (iconStr.startsWith("/")) {
+                    return "file://" + iconStr
+                }
+                
+                return Quickshell.iconPath(iconStr)
             }
             
             fillMode: Image.PreserveAspectFit

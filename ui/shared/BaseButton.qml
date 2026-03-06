@@ -5,7 +5,7 @@ import qs.ui.shared.effects
 Item {
     id: root
     
-    property bool isPressed: tapHandler.pressed
+    property bool isPressed: tapHandler.pressed || extraTapHandler.pressed
     property bool isHovered: hoverHandler.hovered
     property alias cursorShape: hoverHandler.cursorShape
     property real cornerRadius: ThemeManager.globalCornerRadius
@@ -45,14 +45,19 @@ Item {
         
         cornerRadius: root.highlightCornerRadius
         isPressed: root.isPressed
-        mouseX: tapHandler.point.position.x
-        mouseY: tapHandler.point.position.y
+        mouseX: tapHandler.pressed ? tapHandler.point.position.x : extraTapHandler.point.position.x
+        mouseY: tapHandler.pressed ? tapHandler.point.position.y : extraTapHandler.point.position.y
         z: 10
     }
 
     TapHandler {
         id: tapHandler
         onTapped: root.clicked()
+    }
+
+    TapHandler {
+        id: extraTapHandler
+        acceptedButtons: Qt.AllButtons
     }
 
     HoverHandler {

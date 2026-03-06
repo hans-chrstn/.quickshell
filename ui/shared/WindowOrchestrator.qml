@@ -10,6 +10,10 @@ import qs.ui.features.notifications
 Item {
     id: root
 
+    readonly property var _viewManager: ViewManager
+    readonly property var _paletteManager: CommandPaletteManager
+    readonly property var _clipboardManager: ClipboardManager
+
     Variants {
         model: Quickshell.screens
         delegate: LazyContainer {
@@ -127,7 +131,7 @@ Item {
         delegate: LazyContainer {
             id: areaPickerDelegate
             required property var modelData
-            
+            active: AreaPickerManager.active
             component: AreaPickerWindow { 
                 screen: areaPickerDelegate.modelData
             }
@@ -139,7 +143,7 @@ Item {
         delegate: LazyContainer {
             id: launcherDelegate
             required property var modelData
-            
+            active: LauncherManager.active || ViewManager.isRequested("commandPalette")
             component: LauncherWindow { 
                 screen: launcherDelegate.modelData
             }
@@ -151,10 +155,10 @@ Item {
         delegate: LazyContainer {
             id: settingsLdr
             required property var modelData
-            active: ViewManager.settingsRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("settings") && (ViewManager.lastActiveScreenName === modelData.name)
             component: SettingsWindow {
                 screen: settingsLdr.modelData
-                closing: ViewManager.isSettingsClosing
+                closing: ViewManager.isClosing("settings")
             }
         }
     }
@@ -164,10 +168,10 @@ Item {
         delegate: LazyContainer {
             id: wallpaperLdr
             required property var modelData
-            active: ViewManager.wallpaperRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("wallpaper") && (ViewManager.lastActiveScreenName === modelData.name)
             component: WallpaperWindow {
                 screen: wallpaperLdr.modelData
-                closing: ViewManager.isWallpaperClosing
+                closing: ViewManager.isClosing("wallpaper")
             }
         }
     }
@@ -177,10 +181,10 @@ Item {
         delegate: LazyContainer {
             id: networkLdr
             required property var modelData
-            active: ViewManager.networkRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("network") && (ViewManager.lastActiveScreenName === modelData.name)
             component: NetworkWindow {
                 screen: networkLdr.modelData
-                closing: ViewManager.isNetworkClosing
+                closing: ViewManager.isClosing("network")
             }
         }
     }
@@ -190,10 +194,10 @@ Item {
         delegate: LazyContainer {
             id: bluetoothLdr
             required property var modelData
-            active: ViewManager.bluetoothRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("bluetooth") && (ViewManager.lastActiveScreenName === modelData.name)
             component: BluetoothWindow {
                 screen: bluetoothLdr.modelData
-                closing: ViewManager.isBluetoothClosing
+                closing: ViewManager.isClosing("bluetooth")
             }
         }
     }
@@ -203,10 +207,10 @@ Item {
         delegate: LazyContainer {
             id: taskManagerLdr
             required property var modelData
-            active: ViewManager.taskManagerRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("taskManager") && (ViewManager.lastActiveScreenName === modelData.name)
             component: TaskManagerWindow {
                 screen: taskManagerLdr.modelData
-                closing: ViewManager.isTaskManagerClosing
+                closing: ViewManager.isClosing("taskManager")
             }
         }
     }
@@ -216,10 +220,23 @@ Item {
         delegate: LazyContainer {
             id: notesLdr
             required property var modelData
-            active: ViewManager.notesRequested && (ViewManager.lastActiveScreenName === modelData.name)
+            active: ViewManager.isRequested("notes") && (ViewManager.lastActiveScreenName === modelData.name)
             component: NotesWindow {
                 screen: notesLdr.modelData
-                closing: ViewManager.isNotesClosing
+                closing: ViewManager.isClosing("notes")
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: LazyContainer {
+            id: commandPaletteLdr
+            required property var modelData
+            active: ViewManager.isRequested("commandPalette") && (ViewManager.lastActiveScreenName === modelData.name)
+            component: CommandPaletteWindow {
+                screen: commandPaletteLdr.modelData
+                closing: ViewManager.isClosing("commandPalette")
             }
         }
     }

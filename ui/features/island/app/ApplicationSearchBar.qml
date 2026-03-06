@@ -21,6 +21,11 @@ Item {
             LauncherManager.open()
         }
 
+        TapHandler {
+            acceptedButtons: Qt.RightButton
+            onTapped: ViewManager.openWindow("commandPalette")
+        }
+
         Rectangle {
             anchors.fill: parent
             radius: 3

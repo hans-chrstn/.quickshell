@@ -13,7 +13,7 @@ PanelWindow {
     id: root
     
     readonly property string screenName: (root.screen) ? root.screen.name : ""
-    visible: ViewManager.wallpaperRequested && (ViewManager.lastActiveScreenName === screenName)
+    visible: !!ViewManager.activeWindows["wallpaper"] && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -31,11 +31,11 @@ PanelWindow {
         sequence: "Escape"
         enabled: root.visible
         onActivated: {
-            ViewManager.closeWindowByType("wallpaper")
+            ViewManager.closeWindow("wallpaper")
         }
     }
 
-    property bool closing: false
+    property bool closing: !!ViewManager.closingWindows["wallpaper"]
     property bool entryActive: false
     readonly property bool showContent: visible && !closing && entryActive
 

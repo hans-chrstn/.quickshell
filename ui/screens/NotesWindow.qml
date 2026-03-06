@@ -13,7 +13,7 @@ PanelWindow {
     id: root
     
     readonly property string screenName: (root.screen) ? root.screen.name : ""
-    visible: ViewManager.notesRequested && (ViewManager.lastActiveScreenName === screenName)
+    visible: !!ViewManager.activeWindows["notes"] && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -27,7 +27,7 @@ PanelWindow {
     focusable: visible && !closing
     WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
-    property bool closing: false
+    property bool closing: !!ViewManager.closingWindows["notes"]
     property bool entryActive: false
     readonly property bool showContent: visible && !closing && entryActive
 

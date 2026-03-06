@@ -46,17 +46,10 @@ FocusScope {
         }
     }
 
-    Connections {
-        target: ViewManager
-        function onIsSettingsClosingChanged() {
-            if (ViewManager.isSettingsClosing) {
-                isCascadeAnimationActive = false
-            }
-        }
-    }
+    readonly property bool isSettingsClosing: ViewManager.isClosing("settings")
 
     property bool isCascadeAnimationActive: false
-    property real sidebarItemOpacity: (isCascadeAnimationActive && !ViewManager.isSettingsClosing) ? 1.0 : 0
+    property real sidebarItemOpacity: (isCascadeAnimationActive && !isSettingsClosing) ? 1.0 : 0
     Behavior on sidebarItemOpacity { 
         NumberAnimation { 
             duration: 300 
@@ -126,7 +119,7 @@ FocusScope {
             delegate: ConfigurationSidebarDelegate {
                 modelData: model.modelData
                 isCascadeAnimationActive: root.isCascadeAnimationActive
-                isSettingsClosing: ViewManager.isSettingsClosing
+                isSettingsClosing: root.isSettingsClosing
                 sidebarItemOpacity: root.sidebarItemOpacity
             }
         }
@@ -149,11 +142,11 @@ FocusScope {
                 opacity: root.sidebarItemOpacity
                 
                 transform: Translate {
-                    x: (root.isCascadeAnimationActive && !ViewManager.isSettingsClosing) ? 0 : -40
+                    x: (root.isCascadeAnimationActive && !root.isSettingsClosing) ? 0 : -40
                     Behavior on x { 
                         SequentialAnimation {
                             PauseAnimation { 
-                                duration: (root.isCascadeAnimationActive && !ViewManager.isSettingsClosing) ? 300 : 0 
+                                duration: (root.isCascadeAnimationActive && !root.isSettingsClosing) ? 300 : 0 
                             }
                             NumberAnimation { 
                                 duration: 400

@@ -27,10 +27,23 @@ PanelWindow {
     WlrLayershell.keyboardFocus: (visible && bloom.progress > 0.9) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     readonly property string screenName: (root.screen) ? root.screen.name : ""
+    property bool entryActive: false
+    readonly property bool showContent: LauncherManager.active && !LauncherManager.isClosing && entryActive
     visible: (LauncherManager.active || bloom.progress > 0.01) && (ViewManager.lastActiveScreenName === screenName)
 
     onVisibleChanged: {
         if (visible) {
+            entryTimer.restart()
+        } else {
+            entryActive = false
+        }
+    }
+
+    Timer {
+        id: entryTimer
+        interval: 50
+        onTriggered: {
+            entryActive = true
             searchInput.forceActiveFocus()
         }
     }
@@ -38,7 +51,8 @@ PanelWindow {
     Item {
         id: contentArea
         anchors.fill: parent
-        opacity: bloom.progress
+        opacity: root.showContent ? 1.0 : 0.0
+        Behavior on opacity { NumberAnimation { duration: 300 } }
 
         OrganicBlobs {
             anchors.fill: parent
@@ -275,7 +289,7 @@ PanelWindow {
         id: bloom
         anchors.fill: parent
         source: contentArea
-        progress: LauncherManager.active ? 1.0 : 0.0
+        progress: root.showContent ? 1.0 : 0.0
         cornerRadius: 0
     }
 
