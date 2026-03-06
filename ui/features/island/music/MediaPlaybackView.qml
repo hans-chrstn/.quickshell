@@ -11,7 +11,7 @@ import qs.ui.shared
 Item {
     id: root
 
-    property var mediaPlayer: null
+    property var mediaPlayer: MusicManager.activePlayer
     readonly property bool isHovered: mainHoverHandler.hovered
     readonly property alias isSelectorExpanded: deviceSelector.isExpanded
 
