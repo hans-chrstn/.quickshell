@@ -58,6 +58,14 @@ PanelWindow {
     
     exclusionMode: ExclusionMode.Ignore
     
+    HoverHandler {
+        onHoveredChanged: {
+            if (hovered && root.screen) {
+                ViewManager.trackScreen(root.screen.name)
+            }
+        }
+    }
+
     mask: Region {
         Region { 
             item: island 

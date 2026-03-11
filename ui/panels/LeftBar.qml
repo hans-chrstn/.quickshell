@@ -20,11 +20,50 @@ SystemPanel {
     anchors.top: true
     anchors.bottom: true
     
-    margins {
-        top: 0
-        bottom: 0
-    }
+    implicitWidth: 450
+    color: "transparent"
+
+    exclusionMode: ExclusionMode.Normal
+    exclusiveZone: ThemeManager.globalThickness
+    WlrLayershell.layer: WlrLayer.Bottom
     
-    implicitWidth: ThemeManager.globalThickness
-    color: ThemeManager.backgroundColor
+    focusable: true
+    WlrLayershell.keyboardFocus: DashboardManager.active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    mask: Region {
+        Region {
+            item: barRect
+        }
+        Region {
+            item: (DashboardManager.realActive && ViewManager.lastActiveScreenName === root.screen.name) ? dashboardHitbox : null
+        }
+    }
+
+    Rectangle {
+        id: barRect
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: ThemeManager.globalThickness
+        color: ThemeManager.backgroundColor
+        z: 10
+    }
+
+    Item {
+        id: dashboardHitbox
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: 400
+        opacity: 0
+    }
+
+    Loader {
+        id: dashboardLoader
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        z: 5
+        active: DashboardManager.realActive && ViewManager.lastActiveScreenName === root.screen.name
+        source: "LeftDashboard.qml"
+    }
 }

@@ -9,6 +9,20 @@ CornerContainer {
     isAtLeft: true
     aboveWindows: true
     
+    isHoverEnabled: false
+    
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: {
+            DashboardManager.open()
+            DashboardManager.cancelDismiss()
+        }
+        onExited: {
+            DashboardManager.requestDismiss()
+        }
+    }
+    
     firstFilletRotation: 90
     firstFilletX: expandedWidth - 1
     firstFilletY: expandedHeight - surfaceCornerRadius - ThemeManager.dynamicIslandCornerRadius

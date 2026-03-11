@@ -16,7 +16,10 @@ Singleton {
     property bool isAudioAvailable: !!defaultSink && areAudioToolsAvailable
 
     readonly property PwNode defaultSink: Pipewire.defaultAudioSink
-    PwObjectTracker { objects: [root.defaultSink] }
+    
+    PwObjectTracker { 
+        objects: root.defaultSink ? [root.defaultSink] : [] 
+    }
 
     readonly property real volume: (defaultSink && defaultSink.ready && defaultSink.audio) ? defaultSink.audio.volume : 0.0
     readonly property bool isMuted: (defaultSink && defaultSink.ready && defaultSink.audio) ? defaultSink.audio.muted : false
@@ -26,16 +29,20 @@ Singleton {
     property ListModel sinkModel: ListModel { }
     readonly property alias sinks: root.sinkModel
 
+    property ListModel streamModel: ListModel { }
+    readonly property alias streams: root.streamModel
+
     function updateSinks() {
         if (!Pipewire.ready) return
 
         let nodes = Pipewire.nodes.values
         let foundSinks = []
+        let foundStreams = []
         let currentId = defaultSink ? defaultSink.id : -1
 
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i]
-            if (!node) continue
+            if (!node || node.id === undefined) continue
 
             let type = node.type
             let isAudio = (type & PwNodeType.Audio) !== 0
@@ -44,30 +51,38 @@ Singleton {
             
             if (isAudio && isSink && !isStream && node.id !== currentId) {
                 foundSinks.push({
-                    "node": node,
-                    "name": node.description || node.name || "Unknown Device",
-                    "id": node.id
+                    "id": node.id,
+                    "name": node.description || node.name || "Unknown Device"
+                })
+            } else if (isAudio && isStream && node.audio) {
+                foundStreams.push({
+                    "id": node.id,
+                    "name": node.description || node.name || "Application"
                 })
             }
         }
 
-        if (foundSinks.length !== sinkModel.count) {
-            sinkModel.clear()
-            for (let sink of foundSinks) {
-                sinkModel.append(sink)
+        root._syncModel(sinkModel, foundSinks)
+        root._syncModel(streamModel, foundStreams)
+    }
+
+    function _syncModel(model, data) {
+        if (data.length !== model.count) {
+            model.clear()
+            for (let item of data) {
+                model.append(item)
             }
         } else {
             let changed = false
-            for (let i = 0; i < foundSinks.length; i++) {
-                if (sinkModel.get(i).id !== foundSinks[i].id) {
-                    changed = true
-                    break
+            for (let i = 0; i < data.length; i++) {
+                if (model.get(i).id !== data[i].id) {
+                    changed = true; break
                 }
             }
             if (changed) {
-                sinkModel.clear()
-                for (let sink of foundSinks) {
-                    sinkModel.append(sink)
+                model.clear()
+                for (let item of data) {
+                    model.append(item)
                 }
             }
         }
@@ -102,8 +117,9 @@ Singleton {
     }
 
     Timer {
-        interval: 5000
-        running: true
+        id: updateTimer
+        interval: 3000
+        running: Pipewire.ready
         repeat: true
         triggeredOnStart: true
         onTriggered: root.updateSinks()
