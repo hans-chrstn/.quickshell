@@ -8,12 +8,13 @@ ValueIndicatorPill {
     width: ThemeManager.osdPillWidth
     height: ThemeManager.osdPillHeight
     
-    readonly property string screenName: (root.Window.window && root.Window.window.screen) ? root.Window.window.screen.name : ""
+    property string osdScreenName: ""
+    readonly property string screenName: osdScreenName !== "" ? osdScreenName : ((root.Window.window && root.Window.window.screen) ? root.Window.window.screen.name : "")
     
     displayType: OSDManager.currentType
     statusIcon: OSDManager.currentIcon
     indicatorValue: OSDManager.currentValue
-    isPillActive: OSDManager.active && (ViewManager.lastActiveScreenName === screenName)
+    isPillActive: (OSDManager.active || hoverInteractionHandler.hovered) && (ViewManager.lastActiveScreenName === screenName)
     
     progressColor: displayType === "brightness" ? "#FFCC00" : ThemeManager.accentColor
     

@@ -35,7 +35,7 @@ Item {
     property real animScale: isHovered ? 1.25 : 1.0
     Behavior on animScale { 
         NumberAnimation { 
-            duration: 450
+            duration: ThemeManager.durationSlow
             easing.type: Easing.OutBack
             easing.overshoot: 1.0 
         } 
@@ -44,7 +44,7 @@ Item {
     property real animLift: isHovered ? -12 : 0
     Behavior on animLift { 
         NumberAnimation { 
-            duration: 450
+            duration: ThemeManager.durationSlow
             easing.type: Easing.OutBack
             easing.overshoot: 1.0 
         } 
@@ -84,7 +84,7 @@ Item {
                 ParallelAnimation {
                     NumberAnimation { 
                         property: "cascadeY"
-                        duration: 500
+                        duration: ThemeManager.durationSlow
                         easing.type: Easing.OutBack
                         easing.overshoot: 1.8 
                     }
@@ -96,7 +96,7 @@ Item {
                     }
                     NumberAnimation { 
                         property: "cascadeOpacity"
-                        duration: 300 
+                        duration: ThemeManager.durationMedium 
                     }
                 }
             }
@@ -107,15 +107,15 @@ Item {
             ParallelAnimation {
                 NumberAnimation { 
                     property: "cascadeY"
-                    duration: 200 
+                    duration: ThemeManager.durationFast 
                 }
                 NumberAnimation { 
                     property: "cascadeRotation"
-                    duration: 200 
+                    duration: ThemeManager.durationFast 
                 }
                 NumberAnimation { 
                     property: "cascadeOpacity"
-                    duration: 200 
+                    duration: ThemeManager.durationFast 
                 }
             }
         }
@@ -133,7 +133,7 @@ Item {
         id: mainLayout
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 4
+        spacing: ThemeManager.spacingExtraSmall
         
         transform: [
             Scale {
@@ -202,7 +202,7 @@ Item {
 
             ColumnLayout {
                 anchors.fill: parent
-                spacing: 8
+                spacing: ThemeManager.spacingSmall
 
                 AppIslandIcon {
                     id: iconComp

@@ -28,13 +28,13 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: 3
+            radius: ThemeManager.radiusSmall / 2
             color: ThemeManager.contentOnBackgroundColor
             opacity: parent.isHovered ? 0.6 : 0.2
             
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 200
+                    duration: ThemeManager.durationFast
                 }
             }
         }

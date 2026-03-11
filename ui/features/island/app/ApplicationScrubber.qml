@@ -44,10 +44,10 @@ Rectangle {
                 opacity: root.activeLetter === modelData ? 1.0 : (interactionMouseArea.containsMouse ? (1.0 - (Math.min(mouseDistance, 150) / 150) * 0.7) : 0.3)
                 scale: root.activeLetter === modelData ? 1.3 : magnificationFactor
 
-                Behavior on opacity { NumberAnimation { duration: 150 } }
+                Behavior on opacity { NumberAnimation { duration: ThemeManager.durationInstant } }
                 Behavior on scale { 
                     NumberAnimation { 
-                        duration: 300
+                        duration: ThemeManager.durationMedium
                         easing.type: Easing.OutBack 
                     } 
                 }

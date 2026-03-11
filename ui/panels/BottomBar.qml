@@ -18,7 +18,7 @@ SystemPanel {
         }
     }
 
-    implicitHeight: ThemeManager.appIslandExpandedHeight + 30
+    implicitHeight: ThemeManager.appIslandExpandedHeight + ThemeManager.osdPillHeight + 40
 
     anchors.bottom: true
     anchors.left: true
@@ -39,7 +39,23 @@ SystemPanel {
             item: islandTrigger
         }
         Region {
-            item: (osdPill.isPillActive && osdPill.opacity > 0.1) ? osdPill : null
+            item: (osdPill.isPillActive || osdShrinkTimer.running) ? osdMaskArea : null
+        }
+    }
+
+    Timer {
+        id: osdShrinkTimer
+        interval: 350
+    }
+
+    Connections {
+        target: osdPill
+        function onIsPillActiveChanged() {
+            if (!osdPill.isPillActive) {
+                osdShrinkTimer.restart()
+            } else {
+                osdShrinkTimer.stop()
+            }
         }
     }
 
@@ -76,5 +92,15 @@ SystemPanel {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: appIsland.height + 20
         z: 5
+        osdScreenName: root.screen ? root.screen.name : ""
+    }
+
+    Item {
+        id: osdMaskArea
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        width: ThemeManager.osdPillWidth + 80
+        height: ThemeManager.appIslandExpandedHeight + ThemeManager.osdPillHeight + 80
+        opacity: 0
     }
 }

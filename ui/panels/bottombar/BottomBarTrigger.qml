@@ -10,8 +10,6 @@ Item {
     height: targetIsland && targetIsland.isExpanded 
         ? (ThemeManager.appIslandExpandedHeight + ThemeManager.appIslandSearchBarHeight + 20)
         : ThemeManager.globalThickness
-        
-    Behavior on width { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
     MouseArea {
         id: triggerArea

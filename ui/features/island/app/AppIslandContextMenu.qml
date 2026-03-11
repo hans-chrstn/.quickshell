@@ -37,14 +37,14 @@ Menu {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 250
+                duration: ThemeManager.durationMedium
                 easing.type: Easing.OutCubic
             }
             NumberAnimation { 
                 property: "scale"
                 from: 0.95
                 to: 1
-                duration: 250
+                duration: ThemeManager.durationMedium
                 easing.type: Easing.OutBack
                 easing.overshoot: 1.4
             }
@@ -57,20 +57,20 @@ Menu {
                 property: "opacity"
                 from: 1
                 to: 0
-                duration: 150 
+                duration: ThemeManager.durationFast
             }
             NumberAnimation { 
                 property: "scale"
                 from: 1
                 to: 0.98
-                duration: 150 
+                duration: ThemeManager.durationFast
             }
         }
     }
     
     background: Rectangle {
         color: ThemeManager.backgroundPrimaryColor
-        radius: 20
+        radius: ThemeManager.radiusLarge
         border.color: ThemeManager.outlineStrongColor
         border.width: 1
         opacity: 0.98
@@ -130,14 +130,14 @@ Menu {
             implicitHeight: 40
 
             contentItem: RowLayout {
-                spacing: 10
+                spacing: ThemeManager.spacingSmall
                 
                 StyledLabel { 
                     text: ThemeManager.iconWindow
                     type: "body"
                     font.pixelSize: 14
                     customColor: winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
-                    Layout.leftMargin: 10
+                    Layout.leftMargin: ThemeManager.spacingSmall
                 }
                 
                 StyledLabel { 
@@ -179,7 +179,7 @@ Menu {
             
             background: Rectangle { 
                 color: winItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-                radius: 12 
+                radius: ThemeManager.radiusSmall
             }
             
             onTriggered: {
@@ -205,14 +205,14 @@ Menu {
         implicitHeight: 40
         
         contentItem: RowLayout {
-            spacing: 12
+            spacing: ThemeManager.spacingMedium
             
             StyledLabel { 
                 text: ThemeManager.iconAppNew
                 type: "body"
                 font.pixelSize: 16
                 customColor: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.accentColor
-                Layout.leftMargin: 10
+                Layout.leftMargin: ThemeManager.spacingSmall
             }
             
             StyledLabel { 
@@ -226,7 +226,7 @@ Menu {
         
         background: Rectangle { 
             color: newWinItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: 12 
+            radius: ThemeManager.radiusSmall 
         }
         
         onTriggered: {
@@ -242,14 +242,14 @@ Menu {
         implicitHeight: 40
         
         contentItem: RowLayout {
-            spacing: 12
+            spacing: ThemeManager.spacingMedium
             
             StyledLabel { 
                 text: ThemeManager.iconAppLocation
                 type: "body"
                 font.pixelSize: 16
                 customColor: locationItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
-                Layout.leftMargin: 10
+                Layout.leftMargin: ThemeManager.spacingSmall
             }
             
             StyledLabel { 
@@ -263,7 +263,7 @@ Menu {
         
         background: Rectangle { 
             color: locationItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: 12 
+            radius: ThemeManager.radiusSmall 
         }
         
         onTriggered: {
@@ -279,14 +279,14 @@ Menu {
         implicitHeight: 40
         
         contentItem: RowLayout {
-            spacing: 12
+            spacing: ThemeManager.spacingMedium
             
             StyledLabel { 
                 text: ThemeManager.iconAppDetails
                 type: "body"
                 font.pixelSize: 16
                 customColor: infoItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
-                Layout.leftMargin: 10
+                Layout.leftMargin: ThemeManager.spacingSmall
             }
             
             StyledLabel { 
@@ -300,7 +300,7 @@ Menu {
         
         background: Rectangle { 
             color: infoItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: 12 
+            radius: ThemeManager.radiusSmall 
         }
         
         onTriggered: {

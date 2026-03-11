@@ -34,7 +34,32 @@ SystemPanel {
             item: barRect
         }
         Region {
-            item: dIsland
+            item: dIslandHitbox
+        }
+    }
+
+    Item {
+        id: dIslandHitbox
+        anchors.horizontalCenter: dIsland.horizontalCenter
+        y: dIsland.y
+        width: (dIsland.isExpanded || shrinkTimer.running) ? dIsland.expandedWidth : dIsland.collapsedWidth
+        height: (dIsland.isExpanded || shrinkTimer.running) ? dIsland.expandedHeight : dIsland.barHeight
+        opacity: 0
+
+        Timer {
+            id: shrinkTimer
+            interval: ThemeManager.animationDuration + 50
+        }
+
+        Connections {
+            target: dIsland
+            function onIsExpandedChanged() {
+                if (!dIsland.isExpanded) {
+                    shrinkTimer.restart()
+                } else {
+                    shrinkTimer.stop()
+                }
+            }
         }
     }
 

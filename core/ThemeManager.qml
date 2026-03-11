@@ -54,6 +54,27 @@ Singleton {
 
     property int globalThickness: 16
     property int globalCornerRadius: 12
+    
+    property int spacingExtraSmall: 4
+    property int spacingSmall: 8
+    property int spacingMedium: 12
+    property int spacingLarge: 16
+    property int spacingExtraLarge: 24
+    property int spacingHuge: 32
+    property int spacingMassive: 48
+
+    property int radiusSmall: 8
+    property int radiusMedium: 12
+    property int radiusLarge: 16
+    property int radiusExtraLarge: 24
+    property int radiusHuge: 32
+
+    property int durationInstant: 100
+    property int durationFast: 200
+    property int durationMedium: 300
+    property int durationSlow: 500
+    property int durationLeisurely: 800
+
     property bool useDynamicTheming: false
     property color backgroundColor: "#0D0D0F"
     property color manualAccentColor: "#FFFFFF"
@@ -391,6 +412,40 @@ Singleton {
                 { type: "header", label: "Formats" },
                 { type: "text", label: "Time Format", property: "timeFormat", default: "hh:mm" },
                 { type: "text", label: "Date Format", property: "dateFormat", default: "dddd, MMMM d" }
+            ]
+        },
+        {
+            category: "Spacing",
+            icon: "󰇄",
+            items: [
+                { type: "header", label: "Layout Rhythm" },
+                { type: "slider", label: "Extra Small", property: "spacingExtraSmall", default: 4, min: 0, max: 12 },
+                { type: "slider", label: "Small", property: "spacingSmall", default: 8, min: 0, max: 20 },
+                { type: "slider", label: "Medium", property: "spacingMedium", default: 12, min: 0, max: 32 },
+                { type: "slider", label: "Large", property: "spacingLarge", default: 16, min: 0, max: 48 },
+                { type: "slider", label: "Extra Large", property: "spacingExtraLarge", default: 24, min: 0, max: 64 }
+            ]
+        },
+        {
+            category: "Radii",
+            icon: "󰔉",
+            items: [
+                { type: "header", label: "Corner Softness" },
+                { type: "slider", label: "Small", property: "radiusSmall", default: 8, min: 0, max: 24 },
+                { type: "slider", label: "Medium", property: "radiusMedium", default: 12, min: 0, max: 32 },
+                { type: "slider", label: "Large", property: "radiusLarge", default: 16, min: 0, max: 48 },
+                { type: "slider", label: "Extra Large", property: "radiusExtraLarge", default: 24, min: 0, max: 64 }
+            ]
+        },
+        {
+            category: "Durations",
+            icon: "󰥔",
+            items: [
+                { type: "header", label: "Animation Speed" },
+                { type: "slider", label: "Instant", property: "durationInstant", default: 100, min: 0, max: 250, step: 10 },
+                { type: "slider", label: "Fast", property: "durationFast", default: 200, min: 50, max: 500, step: 50 },
+                { type: "slider", label: "Medium", property: "durationMedium", default: 300, min: 100, max: 800, step: 50 },
+                { type: "slider", label: "Slow", property: "durationSlow", default: 500, min: 200, max: 1500, step: 100 }
             ]
         },
         {

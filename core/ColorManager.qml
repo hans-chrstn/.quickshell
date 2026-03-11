@@ -42,16 +42,16 @@ Singleton {
         triggeredOnStart: true
         onTriggered: {
             let musicArtUrl = (MusicManager.activePlayer && MusicManager.activePlayer.trackArtUrl && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing) 
-                ? MusicManager.activePlayer.trackArtUrl 
+                ? MusicManager.activePlayer.trackArtUrl.toString()
                 : "";
             
-            let isRemote = musicArtUrl.toString().startsWith("http");
+            let isRemote = musicArtUrl.startsWith("http");
             
             if (musicArtUrl !== "" && !isRemote) {
                 root.sourceUrl = musicArtUrl;
             } else {
                 let wpPath = WallpaperManager.activeWallpaperPath;
-                if (wpPath) {
+                if (wpPath && wpPath !== "") {
                     let uri = wpPath.startsWith("/") ? "file://" + wpPath : wpPath;
                     root.sourceUrl = uri;
                 } else {
