@@ -150,6 +150,15 @@ Item {
         }
     }
 
+    Connections {
+        target: DashboardManager
+        function onSuppressDismissChanged() {
+            if (!DashboardManager.suppressDismiss && !dashboardHover.hovered) {
+                DashboardManager.requestDismiss()
+            }
+        }
+    }
+
     Item {
         id: backgroundLayer
         anchors.fill: parent

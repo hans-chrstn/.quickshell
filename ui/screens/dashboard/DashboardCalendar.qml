@@ -2,63 +2,242 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
+import "./calendar"
 
 ColumnLayout {
+    id: root
     anchors.fill: parent
     anchors.margins: 30
     spacing: 25
 
-    ColumnLayout {
-        spacing: 4
+    RowLayout {
+        Layout.fillWidth: true
+        spacing: 15
 
-        StyledLabel {
-            text: DashboardManager.realActive 
-                ? Qt.formatDateTime(new Date(), "dddd") 
-                : ""
-            type: "heading"
-            font.pixelSize: 28
+        ColumnLayout {
+            spacing: 4
+            Layout.fillWidth: true
+
+            StyledLabel {
+                text: "Calendar"
+                type: "heading"
+                font.pixelSize: 28
+            }
+
+            StyledLabel {
+                text: Qt.formatDateTime(new Date(), "MMMM d, yyyy")
+                type: "body"
+                opacity: 0.6
+            }
         }
 
-        StyledLabel {
-            text: DashboardManager.realActive 
-                ? Qt.formatDateTime(new Date(), "MMMM d, yyyy") 
-                : ""
-            type: "body"
-            opacity: 0.6
+        BaseButton {
+            width: 44
+            height: 44
+            cornerRadius: 12
+            tooltip: "Add Event"
+            onClicked: eventEditor.active = !eventEditor.active
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 12
+                color: parent.isHovered 
+                    ? ThemeManager.surfaceStrongColor 
+                    : "transparent"
+                border.color: ThemeManager.outlineVariantColor
+                border.width: 1
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: "󰐕"
+                color: ThemeManager.contentOnBackgroundColor
+                font.pixelSize: 24
+                opacity: parent.isHovered ? 1.0 : 0.6
+            }
         }
     }
 
-    StyledCard {
+    CalendarGrid {
+        id: calendarGrid
+        Layout.fillWidth: true
+    }
+
+    EventEditor {
+        id: eventEditor
+        active: false
+        eventDate: CalendarManager.selectedDate
+    }
+
+    Item {
+        id: eventCardContainer
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        ColumnLayout {
+        StyledCard {
+            id: eventCard
             anchors.fill: parent
-            anchors.margins: 20
-            spacing: 15
 
-            StyledLabel {
-                text: "Upcoming Events"
-                type: "title"
-                font.pixelSize: 16
-            }
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: 20
+                spacing: 15
 
-            Rectangle {
-                Layout.fillWidth: true
-                height: 1
-                color: ThemeManager.outlineVariantColor
-            }
+                StyledLabel {
+                    text: "Events for " + Qt.formatDate(CalendarManager.selectedDate, "MMM d")
+                    type: "title"
+                    font.pixelSize: 16
+                }
 
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: ThemeManager.outlineVariantColor
+                    opacity: 0.5
+                }
 
-                Text {
-                    anchors.centerIn: parent
-                    text: "No events scheduled for today"
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.3
-                    font.pixelSize: 13
+                ListView {
+                    id: eventList
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    spacing: 12
+                    clip: true
+                    model: CalendarManager.filteredModel
+
+                    add: Transition {
+                        NumberAnimation { 
+                            property: "opacity"; 
+                            from: 0; 
+                            to: 1; 
+                            duration: 400 
+                        }
+                        NumberAnimation { 
+                            property: "x"; 
+                            from: -30; 
+                            to: 0; 
+                            duration: 400; 
+                            easing.type: Easing.OutQuart 
+                        }
+                    }
+
+                    remove: Transition {
+                        NumberAnimation { 
+                            property: "opacity"; 
+                            to: 0; 
+                            duration: 300 
+                        }
+                        NumberAnimation { 
+                            property: "x"; 
+                            to: 30; 
+                            duration: 300; 
+                            easing.type: Easing.InQuart 
+                        }
+                    }
+
+                    displaced: Transition {
+                        NumberAnimation { 
+                            properties: "y"; 
+                            duration: 400; 
+                            easing.type: Easing.OutCubic 
+                        }
+                    }
+
+                    delegate: Item {
+                        id: delegateRoot
+                        width: eventList.width
+                        height: 70
+
+                        readonly property var cat: {
+                            for (let i = 0; i < CalendarManager.categories.length; i++) {
+                                if (CalendarManager.categories[i].id === model.category) return CalendarManager.categories[i]
+                            }
+                            return CalendarManager.categories[0]
+                        }
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 12
+                            color: ThemeManager.surfaceSubtleColor
+                            border.color: ThemeManager.outlineVariantColor
+                            border.width: 1
+                            opacity: 0.6
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 14
+
+                            Rectangle {
+                                width: 44
+                                height: 44
+                                radius: 10
+                                color: Qt.rgba(delegateRoot.cat.color.r, delegateRoot.cat.color.g, delegateRoot.cat.color.b, 0.15)
+                                border.color: Qt.rgba(delegateRoot.cat.color.r, delegateRoot.cat.color.g, delegateRoot.cat.color.b, 0.3)
+                                border.width: 1
+                                
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: delegateRoot.cat.icon
+                                    color: delegateRoot.cat.color
+                                    font.pixelSize: 22
+                                }
+                            }
+
+                            ColumnLayout {
+                                spacing: 2
+                                Layout.fillWidth: true
+
+                                StyledLabel {
+                                    text: model.title
+                                    type: "body"
+                                    font.weight: Font.DemiBold
+                                }
+
+                                StyledLabel {
+                                    text: (model.allDay ? "All Day" : model.time) 
+                                        + (model.location ? " • " + model.location : "")
+                                    type: "caption"
+                                    opacity: 0.6
+                                }
+                            }
+
+                            Item { Layout.fillWidth: true }
+
+                            BaseButton {
+                                width: 36
+                                height: 36
+                                cornerRadius: 10
+                                tooltip: "Delete"
+                                onClicked: {
+                                    CalendarManager.deleteEvent(model.id)
+                                    SoundManager.playCollapse()
+                                }
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: 10
+                                    color: parent.isHovered ? Qt.rgba(1, 0, 0, 0.1) : "transparent"
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "󰆴"
+                                    color: parent.isHovered ? "#FF4747" : ThemeManager.contentOnBackgroundColor
+                                    font.pixelSize: 18
+                                    opacity: parent.isHovered ? 1.0 : 0.4
+                                }
+                            }
+                        }
+                    }
+
+                    StyledLabel {
+                        anchors.centerIn: parent
+                        text: "No events for this day"
+                        type: "caption"
+                        opacity: 0.3
+                        visible: eventList.count === 0
+                    }
                 }
             }
         }

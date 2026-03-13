@@ -8,6 +8,7 @@ Singleton {
     property bool active: false
     property bool realActive: false
     property int currentPage: 0
+    property bool suppressDismiss: false
     
     readonly property var pages: [
         { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
@@ -43,7 +44,9 @@ Singleton {
     }
 
     function requestDismiss() {
-        dismissTimer.restart()
+        if (!root.suppressDismiss) {
+            dismissTimer.restart()
+        }
     }
 
     function toggle() {
