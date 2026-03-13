@@ -10,15 +10,26 @@ Singleton {
     readonly property string homeDir: Quickshell.env("HOME")
     readonly property string fallbackNotesDir: homeDir + "/Documents"
     readonly property string recentFilesCachePath: Quickshell.cachePath("recent_notes.json")
+    readonly property string scratchpadPath: Quickshell.cachePath("scratchpad.md")
     
     property string content: ""
+    property string scratchpadContent: ""
     property string currentFilePath: "" 
     property string searchText: ""
     property var recentFiles: []
     property bool isReady: false
+    property bool isScratchpadReady: false
     property bool hasUnsavedChanges: false
 
     readonly property string defaultContent: "# New Note\n\n"
+
+    function saveScratchpad() {
+        if (!isScratchpadReady) {
+            return
+        }
+
+        scratchpadFile.setText(root.scratchpadContent)
+    }
 
     function createNewNote() {
         if (hasUnsavedChanges) {
@@ -172,6 +183,27 @@ Singleton {
         }
     }
 
+    FileView {
+        id: scratchpadFile
+        path: root.scratchpadPath
+        onLoaded: {
+            let fileContent = text()
+            if (fileContent !== undefined && fileContent !== null) {
+                root.scratchpadContent = fileContent
+            }
+            root.isScratchpadReady = true
+        }
+    }
+
+    Timer {
+        id: scratchpadSaveTimer
+        interval: 1000
+        repeat: false
+        onTriggered: {
+            root.saveScratchpad()
+        }
+    }
+
     Timer {
         id: autoSaveTimer
         interval: 3000
@@ -196,6 +228,12 @@ Singleton {
         if (isReady && content !== root.defaultContent) {
             root.hasUnsavedChanges = true
             autoSaveTimer.restart()
+        }
+    }
+
+    onScratchpadContentChanged: {
+        if (isScratchpadReady) {
+            scratchpadSaveTimer.restart()
         }
     }
 
