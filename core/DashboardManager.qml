@@ -12,6 +12,7 @@ Singleton {
     
     readonly property var pages: [
         { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
+        { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
         { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
         { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
         { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }

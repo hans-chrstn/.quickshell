@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "../../screens/dashboard"
+import qs.ui.screens.dashboard
 
 Item {
     id: root
@@ -30,9 +30,10 @@ Item {
 
             sourceComponent: {
                 if (index === 0) return calendarComponent;
-                if (index === 1) return mixerComponent;
-                if (index === 2) return clipboardComponent;
-                if (index === 3) return scratchpadComponent;
+                if (index === 1) return timerComponent;
+                if (index === 2) return mixerComponent;
+                if (index === 3) return clipboardComponent;
+                if (index === 4) return scratchpadComponent;
                 return null;
             }
 
@@ -61,6 +62,11 @@ Item {
     Component {
         id: calendarComponent
         DashboardCalendar {}
+    }
+
+    Component {
+        id: timerComponent
+        DashboardTimer {}
     }
 
     Component {
