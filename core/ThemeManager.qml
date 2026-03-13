@@ -334,9 +334,26 @@ Singleton {
     property bool isReady: false
     readonly property string configurationCachePath: Quickshell.cachePath("config.json")
     
+    property bool googleCalendarEnabled: false
+    property string googleCalendarAccount: ""
+    property string googleCalendarClientId: ""
+    property string googleCalendarClientSecret: ""
+
     signal themeResetOccurred()
     
     property var settingsStructure: [
+        {
+            category: "Integrations",
+            icon: "󰄔",
+            items: [
+                { type: "header", label: "Google Calendar" },
+                { type: "switch", label: "Enable Sync", property: "googleCalendarEnabled", default: false },
+                { type: "text", label: "Account Email", property: "googleCalendarAccount", default: "" },
+                { type: "text", label: "Client ID (Optional)", property: "googleCalendarClientId", default: "" },
+                { type: "text", label: "Client Secret (Optional)", property: "googleCalendarClientSecret", default: "" },
+                { type: "action", label: "Verify Connection", actionId: "verifyGoogleCalendar" }
+            ]
+        },
         {
             category: "Lockscreen",
             icon: "󰌾",

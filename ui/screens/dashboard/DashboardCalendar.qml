@@ -31,29 +31,68 @@ ColumnLayout {
             }
         }
 
-        BaseButton {
-            width: 44
-            height: 44
-            cornerRadius: 12
-            tooltip: "Add Event"
-            onClicked: eventEditor.active = !eventEditor.active
+        RowLayout {
+            spacing: 8
 
-            Rectangle {
-                anchors.fill: parent
-                radius: 12
-                color: parent.isHovered 
-                    ? ThemeManager.surfaceStrongColor 
-                    : "transparent"
-                border.color: ThemeManager.outlineVariantColor
-                border.width: 1
+            BaseButton {
+                width: 44
+                height: 44
+                cornerRadius: 12
+                tooltip: "Sync Google Calendar"
+                visible: ThemeManager.googleCalendarEnabled
+                onClicked: {
+                    CalendarManager.triggerSync()
+                    SoundManager.playSuccess()
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 12
+                    color: parent.isHovered 
+                        ? ThemeManager.surfaceStrongColor 
+                        : "transparent"
+                    border.color: ThemeManager.outlineVariantColor
+                    border.width: 1
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰑓"
+                    color: GoogleCalendarManager.isTesting ? ThemeManager.accentColor : ThemeManager.contentOnBackgroundColor
+                    font.pixelSize: 22
+                    opacity: parent.isHovered ? 1.0 : 0.6
+                    
+                    RotationAnimation on rotation {
+                        running: GoogleCalendarManager.isTesting
+                        from: 0; to: 360; duration: 1000; loops: Animation.Infinite
+                    }
+                }
             }
 
-            Text {
-                anchors.centerIn: parent
-                text: "󰐕"
-                color: ThemeManager.contentOnBackgroundColor
-                font.pixelSize: 24
-                opacity: parent.isHovered ? 1.0 : 0.6
+            BaseButton {
+                width: 44
+                height: 44
+                cornerRadius: 12
+                tooltip: "Add Event"
+                onClicked: eventEditor.active = !eventEditor.active
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 12
+                    color: parent.isHovered 
+                        ? ThemeManager.surfaceStrongColor 
+                        : "transparent"
+                    border.color: ThemeManager.outlineVariantColor
+                    border.width: 1
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰐕"
+                    color: ThemeManager.contentOnBackgroundColor
+                    font.pixelSize: 24
+                    opacity: parent.isHovered ? 1.0 : 0.6
+                }
             }
         }
     }
@@ -189,16 +228,39 @@ ColumnLayout {
                                 Layout.fillWidth: true
 
                                 StyledLabel {
+                                    id: titleLabel
                                     text: model.title
                                     type: "body"
                                     font.weight: Font.DemiBold
+                                    elide: Text.ElideRight
+                                    Layout.fillWidth: true
+
+                                    HoverHandler {
+                                        id: titleHover
+                                        onHoveredChanged: {
+                                            if (hovered) {
+                                                TooltipManager.show(titleLabel, model.title, "Calendar Event")
+                                            } else {
+                                                TooltipManager.hide(titleLabel)
+                                            }
+                                        }
+                                    }
                                 }
 
-                                StyledLabel {
-                                    text: (model.allDay ? "All Day" : model.time) 
-                                        + (model.location ? " • " + model.location : "")
-                                    type: "caption"
-                                    opacity: 0.6
+                                RowLayout {
+                                    spacing: 6
+                                    Text {
+                                        text: "󰊭"
+                                        color: "#4285F4"
+                                        font.pixelSize: 13
+                                        visible: model.isGoogleEvent === true
+                                    }
+                                    StyledLabel {
+                                        text: (model.allDay ? "All Day" : model.time) 
+                                            + (model.location ? " • " + model.location : "")
+                                        type: "caption"
+                                        opacity: 0.6
+                                    }
                                 }
                             }
 
@@ -210,7 +272,7 @@ ColumnLayout {
                                 cornerRadius: 10
                                 tooltip: "Delete"
                                 onClicked: {
-                                    CalendarManager.deleteEvent(model.id)
+                                    CalendarManager.deleteEvent(model.id, model.isGoogleEvent === true, model.title, model.date)
                                     SoundManager.playCollapse()
                                 }
 

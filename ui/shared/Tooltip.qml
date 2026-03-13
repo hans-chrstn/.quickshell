@@ -78,7 +78,7 @@ PopupWindow {
             spacing: 2
             
             StyledLabel {
-                text: TooltipManager.text.toUpperCase()
+                text: TooltipManager.text ? TooltipManager.text.toUpperCase() : ""
                 type: "trayTooltip"
                 Layout.alignment: Qt.AlignHCenter
                 customColor: ThemeManager.accentColor
@@ -86,7 +86,7 @@ PopupWindow {
             }
             
             StyledLabel {
-                text: TooltipManager.description
+                text: TooltipManager.description || ""
                 type: "caption"
                 visible: text !== ""
                 opacity: 0.6
@@ -100,14 +100,24 @@ PopupWindow {
     function updatePosition() {
         if (TooltipManager.active && TooltipManager.targetItem) {
             let item = TooltipManager.targetItem
-            let win = item.Window.window
-            if (win && win !== undefined) {
+            let win = item.Window ? item.Window.window : null
+            
+            if (win) {
                 root.targetWindow = win
                 let pos = item.mapToItem(null, 0, 0)
-                root.targetX = pos.x + item.width / 2 - root.width / 2
+                
+                root.targetX = pos.x + (item.width / 2) - (root.implicitWidth / 2)
+                
                 root.targetY = pos.y
+                
                 root.isAtBottom = !!(win.anchors && win.anchors.bottom)
             }
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            updatePosition()
         }
     }
 
@@ -115,7 +125,7 @@ PopupWindow {
         target: TooltipManager
         function onActiveChanged() {
             if (TooltipManager.active) {
-                root.updatePosition()
+                Qt.callLater(root.updatePosition)
             }
         }
     }

@@ -22,6 +22,8 @@ Rectangle {
     radius: ThemeManager.osdPillRadius
     color: ThemeManager.backgroundPrimaryColor
     
+    implicitWidth: pillLayout.implicitWidth + 40
+    
     opacity: isPillActive ? 1.0 : 0.0
     scale: isPillActive ? 1.0 : 0.95
     
@@ -77,6 +79,7 @@ Rectangle {
         }
 
         RowLayout {
+            id: pillLayout
             anchors.fill: parent
             anchors.leftMargin: 20
             anchors.rightMargin: 20
@@ -95,9 +98,20 @@ Rectangle {
                 }
             }
 
+            StyledLabel {
+                Layout.fillWidth: true
+                text: OSDManager.currentMessage
+                type: "body"
+                font.pixelSize: 13
+                font.weight: Font.DemiBold
+                elideMode: Text.ElideRight
+                visible: root.displayType === "message"
+            }
+
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 16 
+                visible: root.displayType !== "message"
                 
                 Rectangle {
                     anchors.centerIn: parent
@@ -170,6 +184,7 @@ Rectangle {
                 opacity: 0.3
                 Layout.preferredWidth: 25
                 horizontalAlignment: Text.AlignRight
+                visible: root.displayType !== "message"
             }
         }
     }

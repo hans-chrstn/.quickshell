@@ -58,9 +58,19 @@ Loader {
             case "text": {
                 return textComp
             }
+            case "action": {
+                return actionComp
+            }
             default: {
                 return null
             }
+        }
+    }
+
+    Component {
+        id: actionComp
+        ConfigActionItem {
+            configurationItemData: root.configurationItemData
         }
     }
 

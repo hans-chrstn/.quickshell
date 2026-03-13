@@ -10,12 +10,13 @@ Singleton {
     property string currentType: "volume"
     property real currentValue: 0.0
     property string currentIcon: ""
+    property string currentMessage: ""
 
     property bool _isReady: false
 
     Timer {
         id: hideTimer
-        interval: 2000
+        interval: 3000
         onTriggered: root.active = false
     }
 
@@ -23,8 +24,18 @@ Singleton {
         if (!root._isReady) return
         
         root.currentType = type
-        root.currentValue = value
-        root.currentIcon = icon
+        
+        if (typeof value === "string" && icon === undefined) {
+            root.currentMessage = type
+            root.currentIcon = value
+            root.currentValue = 0
+            root.currentType = "message"
+        } else {
+            root.currentMessage = ""
+            root.currentValue = value || 0
+            root.currentIcon = icon || ""
+        }
+        
         root.active = true
         hideTimer.restart()
     }

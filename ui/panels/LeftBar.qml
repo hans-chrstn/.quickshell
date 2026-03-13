@@ -20,7 +20,7 @@ SystemPanel {
     anchors.top: true
     anchors.bottom: true
     
-    implicitWidth: 450
+    implicitWidth: DashboardManager.realActive ? 450 : ThemeManager.globalThickness
     color: "transparent"
 
     exclusionMode: ExclusionMode.Normal

@@ -5,7 +5,7 @@ import qs.ui.shared
 ValueIndicatorPill {
     id: root
     
-    width: ThemeManager.osdPillWidth
+    width: displayType === "message" ? Math.max(ThemeManager.osdPillWidth, implicitWidth) : ThemeManager.osdPillWidth
     height: ThemeManager.osdPillHeight
     
     property string osdScreenName: ""

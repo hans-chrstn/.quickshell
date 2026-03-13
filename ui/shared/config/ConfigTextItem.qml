@@ -45,9 +45,12 @@ Item {
                 border.width: 1
             }
             
-            onAccepted: { 
+            onEditingFinished: {
                 ThemeManager[root.configurationItemData.property] = text
                 ThemeManager.saveConfiguration()
+            }
+            
+            onAccepted: { 
                 focus = false 
             }
         }

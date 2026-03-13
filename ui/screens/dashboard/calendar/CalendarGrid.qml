@@ -16,13 +16,25 @@ ColumnLayout {
         let d = new Date(root.viewDate)
         d.setMonth(d.getMonth() - 1)
         root.viewDate = d
+        refreshGoogleMonth()
     }
 
     function nextMonth() {
         let d = new Date(root.viewDate)
         d.setMonth(d.getMonth() + 1)
         root.viewDate = d
+        refreshGoogleMonth()
     }
+
+    function refreshGoogleMonth() {
+        if (ThemeManager.googleCalendarEnabled) {
+            let start = new Date(root.viewDate.getFullYear(), root.viewDate.getMonth(), 1)
+            let end = new Date(root.viewDate.getFullYear(), root.viewDate.getMonth() + 1, 0)
+            GoogleCalendarManager.fetchEvents(start, end)
+        }
+    }
+
+    Component.onCompleted: refreshGoogleMonth()
 
     RowLayout {
         Layout.fillWidth: true

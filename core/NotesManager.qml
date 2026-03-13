@@ -186,6 +186,7 @@ Singleton {
     FileView {
         id: scratchpadFile
         path: root.scratchpadPath
+        printErrors: false
         onLoaded: {
             let fileContent = text()
             if (fileContent !== undefined && fileContent !== null) {
