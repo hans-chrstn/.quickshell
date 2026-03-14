@@ -49,24 +49,27 @@ Item {
 
             sourceComponent: {
                 if (index === 0) {
-                    return calendarComponent
+                    return newsComponent
                 }
                 if (index === 1) {
-                    return timerComponent
-                }
-                if (index === 2) {
-                    return tasksComponent
-                }
-                if (index === 3) {
                     return weatherComponent
                 }
+                if (index === 2) {
+                    return calendarComponent
+                }
+                if (index === 3) {
+                    return tasksComponent
+                }
                 if (index === 4) {
-                    return mixerComponent
+                    return timerComponent
                 }
                 if (index === 5) {
-                    return clipboardComponent
+                    return mixerComponent
                 }
                 if (index === 6) {
+                    return clipboardComponent
+                }
+                if (index === 7) {
                     return scratchpadComponent
                 }
                 return null
@@ -83,7 +86,7 @@ Item {
                 property: "chronoEngine"
                 value: contentRoot.chronoEngine
                 when: {
-                    return index === 1 || index === 2
+                    return index === 3 || index === 4
                 }
             }
 
@@ -116,14 +119,20 @@ Item {
     }
 
     Component {
-        id: calendarComponent
-        DashboardCalendar {
+        id: newsComponent
+        DashboardNews {
         }
     }
 
     Component {
-        id: timerComponent
-        DashboardTimer {
+        id: weatherComponent
+        DashboardWeather {
+        }
+    }
+
+    Component {
+        id: calendarComponent
+        DashboardCalendar {
         }
     }
 
@@ -134,8 +143,8 @@ Item {
     }
 
     Component {
-        id: weatherComponent
-        DashboardWeather {
+        id: timerComponent
+        DashboardTimer {
         }
     }
 

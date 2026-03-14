@@ -25,10 +25,11 @@ SystemPanel {
     }
 
     readonly property var dashboardPages: [
-        { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
-        { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
-        { "id": "tasks", "title": "Tasks & Habits", "icon": "󰄬" },
+        { "id": "news", "title": "Intelligence", "icon": "󰋙" },
         { "id": "weather", "title": "Weather Hub", "icon": "󰖐" },
+        { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
+        { "id": "tasks", "title": "Tasks & Habits", "icon": "󰄬" },
+        { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
         { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
         { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
         { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }
