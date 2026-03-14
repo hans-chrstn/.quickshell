@@ -105,13 +105,35 @@ Rectangle {
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
                 elideMode: Text.ElideRight
-                visible: root.displayType === "message"
+                visible: root.displayType === "message" || root.displayType === "chrono"
+            }
+
+            BaseButton {
+                width: 24
+                height: 24
+                cornerRadius: 12
+                visible: root.displayType === "chrono"
+                onClicked: OSDManager.manualHide("chrono")
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: 12
+                    color: parent.isHovered ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "󰅖"
+                    font.pixelSize: 14
+                    color: parent.parent.isHovered ? ThemeManager.dangerColor : ThemeManager.contentOnBackgroundColor
+                    opacity: 0.6
+                }
             }
 
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 16 
-                visible: root.displayType !== "message"
+                visible: root.displayType !== "message" && root.displayType !== "chrono"
                 
                 Rectangle {
                     anchors.centerIn: parent
@@ -184,7 +206,7 @@ Rectangle {
                 opacity: 0.3
                 Layout.preferredWidth: 25
                 horizontalAlignment: Text.AlignRight
-                visible: root.displayType !== "message"
+                visible: root.displayType !== "message" && root.displayType !== "chrono"
             }
         }
     }

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
+import "./sidebar"
 
 Rectangle {
     id: sidebarRoot
@@ -40,24 +41,17 @@ Rectangle {
         opacity: 0.5
     }
 
-    Rectangle {
+    SelectionPill {
         id: navIndicator
         width: 44
         height: 44
         radius: 12
-        color: ThemeManager.accentColor
-        x: (parent.width - width) / 2
-        y: 30 + (root.currentPage * (44 + 20))
-
-        Behavior on y {
-            NumberAnimation {
-                duration: 400
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.4
-            }
+        x: {
+            return (parent.width - width) / 2
         }
-
-        z: 0
+        y: {
+            return 30 + (root.currentPage * (44 + 20))
+        }
     }
 
     ColumnLayout {
@@ -68,46 +62,23 @@ Rectangle {
         spacing: 20
 
         Repeater {
-            model: root.pages
+            model: {
+                return root.pages
+            }
 
-            delegate: BaseButton {
-                Layout.alignment: Qt.AlignHCenter
-                width: 44
-                height: 44
-                cornerRadius: 12
-
-                readonly property var pageInfo: modelData
-                tooltip: pageInfo ? pageInfo.title : ""
-
-                onClicked: {
+            delegate: SidebarItem {
+                pageInfo: modelData
+                isSelected: {
+                    return root.currentPage === index
+                }
+                onSelected: {
                     root.currentPage = index
-                }
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: parent.cornerRadius
-                    color: "transparent"
-                    border.color: ThemeManager.outlinePrimaryColor
-                    border.width: 1
-                    visible: root.currentPage !== index
-                }
-
-                Text {
-                    anchors.centerIn: parent
-                    text: pageInfo ? pageInfo.icon : ""
-                    color: (root.currentPage === index) 
-                        ? ThemeManager.contentPrimaryColor 
-                        : ThemeManager.contentOnBackgroundColor
-                    font.pixelSize: 22
-                    z: 1
-
-                    Behavior on color { 
-                        ColorAnimation { duration: 250 } 
-                    }
                 }
             }
         }
 
-        Item { Layout.fillHeight: true }
+        Item { 
+            Layout.fillHeight: true 
+        }
     }
 }

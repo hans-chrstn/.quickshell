@@ -2,13 +2,16 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
+import "./clipboard"
 
 ColumnLayout {
+    id: root
+
+    property bool active: false
+
     anchors.fill: parent
     anchors.margins: 30
     spacing: 25
-
-    property bool active: false
 
     RowLayout {
         Layout.fillWidth: true
@@ -24,20 +27,29 @@ ColumnLayout {
             width: 44
             height: 44
             cornerRadius: 12
-            tooltip: "Clear History"
-            visible: ClipboardManager.history.length > 0
+            visible: {
+                if (!ClipboardManager) {
+                    return false
+                }
+                return ClipboardManager.history.length > 0
+            }
 
             onClicked: {
-                ClipboardManager.clear()
-                SoundManager.playCollapse()
+                if (ClipboardManager) {
+                    ClipboardManager.clear()
+                    SoundManager.playCollapse()
+                }
             }
 
             Rectangle {
                 anchors.fill: parent
                 radius: 12
-                color: parent.isHovered 
-                    ? ThemeManager.surfaceStrongColor 
-                    : "transparent"
+                color: {
+                    if (parent.isHovered) {
+                        return ThemeManager.surfaceStrongColor
+                    }
+                    return "transparent"
+                }
                 border.color: ThemeManager.outlineVariantColor
                 border.width: 1
             }
@@ -47,7 +59,12 @@ ColumnLayout {
                 text: "󰃢"
                 color: ThemeManager.contentOnBackgroundColor
                 font.pixelSize: 20
-                opacity: parent.isHovered ? 1.0 : 0.6
+                opacity: {
+                    if (parent.isHovered) {
+                        return 1.0
+                    }
+                    return 0.6
+                }
             }
         }
     }
@@ -56,43 +73,17 @@ ColumnLayout {
         id: clipList
         Layout.fillWidth: true
         Layout.fillHeight: true
-        model: ClipboardManager.history
+        model: {
+            if (!ClipboardManager) {
+                return null
+            }
+            return ClipboardManager.history
+        }
         spacing: 8
         clip: true
 
-        delegate: BaseButton {
-            width: clipList.width
-            height: 60
-            cornerRadius: 12
-            hoverScale: 1.0
-
-            readonly property string clipContent: modelData || ""
-
-            onClicked: {
-                if (clipContent) {
-                    ClipboardManager.copyToClipboard(clipContent)
-                    SoundManager.playSuccess()
-                }
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                radius: 12
-                color: parent.isHovered 
-                    ? ThemeManager.surfaceStrongColor 
-                    : ThemeManager.surfacePrimaryColor
-                border.color: ThemeManager.outlineVariantColor
-                border.width: 1
-            }
-
-            StyledLabel {
-                anchors.fill: parent
-                anchors.margins: 15
-                text: clipContent.replace(/\n/g, " ")
-                type: "body"
-                elideMode: Text.ElideRight
-                font.pixelSize: 13
-            }
+        delegate: ClipboardItemDelegate {
+            content: String(modelData || "")
         }
     }
 
@@ -102,6 +93,11 @@ ColumnLayout {
         opacity: 0.3
         Layout.fillWidth: true
         horizontalAlignment: Text.AlignHCenter
-        visible: ClipboardManager.history.length === 0
+        visible: {
+            if (!ClipboardManager) {
+                return true
+            }
+            return ClipboardManager.history.length === 0
+        }
     }
 }

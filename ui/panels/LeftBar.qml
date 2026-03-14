@@ -23,22 +23,58 @@ SystemPanel {
     readonly property var dashboardPages: [
         { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
         { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
+        { "id": "tasks", "title": "Tasks & Habits", "icon": "󰄬" },
         { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
         { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
         { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }
     ]
 
+    property bool suppressChronoOSD: false
+
     ChronoEngine {
         id: chronoEngine
         
         onAlertTriggered: (label) => {
-            OSDManager.show("Alarm: " + label, ThemeManager.iconClock)
+            root.suppressChronoOSD = false
+            OSDManager.show("message", "Alarm: " + label, ThemeManager.iconClock)
             SoundManager.playSuccess()
         }
         
         onCountdownFinished: {
-            OSDManager.show("Timer Finished", ThemeManager.iconClock)
+            root.suppressChronoOSD = false
+            OSDManager.show("message", "Timer Finished", ThemeManager.iconClock)
             SoundManager.playSuccess()
+            OSDManager.hide("chrono")
+        }
+
+        onCountdownSecondsChanged: {
+            if (isCounting && !root.suppressChronoOSD) {
+                OSDManager.show("chrono", chronoEngine.getFormattedTime(countdownSeconds))
+            }
+        }
+
+        onIsCountingChanged: {
+            if (isCounting) {
+                root.suppressChronoOSD = false
+            } else if (countdownSeconds > 0) {
+                OSDManager.hide("chrono")
+            }
+        }
+
+        onActiveModeChanged: {
+            root.suppressChronoOSD = false
+            if (!isCounting) {
+                OSDManager.hide("chrono")
+            }
+        }
+    }
+
+    Connections {
+        target: OSDManager
+        function onManuallyHidden(type) {
+            if (type === "chrono" && chronoEngine.isCounting) {
+                root.suppressChronoOSD = true
+            }
         }
     }
 
@@ -95,7 +131,7 @@ SystemPanel {
             item: barRect
         }
         Region {
-            item: (root.isDashboardActive && root.isLastActive) ? dashboardHitbox : null
+            item: (root.isDashboardActive && root.isLastActive) ? dashboardMaskItem : null
         }
     }
 
@@ -115,9 +151,25 @@ SystemPanel {
             height: 200
 
             HoverHandler {
-                onHoveredChanged: root.triggerHovered = hovered
+                onHoveredChanged: {
+                    root.triggerHovered = hovered
+                }
             }
         }
+    }
+
+    Item {
+        id: dashboardMaskItem
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        width: {
+            if (dashboardLoader.item) {
+                return Math.max(0, dashboardLoader.item.x + dashboardLoader.item.width)
+            }
+            return 0
+        }
+        visible: width > 0
     }
 
     Item {
@@ -131,7 +183,9 @@ SystemPanel {
         visible: root.isDashboardExpanded
 
         HoverHandler {
-            onHoveredChanged: root.contentHovered = hovered
+            onHoveredChanged: {
+                root.contentHovered = hovered
+            }
         }
     }
 

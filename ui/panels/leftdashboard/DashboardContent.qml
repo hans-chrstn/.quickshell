@@ -14,30 +14,59 @@ Item {
     Layout.fillHeight: true
     clip: true
 
-    readonly property int currentIndex: root.currentPage
+    readonly property int currentIndex: {
+        if (!root) {
+            return 0
+        }
+        return root.currentPage
+    }
 
     Repeater {
-        model: root.pages ? root.pages.length : 0
+        model: {
+            if (!root || !root.pages) {
+                return 0
+            }
+            return root.pages.length
+        }
 
         delegate: Loader {
             anchors.fill: parent
 
-            active: contentRoot.currentIndex === index 
-                || (opacity > 0.01)
+            active: {
+                return contentRoot.currentIndex === index || opacity > 0.01
+            }
 
-            opacity: contentRoot.currentIndex === index 
-                ? 1.0 
-                : 0.0
+            opacity: {
+                if (contentRoot.currentIndex === index) {
+                    return 1.0
+                }
+                return 0.0
+            }
 
-            visible: opacity > 0.01
+            visible: {
+                return opacity > 0.01
+            }
 
             sourceComponent: {
-                if (index === 0) return calendarComponent;
-                if (index === 1) return timerComponent;
-                if (index === 2) return mixerComponent;
-                if (index === 3) return clipboardComponent;
-                if (index === 4) return scratchpadComponent;
-                return null;
+                if (index === 0) {
+                    return calendarComponent
+                }
+                if (index === 1) {
+                    return timerComponent
+                }
+                if (index === 2) {
+                    return tasksComponent
+                }
+                if (index === 3) {
+                    return mixerComponent
+                }
+                if (index === 4) {
+                    return clipboardComponent
+                }
+                if (index === 5) {
+                    return scratchpadComponent
+                }
+                return null
             }
 
             Binding {
@@ -50,7 +79,9 @@ Item {
                 target: item
                 property: "chronoEngine"
                 value: contentRoot.chronoEngine
-                when: index === 1
+                when: {
+                    return index === 1 || index === 2
+                }
             }
 
             Behavior on opacity {
@@ -61,9 +92,15 @@ Item {
             }
 
             transform: Translate {
-                x: contentRoot.currentIndex === index 
-                    ? 0 
-                    : (contentRoot.currentIndex > index ? -30 : 30)
+                x: {
+                    if (contentRoot.currentIndex === index) {
+                        return 0
+                    }
+                    if (contentRoot.currentIndex > index) {
+                        return -30
+                    }
+                    return 30
+                }
 
                 Behavior on x {
                     NumberAnimation {
@@ -77,26 +114,37 @@ Item {
 
     Component {
         id: calendarComponent
-        DashboardCalendar {}
+        DashboardCalendar {
+        }
     }
 
     Component {
         id: timerComponent
-        DashboardTimer {}
+        DashboardTimer {
+        }
+    }
+
+    Component {
+        id: tasksComponent
+        DashboardTasks {
+        }
     }
 
     Component {
         id: mixerComponent
-        DashboardAudioMixer {}
+        DashboardAudioMixer {
+        }
     }
 
     Component {
         id: clipboardComponent
-        DashboardClipboard {}
+        DashboardClipboard {
+        }
     }
 
     Component {
         id: scratchpadComponent
-        DashboardScratchpad {}
+        DashboardScratchpad {
+        }
     }
 }
