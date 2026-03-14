@@ -209,7 +209,7 @@ Singleton {
             longitude = "-0.1278"
         }
 
-        let url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto`
+        let url = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto"
         
         try {
             let xhr = new XMLHttpRequest()
@@ -261,9 +261,15 @@ Singleton {
         interval: 1800000 
         running: true 
         repeat: true 
-        triggeredOnStart: false
+        triggeredOnStart: true
         onTriggered: {
             root.fetchLatestWeather()
         }
+    }
+
+    Component.onCompleted: {
+        Qt.callLater(() => {
+            root.fetchLatestWeather()
+        })
     }
 }
