@@ -6,6 +6,7 @@
 //@ pragma Env QT_FFMPEG_ENCODING_HW_DEVICE_TYPES=vaapi
 //@ pragma Env QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Material
+//@ pragma Env QSG_RHI_BACKEND=vulkan
 
 import QtQuick
 import Quickshell

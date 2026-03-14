@@ -105,6 +105,58 @@ StyledCard {
                     }
                 }
 
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 4
+                    visible: {
+                        if (!root.taskData || !root.taskData.tags) {
+                            return false
+                        }
+                        return root.taskData.tags.count > 0
+                    }
+                    
+                    Repeater {
+                        model: {
+                            if (!root.taskData || !root.taskData.tags) {
+                                return null
+                            }
+                            return root.taskData.tags
+                        }
+                        
+                        delegate: Rectangle {
+                            width: {
+                                return dIcon.width + dLabel.implicitWidth + 12
+                            }
+                            height: 18
+                            radius: 4
+                            color: Qt.rgba(1, 1, 1, 0.05)
+                            
+                            RowLayout {
+                                anchors.centerIn: parent
+                                spacing: 4
+                                
+                                Text {
+                                    id: dIcon
+                                    text: "󰓹"
+                                    color: ThemeManager.accentColor
+                                    font.pixelSize: 10
+                                    opacity: 0.7
+                                }
+                                
+                                StyledLabel {
+                                    id: dLabel
+                                    text: {
+                                        return String(model.name || "")
+                                    }
+                                    type: "caption"
+                                    font.pixelSize: 9
+                                    opacity: 0.8
+                                }
+                            }
+                        }
+                    }
+                }
+
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 4

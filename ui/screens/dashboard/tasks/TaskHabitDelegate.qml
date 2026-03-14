@@ -34,12 +34,7 @@ StyledCard {
             TaskActionColumn {
                 icon: "󰐕"
                 color: "#4CAF50"
-                isVisible: {
-                    if (!root.taskData) {
-                        return false
-                    }
-                    return !!root.taskData.isPositive
-                }
+                isVisible: true
                 onClicked: {
                     HabitManager.incrementHabit(root.taskIndex)
                     SoundManager.playClick()
@@ -96,10 +91,10 @@ StyledCard {
                     Layout.fillWidth: true
                     spacing: 4
                     visible: {
-                        if (!root.taskData) {
+                        if (!root.taskData || !root.taskData.tags) {
                             return false
                         }
-                        return !!root.taskData.tags && root.taskData.tags.length > 0
+                        return root.taskData.tags.count > 0
                     }
                     
                     Repeater {
@@ -133,10 +128,7 @@ StyledCard {
                                 StyledLabel {
                                     id: tLabel
                                     text: {
-                                        if (typeof modelData === "string") {
-                                            return modelData
-                                        }
-                                        return String(modelData.name || "")
+                                        return String(model.name || "")
                                     }
                                     type: "caption"
                                     font.pixelSize: 9

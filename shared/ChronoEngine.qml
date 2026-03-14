@@ -6,7 +6,7 @@ import qs.core
 Item {
     id: root
 
-    readonly property string chronoPersistencePath: Quickshell.cachePath("chrono_v6.json")
+    readonly property string chronoPersistencePath: Quickshell.cachePath("chrono.json")
 
     property int countdownSeconds: 0
     property int lastStartedSeconds: 0

@@ -169,6 +169,163 @@ ColumnLayout {
         }
     }
 
+    ColumnLayout {
+        spacing: 8
+        Layout.fillWidth: true
+        StyledLabel { 
+            text: "Tags"
+            type: "caption"
+            opacity: 0.5 
+        }
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: root.todoTags
+                delegate: Rectangle {
+                    width: tagLabel.implicitWidth + 24
+                    height: 24
+                    radius: 12
+                    color: Qt.rgba(1, 1, 1, 0.05)
+                    border.color: Qt.rgba(1, 1, 1, 0.1)
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 4
+                        StyledLabel { 
+                            id: tagLabel
+                            text: modelData
+                            type: "caption"
+                            font.pixelSize: 10 
+                        }
+                        BaseButton {
+                            width: 14
+                            height: 14
+                            onClicked: { 
+                                let tags = [...root.todoTags]
+                                tags.splice(index, 1)
+                                root.todoTags = tags 
+                            }
+                            Text { 
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                color: "red"
+                                font.pixelSize: 8
+                                opacity: 0.6 
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+            TextField {
+                id: todoTagIn
+                Layout.fillWidth: true
+                height: 30
+                placeholderText: "Add tag..."
+                font.pixelSize: 11
+                color: ThemeManager.contentOnBackgroundColor
+                placeholderTextColor: Qt.rgba(1, 1, 1, 0.4)
+                background: Rectangle { 
+                    radius: 6
+                    color: Qt.rgba(1, 1, 1, 0.05) 
+                }
+            }
+            BaseButton {
+                width: 30
+                height: 30
+                cornerRadius: 6
+                onClicked: { 
+                    if (todoTagIn.text !== "") { 
+                        root.todoTags = [
+                            ...root.todoTags, 
+                            todoTagIn.text
+                        ]
+                        HabitManager.addTag(todoTagIn.text)
+                        todoTagIn.text = "" 
+                    } 
+                }
+                Rectangle { 
+                    anchors.fill: parent
+                    radius: 6
+                    color: ThemeManager.surfaceSubtleColor 
+                }
+                Text { 
+                    anchors.centerIn: parent
+                    text: "󰐕"
+                    color: "white"
+                    opacity: 0.7 
+                }
+            }
+        }
+
+        StyledLabel { 
+            text: "Available Tags"
+            type: "caption"
+            opacity: 0.3
+            font.pixelSize: 9
+            Layout.topMargin: 5
+            visible: {
+                return HabitManager.tagStore.count > 0
+            }
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: HabitManager.tagStore
+                delegate: Rectangle {
+                    width: availTagLabel.implicitWidth + 28
+                    height: 22
+                    radius: 11
+                    color: Qt.rgba(1, 1, 1, 0.03)
+                    border.color: Qt.rgba(1, 1, 1, 0.05)
+                    
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        
+                        BaseButton {
+                            Layout.preferredWidth: availTagLabel.implicitWidth
+                            Layout.fillHeight: true
+                            onClicked: {
+                                let tagName = String(model.name || "")
+                                if (!root.todoTags.includes(tagName)) {
+                                    root.todoTags = [...root.todoTags, tagName]
+                                }
+                            }
+                            StyledLabel {
+                                id: availTagLabel
+                                text: String(model.name || "")
+                                type: "caption"
+                                font.pixelSize: 9
+                                opacity: 0.6
+                            }
+                        }
+
+                        BaseButton {
+                            width: 12
+                            height: 12
+                            onClicked: {
+                                HabitManager.removeTag(index)
+                            }
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                color: "red"
+                                font.pixelSize: 7
+                                opacity: 0.4
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     RowLayout {
         Layout.fillWidth: true
         spacing: 15
@@ -268,6 +425,7 @@ ColumnLayout {
                 root.todoTitle = ""
                 root.todoNotes = ""
                 root.todoChecklist = []
+                root.todoTags = []
                 root.saved()
                 SoundManager.playSuccess()
             }

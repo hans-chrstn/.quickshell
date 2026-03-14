@@ -30,7 +30,7 @@ Singleton {
             "title": String(data.title || "New Habit"),
             "notes": String(data.notes || ""),
             "isPositive": !!data.isPositive,
-            "isNegative": true,
+            "isNegative": !!data.isNegative,
             "difficulty": String(data.difficulty || "easy"),
             "resetCounter": String(data.resetCounter || "daily"),
             "counter": 0,
@@ -120,7 +120,6 @@ Singleton {
         })
         
         let daily = root.dailyStore.get(root.dailyStore.count - 1)
-        
         for (let t of tagData) {
             daily.tags.append({ 
                 "name": String(t.name || t) 
@@ -228,7 +227,6 @@ Singleton {
         })
         
         let todo = root.todoStore.get(root.todoStore.count - 1)
-        
         for (let t of tagData) {
             todo.tags.append({ 
                 "name": String(t.name || t) 
@@ -326,6 +324,13 @@ Singleton {
             root.tagStore.append({ 
                 "name": cleanName 
             })
+            root.saveData()
+        }
+    }
+
+    function removeTag(index) {
+        if (index >= 0 && index < root.tagStore.count) {
+            root.tagStore.remove(index)
             root.saveData()
         }
     }
@@ -445,7 +450,9 @@ Singleton {
             "todos": root.modelToData(root.todoStore),
             "tags": root.modelToData(root.tagStore)
         }
-        persistenceFile.setText(JSON.stringify(data))
+        persistenceFile.setText(
+            JSON.stringify(data, null, 4)
+        )
     }
 
     FileView {

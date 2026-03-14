@@ -126,7 +126,7 @@ ColumnLayout {
         spacing: 6
         Layout.fillWidth: true
         StyledLabel { 
-            text: "Polarity"
+            text: "Habit Type"
             type: "caption"
             opacity: 0.5 
         }
@@ -252,9 +252,7 @@ ColumnLayout {
                 radius: 6
                 x: {
                     let items = ["trivial", "easy", "medium", "hard"]
-                    let idx = items.indexOf(
-                        root.habitDifficulty
-                    )
+                    let idx = items.indexOf(root.habitDifficulty)
                     return idx * (width + 6)
                 }
             }
@@ -304,9 +302,7 @@ ColumnLayout {
             Repeater {
                 model: root.habitTags
                 delegate: Rectangle {
-                    width: {
-                        return tagLabel.implicitWidth + 24
-                    }
+                    width: tagLabel.implicitWidth + 24
                     height: 24
                     radius: 12
                     color: Qt.rgba(1, 1, 1, 0.05)
@@ -325,10 +321,7 @@ ColumnLayout {
                             height: 14
                             onClicked: { 
                                 let tags = [...root.habitTags]
-                                tags.splice(
-                                    index, 
-                                    1
-                                )
+                                tags.splice(index, 1)
                                 root.habitTags = tags 
                             }
                             Text { 
@@ -369,9 +362,7 @@ ColumnLayout {
                             ...root.habitTags, 
                             habitTagIn.text
                         ]
-                        HabitManager.addTag(
-                            habitTagIn.text
-                        )
+                        HabitManager.addTag(habitTagIn.text)
                         habitTagIn.text = "" 
                     } 
                 }
@@ -388,6 +379,70 @@ ColumnLayout {
                 }
             }
         }
+
+        StyledLabel { 
+            text: "Available Tags"
+            type: "caption"
+            opacity: 0.3
+            font.pixelSize: 9
+            Layout.topMargin: 5
+            visible: {
+                return HabitManager.tagStore.count > 0
+            }
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: HabitManager.tagStore
+                delegate: Rectangle {
+                    width: availTagLabel.implicitWidth + 28
+                    height: 22
+                    radius: 11
+                    color: Qt.rgba(1, 1, 1, 0.03)
+                    border.color: Qt.rgba(1, 1, 1, 0.05)
+                    
+                    RowLayout {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        
+                        BaseButton {
+                            Layout.preferredWidth: availTagLabel.implicitWidth
+                            Layout.fillHeight: true
+                            onClicked: {
+                                let tagName = String(model.name || "")
+                                if (!root.habitTags.includes(tagName)) {
+                                    root.habitTags = [...root.habitTags, tagName]
+                                }
+                            }
+                            StyledLabel {
+                                id: availTagLabel
+                                text: String(model.name || "")
+                                type: "caption"
+                                font.pixelSize: 9
+                                opacity: 0.6
+                            }
+                        }
+
+                        BaseButton {
+                            width: 12
+                            height: 12
+                            onClicked: {
+                                HabitManager.removeTag(index)
+                            }
+                            Text {
+                                anchors.centerIn: parent
+                                text: "󰅖"
+                                color: "red"
+                                font.pixelSize: 7
+                                opacity: 0.4
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     BaseButton {
@@ -400,7 +455,8 @@ ColumnLayout {
                 HabitManager.addHabit({
                     "title": root.habitTitle, 
                     "notes": root.habitNotes,
-                    "isPositive": root.habitIsPositive, 
+                    "isPositive": root.habitIsPositive,
+                    "isNegative": !root.habitIsPositive,
                     "difficulty": root.habitDifficulty,
                     "resetCounter": root.habitReset,
                     "tags": root.habitTags
@@ -409,6 +465,7 @@ ColumnLayout {
                 root.habitNotes = ""
                 root.habitTags = []
                 root.habitReset = "daily"
+                root.habitIsPositive = true
                 titleIn.text = ""
                 noteIn.text = ""
                 root.saved()
