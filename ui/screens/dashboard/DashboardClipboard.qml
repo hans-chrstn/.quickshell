@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "./clipboard"
+import qs.ui.screens.dashboard.clipboard
 
 ColumnLayout {
     id: root

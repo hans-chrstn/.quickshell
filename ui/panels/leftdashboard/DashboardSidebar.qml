@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "./sidebar"
+import qs.ui.panels.leftdashboard.sidebar
 
 Rectangle {
     id: sidebarRoot

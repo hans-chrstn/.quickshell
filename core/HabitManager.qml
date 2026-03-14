@@ -344,12 +344,28 @@ Singleton {
             let h = root.habitStore.get(i)
             if (root.shouldReset(h.lastUpdate, h.resetCounter, now)) {
                 if (h.counter > 0) {
-                    root.habitStore.setProperty(i, "streak", (h.streak || 0) + 1)
+                    root.habitStore.setProperty(
+                        i, 
+                        "streak", 
+                        (h.streak || 0) + 1
+                    )
                 } else {
-                    root.habitStore.setProperty(i, "streak", 0)
+                    root.habitStore.setProperty(
+                        i, 
+                        "streak", 
+                        0
+                    )
                 }
-                root.habitStore.setProperty(i, "counter", 0)
-                root.habitStore.setProperty(i, "lastUpdate", nowMs)
+                root.habitStore.setProperty(
+                    i, 
+                    "counter", 
+                    0
+                )
+                root.habitStore.setProperty(
+                    i, 
+                    "lastUpdate", 
+                    nowMs
+                )
                 changed = true
             }
         }
@@ -358,17 +374,37 @@ Singleton {
             let d = root.dailyStore.get(i)
             if (root.shouldReset(d.lastUpdate, d.repeats, now)) {
                 if (d.completed) {
-                    root.dailyStore.setProperty(i, "streak", (d.streak || 0) + 1)
+                    root.dailyStore.setProperty(
+                        i, 
+                        "streak", 
+                        (d.streak || 0) + 1
+                    )
                 } else {
-                    root.dailyStore.setProperty(i, "streak", 0)
+                    root.dailyStore.setProperty(
+                        i, 
+                        "streak", 
+                        0
+                    )
                 }
-                root.dailyStore.setProperty(i, "completed", false)
+                root.dailyStore.setProperty(
+                    i, 
+                    "completed", 
+                    false
+                )
                 if (d.checklist) {
                     for (let j = 0; j < d.checklist.count; j++) {
-                        d.checklist.setProperty(j, "completed", false)
+                        d.checklist.setProperty(
+                            j, 
+                            "completed", 
+                            false
+                        )
                     }
                 }
-                root.dailyStore.setProperty(i, "lastUpdate", nowMs)
+                root.dailyStore.setProperty(
+                    i, 
+                    "lastUpdate", 
+                    nowMs
+                )
                 changed = true
             }
         }
@@ -390,7 +426,10 @@ Singleton {
         if (interval === "weekly") {
             let diff = now.getTime() - last.getTime()
             let dayDiff = diff / (1000 * 60 * 60 * 24)
-            if (dayDiff >= 7) return true
+            if (dayDiff >= 7) {
+                return true
+            }
+            
             let lastDay = last.getDay() || 7
             let nowDay = now.getDay() || 7
             return nowDay < lastDay
@@ -409,7 +448,6 @@ Singleton {
     }
 
     Timer {
-        id: resetCheckTimer
         interval: 60000
         running: true
         repeat: true
@@ -420,7 +458,9 @@ Singleton {
 
     function modelToData(model) {
         let arr = []
-        if (!model) return arr
+        if (!model) {
+            return arr
+        }
         
         for (let i = 0; i < model.count; i++) {
             let item = model.get(i)
@@ -481,7 +521,9 @@ Singleton {
                         root.habitStore.append(hData)
                         let h = root.habitStore.get(root.habitStore.count - 1)
                         for (let t of tags) {
-                            h.tags.append({ "name": String(t.name || t) })
+                            h.tags.append({ 
+                                "name": String(t.name || t) 
+                            })
                         }
                     }
                 }
@@ -496,7 +538,9 @@ Singleton {
                         root.dailyStore.append(dData)
                         let d = root.dailyStore.get(root.dailyStore.count - 1)
                         for (let t of tags) {
-                            d.tags.append({ "name": String(t.name || t) })
+                            d.tags.append({ 
+                                "name": String(t.name || t) 
+                            })
                         }
                         for (let c of checklist) {
                             d.checklist.append({
@@ -517,7 +561,9 @@ Singleton {
                         root.todoStore.append(tData)
                         let t = root.todoStore.get(root.todoStore.count - 1)
                         for (let tg of tags) {
-                            t.tags.append({ "name": String(tg.name || tg) })
+                            t.tags.append({ 
+                                "name": String(tg.name || tg) 
+                            })
                         }
                         for (let c of checklist) {
                             t.checklist.append({

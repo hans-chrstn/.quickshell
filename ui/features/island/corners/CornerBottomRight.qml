@@ -9,7 +9,7 @@ import qs.ui.features.island
 import qs.ui.shared.shapes
 import qs.ui.features.island.system
 import qs.ui.features.island.corners.shared
-import "./bottomright"
+import qs.ui.features.island.corners.bottomright
 
 CornerContainer {
     id: root

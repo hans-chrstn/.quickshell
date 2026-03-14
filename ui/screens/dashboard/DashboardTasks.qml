@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
-import "./tasks"
+import qs.ui.screens.dashboard.tasks
 
 Item {
     id: root
@@ -28,6 +28,7 @@ Item {
         spacing: 20
 
         RowLayout {
+            id: titleRow
             Layout.fillWidth: true
             spacing: 15
 
@@ -210,12 +211,16 @@ Item {
 
                         TaskHabitForm {
                             visible: root.activeTaskType === "habit"
-                            onSaved: root.isAddingTask = false
+                            onSaved: {
+                                root.isAddingTask = false
+                            }
                         }
 
                         TaskDailyForm {
                             visible: root.activeTaskType === "daily"
-                            onSaved: root.isAddingTask = false
+                            onSaved: {
+                                root.isAddingTask = false
+                            }
                             onRequestDatePicker: (current, callback) => {
                                 root.datePickerInitial = current
                                 root.datePickerCallback = callback
@@ -225,7 +230,9 @@ Item {
 
                         TaskTodoForm {
                             visible: root.activeTaskType === "todo"
-                            onSaved: root.isAddingTask = false
+                            onSaved: {
+                                root.isAddingTask = false
+                            }
                             onRequestDatePicker: (current, callback) => {
                                 root.datePickerInitial = current
                                 root.datePickerCallback = callback
@@ -238,6 +245,7 @@ Item {
         }
 
         Flickable {
+            id: taskFlickable
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentWidth: width
@@ -346,7 +354,9 @@ Item {
             opacity: 0.5
             MouseArea {
                 anchors.fill: parent
-                onClicked: root.isDatePickerVisible = false
+                onClicked: {
+                    root.isDatePickerVisible = false
+                }
             }
         }
 
@@ -359,7 +369,9 @@ Item {
                 }
                 root.isDatePickerVisible = false
             }
-            onClosed: root.isDatePickerVisible = false
+            onClosed: {
+                root.isDatePickerVisible = false
+            }
         }
     }
 }

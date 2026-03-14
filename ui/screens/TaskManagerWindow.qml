@@ -6,7 +6,7 @@ import Quickshell.Wayland
 import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
-import "./taskmanager"
+import qs.ui.screens.taskmanager
 
 PanelWindow {
     id: root

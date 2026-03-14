@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "./calendar"
+import qs.ui.screens.dashboard.calendar
 
 ColumnLayout {
     id: root

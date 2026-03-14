@@ -7,8 +7,8 @@ import qs.core
 import qs.ui.shared
 import qs.ui.shared.effects
 import qs.ui.shared.shapes
-import "./leftdashboard"
-import "./leftdashboard/components"
+import qs.ui.panels.leftdashboard
+import qs.ui.panels.leftdashboard.components
 
 Item {
     id: root

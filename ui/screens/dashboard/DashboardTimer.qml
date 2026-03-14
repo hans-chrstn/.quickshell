@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import qs.core
 import qs.ui.shared
-import "./timer"
+import qs.ui.screens.dashboard.timer
 
 ColumnLayout {
     id: root

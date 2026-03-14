@@ -16,44 +16,81 @@ RowLayout {
         StyledLabel {
             id: temperatureDisplay
             type: "weatherTemp"
-            text: isNaN(WeatherManager.currentTemperature) ? "--°" : Math.round(WeatherManager.currentTemperature) + "°"
+            text: {
+                if (isNaN(WeatherManager.currentTemperature)) {
+                    return "--°"
+                }
+                return Math.round(WeatherManager.currentTemperature) + "°"
+            }
         }
         
         StyledLabel {
             id: locationDisplay
             type: "caption"
-            text: (WeatherManager.currentCityName || WeatherManager.configuredLocation || "NO LOCATION SET").toUpperCase()
+            text: {
+                let city = WeatherManager.currentCityName || WeatherManager.configuredLocation || "NO LOCATION SET"
+                return String(city).toUpperCase()
+            }
             customColor: ThemeManager.contentSecondaryColor
-            opacity: locationHoverHandler.hovered ? 1.0 : 0.8
+            opacity: {
+                if (locationHoverHandler.hovered) {
+                    return 1.0
+                }
+                return 0.8
+            }
             font.weight: Font.Bold
             letterSpacing: 1.5
-            scale: locationHoverHandler.hovered ? 1.05 : 1.0
+            scale: {
+                if (locationHoverHandler.hovered) {
+                    return 1.05
+                }
+                return 1.0
+            }
             
-            Behavior on opacity { NumberAnimation { duration: 200 } }
-            Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+            Behavior on opacity { 
+                NumberAnimation { 
+                    duration: 200 
+                } 
+            }
+            
+            Behavior on scale { 
+                NumberAnimation { 
+                    duration: 200
+                    easing.type: Easing.OutQuart 
+                } 
+            }
             
             TapHandler { 
-                onTapped: root.inputRequested() 
+                onTapped: {
+                    root.inputRequested() 
+                }
             }
-            HoverHandler { id: locationHoverHandler; cursorShape: Qt.PointingHandCursor }
+            
+            HoverHandler { 
+                id: locationHoverHandler
+                cursorShape: Qt.PointingHandCursor 
+            }
         }
     }
 
     Rectangle { 
-        width: 1; height: 30
+        width: 1
+        height: 30
         color: ThemeManager.contentOnBackgroundColor
         opacity: 0.1 
     }
 
     RowLayout {
-        spacing: 8
+        spacing: 12
         
-        Image { 
+        Text {
             id: weatherVisualIcon
-            source: WeatherManager.currentWeatherIconUrl || ""
-            width: 40; height: 40
-            fillMode: Image.PreserveAspectFit
-            visible: !!WeatherManager.currentWeatherIconUrl 
+            text: {
+                return WeatherManager.mapWeatherCodeToIcon(WeatherManager.currentWeatherCode)
+            }
+            font.pixelSize: 32
+            color: ThemeManager.accentColor
+            verticalAlignment: Text.AlignVCenter
         }
         
         ColumnLayout {
@@ -62,7 +99,10 @@ RowLayout {
             StyledLabel {
                 id: conditionLabel
                 type: "label"
-                text: (WeatherManager.currentCondition || "LOADING").toUpperCase()
+                text: {
+                    let cond = WeatherManager.currentCondition || "LOADING"
+                    return String(cond).toUpperCase()
+                }
                 font.weight: Font.Bold
                 letterSpacing: 0.5
             }
@@ -70,7 +110,9 @@ RowLayout {
             StyledLabel {
                 id: descriptionLabel
                 type: "caption"
-                text: WeatherManager.currentConditionDescription || "fetching data..."
+                text: {
+                    return WeatherManager.currentConditionDescription || "fetching data..."
+                }
                 customColor: ThemeManager.contentSecondaryColor
                 opacity: 0.8
                 italic: true

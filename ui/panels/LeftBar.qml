@@ -9,7 +9,9 @@ import qs.ui.shared
 SystemPanel {
     id: root
 
-    readonly property bool isLastActive: ViewManager.lastActiveScreenName === root.screen.name
+    readonly property bool isLastActive: {
+        return ViewManager.lastActiveScreenName === root.screen.name
+    }
 
     property bool isDashboardActive: false
     property bool isDashboardExpanded: false
@@ -18,12 +20,15 @@ SystemPanel {
     
     property bool triggerHovered: false
     property bool contentHovered: false
-    readonly property bool isActuallyHovered: triggerHovered || contentHovered
+    readonly property bool isActuallyHovered: {
+        return root.triggerHovered || root.contentHovered
+    }
 
     readonly property var dashboardPages: [
         { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
         { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
         { "id": "tasks", "title": "Tasks & Habits", "icon": "󰄬" },
+        { "id": "weather", "title": "Weather Hub", "icon": "󰖐" },
         { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
         { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
         { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }
@@ -124,14 +129,18 @@ SystemPanel {
     WlrLayershell.layer: WlrLayer.Bottom
 
     focusable: true
-    WlrLayershell.keyboardFocus: root.isDashboardExpanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: {
+        return root.isDashboardExpanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    }
 
     mask: Region {
         Region {
             item: barRect
         }
         Region {
-            item: (root.isDashboardActive && root.isLastActive) ? dashboardMaskItem : null
+            item: {
+                return (root.isDashboardActive && root.isLastActive) ? dashboardMaskItem : null
+            }
         }
     }
 
@@ -169,7 +178,9 @@ SystemPanel {
             }
             return 0
         }
-        visible: width > 0
+        visible: {
+            return width > 0
+        }
     }
 
     Item {
@@ -180,7 +191,9 @@ SystemPanel {
         width: 400
         opacity: 0
         z: 20
-        visible: root.isDashboardExpanded
+        visible: {
+            return root.isDashboardExpanded
+        }
 
         HoverHandler {
             onHoveredChanged: {
@@ -194,7 +207,9 @@ SystemPanel {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         z: 5
-        active: root.isDashboardActive && root.isLastActive
+        active: {
+            return root.isDashboardActive && root.isLastActive
+        }
         source: "LeftDashboard.qml"
         
         Binding {

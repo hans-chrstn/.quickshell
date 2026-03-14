@@ -4,7 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.core
-import "./lock"
+import qs.ui.screens.lock
 
 Scope {
     id: root

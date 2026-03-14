@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "./audiomixer"
+import qs.ui.screens.dashboard.audiomixer
 
 ColumnLayout {
     id: root

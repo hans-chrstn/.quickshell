@@ -58,12 +58,15 @@ Item {
                     return tasksComponent
                 }
                 if (index === 3) {
-                    return mixerComponent
+                    return weatherComponent
                 }
                 if (index === 4) {
-                    return clipboardComponent
+                    return mixerComponent
                 }
                 if (index === 5) {
+                    return clipboardComponent
+                }
+                if (index === 6) {
                     return scratchpadComponent
                 }
                 return null
@@ -127,6 +130,12 @@ Item {
     Component {
         id: tasksComponent
         DashboardTasks {
+        }
+    }
+
+    Component {
+        id: weatherComponent
+        DashboardWeather {
         }
     }
 

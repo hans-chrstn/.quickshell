@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import qs.core
 import qs.ui.shared
-import "./config"
+import qs.ui.shared.config
 
 Loader {
     id: root

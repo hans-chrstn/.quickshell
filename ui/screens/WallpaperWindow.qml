@@ -7,7 +7,7 @@ import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
 import qs.ui.screens
-import "./wallpaper"
+import qs.ui.screens.wallpaper
 
 PanelWindow {
     id: root

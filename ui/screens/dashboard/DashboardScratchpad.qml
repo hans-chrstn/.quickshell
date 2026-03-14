@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
-import "./scratchpad"
+import qs.ui.screens.dashboard.scratchpad
 
 ColumnLayout {
     id: root

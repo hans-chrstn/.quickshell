@@ -7,7 +7,7 @@ import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
 import qs.ui.screens
-import "./notes"
+import qs.ui.screens.notes
 
 PanelWindow {
     id: root
