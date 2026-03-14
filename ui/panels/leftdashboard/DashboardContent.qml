@@ -5,24 +5,27 @@ import qs.ui.shared
 import qs.ui.screens.dashboard
 
 Item {
-    id: root
+    id: contentRoot
+
+    property bool active: false
+    property var chronoEngine: null
 
     Layout.fillWidth: true
     Layout.fillHeight: true
     clip: true
 
-    readonly property int currentIndex: DashboardManager.currentPage
+    readonly property int currentIndex: root.currentPage
 
     Repeater {
-        model: DashboardManager.pages.length
+        model: root.pages ? root.pages.length : 0
 
         delegate: Loader {
             anchors.fill: parent
 
-            active: root.currentIndex === index 
+            active: contentRoot.currentIndex === index 
                 || (opacity > 0.01)
 
-            opacity: root.currentIndex === index 
+            opacity: contentRoot.currentIndex === index 
                 ? 1.0 
                 : 0.0
 
@@ -37,6 +40,19 @@ Item {
                 return null;
             }
 
+            Binding {
+                target: item
+                property: "active"
+                value: contentRoot.active
+            }
+
+            Binding {
+                target: item
+                property: "chronoEngine"
+                value: contentRoot.chronoEngine
+                when: index === 1
+            }
+
             Behavior on opacity {
                 NumberAnimation {
                     duration: ThemeManager.animationDuration
@@ -45,9 +61,9 @@ Item {
             }
 
             transform: Translate {
-                x: root.currentIndex === index 
+                x: contentRoot.currentIndex === index 
                     ? 0 
-                    : (root.currentIndex > index ? -30 : 30)
+                    : (contentRoot.currentIndex > index ? -30 : 30)
 
                 Behavior on x {
                     NumberAnimation {

@@ -4,7 +4,7 @@ import qs.core
 import qs.ui.shared
 
 Rectangle {
-    id: root
+    id: sidebarRoot
 
     Layout.fillHeight: true
     Layout.preferredWidth: 70
@@ -47,7 +47,7 @@ Rectangle {
         radius: 12
         color: ThemeManager.accentColor
         x: (parent.width - width) / 2
-        y: 30 + (DashboardManager.currentPage * (44 + 20))
+        y: 30 + (root.currentPage * (44 + 20))
 
         Behavior on y {
             NumberAnimation {
@@ -68,7 +68,7 @@ Rectangle {
         spacing: 20
 
         Repeater {
-            model: DashboardManager.pages
+            model: root.pages
 
             delegate: BaseButton {
                 Layout.alignment: Qt.AlignHCenter
@@ -80,7 +80,7 @@ Rectangle {
                 tooltip: pageInfo ? pageInfo.title : ""
 
                 onClicked: {
-                    DashboardManager.currentPage = index
+                    root.currentPage = index
                 }
 
                 Rectangle {
@@ -89,13 +89,13 @@ Rectangle {
                     color: "transparent"
                     border.color: ThemeManager.outlinePrimaryColor
                     border.width: 1
-                    visible: DashboardManager.currentPage !== index
+                    visible: root.currentPage !== index
                 }
 
                 Text {
                     anchors.centerIn: parent
                     text: pageInfo ? pageInfo.icon : ""
-                    color: (DashboardManager.currentPage === index) 
+                    color: (root.currentPage === index) 
                         ? ThemeManager.contentPrimaryColor 
                         : ThemeManager.contentOnBackgroundColor
                     font.pixelSize: 22

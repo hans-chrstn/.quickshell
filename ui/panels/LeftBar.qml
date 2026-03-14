@@ -2,11 +2,71 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.core
+import qs.shared
 import qs.ui.panels
 import qs.ui.shared
 
 SystemPanel {
     id: root
+
+    readonly property bool isLastActive: ViewManager.lastActiveScreenName === root.screen.name
+
+    property bool isDashboardActive: false
+    property bool isDashboardExpanded: false
+    property int dashboardCurrentPage: 0
+    property bool suppressDismiss: false
+    
+    property bool triggerHovered: false
+    property bool contentHovered: false
+    readonly property bool isActuallyHovered: triggerHovered || contentHovered
+
+    readonly property var dashboardPages: [
+        { "id": "calendar", "title": "Schedule", "icon": "󰥔" },
+        { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
+        { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
+        { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
+        { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }
+    ]
+
+    ChronoEngine {
+        id: chronoEngine
+        
+        onAlertTriggered: (label) => {
+            OSDManager.show("Alarm: " + label, ThemeManager.iconClock)
+            SoundManager.playSuccess()
+        }
+        
+        onCountdownFinished: {
+            OSDManager.show("Timer Finished", ThemeManager.iconClock)
+            SoundManager.playSuccess()
+        }
+    }
+
+    function finalizeClose() {
+        Qt.callLater(() => {
+            root.isDashboardActive = false
+        })
+    }
+
+    Timer {
+        id: collapseTimer
+        interval: 300
+        onTriggered: {
+            if (!root.suppressDismiss && !root.activeFocus) {
+                root.isDashboardExpanded = false
+            }
+        }
+    }
+
+    onIsActuallyHoveredChanged: {
+        if (isActuallyHovered) {
+            collapseTimer.stop()
+            root.isDashboardActive = true
+            root.isDashboardExpanded = true
+        } else {
+            collapseTimer.restart()
+        }
+    }
 
     HoverHandler {
         onHoveredChanged: {
@@ -19,23 +79,23 @@ SystemPanel {
     anchors.left: true
     anchors.top: true
     anchors.bottom: true
-    
-    implicitWidth: DashboardManager.realActive ? 450 : ThemeManager.globalThickness
+
+    implicitWidth: 450
     color: "transparent"
 
     exclusionMode: ExclusionMode.Normal
     exclusiveZone: ThemeManager.globalThickness
     WlrLayershell.layer: WlrLayer.Bottom
-    
+
     focusable: true
-    WlrLayershell.keyboardFocus: DashboardManager.active ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.isDashboardExpanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
     mask: Region {
         Region {
             item: barRect
         }
         Region {
-            item: (DashboardManager.realActive && ViewManager.lastActiveScreenName === root.screen.name) ? dashboardHitbox : null
+            item: (root.isDashboardActive && root.isLastActive) ? dashboardHitbox : null
         }
     }
 
@@ -47,6 +107,17 @@ SystemPanel {
         width: ThemeManager.globalThickness
         color: ThemeManager.backgroundColor
         z: 10
+
+        Item {
+            id: dashboardTrigger
+            anchors.centerIn: parent
+            width: parent.width
+            height: 200
+
+            HoverHandler {
+                onHoveredChanged: root.triggerHovered = hovered
+            }
+        }
     }
 
     Item {
@@ -56,6 +127,12 @@ SystemPanel {
         anchors.bottom: parent.bottom
         width: 400
         opacity: 0
+        z: 20
+        visible: root.isDashboardExpanded
+
+        HoverHandler {
+            onHoveredChanged: root.contentHovered = hovered
+        }
     }
 
     Loader {
@@ -63,7 +140,48 @@ SystemPanel {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         z: 5
-        active: DashboardManager.realActive && ViewManager.lastActiveScreenName === root.screen.name
+        active: root.isDashboardActive && root.isLastActive
         source: "LeftDashboard.qml"
+        
+        Binding {
+            target: dashboardLoader.item
+            property: "active"
+            value: root.isDashboardExpanded
+        }
+
+        Binding {
+            target: dashboardLoader.item
+            property: "currentPage"
+            value: root.dashboardCurrentPage
+        }
+
+        Binding {
+            target: dashboardLoader.item
+            property: "chronoEngine"
+            value: chronoEngine
+        }
+
+        Connections {
+            target: dashboardLoader.item
+            ignoreUnknownSignals: true
+            
+            function onCurrentPageChanged() {
+                if (dashboardLoader.item) {
+                    root.dashboardCurrentPage = dashboardLoader.item.currentPage
+                }
+            }
+            
+            function onSuppressDismissChanged() {
+                if (dashboardLoader.item) {
+                    root.suppressDismiss = dashboardLoader.item.suppressDismiss
+                }
+            }
+        }
+
+        onLoaded: {
+            if (item) {
+                item.pages = root.dashboardPages
+            }
+        }
     }
 }

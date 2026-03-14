@@ -10,6 +10,14 @@ ColumnLayout {
     anchors.margins: 30
     spacing: 25
 
+    property bool active: false
+
+    onActiveChanged: {
+        if (!active) {
+            eventEditor.active = false
+        }
+    }
+
     RowLayout {
         Layout.fillWidth: true
         spacing: 15

@@ -12,7 +12,12 @@ import "./leftdashboard"
 Item {
     id: root
 
-    property bool active: DashboardManager.active
+    property bool active: false
+    property int currentPage: 0
+    property var pages: []
+    property bool suppressDismiss: false
+    property var chronoEngine: null
+
     property bool entryActive: false
     readonly property bool showContent: active && entryActive
 
@@ -32,6 +37,16 @@ Item {
     height: parent.height
     x: active ? 0 : -width
     z: 5
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        preventStealing: true
+        propagateComposedEvents: true
+        onPressed: (mouse) => {
+            mouse.accepted = false
+        }
+    }
 
     onActiveChanged: {
         if (active) {
@@ -132,32 +147,15 @@ Item {
                 }
 
                 ScriptAction {
-                    script: DashboardManager.finalizeClose()
+                    script: {
+                        if (parent && parent.parent && typeof parent.parent.finalizeClose === "function") {
+                            parent.parent.finalizeClose()
+                        }
+                    }
                 }
             }
         }
     ]
-
-    HoverHandler {
-        id: dashboardHover
-
-        onHoveredChanged: {
-            if (!hovered) {
-                DashboardManager.requestDismiss()
-            } else {
-                DashboardManager.cancelDismiss()
-            }
-        }
-    }
-
-    Connections {
-        target: DashboardManager
-        function onSuppressDismissChanged() {
-            if (!DashboardManager.suppressDismiss && !dashboardHover.hovered) {
-                DashboardManager.requestDismiss()
-            }
-        }
-    }
 
     Item {
         id: backgroundLayer
@@ -240,6 +238,8 @@ Item {
             }
 
             DashboardContent {
+                active: root.active
+                chronoEngine: root.chronoEngine
                 Layout.fillWidth: true
                 Layout.fillHeight: true
             }

@@ -1,29 +1,37 @@
-pragma Singleton
-
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.core
 
-Singleton {
+Item {
     id: root
 
     property int remainingSeconds: 0
-    property int totalSessionSeconds: 0
     property bool running: false
-    property string mode: "timer"
+    property string timerMode: "timer"
+    property int lastInitialSeconds: 0
+    
+    property string pomoState: "work"
+    property int pomoCount: 0
     
     readonly property ListModel alarms: ListModel {}
-    readonly property string alarmsCachePath: Quickshell.cachePath("alarms.json")
+    readonly property string alarmsCachePath: Quickshell.cachePath("alarms_v2.json")
 
-    signal finished()
+    signal timerFinished()
+    signal alarmTriggered(string title)
 
-    function startTimer(minutes) {
-        root.mode = "timer"
-        root.totalSessionSeconds = minutes * 60
-        root.remainingSeconds = root.totalSessionSeconds
+    function startTimer(seconds) {
+        root.timerMode = "timer"
+        root.remainingSeconds = seconds
+        root.lastInitialSeconds = seconds
         root.running = true
         OSDManager.show("Timer Started", ThemeManager.iconClock)
+    }
+
+    function addTime(seconds) {
+        root.remainingSeconds += seconds
+        if (root.remainingSeconds < 0) root.remainingSeconds = 0
+        if (!root.running && root.remainingSeconds > 0) root.running = true
     }
 
     function togglePause() {
@@ -32,10 +40,43 @@ Singleton {
         }
     }
 
-    function reset() {
+    function resetTimer() {
         root.running = false
         root.remainingSeconds = 0
-        root.totalSessionSeconds = 0
+        root.timerMode = "timer"
+    }
+
+    function revertTimer() {
+        root.remainingSeconds = root.lastInitialSeconds
+        root.running = false
+    }
+
+    function startPomodoro() {
+        root.timerMode = "pomodoro"
+        root.pomoState = "work"
+        root.pomoCount = 0
+        root.remainingSeconds = 25 * 60
+        root.running = true
+        OSDManager.show("Pomodoro: Work Session", ThemeManager.iconClock)
+    }
+
+    function _nextPomoStep() {
+        if (root.pomoState === "work") {
+            root.pomoCount++
+            if (root.pomoCount % 4 === 0) {
+                root.pomoState = "longBreak"
+                root.remainingSeconds = 15 * 60
+            } else {
+                root.pomoState = "shortBreak"
+                root.remainingSeconds = 5 * 60
+            }
+            OSDManager.show("Pomodoro: Break Time", ThemeManager.iconClock)
+        } else {
+            root.pomoState = "work"
+            root.remainingSeconds = 25 * 60
+            OSDManager.show("Pomodoro: Back to Work", ThemeManager.iconClock)
+        }
+        root.running = true
     }
 
     function addAlarm(time, title) {
@@ -64,14 +105,19 @@ Singleton {
         }
     }
 
-    function formatTime(seconds) {
-        let m = Math.floor(seconds / 60)
-        let s = seconds % 60
+    function formatTime(totalSeconds) {
+        let h = Math.floor(totalSeconds / 3600)
+        let m = Math.floor((totalSeconds % 3600) / 60)
+        let s = totalSeconds % 60
+        
+        if (h > 0) {
+            return h.toString().padStart(2, '0') + ":" + m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0')
+        }
         return m.toString().padStart(2, '0') + ":" + s.toString().padStart(2, '0')
     }
 
     Timer {
-        id: mainTimer
+        id: secondTimer
         interval: 1000
         running: root.running
         repeat: true
@@ -80,19 +126,19 @@ Singleton {
                 root.remainingSeconds--
             } else {
                 root.running = false
-                root.handleFinish()
+                if (root.timerMode === "pomodoro") {
+                    root._nextPomoStep()
+                } else {
+                    SoundManager.playSuccess()
+                    OSDManager.show("Timer Finished!", ThemeManager.iconClock)
+                    root.timerFinished()
+                }
             }
         }
     }
 
-    function handleFinish() {
-        SoundManager.playSuccess()
-        OSDManager.show("Timer Finished!", ThemeManager.iconClock)
-        root.finished()
-    }
-
     Timer {
-        interval: 30000 
+        interval: 30000
         running: true
         repeat: true
         onTriggered: {
@@ -103,6 +149,7 @@ Singleton {
                 let alarm = root.alarms.get(i)
                 if (alarm.enabled && alarm.time === current) {
                     if (alarm._lastTriggered !== current) {
+                        root.alarmTriggered(alarm.title)
                         OSDManager.show("ALARM: " + alarm.title, ThemeManager.iconClock)
                         SoundManager.playSuccess()
                         root.alarms.setProperty(i, "_lastTriggered", current)

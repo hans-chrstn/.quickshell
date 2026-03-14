@@ -9,6 +9,8 @@ ColumnLayout {
     anchors.margins: 30
     spacing: 25
 
+    property bool active: false
+
     StyledLabel {
         text: "Audio Mixer"
         type: "heading"
@@ -30,10 +32,10 @@ ColumnLayout {
 
             readonly property int streamId: model.id
             readonly property string streamName: model.name || "Application"
-            readonly property bool isActuallyVisible: DashboardManager.active
+            readonly property bool isActuallyVisible: active
 
             readonly property PwNode streamNode: {
-                if (!DashboardManager.realActive || !Pipewire.nodes || !Pipewire.nodes.values) {
+                if (!active || !Pipewire.nodes || !Pipewire.nodes.values) {
                     return null;
                 }
 

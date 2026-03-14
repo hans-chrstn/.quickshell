@@ -8,6 +8,8 @@ ColumnLayout {
     anchors.margins: 30
     spacing: 25
 
+    property bool active: false
+
     StyledLabel {
         text: "Scratchpad"
         type: "heading"
@@ -44,7 +46,7 @@ ColumnLayout {
                 text: savedContent
 
                 onTextChanged: {
-                    if (focus && DashboardManager.active) {
+                    if (focus && active) {
                         NotesManager.scratchpadContent = text
                     }
                 }

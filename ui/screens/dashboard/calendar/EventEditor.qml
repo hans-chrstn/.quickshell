@@ -178,12 +178,28 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 12
-            visible: !root.allDay
+            spacing: root.allDay ? 0 : 12
+
+            Behavior on spacing { 
+                NumberAnimation { duration: 350; easing.type: Easing.OutQuart } 
+            }
 
             ColumnLayout {
-                Layout.fillWidth: true
+                id: timeSection
+                Layout.fillWidth: !root.allDay
+                Layout.preferredWidth: root.allDay ? 0 : 180
+                opacity: root.allDay ? 0.0 : 1.0
+                clip: true
                 spacing: 4
+                
+                visible: opacity > 0.01
+
+                Behavior on Layout.preferredWidth { 
+                    NumberAnimation { duration: 350; easing.type: Easing.OutQuart } 
+                }
+                Behavior on opacity { 
+                    NumberAnimation { duration: 250 } 
+                }
 
                 StyledLabel {
                     text: "Time"
@@ -192,7 +208,7 @@ Rectangle {
                     font.pixelSize: 11
                 }
 
-                TimePicker {
+                TimeScroller {
                     id: timePicker
                     Layout.alignment: Qt.AlignLeft
                     time: root.eventTime
@@ -204,6 +220,10 @@ Rectangle {
                 Layout.fillWidth: true
                 spacing: 12
                 Layout.alignment: Qt.AlignBottom
+
+                Behavior on Layout.fillWidth {
+                    PropertyAnimation { duration: 350 }
+                }
 
                 ColumnLayout {
                     spacing: 4

@@ -8,6 +8,8 @@ ColumnLayout {
     anchors.margins: 30
     spacing: 25
 
+    property bool active: false
+
     RowLayout {
         Layout.fillWidth: true
 
