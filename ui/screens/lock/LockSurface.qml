@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import qs.core
@@ -14,43 +13,51 @@ WlSessionLockSurface {
 
     required property WlSessionLock lock
     
-    color: "transparent"
+    color: "black"
 
     Connections {
         target: root.lock
-        function onUnlock() {
-            SoundManager.playSuccess()
-            unlockAnim.start()
+        function onRequestDismiss() {
+            mainRect.enforceFocus = false
+            dismissAnim.start()
         }
     }
 
     SequentialAnimation {
-        id: unlockAnim
-
+        id: dismissAnim
+        
         ParallelAnimation {
             NumberAnimation { 
                 target: backgroundContainer
                 property: "opacity"
                 to: 0
-                duration: 500 
+                duration: 300 
             }
             NumberAnimation { 
                 target: content
                 property: "scale"
-                to: 0.8
-                duration: 500
-                easing.type: Easing.InBack 
+                to: 0.9
+                duration: 300
+                easing.type: Easing.InCubic 
             }
             NumberAnimation { 
                 target: content
                 property: "opacity"
                 to: 0
-                duration: 500 
+                duration: 300 
             }
         }
         
-        PropertyAction { 
-            target: root.lock; property: "locked"; value: false 
+        ScriptAction {
+            script: dismissTimer.start()
+        }
+    }
+
+    Timer {
+        id: dismissTimer
+        interval: 50
+        onTriggered: {
+            if (root.lock) root.lock.locked = false
         }
     }
 
@@ -61,12 +68,14 @@ WlSessionLockSurface {
         NumberAnimation { 
             target: backgroundContainer
             property: "opacity"
+            from: 0
             to: 1
             duration: 500 
         }
         NumberAnimation { 
             target: content
             property: "scale"
+            from: 0.8
             to: 1
             duration: 500
             easing.type: Easing.OutBack 
@@ -74,6 +83,7 @@ WlSessionLockSurface {
         NumberAnimation { 
             target: content
             property: "opacity"
+            from: 0
             to: 1
             duration: 500 
         }
@@ -84,9 +94,11 @@ WlSessionLockSurface {
         anchors.fill: parent
         color: "black"
         
+        property bool enforceFocus: true
+
         focus: true
         onActiveFocusChanged: {
-            if (!activeFocus) {
+            if (!activeFocus && enforceFocus && root.lock && root.lock.locked) {
                 mainRect.forceActiveFocus()
             }
         }
@@ -113,7 +125,6 @@ WlSessionLockSurface {
             if (event.text.length === 1 || event.key === Qt.Key_Backspace) {
                 SoundManager.playClick()
             }
-            
             LockManager.processKeyEvent(event)
         }
 
@@ -165,7 +176,7 @@ WlSessionLockSurface {
                 LockScreenClock { }
 
                 LockScreenAuthenticationView { }
-                
+
                 StyledLabel {
                     id: statusMsg
                     Layout.alignment: Qt.AlignHCenter

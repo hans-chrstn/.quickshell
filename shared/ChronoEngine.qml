@@ -318,7 +318,6 @@ Item {
         id: persistenceBridge
         path: root.chronoPersistencePath; printErrors: false
         onLoaded: {
-            if (status !== FileView.Ready) return
             try {
                 let p = JSON.parse(text())
                 if (p.alarms) { 

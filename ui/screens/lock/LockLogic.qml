@@ -36,8 +36,7 @@ QtObject {
             } else {
                 buffer = buffer.slice(0, -1)
             }
-        } else if (event.text.length === 1 && event.text !== "" && event.text !== "
-") {
+        } else if (event.text.length === 1 && event.text !== "\r" && event.text !== "\n") {
             buffer += event.text
         }
     }
@@ -62,7 +61,8 @@ QtObject {
 
         onCompleted: (result) => {
             if (result === PamResult.Success) {
-                lock.unlock()
+                SoundManager.playSuccess()
+                if (lock) lock.requestDismiss()
             } else {
                 root.buffer = ""
                 if (!root.message || root.message === "Password: ") {

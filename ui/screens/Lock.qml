@@ -17,7 +17,7 @@ Scope {
     WlSessionLock {
         id: lock
 
-        signal unlock
+        signal requestDismiss
 
         surface: Component {
             LockSurface {

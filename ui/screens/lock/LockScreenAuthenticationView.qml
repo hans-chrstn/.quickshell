@@ -99,6 +99,7 @@ ColumnLayout {
                 visible: LockManager.passwordBuffer.length === 0
                 
                 SequentialAnimation on opacity {
+                    running: LockManager.isLocked
                     loops: Animation.Infinite
                     NumberAnimation {
                         to: 0
