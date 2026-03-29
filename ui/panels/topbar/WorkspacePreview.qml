@@ -2,41 +2,65 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import qs.core
 import qs.ui.shared
 
-Rectangle {
+ClippingRectangle {
     id: root
     
     property var screen: null
     property int workspaceId: -1
-    property real screenWidth: screen ? screen.width : 1920
-    property real screenHeight: screen ? screen.height : 1080
+    property real screenWidth: (screen && screen.width) ? screen.width : 1920
+    property real screenHeight: (screen && screen.height) ? screen.height : 1080
     
-    readonly property real previewScale: 0.15
+    readonly property real previewScale: ThemeManager.workspacePreviewScale
     width: screenWidth * previewScale
     height: screenHeight * previewScale
     
-    radius: ThemeManager.globalCornerRadius
-    color: Qt.rgba(ThemeManager.backgroundColor.r, ThemeManager.backgroundColor.g, ThemeManager.backgroundColor.b, 0.8)
-    border.color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.4)
-    border.width: 1
+    radius: ThemeManager.workspacePreviewRadius
+    color: Qt.rgba(0, 0, 0, ThemeManager.workspacePreviewOpacity)
     
-    opacity: visible ? 1 : 0
-    scale: visible ? 1 : 0.95
-    
-    Behavior on opacity { NumberAnimation { duration: 200 } }
-    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutBack } }
-    
-    clip: true
+    opacity: 0
+    scale: 0.95
+
+    ParallelAnimation {
+        id: fadeAnim
+        running: root.visible
+        
+        NumberAnimation {
+            target: root
+            property: "opacity"
+            to: 1
+            duration: ThemeManager.durationFast
+        }
+        
+        NumberAnimation {
+            target: root
+            property: "scale"
+            to: 1
+            duration: ThemeManager.durationFast
+            easing.type: Easing.OutBack
+        }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: ThemeManager.workspacePreviewRadius
+        color: "transparent"
+        border.color: Qt.rgba(1, 1, 1, 0.1)
+        border.width: 1
+        z: 10
+    }
 
     MultiEffect {
         anchors.fill: parent
         source: bgPreview
         blurEnabled: true
-        blur: 0.4
-        brightness: -0.2
-        saturation: 0.2
+        blur: root.visible ? ThemeManager.workspacePreviewBlur : 0.0
+        brightness: -0.1
+        saturation: 0.1
+        z: -1
     }
 
     Image {
@@ -48,13 +72,13 @@ Rectangle {
             return (path.startsWith("/") ? "file://" : "") + path
         }
         fillMode: Image.PreserveAspectCrop
-        visible: false
+        visible: false 
     }
 
     Item {
         id: container
         anchors.fill: parent
-        anchors.margins: 8
+        anchors.margins: ThemeManager.spacingSmall
 
         Repeater {
             model: NiriManager.windows
@@ -64,8 +88,8 @@ Rectangle {
                 
                 visible: model.workspaceId === root.workspaceId && layout !== undefined
                 
-                width: layout ? (layout.window_size[0] * root.previewScale * 0.9) : 0
-                height: layout ? (layout.window_size[1] * root.previewScale * 0.9) : 0
+                width: (layout && layout.window_size) ? (layout.window_size[0] * root.previewScale * 0.9) : 0
+                height: (layout && layout.window_size) ? (layout.window_size[1] * root.previewScale * 0.9) : 0
                 
                 x: (parent.width - width) / 2
                 y: (parent.height - height) / 2
@@ -81,7 +105,7 @@ Rectangle {
                     layer.enabled: true
                     layer.effect: MultiEffect {
                         shadowEnabled: true
-                        shadowColor: "black"
+                        shadowColor: ThemeManager.shadowPrimaryColor
                         shadowBlur: 0.4
                         shadowVerticalOffset: 2
                         shadowOpacity: 0.5
@@ -89,7 +113,7 @@ Rectangle {
 
                     ColumnLayout {
                         anchors.fill: parent
-                        anchors.margins: 4
+                        anchors.margins: ThemeManager.spacingExtraSmall
                         spacing: 2
 
                         Image {
@@ -116,5 +140,15 @@ Rectangle {
                 }
             }
         }
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: ThemeManager.workspacePreviewRadius
+        color: "transparent"
+        border.color: Qt.rgba(1, 1, 1, 0.05)
+        border.width: 1
+        anchors.margins: 1
+        z: 9
     }
 }

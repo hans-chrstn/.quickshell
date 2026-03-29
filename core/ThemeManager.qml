@@ -24,6 +24,11 @@ Singleton {
     property real lockPasswordOpacity: 0.06
     property int lockParallaxIntensity: 20
 
+    property real workspacePreviewScale: 0.15
+    property real workspacePreviewBlur: 0.8
+    property real workspacePreviewOpacity: 0.4
+    property int workspacePreviewRadius: 12
+
     readonly property color surfacePrimaryColor: Qt.rgba(1, 1, 1, 0.05)
     readonly property color surfaceStrongColor: Qt.rgba(1, 1, 1, 0.1)
     readonly property color surfaceSubtleColor: Qt.rgba(1, 1, 1, 0.02)
