@@ -48,10 +48,23 @@ Item {
     }
     z: 5
 
+    Item {
+        id: hoverHitbox
+        anchors.fill: parent
+        z: 100
+        
+        HoverHandler {
+            id: hh
+            onHoveredChanged: {
+                ViewManager.dashboardContentHovered = hovered
+            }
+        }
+    }
+
     MouseArea {
         anchors.fill: parent
-        hoverEnabled: true
-        preventStealing: true
+        hoverEnabled: false
+        preventStealing: false
         propagateComposedEvents: true
         onPressed: (mouse) => {
             mouse.accepted = false

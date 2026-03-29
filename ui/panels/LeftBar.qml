@@ -14,14 +14,14 @@ SystemPanel {
     }
 
     property bool isDashboardActive: false
-    property bool isDashboardExpanded: false
+    property bool isDashboardExpanded: ViewManager.leftDashboardOpen
     property int dashboardCurrentPage: 0
     property bool suppressDismiss: false
     
-    property bool triggerHovered: false
-    property bool contentHovered: false
-    readonly property bool isActuallyHovered: {
-        return root.triggerHovered || root.contentHovered
+    onIsDashboardExpandedChanged: {
+        if (isDashboardExpanded) {
+            root.isDashboardActive = true
+        }
     }
 
     readonly property var dashboardPages: [
@@ -85,29 +85,7 @@ SystemPanel {
     }
 
     function finalizeClose() {
-        Qt.callLater(() => {
-            root.isDashboardActive = false
-        })
-    }
-
-    Timer {
-        id: collapseTimer
-        interval: 300
-        onTriggered: {
-            if (!root.suppressDismiss && !root.activeFocus) {
-                root.isDashboardExpanded = false
-            }
-        }
-    }
-
-    onIsActuallyHoveredChanged: {
-        if (isActuallyHovered) {
-            collapseTimer.stop()
-            root.isDashboardActive = true
-            root.isDashboardExpanded = true
-        } else {
-            collapseTimer.restart()
-        }
+        root.isDashboardActive = false
     }
 
     HoverHandler {
@@ -153,19 +131,6 @@ SystemPanel {
         width: ThemeManager.globalThickness
         color: ThemeManager.backgroundColor
         z: 10
-
-        Item {
-            id: dashboardTrigger
-            anchors.centerIn: parent
-            width: parent.width
-            height: 200
-
-            HoverHandler {
-                onHoveredChanged: {
-                    root.triggerHovered = hovered
-                }
-            }
-        }
     }
 
     Item {
@@ -181,25 +146,6 @@ SystemPanel {
         }
         visible: {
             return width > 0
-        }
-    }
-
-    Item {
-        id: dashboardHitbox
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: 400
-        opacity: 0
-        z: 20
-        visible: {
-            return root.isDashboardExpanded
-        }
-
-        HoverHandler {
-            onHoveredChanged: {
-                root.contentHovered = hovered
-            }
         }
     }
 

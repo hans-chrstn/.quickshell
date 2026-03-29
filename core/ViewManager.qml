@@ -6,6 +6,30 @@ Singleton {
     id: root
 
     property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
+    
+    property bool dashboardTriggerHovered: false
+    property bool dashboardContentHovered: false
+    
+    property bool _leftDashboardOpen: false
+    readonly property bool leftDashboardOpen: _leftDashboardOpen
+
+    function updateDashboardState() {
+        if (dashboardTriggerHovered || dashboardContentHovered) {
+            hysteresisTimer.stop()
+            _leftDashboardOpen = true
+        } else {
+            hysteresisTimer.restart()
+        }
+    }
+
+    onDashboardTriggerHoveredChanged: updateDashboardState()
+    onDashboardContentHoveredChanged: updateDashboardState()
+
+    Timer {
+        id: hysteresisTimer
+        interval: 300
+        onTriggered: _leftDashboardOpen = false
+    }
 
     function trackScreen(name) {
         if (name && name !== "") {
@@ -13,84 +37,49 @@ Singleton {
         }
     }
 
-    property var activeWindows: ({})
-    property var closingWindows: ({})
-
-    readonly property var windowConfig: ({
-        "settings": { type: "settings", manager: null },
-        "wallpaper": { type: "wallpaper", manager: WallpaperManager },
-        "network": { type: "network", manager: null },
-        "bluetooth": { type: "bluetooth", manager: null },
-        "taskManager": { type: "taskManager", manager: ProcessManager },
-        "notes": { type: "notes", manager: NotesManager },
-        "commandPalette": { type: "commandPalette", manager: CommandPaletteManager }
-    })
-
-    signal windowOpening(string window)
-    signal windowClosing(string window)
-
-    function isRequested(window) {
-        return !!activeWindows[window]
-    }
-
-    function isClosing(window) {
-        return !!closingWindows[window]
-    }
-
-    function openWindow(window) {
-        let config = windowConfig[window]
-        if (!config) return
-
-        let newClosing = Object.assign({}, closingWindows)
-        delete newClosing[window]
-        closingWindows = newClosing
-
-        let newActive = Object.assign({}, activeWindows)
-        newActive[window] = true
-        activeWindows = newActive
-
-        if (config.manager && config.manager.open) {
-            config.manager.open()
+    function openWindow(type) {
+        let windows = root.requestedWindows
+        if (!windows.includes(type)) {
+            windows.push(type)
+            root.requestedWindows = windows
         }
-
-        root.windowOpening(window)
     }
 
-    function closeWindow(window) {
-        let config = windowConfig[window]
-        if (!config || !activeWindows[window]) return
-
-        let newClosing = Object.assign({}, closingWindows)
-        newClosing[window] = true
-        closingWindows = newClosing
-
-        if (config.manager && config.manager.close) {
-            config.manager.close()
+    function closeWindow(type) {
+        let windows = root.requestedWindows
+        let index = windows.indexOf(type)
+        if (index !== -1) {
+            root.closingWindows.push(type)
+            root.closingWindowsChanged()
+            
+            Qt.callLater(() => {
+                let windows = root.requestedWindows
+                let closing = root.closingWindows
+                let i = windows.indexOf(type)
+                let j = closing.indexOf(type)
+                if (i !== -1) windows.splice(i, 1)
+                if (j !== -1) closing.splice(j, 1)
+                root.requestedWindows = windows
+                root.closingWindows = closing
+                root.requestedWindowsChanged()
+                root.closingWindowsChanged()
+            })
         }
-
-        root.windowClosing(window)
-        
-        let closeTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 350; onTriggered: { root._finalizeClose("' + window + '"); destroy(); } }', root)
-        closeTimer.start()
     }
 
-    function toggleWindow(window) {
-        if (isRequested(window) && !isClosing(window)) {
-            closeWindow(window)
+    function toggleWindow(type) {
+        if (root.requestedWindows.includes(type)) {
+            closeWindow(type)
         } else {
-            openWindow(window)
+            openWindow(type)
         }
     }
 
-    function _finalizeClose(window) {
-        let newActive = Object.assign({}, activeWindows)
-        delete newActive[window]
-        activeWindows = newActive
+    property var requestedWindows: []
+    property var closingWindows: []
 
-        let newClosing = Object.assign({}, closingWindows)
-        delete newClosing[window]
-        closingWindows = newClosing
-    }
+    function isRequested(type) { return requestedWindows.includes(type) }
+    function isClosing(type) { return closingWindows.includes(type) }
 
     function openSettings() { openWindow("settings") }
     function toggleSettings() { toggleWindow("settings") }
