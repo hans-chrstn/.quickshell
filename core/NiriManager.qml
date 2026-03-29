@@ -12,11 +12,36 @@ Singleton {
     property alias focusedWindow: niri.focusedWindow
     readonly property bool isConnected: niri.isConnected()
 
+    property var windowLayouts: ({})
+
     Niri {
         id: niri
         Component.onCompleted: connect()
         
         onErrorOccurred: (err) => console.error("[NiriManager] Error:", err)
+
+        onRawEventReceived: (event) => {
+            if (event.WindowsChanged) {
+                let windows = event.WindowsChanged.windows
+                let newLayouts = {}
+                for (let win of windows) {
+                    newLayouts[win.id] = win.layout
+                }
+                root.windowLayouts = newLayouts
+            } else if (event.WindowOpenedOrChanged) {
+                let win = event.WindowOpenedOrChanged.window
+                let layouts = root.windowLayouts
+                layouts[win.id] = win.layout
+                root.windowLayouts = layouts
+                root.windowLayoutsChanged()
+            } else if (event.WindowClosed) {
+                let id = event.WindowClosed.id
+                let layouts = root.windowLayouts
+                delete layouts[id]
+                root.windowLayouts = layouts
+                root.windowLayoutsChanged()
+            }
+        }
     }
 
     function focusWorkspaceById(id) {

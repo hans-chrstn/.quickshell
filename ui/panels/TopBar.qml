@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import Quickshell
+import Quickshell.Wayland
 import Quickshell.Services.Mpris
 import Quickshell.Services.Notifications
 import qs.ui.features.island
@@ -24,7 +25,7 @@ SystemPanel {
         }
     }
 
-    implicitHeight: ThemeManager.dynamicIslandExpandedHeight
+    implicitHeight: 300
     exclusiveZone: ThemeManager.globalThickness
     color: "transparent"
     focusable: dIsland.isExpanded
@@ -35,6 +36,9 @@ SystemPanel {
         }
         Region {
             item: dIslandHitbox
+        }
+        Region {
+            item: ViewManager.hoveredWorkspaceId !== -1 ? workspacePreview : null
         }
     }
 
@@ -70,7 +74,7 @@ SystemPanel {
         anchors.right: parent.right
         height: ThemeManager.globalThickness
         color: ThemeManager.backgroundColor
-        z: 1
+        z: 10
 
         WorkspaceIndicators {
             anchors.left: parent.left
@@ -84,9 +88,19 @@ SystemPanel {
         id: dIsland
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
-        z: 2
+        z: 20
 
         barHeight: ThemeManager.globalThickness
         backgroundColor: ThemeManager.backgroundColor
+    }
+
+    WorkspacePreview {
+        id: workspacePreview
+        screen: root.screen
+        workspaceId: ViewManager.hoveredWorkspaceId
+        visible: (ViewManager.hoveredWorkspaceId !== -1) && (ViewManager.lastActiveScreenName === root.screen.name)
+        x: Math.max(ThemeManager.globalThickness + 8, ViewManager.hoveredWorkspaceX - (width / 4))
+        y: ThemeManager.globalThickness + 8
+        z: 5
     }
 }

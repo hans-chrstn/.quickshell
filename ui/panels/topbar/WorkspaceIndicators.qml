@@ -12,6 +12,7 @@ RowLayout {
     Repeater {
         model: NiriManager.workspaces
         delegate: Rectangle {
+            id: indicator
             readonly property bool onCurrentScreen: model.output === root.screenName
             visible: onCurrentScreen
             
@@ -32,6 +33,18 @@ RowLayout {
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
                 onClicked: NiriManager.focusWorkspaceById(model.id)
+                
+                onEntered: {
+                    ViewManager.hoveredWorkspaceId = model.id
+                    let pos = indicator.mapToItem(null, 0, 0)
+                    ViewManager.hoveredWorkspaceX = pos.x
+                }
+                
+                onExited: {
+                    if (ViewManager.hoveredWorkspaceId === model.id) {
+                        ViewManager.hoveredWorkspaceId = -1
+                    }
+                }
             }
         }
     }

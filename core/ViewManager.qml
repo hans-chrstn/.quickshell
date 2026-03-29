@@ -6,6 +6,8 @@ Singleton {
     id: root
 
     property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
+    property int hoveredWorkspaceId: -1
+    property real hoveredWorkspaceX: 0
     
     property bool dashboardTriggerHovered: false
     property bool dashboardContentHovered: false
