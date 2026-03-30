@@ -31,15 +31,9 @@ SystemPanel {
     focusable: dIsland.isExpanded
 
     mask: Region {
-        Region {
-            item: barRect
-        }
-        Region {
-            item: dIslandHitbox
-        }
-        Region {
-            item: ViewManager.hoveredWorkspaceId !== -1 ? workspacePreview : null
-        }
+        Region { item: barRect }
+        Region { item: dIslandHitbox }
+        Region { item: workspacePreview.opacity > 0.01 ? workspacePreview : null }
     }
 
     Item {
@@ -58,11 +52,8 @@ SystemPanel {
         Connections {
             target: dIsland
             function onIsExpandedChanged() {
-                if (!dIsland.isExpanded) {
-                    shrinkTimer.restart()
-                } else {
-                    shrinkTimer.stop()
-                }
+                if (!dIsland.isExpanded) shrinkTimer.restart()
+                else shrinkTimer.stop()
             }
         }
     }
@@ -77,8 +68,9 @@ SystemPanel {
         z: 10
 
         WorkspaceIndicators {
+            id: indicators
             anchors.left: parent.left
-            anchors.leftMargin: ThemeManager.globalCornerRadius + 15
+            anchors.leftMargin: ThemeManager.globalThickness + 24
             anchors.verticalCenter: parent.verticalCenter
             screenName: root.screen.name
         }
@@ -89,17 +81,29 @@ SystemPanel {
         anchors.horizontalCenter: parent.horizontalCenter
         y: 0
         z: 20
-
         barHeight: ThemeManager.globalThickness
         backgroundColor: ThemeManager.backgroundColor
+    }
+
+    property int _currentPreviewId: -1
+    
+    Connections {
+        target: ViewManager
+        function onHoveredWorkspaceIdChanged() {
+            if (ViewManager.hoveredWorkspaceId !== -1) {
+                root._currentPreviewId = ViewManager.hoveredWorkspaceId
+            }
+        }
     }
 
     WorkspacePreview {
         id: workspacePreview
         screen: root.screen
-        workspaceId: ViewManager.hoveredWorkspaceId
-        visible: (ViewManager.hoveredWorkspaceId !== -1) && (ViewManager.lastActiveScreenName === root.screen.name)
-        x: Math.max(ThemeManager.globalThickness + 8, ViewManager.hoveredWorkspaceX - (width / 4))
+        workspaceId: root._currentPreviewId
+        active: ViewManager.workspacePreviewActive && (ViewManager.lastActiveScreenName === root.screen.name)
+        
+        visible: true
+        x: ThemeManager.globalThickness + 24
         y: ThemeManager.globalThickness + 8
         z: 5
     }

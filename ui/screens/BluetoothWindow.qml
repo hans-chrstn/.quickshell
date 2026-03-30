@@ -12,7 +12,7 @@ PanelWindow {
     id: root
     
     readonly property string screenName: (root.screen) ? root.screen.name : ""
-    visible: ViewManager.bluetoothRequested && (ViewManager.lastActiveScreenName === screenName)
+    visible: !!ViewManager.activeWindows["bluetooth"] && (ViewManager.lastActiveScreenName === screenName)
     color: "transparent"
 
     anchors {
@@ -32,7 +32,7 @@ PanelWindow {
         }
     }
 
-    property bool closing: false
+    property bool closing: !!ViewManager.closingWindows["bluetooth"]
     property bool entryActive: false
 
     readonly property bool showContent: visible && !closing && entryActive

@@ -9,6 +9,12 @@ RowLayout {
     
     property string screenName: ""
 
+    HoverHandler {
+        onHoveredChanged: {
+            ViewManager.indicatorHovered = hovered
+        }
+    }
+
     Repeater {
         model: NiriManager.workspaces
         delegate: Rectangle {
@@ -35,15 +41,8 @@ RowLayout {
                 onClicked: NiriManager.focusWorkspaceById(model.id)
                 
                 onEntered: {
-                    ViewManager.hoveredWorkspaceId = model.id
-                    let pos = indicator.mapToItem(null, 0, 0)
-                    ViewManager.hoveredWorkspaceX = pos.x
-                }
-                
-                onExited: {
-                    if (ViewManager.hoveredWorkspaceId === model.id) {
-                        ViewManager.hoveredWorkspaceId = -1
-                    }
+                    NiriManager.forceUpdateLayouts()
+                    ViewManager.setHoveredWorkspace(model.id)
                 }
             }
         }
