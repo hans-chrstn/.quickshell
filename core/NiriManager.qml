@@ -58,6 +58,21 @@ Singleton {
         niri.focusWindow(id)
     }
 
+    function moveWindowToWorkspace(windowId, workspaceRef) {
+        if (windowId === undefined || workspaceRef === null) return
+        
+        Quickshell.execDetached([
+            "sh", "-c", 
+            "niri msg action move-window-to-workspace " + workspaceRef + " --window-id " + windowId + 
+            " && niri msg action focus-workspace " + workspaceRef
+        ])
+
+        OSDManager.show(
+            "Moved to Workspace " + workspaceRef,
+            ThemeManager.iconWindow
+        )
+    }
+
     function closeWindowById(id) {
         niri.closeWindow(id)
     }

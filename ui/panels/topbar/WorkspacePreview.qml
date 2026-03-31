@@ -114,11 +114,14 @@ ClippingRectangle {
                         isUrgent: windows.data(idx, 264),
                         isPlayingAudio: isPlaying,
                         width: w * root.previewScale * 0.8,
-                        height: h * root.previewScale * 0.8
+                        height: h * root.previewScale * 0.8,
+                        posX: layout.pos_in_scrolling_layout ? layout.pos_in_scrolling_layout[0] : 0
                     })
                 }
             }
         }
+        
+        list.sort((a, b) => a.posX - b.posX)
         return list
     }
 
@@ -126,15 +129,14 @@ ClippingRectangle {
         id: flick
         anchors.fill: parent
         anchors.margins: ThemeManager.spacingMedium
-        
         contentWidth: container.width
         contentHeight: height
         flickableDirection: Flickable.HorizontalFlick
         boundsBehavior: Flickable.DragAndOvershootBounds
         pixelAligned: true
-        
         flickDeceleration: 1500
         maximumFlickVelocity: 2500
+        interactive: ViewManager.activeDragWindowId === -1
         clip: true
 
         WheelHandler {
@@ -165,14 +167,14 @@ ClippingRectangle {
                         anchors.verticalCenter: parent.verticalCenter
                         radius: ThemeManager.radiusSmall / 2
                         
-                        readonly property bool isWindowHovered: hWin.hovered
+                        readonly property bool isWindowHovered: maWin.containsMouse
                         
                         color: (modelData.isFocused || isWindowHovered) 
                             ? Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.4) 
                             : ThemeManager.surfacePrimaryColor
                         
                         border.color: isWindowHovered 
-                            ? "white" 
+                            ? ThemeManager.surfaceContentColor 
                             : (modelData.isFocused ? ThemeManager.accentColor : ThemeManager.outlineVariantColor)
                         
                         border.width: isWindowHovered ? 3 : (modelData.isFocused ? 2 : 1)
@@ -188,15 +190,71 @@ ClippingRectangle {
                             shadowOpacity: 0.8
                         }
 
-                        HoverHandler {
-                            id: hWin
-                            cursorShape: Qt.PointingHandCursor
-                        }
+                        MouseArea {
+                            id: maWin
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: ViewManager.activeDragWindowId !== -1 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+                            
+                            property real startX: 0
+                            property real startY: 0
+                            property bool potentialDrag: false
+                            property int windowIdToDrag: -1
 
-                        TapHandler {
-                            onTapped: {
-                                NiriManager.focusWindowById(modelData.id)
-                                ViewManager.setHoveredWorkspace(-1)
+                            onPressed: (mouse) => {
+                                startX = mouse.x
+                                startY = mouse.y
+                                potentialDrag = true
+                                windowIdToDrag = modelData.id
+                            }
+
+                            onPositionChanged: (mouse) => {
+                                if (potentialDrag && ViewManager.activeDragWindowId === -1) {
+                                    let dist = Math.sqrt(Math.pow(mouse.x - startX, 2) + Math.pow(mouse.y - startY, 2))
+                                    if (dist > 10) {
+                                        ViewManager.activeDragWindowId = windowIdToDrag
+                                        ViewManager.activeDragIcon = modelData.iconPath
+                                    }
+                                }
+
+                                if (ViewManager.activeDragWindowId !== -1) {
+                                    let mapped = maWin.mapToItem(null, mouse.x, mouse.y)
+                                    let absX = (root.screen ? root.screen.x : 0) + mapped.x
+                                    let absY = (root.screen ? root.screen.y : 0) + mapped.y
+                                    
+                                    ViewManager.dragX = absX
+                                    ViewManager.dragY = absY
+                                    
+                                    if (root.screen) ViewManager.trackScreen(root.screen.name)
+                                    ViewManager.checkDropTarget(absX, absY)
+                                }
+                            }
+
+                            onReleased: {
+                                if (ViewManager.activeDragWindowId !== -1) {
+                                    if (ViewManager.hoveredTargetWorkspaceRef !== null) {
+                                        NiriManager.moveWindowToWorkspace(
+                                            ViewManager.activeDragWindowId, 
+                                            ViewManager.hoveredTargetWorkspaceRef
+                                        )
+                                    }
+                                    
+                                    ViewManager.activeDragWindowId = -1
+                                    ViewManager.activeDragIcon = ""
+                                    ViewManager.hoveredTargetWorkspaceId = -1
+                                    ViewManager.hoveredTargetWorkspaceRef = null
+                                    ViewManager.setHoveredWorkspace(-1)
+                                } else if (potentialDrag) {
+                                    NiriManager.focusWindowById(modelData.id)
+                                    Quickshell.execDetached(["niri", "msg", "action", "focus-window", "--id", modelData.id.toString()])
+                                    ViewManager.setHoveredWorkspace(-1)
+                                }
+                                potentialDrag = false
+                            }
+
+                            onCanceled: {
+                                potentialDrag = false
+                                ViewManager.activeDragWindowId = -1
                             }
                         }
 
@@ -220,8 +278,8 @@ ClippingRectangle {
                                 font.weight: (modelData.isFocused || windowRect.isWindowHovered) ? Font.Bold : Font.Normal
                                 elideMode: Text.ElideRight
                                 horizontalAlignment: Text.AlignHCenter
-                                customColor: (modelData.isFocused || windowRect.isWindowHovered) ? "white" : ThemeManager.surfaceContentColor
-                                opacity: 0.8
+                                customColor: (modelData.isFocused || windowRect.isWindowHovered) ? ThemeManager.surfaceContentColor : ThemeManager.surfaceContentColor
+                                opacity: (modelData.isFocused || windowRect.isWindowHovered) ? 1.0 : 0.8
                                 visible: windowRect.height > 20
                             }
                         }
@@ -270,7 +328,7 @@ ClippingRectangle {
                                     text: "!"
                                     font.pixelSize: parent.width * 0.8
                                     font.weight: Font.Black
-                                    customColor: "white"
+                                    customColor: ThemeManager.surfaceContentColor
                                 }
                             }
                         }

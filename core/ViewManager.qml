@@ -8,22 +8,62 @@ Singleton {
     property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
     
     property int hoveredWorkspaceId: -1
+    property real hoveredWorkspaceX: 0
     property bool workspacePreviewActive: false
     
     property bool indicatorHovered: false
     property bool previewHovered: false
     readonly property bool anyHovered: indicatorHovered || previewHovered
 
-    function setHoveredWorkspace(id) {
+    property int activeDragWindowId: -1
+    property string activeDragIcon: ""
+    property real dragX: 0
+    property real dragY: 0
+    property int hoveredTargetWorkspaceId: -1
+    property var hoveredTargetWorkspaceRef: null 
+    readonly property bool isDragging: activeDragWindowId !== -1
+
+    property var indicatorRects: ({})
+
+    function registerIndicator(id, ref, rect) {
+        let rects = Object.assign({}, root.indicatorRects)
+        rects[id] = { ref: ref, rect: rect }
+        root.indicatorRects = rects
+    }
+
+    function checkDropTarget(wx, wy) {
+        let foundId = -1
+        let foundRef = null
+        
+        for (let id in indicatorRects) {
+            let data = indicatorRects[id]
+            let r = data.rect
+            if (wx >= r.x && wx <= (r.x + r.width) && wy >= r.y && wy <= (r.y + r.height)) {
+                foundId = parseInt(id)
+                foundRef = data.ref
+                break
+            }
+        }
+        
+        if (foundId !== root.hoveredTargetWorkspaceId) {
+            root.hoveredTargetWorkspaceId = foundId
+            root.hoveredTargetWorkspaceRef = foundRef
+        }
+    }
+
+    function setHoveredWorkspace(id, x) {
         if (id !== -1) {
             root.hoveredWorkspaceId = id
             root.workspacePreviewActive = true
             hysteresisTimer.stop()
         }
+        if (x !== undefined) {
+            root.hoveredWorkspaceX = x
+        }
     }
 
     onAnyHoveredChanged: {
-        if (anyHovered) {
+        if (anyHovered || isDragging) {
             hysteresisTimer.stop()
         } else {
             hysteresisTimer.restart()
@@ -98,7 +138,7 @@ Singleton {
     }
 
     function toggleWindow(type) {
-        if (root.activeWindows[type]) {
+        if (root.activeWindows.hasOwnProperty(type)) {
             closeWindow(type)
         } else {
             openWindow(type)

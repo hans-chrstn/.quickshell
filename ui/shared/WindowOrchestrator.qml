@@ -1,5 +1,7 @@
 import QtQuick
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Wayland
 import qs.core
 import qs.ui.panels
 import qs.ui.features.island
@@ -237,6 +239,80 @@ Item {
             component: CommandPaletteWindow {
                 screen: commandPaletteLdr.modelData
                 closing: ViewManager.isClosing("commandPalette")
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+        delegate: PanelWindow {
+            id: dragOverlay
+            required property var modelData
+            screen: modelData
+            
+            anchors { left: true; right: true; top: true; bottom: true }
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Overlay
+            color: "transparent"
+            
+            visible: ViewManager.activeDragWindowId !== -1 && (ViewManager.lastActiveScreenName === modelData.name)
+            
+            mask: Region {
+                Region { item: ghost }
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                
+                onPositionChanged: (mouse) => {
+                    ViewManager.dragX = dragOverlay.screen.x + mouse.x
+                    ViewManager.dragY = dragOverlay.screen.y + mouse.y
+                    ViewManager.checkDropTarget(ViewManager.dragX, ViewManager.dragY)
+                }
+                
+                onReleased: {
+                    if (ViewManager.hoveredTargetWorkspaceRef !== null) {
+                        NiriManager.moveWindowToWorkspace(
+                            ViewManager.activeDragWindowId, 
+                            ViewManager.hoveredTargetWorkspaceRef
+                        )
+                    }
+                    
+                    ViewManager.activeDragWindowId = -1
+                    ViewManager.activeDragIcon = ""
+                    ViewManager.hoveredTargetWorkspaceId = -1
+                    ViewManager.hoveredTargetWorkspaceRef = null
+                    ViewManager.setHoveredWorkspace(-1)
+                }
+            }
+
+            Rectangle {
+                id: ghost
+                width: 80
+                height: 80
+                radius: 16
+                color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.6)
+                border.color: "white"
+                border.width: 2
+                
+                x: (ViewManager.dragX - dragOverlay.screen.x) - (width / 2)
+                y: (ViewManager.dragY - dragOverlay.screen.y) - (height / 2)
+                
+                layer.enabled: true
+                layer.effect: MultiEffect {
+                    shadowEnabled: true
+                    shadowColor: "black"
+                    shadowOpacity: 0.8
+                    shadowBlur: 0.5
+                }
+
+                Image {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    source: ViewManager.activeDragIcon ? "file://" + ViewManager.activeDragIcon : ""
+                    smooth: true
+                }
             }
         }
     }
