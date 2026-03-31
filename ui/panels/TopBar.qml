@@ -103,6 +103,7 @@ SystemPanel {
         active: ViewManager.workspacePreviewActive && (ViewManager.lastActiveScreenName === root.screen.name)
         
         visible: true
+        
         x: ThemeManager.globalThickness + 24
         y: ThemeManager.globalThickness + 8
         z: 5

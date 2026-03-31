@@ -13,11 +13,12 @@ Singleton {
     property bool indicatorHovered: false
     property bool previewHovered: false
     readonly property bool anyHovered: indicatorHovered || previewHovered
-    
+
     function setHoveredWorkspace(id) {
         if (id !== -1) {
             root.hoveredWorkspaceId = id
             root.workspacePreviewActive = true
+            hysteresisTimer.stop()
         }
     }
 
@@ -31,7 +32,7 @@ Singleton {
 
     Timer {
         id: hysteresisTimer
-        interval: 350
+        interval: 300
         onTriggered: {
             root.workspacePreviewActive = false
             root.hoveredWorkspaceId = -1

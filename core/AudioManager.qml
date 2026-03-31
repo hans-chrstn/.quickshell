@@ -32,12 +32,17 @@ Singleton {
     property ListModel streamModel: ListModel { }
     readonly property alias streams: root.streamModel
 
+    property var pidsPlayingAudio: []
+    property var appNamesPlayingAudio: []
+
     function updateSinks() {
         if (!Pipewire.ready) return
 
         let nodes = Pipewire.nodes.values
         let foundSinks = []
         let foundStreams = []
+        let foundPids = []
+        let foundAppNames = []
         let currentId = defaultSink ? defaultSink.id : -1
 
         for (let i = 0; i < nodes.length; i++) {
@@ -59,9 +64,32 @@ Singleton {
                     "id": node.id,
                     "name": node.description || node.name || "Application"
                 })
+                
+                let pid = node.properties["application.process.id"]
+                if (pid) {
+                    let pidInt = parseInt(pid)
+                    if (!isNaN(pidInt) && !foundPids.includes(pidInt)) {
+                        foundPids.push(pidInt)
+                    }
+                }
+
+                let names = [
+                    node.properties["application.name"],
+                    node.properties["node.name"],
+                    node.description,
+                    node.name
+                ]
+                for (let n of names) {
+                    if (n) {
+                        let cn = n.toLowerCase()
+                        if (!foundAppNames.includes(cn)) foundAppNames.push(cn)
+                    }
+                }
             }
         }
 
+        root.pidsPlayingAudio = foundPids
+        root.appNamesPlayingAudio = foundAppNames
         root._syncModel(sinkModel, foundSinks)
         root._syncModel(streamModel, foundStreams)
     }
