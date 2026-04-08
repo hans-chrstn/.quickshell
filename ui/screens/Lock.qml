@@ -9,31 +9,17 @@ import qs.ui.screens.lock
 Scope {
     id: root
 
-    LockLogic {
-        id: logic
-        lock: lock
-    }
-
     WlSessionLock {
         id: lock
-
-        signal requestDismiss
 
         surface: Component {
             LockSurface {
                 lock: lock
             }
         }
-
-        onLockedChanged: {
-            if (locked) {
-                logic.buffer = ""
-                logic.message = ""
-            }
-        }
     }
 
     Component.onCompleted: {
-        LockManager.register(root, lock, logic)
+        LockManager.register(root, lock, null)
     }
 }
