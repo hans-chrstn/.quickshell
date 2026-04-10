@@ -1,21 +1,33 @@
 pragma Singleton
-
 import QtQuick
 import Quickshell
 import qs.shared
+import qs.core.auth
 
 Singleton {
     id: root
+
     property var _queue: []
+
     property var logModel: ListModel { }
+
     property bool isPaused: true
+
     signal paused(string pauseMarker)
 
     Timer {
         id: worker
+
         repeat: true
-        interval: 200
+
+        interval: 100
+
         onTriggered: {
+            if (root.isPaused) {
+                worker.stop()
+                return
+            }
+
             if (root._queue.length === 0) {
                 worker.stop()
                 return
@@ -30,40 +42,46 @@ Singleton {
                 return
             }
 
-            let minDelay = 50
-            let maxDelay = 250
-            let delay = Math.random() * maxDelay
-            
-            worker.interval = Math.max(
-                minDelay, 
-                Math.min(delay, maxDelay)
-            )
+            let minDelay = 150
+            let maxDelay = 400
+            let delay = minDelay + (Math.random() * (maxDelay - minDelay))
+            worker.interval = delay
         }
     }
 
     function _addToModel(item) {
-        logModel.append(item)
+        logModel.append({
+            message: item.message,
+            raw: item.raw,
+            isHeader: item.raw.startsWith("---")
+        })
+
         if (logModel.count > 50) {
             logModel.remove(0)
         }
     }
 
     function displayMessage(message, pauseWithMarker = "") {
-        let timestamp = new Date().toLocaleTimeString(
-            Qt.locale(), 
-            "HH:mm:ss"
-        )
-        let hex = (Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(
-            4, 
-            "0"
-        )
-        let processed = "[" + timestamp + "] 0x" + hex + " // " + message
+        let processed = ""
+        if (!message.startsWith("---")) {
+            let timestamp = new Date().toLocaleTimeString(
+                Qt.locale(), 
+                "HH:mm:ss"
+            )
+            let hex = (Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, "0")
+            processed = "[" + timestamp + "] 0x" + hex + " // " + message
+        } else {
+            processed = message
+        }
+        
         let item = {
             message: processed,
             raw: message,
             pauseWithMarker: pauseWithMarker
         }
+
         root._queue.push(item)
+
         if (!worker.running && !root.isPaused) {
             worker.start()
         }
@@ -71,7 +89,9 @@ Singleton {
 
     function unpause() {
         root.isPaused = false
-        worker.start()
+        if (!worker.running) {
+            worker.start()
+        }
     }
 
     function clear() {

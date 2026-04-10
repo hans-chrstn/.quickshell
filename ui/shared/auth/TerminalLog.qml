@@ -14,34 +14,26 @@ Item {
 
     property bool active: false
 
-    property real expandWidth: 0
-
-    property real expandHeight: 0
+    property real expansion: 0
 
     onActiveChanged: {
         if (active) {
             introAnim.start()
-        } else {
-            outroAnim.start()
         }
     }
 
     SequentialAnimation {
         id: introAnim
 
-        NumberAnimation {
-            target: root
-            property: "expandWidth"
-            to: 1
-            duration: 400
-            easing.type: Easing.OutCubic
+        PauseAnimation { 
+            duration: 200 
         }
 
         NumberAnimation {
             target: root
-            property: "expandHeight"
+            property: "expansion"
             to: 1
-            duration: 500
+            duration: 1200
             easing.type: Easing.OutQuart
         }
 
@@ -52,34 +44,14 @@ Item {
         }
     }
 
-    SequentialAnimation {
-        id: outroAnim
-
-        NumberAnimation {
-            target: root
-            property: "expandHeight"
-            to: 0
-            duration: 300
-            easing.type: Easing.InCubic
-        }
-
-        NumberAnimation {
-            target: root
-            property: "expandWidth"
-            to: 0
-            duration: 300
-            easing.type: Easing.InCubic
-        }
-    }
-
     Rectangle {
         id: container
 
         anchors.centerIn: parent
 
-        width: 400 * root.expandWidth
+        width: 400 * root.expansion
 
-        height: 120 * root.expandHeight
+        height: 120 * root.expansion
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -90,10 +62,15 @@ Item {
 
         clip: true
 
-        opacity: root.expandHeight > 0.1 ? 1 : 0
+        opacity: {
+            if (root.expansion > 0.01) {
+                return 1
+            }
+            return 0
+        }
 
         Behavior on opacity {
-            NumberAnimation { duration: 200 }
+            NumberAnimation { duration: 400 }
         }
 
         Rectangle { 
@@ -101,12 +78,8 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
-            visible: root.expandWidth > 0.9
-
-            anchors {
-                top: parent.top
-                left: parent.left
-            }
+            visible: root.expansion > 0.95
+            anchors { top: parent.top; left: parent.left }
         }
 
         Rectangle { 
@@ -114,12 +87,8 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
-            visible: root.expandHeight > 0.9
-
-            anchors {
-                top: parent.top
-                left: parent.left
-            }
+            visible: root.expansion > 0.95
+            anchors { top: parent.top; left: parent.left }
         }
 
         Rectangle { 
@@ -127,12 +96,8 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
-            visible: root.expandWidth > 0.9
-
-            anchors {
-                bottom: parent.bottom
-                right: parent.right
-            }
+            visible: root.expansion > 0.95
+            anchors { bottom: parent.bottom; right: parent.right }
         }
 
         Rectangle { 
@@ -140,12 +105,14 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
-            visible: root.expandHeight > 0.9
+            visible: root.expansion > 0.95
+            anchors { bottom: parent.bottom; right: parent.right }
+        }
 
-            anchors {
-                bottom: parent.bottom
-                right: parent.right
-            }
+        TextMetrics {
+            id: metrics
+            font { pixelSize: 10; family: "monospace" }
+            text: "-"
         }
 
         ListView {
@@ -164,10 +131,15 @@ Item {
 
             z: 10
 
-            opacity: root.expandHeight > 0.8 ? 1 : 0
+            opacity: {
+                if (root.expansion > 0.9) {
+                    return 1
+                }
+                return 0
+            }
 
             Behavior on opacity {
-                NumberAnimation { duration: 300 }
+                NumberAnimation { duration: 500 }
             }
             
             layer {
@@ -179,18 +151,9 @@ Item {
                             width: logView.width
                             height: logView.height
                             gradient: Gradient {
-                                GradientStop { 
-                                    position: 0.0
-                                    color: "transparent" 
-                                }
-                                GradientStop { 
-                                    position: 0.3
-                                    color: "white" 
-                                }
-                                GradientStop { 
-                                    position: 1.0
-                                    color: "white" 
-                                }
+                                GradientStop { position: 0.0; color: "transparent" }
+                                GradientStop { position: 0.3; color: "white" }
+                                GradientStop { position: 1.0; color: "white" }
                             }
                         }
                     }
@@ -202,13 +165,32 @@ Item {
 
                 height: logLabel.implicitHeight + 2
                 
-                readonly property string processedText: {
-                    let txt = model.raw
-                    if (txt.startsWith("---")) {
-                        let stripped = txt.replace(/-/g, "").trim()
-                        return stripped
+                property int charCount: 0
+
+                readonly property string fullText: {
+                    if (model.isHeader) {
+                        let stripped = model.raw.replace(/-/g, "").trim()
+                        let charWidth = metrics.advanceWidth
+                        let availableWidth = logView.width - 20
+                        let totalChars = Math.floor(availableWidth / charWidth)
+                        let hyphens = Math.max(0, Math.floor((totalChars - stripped.length) / 2))
+                        let padding = "-".repeat(hyphens)
+                        return padding + stripped + padding
                     }
                     return model.message
+                }
+
+                Timer {
+                    interval: 15
+                    running: root.expansion > 0.9
+                    repeat: true
+                    onTriggered: {
+                        if (charCount < fullText.length) {
+                            charCount++
+                        } else {
+                            stop()
+                        }
+                    }
                 }
 
                 StyledLabel {
@@ -216,70 +198,28 @@ Item {
 
                     anchors.fill: parent
 
-                    text: parent.processedText
+                    text: parent.fullText.substring(0, parent.charCount)
 
                     font {
                         pixelSize: 10
                         family: "monospace"
                     }
 
-                    horizontalAlignment: {
-                        if (model.raw.startsWith("---")) {
-                            return Text.AlignHCenter
-                        }
-                        return Text.AlignLeft
-                    }
+                    horizontalAlignment: model.isHeader ? Text.AlignHCenter : Text.AlignLeft
 
                     customColor: {
                         if (model.raw.includes("failed") || model.raw.includes("FAILED")) {
                             return ThemeManager.dangerColor
                         }
-                        if (model.raw.startsWith("---")) {
-                            return ThemeManager.accentColor
-                        }
-                        return ThemeManager.surfaceContentColor
+                        return model.isHeader ? ThemeManager.accentColor : ThemeManager.surfaceContentColor
                     }
 
-                    opacity: {
-                        if (model.raw.startsWith("---")) {
-                            return 0.8
-                        }
-                        return 0.5
-                    }
+                    opacity: model.isHeader ? 0.8 : 0.5
                 }
             }
 
             onCountChanged: {
                 Qt.callLater(logView.positionViewAtEnd)
-            }
-
-            add: Transition {
-                SequentialAnimation {
-                    NumberAnimation { 
-                        property: "opacity"
-                        from: 0
-                        to: 1
-                        duration: 50 
-                    }
-                    NumberAnimation { 
-                        property: "opacity"
-                        from: 1
-                        to: 0.3
-                        duration: 50 
-                    }
-                    NumberAnimation { 
-                        property: "opacity"
-                        from: 0.3
-                        to: 0.6
-                        duration: 100 
-                    }
-                    NumberAnimation { 
-                        property: "x"
-                        from: -10
-                        to: 0
-                        duration: 100 
-                    }
-                }
             }
         }
     }

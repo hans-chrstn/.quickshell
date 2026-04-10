@@ -15,35 +15,28 @@ Item {
 
     visible: AuthManager.currentUser !== ""
 
-    property real expandWidth: 0
-
-    property real expandHeight: 0
+    property real expansion: 0
 
     onVisibleChanged: {
         if (visible) {
             introAnim.start()
         } else {
-            root.expandWidth = 0
-            root.expandHeight = 0
+            root.expansion = 0
         }
     }
 
     SequentialAnimation {
         id: introAnim
 
-        NumberAnimation {
-            target: root
-            property: "expandWidth"
-            to: 1
-            duration: 400
-            easing.type: Easing.OutCubic
+        PauseAnimation { 
+            duration: 100 
         }
 
         NumberAnimation {
             target: root
-            property: "expandHeight"
+            property: "expansion"
             to: 1
-            duration: 500
+            duration: 1000
             easing.type: Easing.OutQuart
         }
     }
@@ -53,9 +46,9 @@ Item {
 
         anchors.centerIn: parent
 
-        width: 440 * root.expandWidth
+        width: 440 * root.expansion
 
-        height: 160 * root.expandHeight
+        height: 160 * root.expansion
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -67,7 +60,7 @@ Item {
         clip: true
 
         opacity: {
-            if (root.expandHeight > 0.1) {
+            if (root.expansion > 0.01) {
                 return 1
             }
             return 0
@@ -86,7 +79,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expandWidth > 0.9
+                return root.expansion > 0.95
             }
 
             anchors {
@@ -102,7 +95,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expandHeight > 0.9
+                return root.expansion > 0.95
             }
 
             anchors {
@@ -118,7 +111,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expandWidth > 0.9
+                return root.expansion > 0.95
             }
 
             anchors {
@@ -134,7 +127,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expandHeight > 0.9
+                return root.expansion > 0.95
             }
 
             anchors {
@@ -152,7 +145,7 @@ Item {
             spacing: 24
 
             opacity: {
-                if (root.expandHeight > 0.8) {
+                if (root.expansion > 0.9) {
                     return 1
                 }
                 return 0

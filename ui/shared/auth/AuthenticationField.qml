@@ -16,35 +16,28 @@ Item {
 
     property bool isInputFocused: input.activeFocus
 
-    property real expandWidth: 0
-
-    property real expandHeight: 0
+    property real expansion: 0
 
     onVisibleChanged: {
         if (visible) {
             introAnim.start()
         } else {
-            root.expandWidth = 0
-            root.expandHeight = 0
+            root.expansion = 0
         }
     }
 
     SequentialAnimation {
         id: introAnim
 
-        NumberAnimation {
-            target: root
-            property: "expandWidth"
-            to: 1
-            duration: 400
-            easing.type: Easing.OutCubic
+        PauseAnimation { 
+            duration: 200 
         }
 
         NumberAnimation {
             target: root
-            property: "expandHeight"
+            property: "expansion"
             to: 1
-            duration: 400
+            duration: 800
             easing.type: Easing.OutQuart
         }
     }
@@ -54,9 +47,9 @@ Item {
 
         anchors.centerIn: parent
 
-        width: 400 * root.expandWidth
+        width: 400 * root.expansion
 
-        height: 44 * root.expandHeight
+        height: 44 * root.expansion
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -73,7 +66,7 @@ Item {
         clip: true
 
         opacity: {
-            if (root.expandHeight > 0.1) {
+            if (root.expansion > 0.01) {
                 return 1
             }
             return 0
@@ -93,7 +86,7 @@ Item {
 
             visible: {
                 return input.activeFocus && 
-                       root.expandWidth > 0.9
+                       root.expansion > 0.95
             }
 
             anchors {
@@ -110,7 +103,7 @@ Item {
 
             visible: {
                 return input.activeFocus && 
-                       root.expandHeight > 0.9
+                       root.expansion > 0.95
             }
 
             anchors {
@@ -127,7 +120,7 @@ Item {
 
             visible: {
                 return input.activeFocus && 
-                       root.expandWidth > 0.9
+                       root.expansion > 0.95
             }
 
             anchors {
@@ -144,7 +137,7 @@ Item {
 
             visible: {
                 return input.activeFocus && 
-                       root.expandHeight > 0.9
+                       root.expansion > 0.95
             }
 
             anchors {
@@ -184,7 +177,7 @@ Item {
             background: null
 
             opacity: {
-                if (root.expandHeight > 0.8) {
+                if (root.expansion > 0.8) {
                     return 1
                 }
                 return 0
@@ -237,7 +230,7 @@ Item {
 
             visible: {
                 return input.text === "" && 
-                       root.expandHeight > 0.9
+                       root.expansion > 0.9
             }
         }
     }
