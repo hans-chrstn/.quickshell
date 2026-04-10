@@ -5,20 +5,6 @@ import qs.core
 Item {
     id: root
 
-    width: {
-        if (parent) {
-            return parent.width
-        }
-        return 1920
-    }
-
-    height: {
-        if (parent) {
-            return parent.height
-        }
-        return 1080
-    }
-
     anchors.fill: parent
     
     signal finished()
@@ -27,16 +13,42 @@ Item {
 
     property bool isLocking: false
 
-    property real glitchOffset: 0
-
     property real outerOpacity: 1
 
     property real innerScale: 1.0
+
+    property real glitchX: 0
+
+    property real glitchOpacity: 0
 
     Rectangle {
         anchors.fill: parent
         color: "black"
         opacity: root.outerOpacity
+    }
+
+    Timer {
+        id: logoGlitchTimer
+
+        interval: 48
+
+        repeat: true
+
+        running: root.isLocking
+
+        onTriggered: {
+            let rand = Math.random()
+            if (rand > 0.8) {
+                root.glitchX = (Math.random() - 0.5) * 40
+                root.glitchOpacity = 0.3
+            } else if (rand > 0.4) {
+                root.glitchX = 0
+                root.glitchOpacity = 0.15
+            } else {
+                root.glitchX = 0
+                root.glitchOpacity = 0
+            }
+        }
     }
 
     Item {
@@ -150,46 +162,25 @@ Item {
                 }
             }
         }
+    }
 
-        Repeater {
-            model: 3
+    Repeater {
+        model: 8
+
+        Rectangle {
+            width: 40 + (Math.random() * 160)
+
+            height: 1
+
+            color: root.accent
+
+            opacity: root.glitchOpacity
+
+            x: (root.width / 2) + (Math.random() - 0.5) * 400 - (width / 2) + root.glitchX
+
+            y: (root.height / 2) + (Math.random() - 0.5) * 200
             
-            Rectangle {
-                width: 400
-                height: 2
-                color: root.accent
-                opacity: 0
-                x: -50 + root.glitchOffset
-                y: 50 + (index * 100)
-                
-                SequentialAnimation on opacity {
-                    running: root.isLocking
-
-                    NumberAnimation { 
-                        to: 0.6
-                        duration: 50 
-                    }
-
-                    NumberAnimation { 
-                        to: 0
-                        duration: 100 
-                    }
-
-                    PauseAnimation { 
-                        duration: 50 
-                    }
-
-                    NumberAnimation { 
-                        to: 0.3
-                        duration: 50 
-                    }
-
-                    NumberAnimation { 
-                        to: 0
-                        duration: 50 
-                    }
-                }
-            }
+            visible: root.isLocking && opacity > 0
         }
     }
 
@@ -248,28 +239,12 @@ Item {
                     easing.type: Easing.OutElastic 
                 }
             }
+        }
 
-            SequentialAnimation {
-                NumberAnimation { 
-                    target: root
-                    property: "glitchOffset"
-                    to: 20
-                    duration: 50 
-                }
-
-                NumberAnimation { 
-                    target: root
-                    property: "glitchOffset"
-                    to: -15
-                    duration: 50 
-                }
-
-                NumberAnimation { 
-                    target: root
-                    property: "glitchOffset"
-                    to: 0
-                    duration: 50 
-                }
+        ScriptAction {
+            script: {
+                logoGlitchTimer.stop()
+                root.glitchOpacity = 0
             }
         }
 

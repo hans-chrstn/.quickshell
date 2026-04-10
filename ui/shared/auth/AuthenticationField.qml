@@ -16,7 +16,26 @@ Item {
 
     property bool isInputFocused: input.activeFocus
 
+    property bool isActivelyTyping: false
+
     property real expansion: 0
+
+    onExpansionChanged: {
+        if (root.expansion === 0) {
+            input.text = ""
+            root.isActivelyTyping = false
+        }
+    }
+
+    Timer {
+        id: activeTypingTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            root.isActivelyTyping = false
+        }
+    }
+
 
     onVisibleChanged: {
         if (visible) {
@@ -153,6 +172,11 @@ Item {
                 fill: parent
                 leftMargin: 12
                 rightMargin: 12
+            }
+
+            onTextChanged: {
+                root.isActivelyTyping = true
+                activeTypingTimer.restart()
             }
 
             font {

@@ -15,28 +15,37 @@ Item {
 
     visible: AuthManager.currentUser !== ""
 
-    property real expansion: 0
+    property real expandWidth: 0
+
+    property real expandHeight: 0
+
+    property bool active: false
 
     onVisibleChanged: {
         if (visible) {
             introAnim.start()
         } else {
-            root.expansion = 0
+            root.expandWidth = 0
+            root.expandHeight = 0
         }
     }
 
     SequentialAnimation {
         id: introAnim
 
-        PauseAnimation { 
-            duration: 100 
+        NumberAnimation {
+            target: root
+            property: "expandWidth"
+            to: 1
+            duration: 400
+            easing.type: Easing.OutCubic
         }
 
         NumberAnimation {
             target: root
-            property: "expansion"
+            property: "expandHeight"
             to: 1
-            duration: 1000
+            duration: 500
             easing.type: Easing.OutQuart
         }
     }
@@ -46,9 +55,9 @@ Item {
 
         anchors.centerIn: parent
 
-        width: 440 * root.expansion
+        width: 440 * root.expandWidth
 
-        height: 160 * root.expansion
+        height: 160 * root.expandHeight
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -60,7 +69,7 @@ Item {
         clip: true
 
         opacity: {
-            if (root.expansion > 0.01) {
+            if (root.expandHeight > 0.1) {
                 return 1
             }
             return 0
@@ -79,7 +88,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expansion > 0.95
+                return root.expandWidth > 0.9
             }
 
             anchors {
@@ -95,7 +104,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expansion > 0.95
+                return root.expandHeight > 0.9
             }
 
             anchors {
@@ -111,7 +120,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expansion > 0.95
+                return root.expandWidth > 0.9
             }
 
             anchors {
@@ -127,7 +136,7 @@ Item {
             z: 20
 
             visible: {
-                return root.expansion > 0.95
+                return root.expandHeight > 0.9
             }
 
             anchors {
@@ -145,7 +154,7 @@ Item {
             spacing: 24
 
             opacity: {
-                if (root.expansion > 0.9) {
+                if (root.expandHeight > 0.8) {
                     return 1
                 }
                 return 0
@@ -269,9 +278,17 @@ Item {
                 
                 clip: true
 
+                HandshakeRing {
+                    anchors.centerIn: parent
+                    active: root.active
+                }
+
                 Fingerprint {
-                    anchors.fill: parent
+                    anchors.centerIn: parent
+                    width: 100
+                    height: 100
                     opacity: 0.8
+                    active: root.active
                 }
 
                 Rectangle {

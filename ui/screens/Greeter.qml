@@ -44,6 +44,53 @@ PanelWindow {
                 contentLoader.active = false
             }
         }
+
+        function onCurrentUserChanged() {
+            if (AuthManager.currentUser !== "" && root.bootDone) {
+                glitchTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: glitchTimer
+
+        interval: 16
+
+        repeat: true
+
+        property int ticks: 0
+
+        onTriggered: {
+            ticks++
+            
+            if (ticks < 30) {
+                let rand = Math.random()
+                
+                if (rand > 0.8) {
+                    contentLoader.x = (Math.random() - 0.5) * 100
+                    contentLoader.opacity = 0.2
+                    glitchTimer.interval = 16
+                } else if (rand > 0.6) {
+                    contentLoader.x = 0
+                    contentLoader.opacity = 0
+                    glitchTimer.interval = 32
+                } else if (rand > 0.3) {
+                    contentLoader.x = (Math.random() - 0.5) * 20
+                    contentLoader.opacity = 0.8
+                    glitchTimer.interval = 16
+                } else {
+                    contentLoader.x = 0
+                    contentLoader.opacity = 1
+                    glitchTimer.interval = 48
+                }
+            } else {
+                contentLoader.x = 0
+                contentLoader.opacity = 1
+                ticks = 0
+                stop()
+            }
+        }
     }
 
     Rectangle {
@@ -119,7 +166,7 @@ PanelWindow {
                             userField.forceActiveFocus()
                         }
                     } else {
-                        if (authField.visible && !authField.focus) {
+                        if (authField.visible && !authField.isInputFocused) {
                             authField.forceActiveFocus()
                         }
                     }
@@ -128,13 +175,6 @@ PanelWindow {
 
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: true
-
-                onPositionChanged: (mouse) => {
-                    root.mouseX = (mouse.x - width / 2) / (width / 2)
-                    root.mouseY = (mouse.y - height / 2) / (height / 2)
-                }
-
                 onClicked: {
                     picker.active = false
                 }
@@ -154,6 +194,7 @@ PanelWindow {
                     IdentityCard {
                         anchors.centerIn: parent
                         visible: AuthManager.currentUser !== ""
+                        active: authField.isActivelyTyping || AuthManager.state === AuthManager.State.Loading
                     }
 
                     UsernameField {
@@ -183,16 +224,31 @@ PanelWindow {
                 }
             }
 
+            LockScreenClock {
+                anchors {
+                    bottom: parent.bottom
+                    right: parent.right
+                    margins: 80
+                }
+                scale: 0.8
+                opacity: {
+                    if (AuthManager.currentUser !== "") {
+                        return 1
+                    }
+                    return userField.expansion
+                }
+            }
+
             BaseButton {
                 id: sessionTrigger
 
                 anchors {
-                    bottom: parent.bottom
-                    horizontalCenter: parent.horizontalCenter
-                    bottomMargin: 40
+                    top: parent.top
+                    right: parent.right
+                    margins: 80
                 }
 
-                width: 320
+                width: 280
                 height: 44
 
                 opacity: {
@@ -202,9 +258,7 @@ PanelWindow {
                     return userField.expansion
                 }
 
-                visible: {
-                    return root.bootDone
-                }
+                visible: root.bootDone
 
                 onClicked: {
                     picker.active = true
@@ -224,86 +278,19 @@ PanelWindow {
                         width: 1
                     }
                     
-                    Rectangle { 
-                        width: 10
-                        height: 1
-                        color: ThemeManager.accentColor
-                        visible: sessionTrigger.isHovered
-
-                        anchors {
-                            top: parent.top
-                            left: parent.left
-                        }
-                    }
-
-                    Rectangle { 
-                        width: 1
-                        height: 10
-                        color: ThemeManager.accentColor
-                        visible: sessionTrigger.isHovered
-
-                        anchors {
-                            top: parent.top
-                            left: parent.left
-                        }
-                    }
-
-                    Rectangle { 
-                        width: 10
-                        height: 1
-                        color: ThemeManager.accentColor
-                        visible: sessionTrigger.isHovered
-
-                        anchors {
-                            bottom: parent.bottom
-                            right: parent.right
-                        }
-                    }
-
-                    Rectangle { 
-                        width: 1
-                        height: 10
-                        color: ThemeManager.accentColor
-                        visible: sessionTrigger.isHovered
-
-                        anchors {
-                            bottom: parent.bottom
-                            right: parent.right
-                        }
-                    }
-
                     RowLayout {
                         anchors.centerIn: parent
                         spacing: 15
                         opacity: 0.8
 
                         StyledLabel {
-                            text: "ENVIRONMENT_NODE //"
-
-                            font {
-                                pixelSize: 10
-                                weight: Font.Black
-                            }
+                            text: "NODE //"
+                            font { pixelSize: 10; weight: Font.Black }
                         }
 
                         StyledLabel {
                             text: SessionManager.currentSessionName.toUpperCase()
-
-                            font {
-                                pixelSize: 12
-                                weight: Font.Bold
-                            }
-
-                            customColor: ThemeManager.accentColor
-                        }
-                        
-                        StyledLabel {
-                            text: "󱗘"
-
-                            font {
-                                pixelSize: 14
-                            }
-
+                            font { pixelSize: 12; weight: Font.Bold }
                             customColor: ThemeManager.accentColor
                         }
                     }
@@ -313,27 +300,6 @@ PanelWindow {
             SessionPicker {
                 id: picker
                 active: false
-            }
-
-            LockScreenClock {
-                anchors {
-                    top: parent.top
-                    horizontalCenter: parent.horizontalCenter
-                    topMargin: 60
-                }
-
-                scale: 0.6
-                
-                opacity: {
-                    if (AuthManager.currentUser !== "") {
-                        return 1
-                    }
-                    return userField.expansion
-                }
-
-                visible: {
-                    return root.bootDone
-                }
             }
             
             Component.onCompleted: {

@@ -198,7 +198,15 @@ Item {
 
                     anchors.fill: parent
 
-                    text: parent.fullText.substring(0, parent.charCount)
+                    text: {
+                        let base = parent.fullText.substring(0, parent.charCount)
+                        if (parent.charCount < parent.fullText.length) {
+                            let symbols = ["#", "&", "*", "?", "@", "%", "$", "!"]
+                            let randomSymbol = symbols[Math.floor(Math.random() * symbols.length)]
+                            return base + randomSymbol
+                        }
+                        return base
+                    }
 
                     font {
                         pixelSize: 10
