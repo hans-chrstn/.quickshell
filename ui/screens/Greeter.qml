@@ -11,21 +11,30 @@ import qs.ui.screens.lock
 
 PanelWindow {
     id: root
+
     anchors {
         left: true
         right: true
         top: true
         bottom: true
     }
-    color: "black"
+
+    color: "#000000"
+
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+
     focusable: true
+
     property real mouseX: 0
+
     property real mouseY: 0
+    
+    property bool bootDone: false
 
     Connections {
         target: AuthManager
+
         function onStateChanged() {
             if (AuthManager.state === AuthManager.State.Success) {
                 root.visible = false
@@ -37,17 +46,46 @@ PanelWindow {
         }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+        z: -1000
+    }
+
+    BootLogo {
+        id: bootLogo
+
+        anchors.fill: parent
+
+        visible: !root.bootDone || contentLoader.status !== Loader.Ready
+
+        onFinished: {
+            root.bootDone = true
+            contentLoader.active = true
+        }
+
+        z: 100
+    }
+
     Loader {
         id: contentLoader
+
         anchors.fill: parent
-        active: true
+
+        active: false
+
+        visible: status === Loader.Ready
+
         sourceComponent: Item {
+            id: mainContent
+
             anchors.fill: parent
             focus: true
 
             Shortcut {
                 sequence: "Escape"
                 enabled: root.visible
+
                 onActivated: {
                     if (AuthManager.currentUser !== "" && !picker.active) {
                         AuthManager.cancelIdentification()
@@ -58,14 +96,27 @@ PanelWindow {
 
             Timer {
                 id: focusGuard
-                interval: 50
-                running: root.visible && AuthManager.state !== AuthManager.State.Finish && !picker.active
+
+                interval: 100
+
+                running: {
+                    return root.visible && 
+                           root.bootDone &&
+                           AuthManager.state !== AuthManager.State.Finish && 
+                           !picker.active
+                }
+
                 repeat: true
+
                 onTriggered: {
                     if (userField.visible && userField.enabled) {
-                        if (!userField.activeFocus) userField.forceActiveFocus()
+                        if (!userField.activeFocus) {
+                            userField.forceActiveFocus()
+                        }
                     } else if (authField.visible && authField.enabled) {
-                        if (!authField.activeFocus) authField.forceActiveFocus()
+                        if (!authField.activeFocus) {
+                            authField.forceActiveFocus()
+                        }
                     }
                 }
             }
@@ -73,10 +124,12 @@ PanelWindow {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
+
                 onPositionChanged: (mouse) => {
                     root.mouseX = (mouse.x - width / 2) / (width / 2)
                     root.mouseY = (mouse.y - height / 2) / (height / 2)
                 }
+
                 onClicked: {
                     picker.active = false
                 }
@@ -84,16 +137,19 @@ PanelWindow {
 
             Image {
                 id: background
+
                 anchors.fill: parent
+
                 source: {
                     if (WallpaperManager.activeWallpaperPath) {
                         return "file://" + WallpaperManager.activeWallpaperPath
                     }
                     return ""
                 }
+
                 fillMode: Image.PreserveAspectCrop
                 opacity: 0.3
-                visible: contentLoader.active
+                visible: status === Image.Ready
             }
 
             MultiEffect {
@@ -109,31 +165,33 @@ PanelWindow {
             ColumnLayout {
                 anchors.centerIn: parent
                 spacing: 0
-                width: 400
+                width: 440
 
-                IdentityCard {
+                Item {
                     Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: 440
+                    Layout.preferredHeight: 160
                     Layout.bottomMargin: 20
-                    visible: {
-                        return AuthManager.currentUser !== ""
-                    }
-                }
 
-                UsernameField {
-                    id: userField
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
-                    Layout.bottomMargin: 30
-                    visible: {
-                        return AuthManager.currentUser === ""
+                    IdentityCard {
+                        anchors.centerIn: parent
+                        visible: AuthManager.currentUser !== ""
+                    }
+
+                    UsernameField {
+                        id: userField
+                        anchors.centerIn: parent
+                        visible: AuthManager.currentUser === ""
                     }
                 }
 
                 AuthenticationField {
                     id: authField
+
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
                     Layout.bottomMargin: 30
+
                     visible: {
                         return AuthManager.currentUser !== ""
                     }
@@ -144,18 +202,43 @@ PanelWindow {
                     Layout.preferredHeight: 120
                     Layout.fillWidth: true
                     opacity: 0.6
+                    
+                    expansion: {
+                        if (AuthManager.currentUser !== "") {
+                            return 1
+                        }
+                        return userField.expansion
+                    }
+
+                    visible: {
+                        return root.bootDone
+                    }
                 }
             }
 
             BaseButton {
                 id: sessionTrigger
+
                 anchors {
                     bottom: parent.bottom
                     horizontalCenter: parent.horizontalCenter
                     bottomMargin: 40
                 }
+
                 width: 320
                 height: 44
+
+                opacity: {
+                    if (AuthManager.currentUser !== "") {
+                        return 1
+                    }
+                    return userField.expansion
+                }
+
+                visible: {
+                    return root.bootDone
+                }
+
                 onClicked: {
                     picker.active = true
                 }
@@ -163,8 +246,14 @@ PanelWindow {
                 Rectangle {
                     anchors.fill: parent
                     color: Qt.rgba(0, 0, 0, 0.6)
+
                     border {
-                        color: sessionTrigger.isHovered ? ThemeManager.accentColor : ThemeManager.outlinePrimaryColor
+                        color: {
+                            if (sessionTrigger.isHovered) {
+                                return ThemeManager.accentColor
+                            }
+                            return ThemeManager.outlinePrimaryColor
+                        }
                         width: 1
                     }
                     
@@ -173,6 +262,7 @@ PanelWindow {
                         height: 1
                         color: ThemeManager.accentColor
                         visible: sessionTrigger.isHovered
+
                         anchors {
                             top: parent.top
                             left: parent.left
@@ -184,6 +274,7 @@ PanelWindow {
                         height: 10
                         color: ThemeManager.accentColor
                         visible: sessionTrigger.isHovered
+
                         anchors {
                             top: parent.top
                             left: parent.left
@@ -195,6 +286,7 @@ PanelWindow {
                         height: 1
                         color: ThemeManager.accentColor
                         visible: sessionTrigger.isHovered
+
                         anchors {
                             bottom: parent.bottom
                             right: parent.right
@@ -206,6 +298,7 @@ PanelWindow {
                         height: 10
                         color: ThemeManager.accentColor
                         visible: sessionTrigger.isHovered
+
                         anchors {
                             bottom: parent.bottom
                             right: parent.right
@@ -219,6 +312,7 @@ PanelWindow {
 
                         StyledLabel {
                             text: "ENVIRONMENT_NODE //"
+
                             font {
                                 pixelSize: 10
                                 weight: Font.Black
@@ -227,18 +321,22 @@ PanelWindow {
 
                         StyledLabel {
                             text: SessionManager.currentSessionName.toUpperCase()
+
                             font {
                                 pixelSize: 12
                                 weight: Font.Bold
                             }
+
                             customColor: ThemeManager.accentColor
                         }
                         
                         StyledLabel {
                             text: "󱗘"
+
                             font {
                                 pixelSize: 14
                             }
+
                             customColor: ThemeManager.accentColor
                         }
                     }
@@ -256,7 +354,23 @@ PanelWindow {
                     horizontalCenter: parent.horizontalCenter
                     topMargin: 60
                 }
+
                 scale: 0.6
+                
+                opacity: {
+                    if (AuthManager.currentUser !== "") {
+                        return 1
+                    }
+                    return userField.expansion
+                }
+
+                visible: {
+                    return root.bootDone
+                }
+            }
+            
+            Component.onCompleted: {
+                userField.forceActiveFocus()
             }
         }
     }
