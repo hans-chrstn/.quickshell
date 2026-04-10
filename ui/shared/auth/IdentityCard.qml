@@ -15,16 +15,47 @@ Item {
 
     visible: AuthManager.currentUser !== ""
 
-    property real expansion: visible ? 1 : 0
+    property real expandWidth: 0
+
+    property real expandHeight: 0
+
+    onVisibleChanged: {
+        if (visible) {
+            introAnim.start()
+        } else {
+            root.expandWidth = 0
+            root.expandHeight = 0
+        }
+    }
+
+    SequentialAnimation {
+        id: introAnim
+
+        NumberAnimation {
+            target: root
+            property: "expandWidth"
+            to: 1
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+
+        NumberAnimation {
+            target: root
+            property: "expandHeight"
+            to: 1
+            duration: 500
+            easing.type: Easing.OutQuart
+        }
+    }
 
     Rectangle {
         id: container
 
         anchors.centerIn: parent
 
-        width: 440 * root.expansion
+        width: 440 * root.expandWidth
 
-        height: 160 * root.expansion
+        height: 160 * root.expandHeight
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -35,25 +66,16 @@ Item {
 
         clip: true
 
-        opacity: root.expansion
-
-        Behavior on width {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
+        opacity: {
+            if (root.expandHeight > 0.1) {
+                return 1
             }
-        }
-
-        Behavior on height {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
-            }
+            return 0
         }
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: 300
+            NumberAnimation { 
+                duration: 200 
             }
         }
 
@@ -62,6 +84,10 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
+
+            visible: {
+                return root.expandWidth > 0.9
+            }
 
             anchors {
                 top: parent.top
@@ -75,6 +101,10 @@ Item {
             color: ThemeManager.accentColor
             z: 20
 
+            visible: {
+                return root.expandHeight > 0.9
+            }
+
             anchors {
                 top: parent.top
                 left: parent.left
@@ -86,6 +116,10 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
+
+            visible: {
+                return root.expandWidth > 0.9
+            }
 
             anchors {
                 bottom: parent.bottom
@@ -98,6 +132,10 @@ Item {
             height: 10
             color: ThemeManager.accentColor
             z: 20
+
+            visible: {
+                return root.expandHeight > 0.9
+            }
 
             anchors {
                 bottom: parent.bottom
@@ -113,6 +151,19 @@ Item {
 
             spacing: 24
 
+            opacity: {
+                if (root.expandHeight > 0.8) {
+                    return 1
+                }
+                return 0
+            }
+
+            Behavior on opacity {
+                NumberAnimation { 
+                    duration: 300 
+                }
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 8
@@ -123,17 +174,17 @@ Item {
                     Column {
                         StyledLabel {
                             text: "EMPID //"
-                            font {
+                            font { 
                                 pixelSize: 10
-                                weight: Font.Black
+                                weight: Font.Black 
                             }
                             opacity: 0.5
                         }
                         StyledLabel {
                             text: AuthManager.userUuid
-                            font {
+                            font { 
                                 pixelSize: 16
-                                family: "monospace"
+                                family: "monospace" 
                             }
                             customColor: ThemeManager.accentColor
                         }
@@ -142,17 +193,17 @@ Item {
                     Column {
                         StyledLabel {
                             text: "CLASS //"
-                            font {
+                            font { 
                                 pixelSize: 10
-                                weight: Font.Black
+                                weight: Font.Black 
                             }
                             opacity: 0.5
                         }
                         StyledLabel {
                             text: "OPERATOR"
-                            font {
+                            font { 
                                 pixelSize: 16
-                                family: "monospace"
+                                family: "monospace" 
                             }
                         }
                     }
@@ -164,9 +215,9 @@ Item {
 
                     StyledLabel {
                         text: "NAME //"
-                        font {
+                        font { 
                             pixelSize: 10
-                            weight: Font.Black
+                            weight: Font.Black 
                         }
                         opacity: 0.5
                     }
@@ -179,9 +230,9 @@ Item {
                             }
                             return "AWAITING_IDENT..."
                         }
-                        font {
+                        font { 
                             pixelSize: 22
-                            weight: Font.Black
+                            weight: Font.Black 
                         }
                         elideMode: Text.ElideRight
                     }
@@ -202,7 +253,6 @@ Item {
 
                         Repeater {
                             model: 30
-
                             Rectangle {
                                 width: (index % 4 == 0) ? 3 : 1
                                 height: parent.height
@@ -218,38 +268,17 @@ Item {
                 Layout.preferredWidth: 120
                 Layout.fillHeight: true
                 color: Qt.rgba(0, 0, 0, 0.5)
-
-                border {
+                
+                border { 
                     color: ThemeManager.outlinePrimaryColor
-                    width: 1
+                    width: 1 
                 }
-
+                
                 clip: true
 
-                Image {
-                    id: avatarImg
-
-                    anchors {
-                        fill: parent
-                        margins: 1
-                    }
-
-                    source: {
-                        if (AuthManager.currentUser !== "") {
-                            return "file:///var/lib/AccountsService/icons/" + AuthManager.currentUser
-                        }
-                        return ""
-                    }
-
-                    fillMode: Image.PreserveAspectCrop
+                Fingerprint {
+                    anchors.fill: parent
                     opacity: 0.8
-                    visible: status === Image.Ready
-
-                    onStatusChanged: {
-                        if (status === Image.Error && AuthManager.currentUser !== "") {
-                            source = "file:///usr/share/icons/hicolor/scalable/apps/user-available.svg"
-                        }
-                    }
                 }
 
                 Rectangle {
@@ -257,7 +286,7 @@ Item {
                     width: parent.width
                     height: 2
                     color: ThemeManager.accentColor
-
+                    
                     opacity: {
                         if (AuthManager.state === AuthManager.State.Loading) {
                             return 0.8

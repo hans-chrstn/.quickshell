@@ -32,11 +32,13 @@ Item {
             name: "Collapsed"
             PropertyChanges { target: root; expansion: 0 }
             PropertyChanges { target: root; diamondOffset: 0 }
+            PropertyChanges { target: diamond; opacity: 0 }
         },
         State {
             name: "Expanded"
             PropertyChanges { target: root; expansion: 1 }
             PropertyChanges { target: root; diamondOffset: -200 }
+            PropertyChanges { target: diamond; opacity: 1 }
         }
     ]
 
@@ -45,6 +47,12 @@ Item {
             from: "Collapsed"
             to: "Expanded"
             SequentialAnimation {
+                NumberAnimation { 
+                    target: diamond
+                    property: "opacity"
+                    to: 1
+                    duration: 200
+                }
                 NumberAnimation { 
                     target: root
                     property: "diamondOffset"
@@ -78,6 +86,12 @@ Item {
                     to: 0
                     duration: 500
                     easing.type: Easing.InOutBack
+                }
+                NumberAnimation { 
+                    target: diamond
+                    property: "opacity"
+                    to: 0
+                    duration: 200
                 }
             }
         }

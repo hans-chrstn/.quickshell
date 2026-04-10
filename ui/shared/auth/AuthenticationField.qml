@@ -14,16 +14,49 @@ Item {
 
     visible: AuthManager.currentUser !== ""
 
-    property real expansion: visible ? 1 : 0
+    property bool isInputFocused: input.activeFocus
+
+    property real expandWidth: 0
+
+    property real expandHeight: 0
+
+    onVisibleChanged: {
+        if (visible) {
+            introAnim.start()
+        } else {
+            root.expandWidth = 0
+            root.expandHeight = 0
+        }
+    }
+
+    SequentialAnimation {
+        id: introAnim
+
+        NumberAnimation {
+            target: root
+            property: "expandWidth"
+            to: 1
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+
+        NumberAnimation {
+            target: root
+            property: "expandHeight"
+            to: 1
+            duration: 400
+            easing.type: Easing.OutQuart
+        }
+    }
 
     Rectangle {
         id: container
 
         anchors.centerIn: parent
 
-        width: 400 * root.expansion
+        width: 400 * root.expandWidth
 
-        height: 44 * root.expansion
+        height: 44 * root.expandHeight
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -39,25 +72,16 @@ Item {
 
         clip: true
 
-        opacity: root.expansion
-
-        Behavior on width {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
+        opacity: {
+            if (root.expandHeight > 0.1) {
+                return 1
             }
-        }
-
-        Behavior on height {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
-            }
+            return 0
         }
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: 300
+            NumberAnimation { 
+                duration: 200 
             }
         }
 
@@ -66,7 +90,11 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
-            visible: input.activeFocus
+
+            visible: {
+                return input.activeFocus && 
+                       root.expandWidth > 0.9
+            }
 
             anchors {
                 top: parent.top
@@ -79,7 +107,11 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
-            visible: input.activeFocus
+
+            visible: {
+                return input.activeFocus && 
+                       root.expandHeight > 0.9
+            }
 
             anchors {
                 top: parent.top
@@ -92,7 +124,11 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
-            visible: input.activeFocus
+
+            visible: {
+                return input.activeFocus && 
+                       root.expandWidth > 0.9
+            }
 
             anchors {
                 bottom: parent.bottom
@@ -105,7 +141,11 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
-            visible: input.activeFocus
+
+            visible: {
+                return input.activeFocus && 
+                       root.expandHeight > 0.9
+            }
 
             anchors {
                 bottom: parent.bottom
@@ -143,7 +183,12 @@ Item {
 
             background: null
 
-            opacity: root.expansion > 0.8 ? 1 : 0
+            opacity: {
+                if (root.expandHeight > 0.8) {
+                    return 1
+                }
+                return 0
+            }
 
             Behavior on opacity {
                 NumberAnimation {
@@ -160,6 +205,7 @@ Item {
                 width: 10
                 height: 20
                 color: ThemeManager.accentColor
+
                 visible: input.activeFocus
 
                 SequentialAnimation on opacity {
@@ -191,7 +237,7 @@ Item {
 
             visible: {
                 return input.text === "" && 
-                       root.expansion > 0.9
+                       root.expandHeight > 0.9
             }
         }
     }

@@ -52,6 +52,11 @@ PanelWindow {
         z: -1000
     }
 
+    TechnicalGrid {
+        anchors.fill: parent
+        z: -500
+    }
+
     BootLogo {
         id: bootLogo
 
@@ -109,12 +114,12 @@ PanelWindow {
                 repeat: true
 
                 onTriggered: {
-                    if (userField.visible && userField.enabled) {
-                        if (!userField.activeFocus) {
+                    if (AuthManager.currentUser === "") {
+                        if (userField.visible && !userField.isInputFocused) {
                             userField.forceActiveFocus()
                         }
-                    } else if (authField.visible && authField.enabled) {
-                        if (!authField.activeFocus) {
+                    } else {
+                        if (authField.visible && !authField.focus) {
                             authField.forceActiveFocus()
                         }
                     }
@@ -133,33 +138,6 @@ PanelWindow {
                 onClicked: {
                     picker.active = false
                 }
-            }
-
-            Image {
-                id: background
-
-                anchors.fill: parent
-
-                source: {
-                    if (WallpaperManager.activeWallpaperPath) {
-                        return "file://" + WallpaperManager.activeWallpaperPath
-                    }
-                    return ""
-                }
-
-                fillMode: Image.PreserveAspectCrop
-                opacity: 0.3
-                visible: status === Image.Ready
-            }
-
-            MultiEffect {
-                anchors.fill: parent
-                source: background
-                blurEnabled: true
-                blur: 0.8
-                brightness: -0.25
-                autoPaddingEnabled: false
-                visible: background.visible
             }
 
             ColumnLayout {
@@ -181,7 +159,7 @@ PanelWindow {
                     UsernameField {
                         id: userField
                         anchors.centerIn: parent
-                        visible: AuthManager.currentUser === ""
+                        visible: AuthManager.currentUser === "" || expansion > 0.01
                     }
                 }
 
@@ -192,9 +170,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.bottomMargin: 30
 
-                    visible: {
-                        return AuthManager.currentUser !== ""
-                    }
+                    visible: AuthManager.currentUser !== ""
                 }
 
                 TerminalLog {
@@ -203,16 +179,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     opacity: 0.6
                     
-                    expansion: {
-                        if (AuthManager.currentUser !== "") {
-                            return 1
-                        }
-                        return userField.expansion
-                    }
-
-                    visible: {
-                        return root.bootDone
-                    }
+                    active: root.bootDone
                 }
             }
 

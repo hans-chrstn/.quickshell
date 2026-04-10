@@ -12,16 +12,74 @@ Item {
 
     implicitHeight: 120
 
-    property real expansion: 0
+    property bool active: false
+
+    property real expandWidth: 0
+
+    property real expandHeight: 0
+
+    onActiveChanged: {
+        if (active) {
+            introAnim.start()
+        } else {
+            outroAnim.start()
+        }
+    }
+
+    SequentialAnimation {
+        id: introAnim
+
+        NumberAnimation {
+            target: root
+            property: "expandWidth"
+            to: 1
+            duration: 400
+            easing.type: Easing.OutCubic
+        }
+
+        NumberAnimation {
+            target: root
+            property: "expandHeight"
+            to: 1
+            duration: 500
+            easing.type: Easing.OutQuart
+        }
+
+        ScriptAction {
+            script: {
+                TerminalManager.unpause()
+            }
+        }
+    }
+
+    SequentialAnimation {
+        id: outroAnim
+
+        NumberAnimation {
+            target: root
+            property: "expandHeight"
+            to: 0
+            duration: 300
+            easing.type: Easing.InCubic
+        }
+
+        NumberAnimation {
+            target: root
+            property: "expandWidth"
+            to: 0
+            duration: 300
+            easing.type: Easing.InCubic
+        }
+    }
 
     Rectangle {
         id: container
 
         anchors.centerIn: parent
 
-        width: 400 * root.expansion
+        width: 400 * root.expandWidth
 
-        height: 120 * root.expansion
+        height: 120 * root.expandHeight
 
         color: Qt.rgba(0, 0, 0, 0.4)
 
@@ -32,26 +90,10 @@ Item {
 
         clip: true
 
-        opacity: root.expansion
-
-        Behavior on width {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
-            }
-        }
-
-        Behavior on height {
-            NumberAnimation {
-                duration: 500
-                easing.type: Easing.OutCubic
-            }
-        }
+        opacity: root.expandHeight > 0.1 ? 1 : 0
 
         Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-            }
+            NumberAnimation { duration: 200 }
         }
 
         Rectangle { 
@@ -59,6 +101,7 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
+            visible: root.expandWidth > 0.9
 
             anchors {
                 top: parent.top
@@ -71,6 +114,7 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
+            visible: root.expandHeight > 0.9
 
             anchors {
                 top: parent.top
@@ -83,6 +127,7 @@ Item {
             height: 1
             color: ThemeManager.accentColor
             z: 20
+            visible: root.expandWidth > 0.9
 
             anchors {
                 bottom: parent.bottom
@@ -95,6 +140,7 @@ Item {
             height: 8
             color: ThemeManager.accentColor
             z: 20
+            visible: root.expandHeight > 0.9
 
             anchors {
                 bottom: parent.bottom
@@ -117,6 +163,12 @@ Item {
             interactive: false
 
             z: 10
+
+            opacity: root.expandHeight > 0.8 ? 1 : 0
+
+            Behavior on opacity {
+                NumberAnimation { duration: 300 }
+            }
             
             layer {
                 enabled: true

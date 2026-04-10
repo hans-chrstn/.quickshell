@@ -8,7 +8,7 @@ Singleton {
     id: root
     property var _queue: []
     property var logModel: ListModel { }
-    property bool isPaused: false
+    property bool isPaused: true
     signal paused(string pauseMarker)
 
     Timer {
