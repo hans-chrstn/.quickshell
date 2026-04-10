@@ -25,7 +25,9 @@ TextField {
     activeFocusOnTab: true
 
     onVisibleChanged: {
-        if (!visible) {
+        if (
+            !visible
+        ) {
             root.focus = false
         }
     }

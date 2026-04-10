@@ -79,6 +79,11 @@ Singleton {
         _queue = []
     }
 
+    function stopWorker() {
+        worker.stop()
+        root.isPaused = true
+    }
+
     Component.onCompleted: {
         root.displayMessage("SENTINEL_IDP_LINK_ESTABLISHED")
         root.displayMessage("SPOOFING_SSL_CHANNEL... [OK]")

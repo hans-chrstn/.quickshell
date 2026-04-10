@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Services.Greetd
 import qs.core
 import qs.core.auth.handlers
 
@@ -30,7 +31,7 @@ Singleton {
     }
 
     readonly property string blumePrefix: "[BLUME_IDP]"
-    readonly property string sentinelPrefix: "[SENTINEL ]"
+    readonly property string sentinelPrefix: "[SENTINEL]"
 
     onCurrentUserChanged: {
         if (root.currentUser === "") {
@@ -76,6 +77,24 @@ Singleton {
         }
     }
 
+    Connections {
+        target: Greetd
+        function onLaunched() {
+            if (root.authMode === "greet") {
+                exitTimer.start()
+            }
+        }
+    }
+
+    Timer {
+        id: exitTimer
+        interval: 300
+        repeat: false
+        onTriggered: {
+            Qt.quit()
+        }
+    }
+
     onAuthModeChanged: {
         root.updateHandler()
     }
@@ -98,13 +117,14 @@ Singleton {
             root._handler.user = root.currentUser
             root.state = AuthManager.State.Ready
         } else if (root.authMode === "greet") {
-            root._handler = GreetdHandler
             root.currentUser = ""
+            root._handler.user = ""
             root.state = AuthManager.State.Identify
         } else {
-            root._handler = FakeHandler
             root.currentUser = ""
+            root._handler.user = ""
             root.state = AuthManager.State.Identify
+            root._handler.start()
         }
 
         if (root._handler) {
@@ -119,9 +139,6 @@ Singleton {
         root.currentUser = username
         if (root._handler) {
             root._handler.user = username
-        }
-        root.state = AuthManager.State.Ready
-        if (root.authMode === "greet") {
             root._handler.start()
         }
         TerminalManager.displayMessage(root.blumePrefix + " Handshake initiated for " + username)
@@ -150,6 +167,8 @@ Singleton {
         repeat: false
         onTriggered: {
             root.state = AuthManager.State.Finish
+            TerminalManager.stopWorker()
+            
             if (root.isGreeter && root.authMode === "greet") {
                 let cmdString = SessionManager.currentSessionExec
                 let cmd = []
@@ -161,7 +180,14 @@ Singleton {
                         return arg
                     })
                 }
-                Greetd.launch(cmd, ["XDG_SESSION_TYPE=wayland"])
+                
+                if (cmd.length === 0) {
+                    cmd = ["niri-session"]
+                }
+                
+                Greetd.launch(cmd, ["XDG_SESSION_TYPE=wayland"], false)
+            } else if (root.authMode === "fake") {
+                exitTimer.start()
             }
         }
     }

@@ -21,11 +21,12 @@ TextField {
     rightPadding: 12
     verticalAlignment: TextInput.AlignVCenter
     horizontalAlignment: TextInput.AlignLeft
-    focus: true
     activeFocusOnTab: true
 
     onVisibleChanged: {
-        if (!visible) {
+        if (
+            !visible
+        ) {
             root.focus = false
         }
     }
