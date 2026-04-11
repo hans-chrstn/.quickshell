@@ -5,6 +5,9 @@ import Quickshell
 
 Singleton {
     id: root
+
+    property string user: ""
+
     signal ready()
     signal success()
     signal failed()

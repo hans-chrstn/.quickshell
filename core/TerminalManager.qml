@@ -13,7 +13,24 @@ Singleton {
 
     property bool isPaused: true
 
+    readonly property bool isProcessing: worker.running || _queue.length > 0
+
+    signal finished()
+
     signal paused(string pauseMarker)
+
+    function _generateHex(message) {
+        let seed = AuthManager.currentUser || "SYSTEM"
+        let combined = seed + message
+        let hash = 0
+        
+        for (let i = 0; i < combined.length; i++) {
+            hash = ((hash << 5) - hash) + combined.charCodeAt(i)
+            hash |= 0
+        }
+        
+        return Math.abs(hash % 0xFFFF).toString(16).toUpperCase().padStart(4, "0")
+    }
 
     Timer {
         id: worker
@@ -30,6 +47,7 @@ Singleton {
 
             if (root._queue.length === 0) {
                 worker.stop()
+                root.finished()
                 return
             }
 

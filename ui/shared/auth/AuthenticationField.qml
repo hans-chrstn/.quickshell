@@ -20,13 +20,6 @@ Item {
 
     property real expansion: 0
 
-    onExpansionChanged: {
-        if (root.expansion === 0) {
-            input.text = ""
-            root.isActivelyTyping = false
-        }
-    }
-
     Timer {
         id: activeTypingTimer
         interval: 500
@@ -36,6 +29,12 @@ Item {
         }
     }
 
+    onExpansionChanged: {
+        if (root.expansion === 0) {
+            input.text = ""
+            root.isActivelyTyping = false
+        }
+    }
 
     onVisibleChanged: {
         if (visible) {

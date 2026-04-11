@@ -68,24 +68,24 @@ PanelWindow {
                 let rand = Math.random()
                 
                 if (rand > 0.8) {
-                    contentLoader.x = (Math.random() - 0.5) * 100
+                    exitTranslate.x = (Math.random() - 0.5) * 100
                     contentLoader.opacity = 0.2
                     glitchTimer.interval = 16
                 } else if (rand > 0.6) {
-                    contentLoader.x = 0
+                    exitTranslate.x = 0
                     contentLoader.opacity = 0
                     glitchTimer.interval = 32
                 } else if (rand > 0.3) {
-                    contentLoader.x = (Math.random() - 0.5) * 20
+                    exitTranslate.x = (Math.random() - 0.5) * 20
                     contentLoader.opacity = 0.8
                     glitchTimer.interval = 16
                 } else {
-                    contentLoader.x = 0
+                    exitTranslate.x = 0
                     contentLoader.opacity = 1
                     glitchTimer.interval = 48
                 }
             } else {
-                contentLoader.x = 0
+                exitTranslate.x = 0
                 contentLoader.opacity = 1
                 ticks = 0
                 stop()
@@ -102,6 +102,12 @@ PanelWindow {
     TechnicalGrid {
         anchors.fill: parent
         z: -500
+    }
+
+    TechnicalTopology {
+        anchors.fill: parent
+        z: -450
+        visible: root.bootDone
     }
 
     BootLogo {
@@ -127,6 +133,10 @@ PanelWindow {
         active: false
 
         visible: status === Loader.Ready
+
+        transform: Translate {
+            id: exitTranslate
+        }
 
         sourceComponent: Item {
             id: mainContent

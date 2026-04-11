@@ -164,26 +164,6 @@ Item {
         }
     }
 
-    Repeater {
-        model: 8
-
-        Rectangle {
-            width: 40 + (Math.random() * 160)
-
-            height: 1
-
-            color: root.accent
-
-            opacity: root.glitchOpacity
-
-            x: (root.width / 2) + (Math.random() - 0.5) * 400 - (width / 2) + root.glitchX
-
-            y: (root.height / 2) + (Math.random() - 0.5) * 200
-            
-            visible: root.isLocking && opacity > 0
-        }
-    }
-
     QtObject {
         id: rotationAnim
 
@@ -258,7 +238,7 @@ Item {
                 property: "outerOpacity"
                 to: 0
                 duration: 800
-                easing.type: Easing.OutQuart
+                easing.type: Easing.OutQuart 
             }
 
             NumberAnimation {
