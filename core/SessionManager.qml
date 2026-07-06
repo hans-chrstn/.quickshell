@@ -14,7 +14,8 @@ Singleton {
     
     readonly property var defaultSessions: [
         { name: "Niri", exec: "niri-session" },
-        { name: "Steam", exec: "steam-gamescope" }
+        { name: "Steam", exec: "steam-gamescope" },
+        { name: "Hyprland", exec: "start-hyprland" }
     ]
 
     ListModel { id: sessionModel }
