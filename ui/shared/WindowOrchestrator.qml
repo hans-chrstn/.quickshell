@@ -8,6 +8,7 @@ import qs.ui.features.island
 import qs.ui.features.island.corners
 import qs.ui.screens
 import qs.ui.features.notifications
+import qs.ui.features.gestures
 
 Item {
     id: root
@@ -318,4 +319,8 @@ Item {
     }
 
     Tooltip { }
+
+    GestureHUD {
+      id: gestureHUD
+    }
 }

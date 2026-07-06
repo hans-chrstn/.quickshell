@@ -211,6 +211,7 @@ PanelWindow {
                         id: userField
                         anchors.centerIn: parent
                         visible: AuthManager.currentUser === "" || expansion > 0.01
+                        enabled: !picker.active
                     }
                 }
 
@@ -222,6 +223,7 @@ PanelWindow {
                     Layout.bottomMargin: 30
 
                     visible: AuthManager.currentUser !== ""
+                    enabled: !picker.active
                 }
 
                 TerminalLog {

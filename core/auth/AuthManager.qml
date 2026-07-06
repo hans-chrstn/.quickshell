@@ -114,15 +114,18 @@ Singleton {
             successTimer.stop()
             
             if (root.isGreeter && root.authMode === "greet") {
-                let cmdString = SessionManager.currentSessionExec
+                let cmdString = SessionManager.currentSessionExec.trim()
                 let cmd = []
                 if (cmdString !== "") {
-                    cmd = cmdString.match(/[^\s"']+|"([^"]*)"|'([^']*)'/g).map(arg => {
-                        if (arg.startsWith('"') || arg.startsWith("'")) {
-                            return arg.slice(1, -1)
-                        }
-                        return arg
-                    })
+                    let matches = cmdString.match(/[^\s"']+|"([^"]*)"|'([^']*)'/g)
+                    if (matches) {
+                        cmd = matches.map(arg => {
+                            if (arg.startsWith('"') || arg.startsWith("'")) {
+                                return arg.slice(1, -1)
+                            }
+                            return arg
+                        })
+                    }
                 }
                 
                 if (cmd.length === 0) {
@@ -141,7 +144,8 @@ Singleton {
         interval: 2000
         repeat: false
         onTriggered: {
-            root.state = AuthManager.State.Ready
+            root.state = AuthManager.State.Identification
+            root.currentHandler.start()
         }
     }
 
