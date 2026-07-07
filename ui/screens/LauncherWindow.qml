@@ -132,7 +132,7 @@ PanelWindow {
                             onAccepted: {
                                 if (LauncherManager.model.count > 0) {
                                     let app = LauncherManager.model.get(0).app
-                                    if (!NiriManager.focusApplication(app.id)) {
+                                    if (!WindowManager.focusApplication(app.id)) {
                                         app.execute()
                                     }
                                     LauncherManager.close()
@@ -222,7 +222,7 @@ PanelWindow {
                         highlightTarget: launcherIconComp
                         
                         onClicked: {
-                            if (!NiriManager.focusApplication(model.app.id)) {
+                            if (!WindowManager.focusApplication(model.app.id)) {
                                 model.app.execute()
                             }
                             LauncherManager.close()
@@ -264,7 +264,7 @@ PanelWindow {
                                 iconSize: 84
                                 cornerRadius: 18
                                 isHovered: launcherBtn.isHovered
-                                isRunning: typeof NiriManager !== "undefined" ? NiriManager.isApplicationRunning(model.app.id) : false
+                                isRunning: typeof WindowManager !== "undefined" ? WindowManager.isApplicationRunning(model.app.id) : false
                             }
 
                             StyledLabel {

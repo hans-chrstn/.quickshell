@@ -61,6 +61,9 @@ Loader {
             case "action": {
                 return actionComp
             }
+            case "gesture_editor": {
+                return gestureEditorComp
+            }
             default: {
                 return null
             }
@@ -105,6 +108,13 @@ Loader {
     Component {
         id: colorComp
         ConfigColorItem {
+            configurationItemData: root.configurationItemData
+        }
+    }
+
+    Component {
+        id: gestureEditorComp
+        ConfigGestureEditorItem {
             configurationItemData: root.configurationItemData
         }
     }

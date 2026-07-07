@@ -8,7 +8,7 @@ import qs.ui.features.island
 import qs.ui.features.island.corners
 import qs.ui.screens
 import qs.ui.features.notifications
-import qs.ui.features.gestures
+    import qs.ui.features.gestures
 
 Item {
     id: root
@@ -274,7 +274,7 @@ Item {
                 
                 onReleased: {
                     if (ViewManager.hoveredTargetWorkspaceRef !== null) {
-                        NiriManager.moveWindowToWorkspace(
+                        WindowManager.moveWindowToWorkspace(
                             ViewManager.activeDragWindowId, 
                             ViewManager.hoveredTargetWorkspaceRef
                         )

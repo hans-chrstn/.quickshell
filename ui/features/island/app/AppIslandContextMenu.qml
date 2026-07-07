@@ -21,7 +21,7 @@ Menu {
             appIslandRoot.activeMenus++
         }
         if (root.app) {
-            root.windowsList = NiriManager.getApplicationWindows(root.app.id)
+            root.windowsList = WindowManager.getApplicationWindows(root.app.id)
         }
     }
     
@@ -157,7 +157,7 @@ Menu {
                     cornerRadius: 14
                     Layout.rightMargin: 6
                     onClicked: {
-                        NiriManager.closeWindowById(modelData.id)
+                        WindowManager.closeWindowById(modelData.id)
                         root.close()
                     }
                     
@@ -183,7 +183,7 @@ Menu {
             }
             
             onTriggered: {
-                NiriManager.focusWindowById(modelData.id)
+                WindowManager.focusWindowById(modelData.id)
             }
         }
     }

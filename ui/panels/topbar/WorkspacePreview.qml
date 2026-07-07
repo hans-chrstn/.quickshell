@@ -72,53 +72,38 @@ ClippingRectangle {
         if (!active || workspaceId === -1) return []
         
         let list = []
-        let windows = NiriManager.windows
-        let layouts = NiriManager.windowLayouts
+        let windows = WindowManager.getWorkspaceWindows(workspaceId)
         let audioPids = AudioManager.pidsPlayingAudio
         let audioApps = AudioManager.appNamesPlayingAudio
         
-        for (let i = 0; i < windows.count; i++) {
-            let idx = windows.index(i, 0)
-            let wsId = windows.data(idx, 261)
+        for (let i = 0; i < windows.length; i++) {
+            let win = windows[i]
             
-            if (wsId === root.workspaceId) {
-                let id = windows.data(idx, 257)
-                let pid = windows.data(idx, 260)
-                let appId = windows.data(idx, 259) || ""
-                let title = windows.data(idx, 258) || ""
-                
-                let layout = layouts[id]
-                if (layout) {
-                    let w = layout.window_size ? layout.window_size[0] : (layout.tile_size ? layout.tile_size[0] : 100)
-                    let h = layout.window_size ? layout.window_size[1] : (layout.tile_size ? layout.tile_size[1] : 100)
-                    
-                    let isPlaying = audioPids.includes(pid)
-                    if (!isPlaying && audioApps.length > 0) {
-                        let cleanAppId = appId.toLowerCase()
-                        let cleanTitle = title.toLowerCase()
-                        isPlaying = audioApps.some(name => {
-                            let cleanName = name.toLowerCase()
-                            return cleanAppId.includes(cleanName) || 
-                                   cleanName.includes(cleanAppId) ||
-                                   cleanTitle.includes(cleanName)
-                        })
-                        if (!isPlaying && cleanAppId === "feishin" && audioApps.includes("chromium")) isPlaying = true
-                    }
-
-                    list.push({
-                        id: id,
-                        appId: appId,
-                        title: title,
-                        iconPath: windows.data(idx, 265),
-                        isFocused: windows.data(idx, 262),
-                        isUrgent: windows.data(idx, 264),
-                        isPlayingAudio: isPlaying,
-                        width: w * root.previewScale * 0.8,
-                        height: h * root.previewScale * 0.8,
-                        posX: layout.pos_in_scrolling_layout ? layout.pos_in_scrolling_layout[0] : 0
-                    })
-                }
+            let isPlaying = audioPids.includes(win.pid)
+            if (!isPlaying && audioApps.length > 0) {
+                let cleanAppId = win.appId.toLowerCase()
+                let cleanTitle = win.title.toLowerCase()
+                isPlaying = audioApps.some(name => {
+                    let cleanName = name.toLowerCase()
+                    return cleanAppId.includes(cleanName) || 
+                           cleanName.includes(cleanAppId) ||
+                           cleanTitle.includes(cleanName)
+                })
+                if (!isPlaying && cleanAppId === "feishin" && audioApps.includes("chromium")) isPlaying = true
             }
+
+            list.push({
+                id: win.id,
+                appId: win.appId,
+                title: win.title,
+                iconPath: win.iconPath,
+                isFocused: win.isFocused,
+                isUrgent: win.isUrgent,
+                isPlayingAudio: isPlaying,
+                width: win.width * root.previewScale * 0.8,
+                height: win.height * root.previewScale * 0.8,
+                posX: win.posX
+            })
         }
         
         list.sort((a, b) => a.posX - b.posX)
@@ -233,7 +218,7 @@ ClippingRectangle {
                             onReleased: {
                                 if (ViewManager.activeDragWindowId !== -1) {
                                     if (ViewManager.hoveredTargetWorkspaceRef !== null) {
-                                        NiriManager.moveWindowToWorkspace(
+                                        WindowManager.moveWindowToWorkspace(
                                             ViewManager.activeDragWindowId, 
                                             ViewManager.hoveredTargetWorkspaceRef
                                         )
@@ -245,7 +230,7 @@ ClippingRectangle {
                                     ViewManager.hoveredTargetWorkspaceRef = null
                                     ViewManager.setHoveredWorkspace(-1)
                                 } else if (potentialDrag) {
-                                    NiriManager.focusWindowById(modelData.id)
+                                    WindowManager.focusWindowById(modelData.id)
                                     Quickshell.execDetached(["niri", "msg", "action", "focus-window", "--id", modelData.id.toString()])
                                     ViewManager.setHoveredWorkspace(-1)
                                 }

@@ -17,7 +17,7 @@ Item {
     property var app: model ? model.app : null
 
     readonly property bool isHovered: hHandler.hovered || contextMenuLoader.active
-    readonly property bool isRunning: (appDelegate.app && typeof NiriManager !== "undefined") ? NiriManager.isApplicationRunning(appDelegate.app.id) : false
+    readonly property bool isRunning: (appDelegate.app && typeof WindowManager !== "undefined") ? WindowManager.isApplicationRunning(appDelegate.app.id) : false
     
     readonly property real visualOffset: {
         if (!PathView.view) {
@@ -166,7 +166,7 @@ Item {
                     return
                 }
                 
-                if (!NiriManager.focusApplication(appDelegate.app.id)) {
+                if (!WindowManager.focusApplication(appDelegate.app.id)) {
                     appDelegate.app.execute()
                 }
             }

@@ -145,6 +145,12 @@ Singleton {
         }
     }
 
+    function closeAllWindows() {
+        for (let type in root.activeWindows) {
+            closeWindow(type)
+        }
+    }
+
     function isRequested(type) { return !!root.activeWindows[type] }
     function isClosing(type) { return !!root.closingWindows[type] }
 

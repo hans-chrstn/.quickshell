@@ -70,7 +70,7 @@ Singleton {
                 let app = DesktopEntries.applications.values.find(a => a.id === item.id)
                 if (app) {
                     root.recordLaunch(app.id)
-                    if (!NiriManager.focusApplication(app.id)) app.execute()
+                    if (!WindowManager.focusApplication(app.id)) app.execute()
                 }
             } else if (item.type === "system") {
                 let sysAction = root.systemActions.find(a => a.name === item.name)
@@ -80,7 +80,7 @@ Singleton {
             } else if (item.type === "clip") {
                 ClipboardManager.copyToClipboard(item.name)
             } else if (item.type === "window") {
-                NiriManager.focusWindowById(item.id)
+                WindowManager.focusWindowById(item.id)
             } else if (item.type === "browser") {
                 let app = DesktopEntries.applications.values.find(a => a.id === item.id)
                 if (app && app.command && app.command.length > 0) {
@@ -158,11 +158,12 @@ Singleton {
             }
 
             if (filter !== "") {
-                for (let i = 0; i < NiriManager.windows.count; i++) {
-                    let idx = NiriManager.windows.index(i, 0)
-                    let title = NiriManager.windows.data(idx, 258) || ""
-                    let appId = NiriManager.windows.data(idx, 259) || ""
-                    let winId = NiriManager.windows.data(idx, 257)
+                let allWindows = WindowManager.getAllWindows()
+                for (let i = 0; i < allWindows.length; i++) {
+                    let win = allWindows[i]
+                    let title = win.title
+                    let appId = win.appId
+                    let winId = win.id
                     
                     let score = FuzzySearch.score(filter, title)
                     if (score > 0) {

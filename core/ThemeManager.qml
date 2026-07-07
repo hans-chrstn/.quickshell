@@ -344,6 +344,14 @@ Singleton {
     property string googleCalendarClientId: ""
     property string googleCalendarClientSecret: ""
 
+    property string mouseForwardCommand: ""
+    property string mouseBackCommand: ""
+    property string mouseActionCommand: ""
+    property string mouseMiddleCommand: ""
+    property string mouseCenterCommand: ""
+    
+    property string radialMenuStyle: "default"
+
     signal themeResetOccurred()
     
     property var settingsStructure: [
@@ -584,6 +592,27 @@ Singleton {
                 { type: "header", label: "Task Manager" },
                 { type: "slider", label: "Refresh (ms)", property: "taskManagerInterval", default: 5000, min: 1000, max: 30000, step: 500 },
                 { type: "slider", label: "Process Limit", property: "taskManagerProcessLimit", default: 25, min: 5, max: 100 }
+            ]
+        },
+        {
+            category: "Mouse Actions",
+            icon: "󰍽",
+            items: [
+                { type: "header", label: "Button Bindings (Crab daemon)" },
+                { type: "text", label: "Forward Button", property: "mouseForwardCommand", default: "" },
+                { type: "text", label: "Back Button", property: "mouseBackCommand", default: "" },
+                { type: "text", label: "Action Button", property: "mouseActionCommand", default: "" },
+                { type: "text", label: "Middle Click", property: "mouseMiddleCommand", default: "" },
+                { type: "text", label: "Center Button", property: "mouseCenterCommand", default: "" }
+            ]
+        },
+        {
+            category: "Radial Gestures",
+            icon: "󰇄",
+            items: [
+                { type: "header", label: "Custom App Gestures" },
+                { type: "text", label: "Menu Style (default, ctos)", property: "radialMenuStyle", default: "default" },
+                { type: "gesture_editor" }
             ]
         }
     ]
