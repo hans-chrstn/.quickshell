@@ -611,7 +611,7 @@ Singleton {
             icon: "󰇄",
             items: [
                 { type: "header", label: "Custom App Gestures" },
-                { type: "text", label: "Menu Style (default, ctos)", property: "radialMenuStyle", default: "default" },
+                { type: "text", label: "Menu Style (default, ctos, pills)", property: "radialMenuStyle", default: "default" },
                 { type: "gesture_editor" }
             ]
         }

@@ -282,30 +282,49 @@ PanelWindow {
     }
     
     function updateSelection() {
-        if (!readyToDraw) return;
-        
-        let n = activeConfig.length;
-        if (n === 0) return;
-        
-        let bestIndex = -1;
-        
-        for (let i = 0; i < n; i++) {
-            let angle = (i * (360 / n)) - 90;
-            let rad = angle * Math.PI / 180;
-            let btnX = centerX + Math.cos(rad) * 100;
-            let btnY = centerY + Math.sin(rad) * 100;
-            
-            let dx = currentX - btnX;
-            let dy = currentY - btnY;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            
-            if (dist < 45) {
-                bestIndex = i;
-                break;
+        if (!readyToDraw) return
+
+        let n = activeConfig.length
+        if (n === 0) return
+
+        let bestIndex = -1
+
+        if (ThemeManager.radialMenuStyle === "pills") {
+            let pillWidth = 30
+            let pillGap = 6
+            let totalWidth = n * pillWidth + (n - 1) * pillGap
+            let startX = centerX - totalWidth / 2
+            let stripTop = centerY + 19
+            let stripBottom = centerY + 61
+
+            if (currentY >= stripTop && currentY <= stripBottom) {
+                for (let i = 0; i < n; i++) {
+                    let pillX = startX + i * (pillWidth + pillGap)
+                    if (currentX >= pillX && currentX <= pillX + pillWidth) {
+                        bestIndex = i
+                        break
+                    }
+                }
+            }
+        } else {
+            for (let i = 0; i < n; i++) {
+                let angle = (i * (360 / n)) - 90
+                let rad = angle * Math.PI / 180
+                let btnX = centerX + Math.cos(rad) * 100
+                let btnY = centerY + Math.sin(rad) * 100
+
+                let dx = currentX - btnX
+                let dy = currentY - btnY
+                let dist = Math.sqrt(dx*dx + dy*dy)
+
+                if (dist < 45) {
+                    bestIndex = i
+                    break
+                }
             }
         }
-        
-        selectedIndex = bestIndex;
+
+        selectedIndex = bestIndex
     }
     Component {
         id: styleDefault
@@ -574,9 +593,57 @@ PanelWindow {
 
     Loader {
         anchors.fill: parent
+        active: ThemeManager.radialMenuStyle === "pills"
+        source: "GestureHUDPills.qml"
+
+        onLoaded: {
+            item.activeConfig = Qt.binding(function() { return hudWindow.activeConfig })
+            item.selectedIndex = Qt.binding(function() { return hudWindow.selectedIndex })
+            item.centerX = Qt.binding(function() { return hudWindow.centerX })
+            item.centerY = Qt.binding(function() { return hudWindow.centerY })
+            item.currentX = Qt.binding(function() { return hudWindow.currentX })
+            item.currentY = Qt.binding(function() { return hudWindow.currentY })
+            item.readyToDraw = Qt.binding(function() { return hudWindow.readyToDraw })
+            item.availablePages = Qt.binding(function() { return hudWindow.availablePages })
+            item.currentPageIndex = Qt.binding(function() { return hudWindow.currentPageIndex })
+            item.actionTriggered.connect(function() {
+                if (hudWindow.selectedIndex >= 0 && hudWindow.selectedIndex < hudWindow.activeConfig.length) {
+                    let item = hudWindow.activeConfig[hudWindow.selectedIndex]
+                    if (item.internal) {
+                        if (item.internal === "close_window") {
+                            if (ToplevelManager.activeToplevel) ToplevelManager.activeToplevel.close()
+                        } else if (item.internal === "maximize_window") {
+                            if (ToplevelManager.activeToplevel) ToplevelManager.activeToplevel.maximized = !ToplevelManager.activeToplevel.maximized
+                        } else if (item.internal === "fullscreen_window") {
+                            if (ToplevelManager.activeToplevel) ToplevelManager.activeToplevel.fullscreen = !ToplevelManager.activeToplevel.fullscreen
+                        } else if (item.internal === "edit_config") {
+                            let targetApp = item.targetApp || hudWindow.activeApp
+                            if (!hudWindow.gesturesData[targetApp]) {
+                                let newData = Object.assign({}, hudWindow.gesturesData)
+                                newData[targetApp] = { name: targetApp, icon: "󰏚", actions: [] }
+                                gesturesConfigFile.setText(JSON.stringify(newData, null, 4))
+                            }
+                            ViewManager.openWindow("settings")
+                        } else if (item.internal === "open_launcher") {
+                            ViewManager.toggleWindow("commandPalette")
+                        } else if (item.internal === "open_settings") {
+                            ViewManager.openWindow("settings")
+                        }
+                    } else if (item.command) {
+                        Quickshell.execDetached(["sh", "-c", item.command])
+                    }
+                }
+                GestureManager.isGestureActive = false
+            })
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: ThemeManager.radialMenuStyle !== "pills"
         sourceComponent: {
-            if (ThemeManager.radialMenuStyle === "ctos") return styleCtos;
-            return styleDefault;
+            if (ThemeManager.radialMenuStyle === "ctos") return styleCtos
+            return styleDefault
         }
     }
 }
