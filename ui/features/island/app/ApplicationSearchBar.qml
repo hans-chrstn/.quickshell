@@ -19,11 +19,7 @@ Item {
         
         onClicked: {
             LauncherManager.open()
-        }
-
-        TapHandler {
-            acceptedButtons: Qt.RightButton
-            onTapped: ViewManager.openWindow("commandPalette")
+            ViewManager.openWindow("commandPalette")
         }
 
         Rectangle {

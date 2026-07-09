@@ -39,8 +39,7 @@ Item {
                             { "name": "Browser", "icon": "󰈹", "command": "zen-beta" },
                             { "name": "Files", "icon": "󰉋", "command": "kitty -e yazi" },
                             { "name": "Settings", "icon": "󰒓", "internal": "open_settings" },
-                            { "name": "Launcher", "icon": "󱓞", "internal": "open_launcher" },
-                            { "name": "Commands", "icon": "󰍉", "internal": "open_power" }
+                            { "name": "Launcher", "icon": "󱓞", "internal": "open_launcher" }
                         ]
                     }
                 };

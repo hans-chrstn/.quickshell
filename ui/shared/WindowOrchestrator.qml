@@ -14,7 +14,7 @@ Item {
     id: root
 
     readonly property var _viewManager: ViewManager
-    readonly property var _paletteManager: CommandPaletteManager
+    readonly property var _launcherManager: LauncherManager
     readonly property var _clipboardManager: ClipboardManager
 
     Variants {
@@ -147,7 +147,7 @@ Item {
             id: launcherDelegate
             required property var modelData
             active: LauncherManager.active || ViewManager.isRequested("commandPalette")
-            component: LauncherWindow { 
+            component: CommandPaletteWindow {
                 screen: launcherDelegate.modelData
             }
         }
@@ -231,18 +231,6 @@ Item {
         }
     }
 
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: commandPaletteLdr
-            required property var modelData
-            active: ViewManager.isRequested("commandPalette") && (ViewManager.lastActiveScreenName === modelData.name)
-            component: CommandPaletteWindow {
-                screen: commandPaletteLdr.modelData
-                closing: ViewManager.isClosing("commandPalette")
-            }
-        }
-    }
 
     Variants {
         model: Quickshell.screens

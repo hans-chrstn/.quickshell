@@ -79,8 +79,7 @@ PanelWindow {
                             { "name": "Browser", "icon": "󰈹", "command": "zen-beta" },
                             { "name": "Files", "icon": "󰉋", "command": "kitty -e yazi" },
                             { "name": "Settings", "icon": "󰒓", "internal": "open_settings" },
-                            { "name": "Launcher", "icon": "󱓞", "internal": "open_launcher" },
-                            { "name": "Commands", "icon": "󰍉", "internal": "open_power" }
+                            { "name": "Launcher", "icon": "󱓞", "internal": "open_launcher" }
                         ]
                     }
                 };
@@ -136,7 +135,6 @@ PanelWindow {
     onIsVisibleChanged: {
         if (isVisible) {
             ViewManager.closeAllWindows();
-            LauncherManager.close();
             
             gesturesConfigFile.reload();
             
@@ -271,11 +269,9 @@ PanelWindow {
                         }
                         ViewManager.openWindow("settings");
                     } else if (item.internal === "open_launcher") {
-                        LauncherManager.toggle();
+                        ViewManager.toggleWindow("commandPalette");
                     } else if (item.internal === "open_settings") {
                         ViewManager.openWindow("settings");
-                    } else if (item.internal === "open_power") {
-                        ViewManager.openWindow("commandPalette");
                     }
                 } else if (item.command) {
                     Quickshell.execDetached(["sh", "-c", item.command]);

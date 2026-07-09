@@ -13,8 +13,8 @@ Item {
         width: parent.width
         anchors.top: parent.top
         onLetterSelected: (letter) => {
-            for (let i = 0; i < LauncherManager.model.count; i++) {
-                let item = LauncherManager.model.get(i)
+            for (let i = 0; i < LauncherManager.appModel.count; i++) {
+                let item = LauncherManager.appModel.get(i)
                 if (item && item.app) {
                     let firstLetter = item.app.name.substring(0, 1).toUpperCase()
                     if (letter === "#" && !"ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter)) {
@@ -42,15 +42,15 @@ Item {
         preferredHighlightBegin: 0.5
         preferredHighlightEnd: 0.5
         dragMargin: 40
-        model: LauncherManager.model
+        model: LauncherManager.appModel
 
         delegate: AppIslandDelegate {
             isIslandExpanded: root.isIslandExpanded
         }
 
         onCurrentIndexChanged: {
-            if (currentIndex >= 0 && currentIndex < LauncherManager.model.count) {
-                let item = LauncherManager.model.get(currentIndex)
+            if (currentIndex >= 0 && currentIndex < LauncherManager.appModel.count) {
+                let item = LauncherManager.appModel.get(currentIndex)
                 if (item && item.app) {
                     let firstLetter = item.app.name.substring(0, 1).toUpperCase()
                     alphabetScrubber.activeLetter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(firstLetter) ? firstLetter : "#"
