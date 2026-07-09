@@ -191,31 +191,29 @@ Item {
             Item {
                 id: progressBarContainer
                 Layout.fillWidth: true
-                Layout.preferredHeight: progressBarMouseArea.containsMouse || progressBarMouseArea.pressed ? 6 : 3
+                Layout.preferredHeight: 6
                 Layout.topMargin: 12
-                
-                Behavior on Layout.preferredHeight {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutQuart
-                    }
-                }
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: height / 2
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.1
+                    radius: 3
+                    color: "#333333"
                 }
 
                 Rectangle {
                     height: parent.height
-                    radius: height / 2
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.8
+                    radius: 3
+                    color: "white"
                     width: (root.mediaPlayer && root.mediaPlayer.length > 0)
                         ? parent.width * (root.mediaPlayer.position / root.mediaPlayer.length)
                         : 0
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 500
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
                 MouseArea {

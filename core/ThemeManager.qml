@@ -75,10 +75,10 @@ Singleton {
     property int radiusHuge: 32
 
     property int durationInstant: 100
-    property int durationFast: 200
-    property int durationMedium: 300
-    property int durationSlow: 500
-    property int durationLeisurely: 800
+    property int durationFast: 120
+    property int durationMedium: 280
+    property int durationSlow: 400
+    property int durationLeisurely: 600
 
     property bool useDynamicTheming: false
     property color backgroundColor: "#0D0D0F"
@@ -150,12 +150,12 @@ Singleton {
         "heading": {
             "pixelSize": 32,
             "weight": Font.Bold,
-            "letterSpacing": 0
+            "letterSpacing": -0.35
         },
         "clock": {
             "pixelSize": 52,
             "weight": Font.DemiBold,
-            "letterSpacing": -2
+            "letterSpacing": -0.45
         },
         "weatherTemp": {
             "pixelSize": 42,
@@ -165,12 +165,12 @@ Singleton {
         "title": {
             "pixelSize": 20,
             "weight": Font.DemiBold,
-            "letterSpacing": 0
+            "letterSpacing": -0.35
         },
         "body": {
             "pixelSize": 14,
             "weight": Font.Normal,
-            "letterSpacing": 0
+            "letterSpacing": -0.15
         },
         "label": {
             "pixelSize": 12,
@@ -255,7 +255,7 @@ Singleton {
     })
 
     property int animationDuration: 400
-    property int animationEasing: Easing.OutQuart
+    property int animationEasing: Easing.OutQuint
 
     property real shadowOpacity: 0.4
     property int shadowBlurRadius: 15

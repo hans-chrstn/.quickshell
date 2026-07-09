@@ -16,10 +16,10 @@ Item {
     property Item highlightTarget: null
     property real highlightCornerRadius: root.cornerRadius
     
-    property real hoverScale: 1.05
-    property real pressScale: 0.92
+    property real hoverScale: 1.03
+    property real pressScale: 0.96
     property int animationDuration: ThemeManager.animationDuration
-    property int pressDuration: 100
+    property int pressDuration: 90
     
     signal clicked()
 

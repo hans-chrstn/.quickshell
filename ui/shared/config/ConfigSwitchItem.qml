@@ -39,32 +39,29 @@ Item {
             implicitHeight: 24
             radius: 12
             Layout.alignment: Qt.AlignVCenter
-            color: ThemeManager[root.configurationItemData.property] ? ThemeManager.accentColor : ThemeManager.outlinePrimaryColor
+            readonly property bool isOn: ThemeManager[root.configurationItemData.property]
+            color: switchIndicator.isOn ? "#34C759" : ThemeManager.outlineStrongColor
             border.color: root.activeFocus ? "white" : "transparent"
             border.width: root.activeFocus ? 2 : 0
-            
+            Behavior on color { ColorAnimation { duration: 140 } }
+
             Rectangle {
-                x: ThemeManager[root.configurationItemData.property] ? parent.width - width - 2 : 2
+                x: switchIndicator.isOn ? parent.width - width - 2 : 2
                 y: 2
                 width: 20
                 height: 20
                 radius: 10
-                color: ThemeManager[root.configurationItemData.property] ? ThemeManager.backgroundPrimaryColor : ThemeManager.contentOnBackgroundColor
-                Behavior on x { 
-                    NumberAnimation { 
-                        duration: 200
-                        easing.type: Easing.OutQuart 
-                    } 
-                }
-                Behavior on color { 
-                    ColorAnimation { 
-                        duration: 200 
-                    } 
+                color: "white"
+                Behavior on x {
+                    NumberAnimation {
+                        duration: 140
+                        easing.type: Easing.OutCubic
+                    }
                 }
             }
-            
-            TapHandler { 
-                onTapped: root.performToggle() 
+
+            TapHandler {
+                onTapped: root.performToggle()
             }
         }
     }

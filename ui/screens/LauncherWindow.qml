@@ -21,7 +21,7 @@ PanelWindow {
     }
 
     color: "transparent"
-    
+
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: (visible && bloom.progress > 0.9) ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
@@ -72,141 +72,145 @@ PanelWindow {
         }
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.topMargin: 100
-            anchors.bottomMargin: 80
+            anchors.centerIn: parent
             spacing: 0
+            width: Math.min(parent.width - 120, 1000)
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 120
-                Layout.alignment: Qt.AlignHCenter
-                Layout.maximumWidth: 700
-                
+                Layout.preferredHeight: 64
+                Layout.bottomMargin: 50
+
                 Rectangle {
-                    anchors.centerIn: parent
-                    width: parent.width
-                    height: 70
-                    radius: 35
-                    color: ThemeManager.surfaceStrongColor
+                    id: matteOuter
+                    anchors.fill: parent
+                    radius: 32
+                    color: "#1c1c1e"
+                }
+
+                Rectangle {
+                    id: matteInner
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    radius: 31
+                    color: "#101012"
+                }
+
+                Rectangle {
+                    id: matteBorder
+                    anchors.fill: parent
+                    anchors.margins: 1
+                    radius: 31
+                    color: "transparent"
                     border.color: ThemeManager.outlineStrongColor
                     border.width: 1
-                    
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        shadowEnabled: true
-                        shadowOpacity: 0.4
-                        shadowBlur: 0.5
-                        shadowVerticalOffset: 10
+                }
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 24
+                    anchors.rightMargin: 24
+                    spacing: 16
+
+                    StyledLabel {
+                        text: ThemeManager.iconSearch
+                        type: "heading"
+                        font.pixelSize: 22
+                        opacity: searchInput.activeFocus ? 1.0 : 0.3
+                        customColor: ThemeManager.accentColor
+                        Behavior on opacity { NumberAnimation { duration: 200 } }
                     }
 
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 32
-                        anchors.rightMargin: 32
-                        spacing: 20
+                    TextInput {
+                        id: searchInput
+                        Layout.fillWidth: true
+                        color: "#f5f5f7"
+                        font.family: ThemeManager.fontFamily
+                        font.pixelSize: 20
+                        font.weight: Font.DemiBold
+                        selectionColor: ThemeManager.accentColor
+                        text: LauncherManager.searchText
 
-                        StyledLabel {
-                            text: ThemeManager.iconSearch
-                            type: "heading"
-                            font.pixelSize: 28
-                            opacity: searchInput.activeFocus ? 1.0 : 0.3
-                            customColor: ThemeManager.accentColor
-                            Behavior on opacity { NumberAnimation { duration: 200 } }
+                        onTextChanged: {
+                            LauncherManager.searchText = text
                         }
 
-                        TextInput {
-                            id: searchInput
-                            Layout.fillWidth: true
-                            color: ThemeManager.contentOnBackgroundColor
-                            font.family: ThemeManager.fontFamily
-                            font.pixelSize: 24
-                            font.weight: Font.Medium
-                            selectionColor: ThemeManager.accentColor
-                            text: LauncherManager.searchText
-                            
-                            onTextChanged: {
-                                LauncherManager.searchText = text
-                            }
-
-                            onAccepted: {
-                                if (LauncherManager.model.count > 0) {
-                                    let app = LauncherManager.model.get(0).app
-                                    if (!WindowManager.focusApplication(app.id)) {
-                                        app.execute()
-                                    }
-                                    LauncherManager.close()
+                        onAccepted: {
+                            if (LauncherManager.model.count > 0) {
+                                let app = LauncherManager.model.get(0).app
+                                if (!WindowManager.focusApplication(app.id)) {
+                                    app.execute()
                                 }
+                                LauncherManager.close()
                             }
+                        }
 
-                            StyledLabel {
-                                text: "Launch anything..."
-                                type: "heading"
-                                font.pixelSize: 24
-                                opacity: 0.15
-                                visible: !searchInput.text && !searchInput.activeFocus
-                            }
+                        StyledLabel {
+                            text: "Search apps..."
+                            type: "title"
+                            font.pixelSize: 20
+                            font.weight: Font.DemiBold
+                            letterSpacing: -0.35
+                            opacity: 0.12
+                            visible: !searchInput.text && !searchInput.activeFocus
                         }
                     }
                 }
             }
 
-            Item { Layout.preferredHeight: 40 }
-
             GridView {
                 id: appGrid
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.preferredHeight: Math.min(contentHeight, root.height * 0.6)
                 Layout.alignment: Qt.AlignHCenter
-                Layout.maximumWidth: 1400
-                
+
                 model: LauncherManager.model
-                cellWidth: 160
-                cellHeight: 180
-                clip: false
+                cellWidth: 130
+                cellHeight: 150
+                clip: true
                 boundsBehavior: Flickable.StopAtBounds
-                
+
                 delegate: Item {
                     id: delegateRoot
                     width: appGrid.cellWidth
                     height: appGrid.cellHeight
-                    
+
                     opacity: 0
                     scale: 0.8
-                    
+
                     transform: Translate {
                         id: cascadeTranslate
-                        y: 40
+                        y: 30
                     }
 
                     SequentialAnimation {
                         running: root.visible
-                        PauseAnimation { 
-                            duration: Math.max(0, (index % 8) * 40 + (Math.floor(index / 8) * 60))
+                        PauseAnimation {
+                            duration: Math.max(0, (index % 8) * 30 + (Math.floor(index / 8) * 40))
                         }
                         ParallelAnimation {
-                            NumberAnimation { 
+                            NumberAnimation {
                                 target: delegateRoot
                                 property: "opacity"
                                 to: 1.0
-                                duration: 500
-                                easing.type: Easing.OutCubic 
+                                duration: 400
+                                easing.type: Easing.OutCubic
                             }
-                            NumberAnimation { 
+                            NumberAnimation {
                                 target: delegateRoot
                                 property: "scale"
                                 to: 1.0
-                                duration: 600
+                                duration: 500
                                 easing.type: Easing.OutBack
-                                easing.overshoot: 1.2 
+                                easing.overshoot: 1.2
                             }
-                            NumberAnimation { 
+                            NumberAnimation {
                                 target: cascadeTranslate
                                 property: "y"
                                 to: 0
-                                duration: 600
+                                duration: 500
                                 easing.type: Easing.OutBack
-                                easing.overshoot: 1.2 
+                                easing.overshoot: 1.2
                             }
                         }
                     }
@@ -214,13 +218,13 @@ PanelWindow {
                     BaseButton {
                         id: launcherBtn
                         anchors.fill: parent
-                        anchors.margins: 10
-                        cornerRadius: 28
-                        highlightCornerRadius: 18
-                        hoverScale: 1.1
+                        anchors.margins: 8
+                        cornerRadius: 20
+                        highlightCornerRadius: 14
+                        hoverScale: 1.05
                         tooltip: model.app.name
                         highlightTarget: launcherIconComp
-                        
+
                         onClicked: {
                             if (!WindowManager.focusApplication(model.app.id)) {
                                 model.app.execute()
@@ -256,13 +260,13 @@ PanelWindow {
 
                         ColumnLayout {
                             anchors.centerIn: parent
-                            spacing: 16
+                            spacing: 8
 
                             AppIslandIcon {
                                 id: launcherIconComp
                                 app: model.app
-                                iconSize: 84
-                                cornerRadius: 18
+                                iconSize: 64
+                                cornerRadius: 14
                                 isHovered: launcherBtn.isHovered
                                 isRunning: typeof WindowManager !== "undefined" ? WindowManager.isApplicationRunning(model.app.id) : false
                             }
@@ -270,12 +274,13 @@ PanelWindow {
                             StyledLabel {
                                 text: model.app.name
                                 type: "body"
-                                font.weight: Font.Bold
-                                font.pixelSize: 13
-                                Layout.preferredWidth: 130
+                                font.weight: Font.DemiBold
+                                font.pixelSize: 11
+                                letterSpacing: -0.15
+                                Layout.preferredWidth: 110
                                 horizontalAlignment: Text.AlignHCenter
                                 elideMode: Text.ElideRight
-                                opacity: launcherBtn.isHovered ? 1.0 : 0.6
+                                opacity: launcherBtn.isHovered ? 1.0 : 0.55
                                 Behavior on opacity { NumberAnimation { duration: 200 } }
                             }
                         }
