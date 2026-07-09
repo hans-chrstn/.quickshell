@@ -41,7 +41,7 @@ PanelWindow {
         availablePages = keys;
         
         let targetIndex = keys.indexOf(activeApp);
-        if (targetIndex !== -1 && gesturesData[activeApp]) {
+        if (targetIndex !== -1) {
             currentPageIndex = targetIndex;
         } else {
             currentPageIndex = keys.indexOf("global") !== -1 ? keys.indexOf("global") : 0;
@@ -140,8 +140,13 @@ PanelWindow {
             
             gesturesConfigFile.reload();
             
-            let activeTop = ToplevelManager.activeToplevel;
-            hudWindow.activeApp = activeTop ? activeTop.appId.toLowerCase() : "";
+            let activeTop = WindowManager.focusedWindow;
+            let isActivated = true;
+            if (activeTop && activeTop.hasOwnProperty("activated")) {
+                isActivated = activeTop.activated;
+            }
+            hudWindow.activeApp = (activeTop && isActivated) ? activeTop.appId.toLowerCase() : "";
+            refreshPages();
             
             readyToDraw = false;
             initProc.running = true;
@@ -204,7 +209,6 @@ PanelWindow {
                             ViewManager.trackScreen(activeMon.name);
                         }
                         
-                        // Safety clamp to prevent the radial from rendering off-screen
                         let padding = 150; 
                         if (globalX < padding) globalX = padding;
                         if (globalX > hudWindow.width - padding) globalX = hudWindow.width - padding;
@@ -260,7 +264,6 @@ PanelWindow {
                     } else if (item.internal === "edit_config") {
                         let targetApp = item.targetApp || activeApp;
                         if (!hudWindow.gesturesData[targetApp]) {
-                            // Silently add the app as requested
                             let newData = Object.assign({}, hudWindow.gesturesData);
                             newData[targetApp] = { name: targetApp, icon: "󰏚", actions: [] };
                             
@@ -278,7 +281,6 @@ PanelWindow {
                     Quickshell.execDetached(["sh", "-c", item.command]);
                 }
             }
-            // Always close the menu when clicked
             GestureManager.isGestureActive = false;
         }
     }
@@ -301,8 +303,6 @@ PanelWindow {
             let dy = currentY - btnY;
             let dist = Math.sqrt(dx*dx + dy*dy);
             
-            // The button radius is 30. A hitbox of 45 gives a tiny bit of leniency
-            // while requiring you to explicitly point at the button itself.
             if (dist < 45) {
                 bestIndex = i;
                 break;

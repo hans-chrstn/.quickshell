@@ -29,22 +29,29 @@ Singleton {
     }
 
     function forceUpdateLayouts() {
-        if (!isNiri) return
         if (refreshProcess.running) return
         refreshProcess.running = true
     }
 
     Process {
         id: refreshProcess
-        command: ["niri", "msg", "-j", "windows"]
+        command: isNiri ? ["niri", "msg", "-j", "windows"] : ["hyprctl", "clients", "-j"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
                     let windows = JSON.parse(text)
                     let nextLayouts = {}
-                    for (let i = 0; i < windows.length; i++) {
-                        let win = windows[i]
-                        nextLayouts[win.id] = win.layout
+                    if (isNiri) {
+                        for (let i = 0; i < windows.length; i++) {
+                            let win = windows[i]
+                            nextLayouts[win.id] = win.layout
+                        }
+                    } else {
+                        for (let i = 0; i < windows.length; i++) {
+                            let win = windows[i]
+                            let hexAddr = win.address.replace("0x", "")
+                            nextLayouts[hexAddr] = win
+                        }
                     }
                     root.windowLayouts = nextLayouts
                     root.layoutsChanged()
@@ -61,7 +68,6 @@ Singleton {
         if (isNiri) {
             niri.focusWorkspaceById(id)
         } else {
-            // Fallback for Hyprland: iterate and activate the matching workspace object
             if (Hyprland && Hyprland.workspaces) {
                 for (let i = 0; i < Hyprland.workspaces.count; i++) {
                     let ws = Hyprland.workspaces.get(i)
@@ -79,8 +85,11 @@ Singleton {
         if (isNiri) {
             niri.focusWindow(id)
         } else {
-            // id is the Toplevel object itself
-            if (id.activate) id.activate()
+            if (typeof id === "string") {
+                Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "address:0x" + id])
+            } else if (id.activate) {
+                id.activate()
+            }
         }
     }
 
@@ -94,9 +103,11 @@ Singleton {
                 " && niri msg action focus-workspace " + workspaceRef
             ])
         } else {
-            // For Hyprland, move the currently focused window as a fallback, or dispatch directly
-            // If windowId is the active window (which is highly likely when using shortcuts)
-            Hyprland.dispatch("dispatch movetoworkspace " + workspaceRef)
+            if (typeof windowId === "string") {
+                Quickshell.execDetached(["hyprctl", "dispatch", "movetoworkspace", workspaceRef + ",address:0x" + windowId])
+            } else {
+                Quickshell.execDetached(["hyprctl", "dispatch", "movetoworkspace", workspaceRef.toString()])
+            }
         }
 
         OSDManager.show(
@@ -117,7 +128,6 @@ Singleton {
         model: root.windows
         delegate: QtObject {
             readonly property string normalizedAppId: model.appId ? model.appId.toLowerCase() : ""
-            // For Niri, model is the list item with 'id'. For ToplevelManager, model is the object itself.
             readonly property var windowId: root.isNiri ? model.id : model
             
             Component.onCompleted: {
@@ -204,7 +214,6 @@ Singleton {
         return windows
     }
 
-    // New helper for CommandPaletteManager to iterate abstractly
     function getAllWindows() {
         let list = []
         for (let i = 0; i < root.windows.count; i++) {
@@ -262,40 +271,23 @@ Singleton {
                 }
             }
         } else {
-            if (Hyprland && Hyprland.workspaces) {
-                let targetWs = null
-                for (let i = 0; i < Hyprland.workspaces.count; i++) {
-                    let ws = Hyprland.workspaces.get(i)
-                    if (ws.id === wsId) {
-                        targetWs = ws
-                        break
-                    }
-                }
-                
-                if (targetWs && targetWs.toplevels) {
-                    for (let i = 0; i < targetWs.toplevels.count; i++) {
-                        let top = targetWs.toplevels.get(i)
-                        let ipc = top.lastIpcObject || {}
-                        let pid = ipc.pid || 0
-                        let appId = ipc.class || (top.wayland ? top.wayland.appId : "")
-                        
-                        let w = ipc.size ? ipc.size[0] : 100
-                        let h = ipc.size ? ipc.size[1] : 100
-                        let posX = ipc.at ? ipc.at[0] : 0
-                        
-                        list.push({
-                            id: top.wayland || top,
-                            pid: pid,
-                            appId: appId,
-                            title: top.title || "",
-                            iconPath: "",
-                            isFocused: top.activated,
-                            isUrgent: top.urgent,
-                            width: w,
-                            height: h,
-                            posX: posX
-                        })
-                    }
+            let layouts = root.windowLayouts;
+            for (let addr in layouts) {
+                let win = layouts[addr]
+                if (win.workspace && win.workspace.id === wsId) {
+                    list.push({
+                        id: addr,
+                        pid: win.pid || 0,
+                        appId: win.class || "",
+                        title: win.title || "",
+                        iconPath: "",
+                        isFocused: (Hyprland.activeToplevel && Hyprland.activeToplevel.address === addr),
+                        isUrgent: false,
+                        width: win.size ? win.size[0] : 100,
+                        height: win.size ? win.size[1] : 100,
+                        posX: win.at ? win.at[0] : 0,
+                        posY: win.at ? win.at[1] : 0
+                    })
                 }
             }
         }

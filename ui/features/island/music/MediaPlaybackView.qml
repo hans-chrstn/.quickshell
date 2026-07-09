@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.core
@@ -78,17 +79,52 @@ Item {
                         }
 
                         ClippingRectangle {
+                            id: artContainer
                             anchors.fill: parent
-                            radius: ThemeManager.musicArtRadius
+                            radius: width / 2
                             color: ThemeManager.surfaceVariantColor
+
+                            property string resolvedArtUrl: ""
+
+                            Process {
+                                id: artConvertProc
+                                property string targetUrl: ""
+                                command: ["sh", "-c", "curl -s '" + targetUrl + "' -o /tmp/qs_art.webp && magick /tmp/qs_art.webp /tmp/qs_art.jpg"]
+                                onExited: (exitCode) => {
+                                    if (exitCode === 0) {
+                                        artContainer.resolvedArtUrl = "file:///tmp/qs_art.jpg";
+                                    } else {
+                                        artContainer.resolvedArtUrl = targetUrl;
+                                    }
+                                }
+                            }
+
+                            Connections {
+                                target: root.mediaPlayer
+                                function onTrackArtUrlChanged() {
+                                    artContainer.checkAndFetchArt()
+                                }
+                            }
+
+                            Component.onCompleted: checkAndFetchArt()
+
+                            function checkAndFetchArt() {
+                                let url = root.mediaPlayer ? (root.mediaPlayer.trackArtUrl || "") : "";
+                                if (url.startsWith("http") && url.includes("getCoverArt.view")) {
+                                    artConvertProc.targetUrl = url;
+                                    artConvertProc.running = true;
+                                } else {
+                                    artContainer.resolvedArtUrl = url;
+                                }
+                            }
 
                             Image {
                                 id: albumArtImage
                                 anchors.fill: parent
-                                source: root.mediaPlayer ? root.mediaPlayer.trackArtUrl : ""
+                                source: artContainer.resolvedArtUrl || ""
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
-                                cache: true
+                                cache: false
                                 opacity: status === Image.Ready ? 1 : 0
                                 Behavior on opacity {
                                     NumberAnimation {

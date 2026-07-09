@@ -28,10 +28,8 @@ Item {
 
             y: row * groupSpacing
 
-            // Random seed for this specific node group
             readonly property real seed: ((col * 17) + (row * 31)) % 100
 
-            // Sparse Node
             Rectangle {
                 anchors.centerIn: parent
 
@@ -45,10 +43,9 @@ Item {
 
                 opacity: 0.4
 
-                visible: nodeGroup.seed < 20 // Only 20% of intersections have a visible node
+                visible: nodeGroup.seed < 20
             }
 
-            // Unpredictable Horizontal Data Path
             Item {
                 width: groupSpacing
 
@@ -108,7 +105,6 @@ Item {
                 }
             }
 
-            // Unpredictable Vertical Data Path
             Item {
                 width: 2
 

@@ -144,6 +144,7 @@
           pkgs.libnotify
           pkgs.wf-recorder
           pkgs.swww
+          pkgs.pulseaudio
           qtMultimedia
           kirigami
           pkgs.kdePackages.sonnet

@@ -68,6 +68,9 @@ ClippingRectangle {
         visible: false 
     }
 
+    property real layoutWidthNeeded: 0
+    property real layoutHeightNeeded: 0
+
     readonly property var workspaceWindows: {
         if (!active || workspaceId === -1) return []
         
@@ -76,6 +79,21 @@ ClippingRectangle {
         let audioPids = AudioManager.pidsPlayingAudio
         let audioApps = AudioManager.appNamesPlayingAudio
         
+        if (WindowManager.isNiri) {
+            windows.sort((a, b) => a.posX - b.posX)
+        }
+        
+        let minX = 0;
+        let minY = 0;
+        if (!WindowManager.isNiri && windows.length > 0) {
+            minX = Math.min(...windows.map(w => w.posX));
+            minY = Math.min(...windows.map(w => w.posY));
+        }
+
+        let currentX = 0;
+        let maxW = 0;
+        let maxH = 0;
+
         for (let i = 0; i < windows.length; i++) {
             let win = windows[i]
             
@@ -92,6 +110,22 @@ ClippingRectangle {
                 if (!isPlaying && cleanAppId === "feishin" && audioApps.includes("chromium")) isPlaying = true
             }
 
+            let w = win.width * root.previewScale * 0.8;
+            let h = win.height * root.previewScale * 0.8;
+            let finalX = 0;
+            let finalY = 0;
+
+            if (WindowManager.isNiri) {
+                finalX = currentX;
+                currentX += w + ThemeManager.spacingSmall;
+            } else {
+                finalX = (win.posX - minX) * root.previewScale * 0.8;
+                finalY = (win.posY - minY) * root.previewScale * 0.8;
+            }
+
+            maxW = Math.max(maxW, finalX + w);
+            maxH = Math.max(maxH, finalY + h);
+
             list.push({
                 id: win.id,
                 appId: win.appId,
@@ -100,13 +134,15 @@ ClippingRectangle {
                 isFocused: win.isFocused,
                 isUrgent: win.isUrgent,
                 isPlayingAudio: isPlaying,
-                width: win.width * root.previewScale * 0.8,
-                height: win.height * root.previewScale * 0.8,
-                posX: win.posX
+                width: w,
+                height: h,
+                posX: finalX,
+                posY: finalY
             })
         }
         
-        list.sort((a, b) => a.posX - b.posX)
+        layoutWidthNeeded = maxW;
+        layoutHeightNeeded = maxH;
         return list
     }
 
@@ -121,7 +157,7 @@ ClippingRectangle {
         pixelAligned: true
         flickDeceleration: 1500
         maximumFlickVelocity: 2500
-        interactive: ViewManager.activeDragWindowId === -1
+        interactive: !ViewManager.isDragging
         clip: true
 
         WheelHandler {
@@ -134,14 +170,15 @@ ClippingRectangle {
 
         Item {
             id: container
-            width: Math.max(flick.width, windowRow.width)
+            width: Math.max(flick.width, root.layoutWidthNeeded)
             height: flick.height
 
-            Row {
-                id: windowRow
-                height: parent.height
-                spacing: ThemeManager.spacingSmall
-                anchors.centerIn: parent
+            Item {
+                id: windowContainer
+                width: root.layoutWidthNeeded
+                height: WindowManager.isNiri ? parent.height : root.layoutHeightNeeded
+                anchors.centerIn: WindowManager.isNiri ? undefined : parent
+                anchors.verticalCenter: WindowManager.isNiri ? parent.verticalCenter : undefined
 
                 Repeater {
                     model: root.workspaceWindows
@@ -149,7 +186,9 @@ ClippingRectangle {
                         id: windowRect
                         width: modelData.width
                         height: modelData.height
-                        anchors.verticalCenter: parent.verticalCenter
+                        
+                        x: modelData.posX
+                        y: WindowManager.isNiri ? (windowContainer.height - height) / 2 : modelData.posY
                         radius: ThemeManager.radiusSmall / 2
                         
                         readonly property bool isWindowHovered: maWin.containsMouse
@@ -179,12 +218,12 @@ ClippingRectangle {
                             id: maWin
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: ViewManager.activeDragWindowId !== -1 ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+                            cursorShape: ViewManager.isDragging ? Qt.ClosedHandCursor : Qt.PointingHandCursor
                             
                             property real startX: 0
                             property real startY: 0
                             property bool potentialDrag: false
-                            property int windowIdToDrag: -1
+                            property var windowIdToDrag: null
 
                             onPressed: (mouse) => {
                                 startX = mouse.x
@@ -194,7 +233,7 @@ ClippingRectangle {
                             }
 
                             onPositionChanged: (mouse) => {
-                                if (potentialDrag && ViewManager.activeDragWindowId === -1) {
+                                if (potentialDrag && !ViewManager.isDragging) {
                                     let dist = Math.sqrt(Math.pow(mouse.x - startX, 2) + Math.pow(mouse.y - startY, 2))
                                     if (dist > 10) {
                                         ViewManager.activeDragWindowId = windowIdToDrag
@@ -202,7 +241,7 @@ ClippingRectangle {
                                     }
                                 }
 
-                                if (ViewManager.activeDragWindowId !== -1) {
+                                if (ViewManager.isDragging) {
                                     let mapped = maWin.mapToItem(null, mouse.x, mouse.y)
                                     let absX = (root.screen ? root.screen.x : 0) + mapped.x
                                     let absY = (root.screen ? root.screen.y : 0) + mapped.y
@@ -216,7 +255,7 @@ ClippingRectangle {
                             }
 
                             onReleased: {
-                                if (ViewManager.activeDragWindowId !== -1) {
+                                if (ViewManager.isDragging) {
                                     if (ViewManager.hoveredTargetWorkspaceRef !== null) {
                                         WindowManager.moveWindowToWorkspace(
                                             ViewManager.activeDragWindowId, 
@@ -224,14 +263,13 @@ ClippingRectangle {
                                         )
                                     }
                                     
-                                    ViewManager.activeDragWindowId = -1
+                                    ViewManager.activeDragWindowId = null
                                     ViewManager.activeDragIcon = ""
                                     ViewManager.hoveredTargetWorkspaceId = -1
                                     ViewManager.hoveredTargetWorkspaceRef = null
                                     ViewManager.setHoveredWorkspace(-1)
                                 } else if (potentialDrag) {
                                     WindowManager.focusWindowById(modelData.id)
-                                    Quickshell.execDetached(["niri", "msg", "action", "focus-window", "--id", modelData.id.toString()])
                                     ViewManager.setHoveredWorkspace(-1)
                                 }
                                 potentialDrag = false
@@ -239,7 +277,7 @@ ClippingRectangle {
 
                             onCanceled: {
                                 potentialDrag = false
-                                ViewManager.activeDragWindowId = -1
+                                ViewManager.activeDragWindowId = null
                             }
                         }
 

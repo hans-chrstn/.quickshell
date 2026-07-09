@@ -114,8 +114,8 @@ Singleton {
     property string iconMute: "󰝟"
     property string iconVolume: "󰕾"
     property string iconMusic: "󰝚"
-    property string iconAudioInput: "󰓃"
-    property string iconAudioOutput: "󰓄"
+    property string iconAudioInput: "󰍬"
+    property string iconAudioOutput: "󰕾"
     property string iconSelector: "󱗘"
     
     property string iconBrightness: "󰃠"

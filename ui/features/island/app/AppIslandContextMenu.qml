@@ -1,21 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Effects
 import Quickshell
 import qs.core
 import qs.ui.shared
 
-Menu {
+BaseContextMenu {
     id: root
-    
+
     property var app: null
     property var delegateRoot: null
     property var windowsList: []
-    
+
     width: 240
     padding: 8
-    
+
     onOpened: {
         if (typeof appIslandRoot !== "undefined") {
             appIslandRoot.activeMenus++
@@ -24,70 +23,17 @@ Menu {
             root.windowsList = WindowManager.getApplicationWindows(root.app.id)
         }
     }
-    
+
     onClosed: {
         if (typeof appIslandRoot !== "undefined") {
             appIslandRoot.activeMenus--
-        }
-    }
-    
-    enter: Transition {
-        ParallelAnimation {
-            NumberAnimation { 
-                property: "opacity"
-                from: 0
-                to: 1
-                duration: ThemeManager.durationMedium
-                easing.type: Easing.OutCubic
-            }
-            NumberAnimation { 
-                property: "scale"
-                from: 0.95
-                to: 1
-                duration: ThemeManager.durationMedium
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.4
-            }
-        }
-    }
-    
-    exit: Transition {
-        ParallelAnimation {
-            NumberAnimation { 
-                property: "opacity"
-                from: 1
-                to: 0
-                duration: ThemeManager.durationFast
-            }
-            NumberAnimation { 
-                property: "scale"
-                from: 1
-                to: 0.98
-                duration: ThemeManager.durationFast
-            }
-        }
-    }
-    
-    background: Rectangle {
-        color: ThemeManager.backgroundPrimaryColor
-        radius: ThemeManager.radiusLarge
-        border.color: ThemeManager.outlineStrongColor
-        border.width: 1
-        opacity: 0.98
-        
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowOpacity: 0.6
-            shadowBlur: 25
-            shadowVerticalOffset: 8
         }
     }
 
     Connections {
         target: root.delegateRoot ? root.delegateRoot : null
         ignoreUnknownSignals: true
-        
+
         function onIsIslandExpandedChanged() {
             if (root.delegateRoot && !root.delegateRoot.isIslandExpanded) {
                 root.close()
@@ -131,16 +77,16 @@ Menu {
 
             contentItem: RowLayout {
                 spacing: ThemeManager.spacingSmall
-                
-                StyledLabel { 
+
+                StyledLabel {
                     text: ThemeManager.iconWindow
                     type: "body"
                     font.pixelSize: 14
                     customColor: winItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
                     Layout.leftMargin: ThemeManager.spacingSmall
                 }
-                
-                StyledLabel { 
+
+                StyledLabel {
                     text: modelData.title || "Untitled Window"
                     type: "body"
                     font.pixelSize: 12
@@ -160,13 +106,13 @@ Menu {
                         WindowManager.closeWindowById(modelData.id)
                         root.close()
                     }
-                    
+
                     Rectangle {
                         anchors.fill: parent
                         radius: 14
                         color: closeBtn.isHovered ? ThemeManager.dangerSurfaceColor : "transparent"
-                        
-                        StyledLabel { 
+
+                        StyledLabel {
                             text: ThemeManager.iconClose
                             type: "body"
                             anchors.centerIn: parent
@@ -176,12 +122,12 @@ Menu {
                     }
                 }
             }
-            
-            background: Rectangle { 
+
+            background: Rectangle {
                 color: winItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
                 radius: ThemeManager.radiusSmall
             }
-            
+
             onTriggered: {
                 WindowManager.focusWindowById(modelData.id)
             }
@@ -203,32 +149,32 @@ Menu {
         id: newWinItem
         implicitWidth: 224
         implicitHeight: 40
-        
+
         contentItem: RowLayout {
             spacing: ThemeManager.spacingMedium
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: ThemeManager.iconAppNew
                 type: "body"
                 font.pixelSize: 16
                 customColor: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.accentColor
                 Layout.leftMargin: ThemeManager.spacingSmall
             }
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: "Launch New Instance"
                 type: "label"
                 font.weight: Font.DemiBold
                 customColor: newWinItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceContentColor
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
             }
         }
-        
-        background: Rectangle { 
+
+        background: Rectangle {
             color: newWinItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: ThemeManager.radiusSmall 
+            radius: ThemeManager.radiusSmall
         }
-        
+
         onTriggered: {
             if (root.app) {
                 root.app.execute()
@@ -240,32 +186,32 @@ Menu {
         id: locationItem
         implicitWidth: 224
         implicitHeight: 40
-        
+
         contentItem: RowLayout {
             spacing: ThemeManager.spacingMedium
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: ThemeManager.iconAppLocation
                 type: "body"
                 font.pixelSize: 16
                 customColor: locationItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
                 Layout.leftMargin: ThemeManager.spacingSmall
             }
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: "Open Desktop Entry"
                 type: "label"
                 font.weight: Font.Medium
                 customColor: locationItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceContentColor
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
             }
         }
-        
-        background: Rectangle { 
+
+        background: Rectangle {
             color: locationItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: ThemeManager.radiusSmall 
+            radius: ThemeManager.radiusSmall
         }
-        
+
         onTriggered: {
             if (root.app) {
                 Quickshell.execDetached(["xdg-open", root.app.path])
@@ -277,32 +223,32 @@ Menu {
         id: infoItem
         implicitWidth: 224
         implicitHeight: 40
-        
+
         contentItem: RowLayout {
             spacing: ThemeManager.spacingMedium
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: ThemeManager.iconAppDetails
                 type: "body"
                 font.pixelSize: 16
                 customColor: infoItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceVariantContentColor
                 Layout.leftMargin: ThemeManager.spacingSmall
             }
-            
-            StyledLabel { 
+
+            StyledLabel {
                 text: "Application Details"
                 type: "label"
                 font.weight: Font.Medium
                 customColor: infoItem.highlighted ? ThemeManager.contentOnBackgroundColor : ThemeManager.surfaceContentColor
-                Layout.fillWidth: true 
+                Layout.fillWidth: true
             }
         }
-        
-        background: Rectangle { 
+
+        background: Rectangle {
             color: infoItem.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
-            radius: ThemeManager.radiusSmall 
+            radius: ThemeManager.radiusSmall
         }
-        
+
         onTriggered: {
             if (root.app) {
                 Quickshell.execDetached(["notify-send", root.app.name, "ID: " + root.app.id + "\nPath: " + root.app.path])

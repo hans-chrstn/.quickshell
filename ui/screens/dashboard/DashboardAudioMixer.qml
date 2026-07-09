@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.core
 import qs.ui.shared
 import qs.ui.screens.dashboard.audiomixer
+import Quickshell
 
 ColumnLayout {
     id: root
@@ -18,36 +19,58 @@ ColumnLayout {
         type: "heading"
         font.pixelSize: 28
     }
-
-    ListView {
-        id: streamList
+    
+    Loader {
+        id: mixerLoader
         Layout.fillWidth: true
         Layout.fillHeight: true
-        model: {
-            if (!AudioManager) {
-                return null
+        asynchronous: true
+        active: root.active || item !== null
+        
+        sourceComponent: ColumnLayout {
+            anchors.fill: parent
+            spacing: 25
+            
+            DefaultDeviceSelector {
+                Layout.fillWidth: true
+                active: root.active
             }
-            return AudioManager.streams
-        }
-        spacing: 15
-        clip: true
+            
+            Rectangle {
+                Layout.fillWidth: true
+                height: 1
+                color: ThemeManager.outlinePrimaryColor
+                opacity: 0.5
+            }
+            
+            StyledLabel {
+                text: "Application Volumes"
+                type: "label"
+                font.weight: Font.Bold
+                opacity: 0.8
+            }
 
-        delegate: AudioStreamDelegate {
-            streamData: model
-            isActive: root.active
-        }
+            ListView {
+                id: streamList
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                model: AudioManager ? AudioManager.streams : null
+                spacing: 15
+                clip: true
 
-        StyledLabel {
-            text: "No active application streams"
-            type: "caption"
-            opacity: 0.3
-            Layout.fillWidth: true
-            horizontalAlignment: Text.AlignHCenter
-            visible: {
-                if (!AudioManager || !AudioManager.streams) {
-                    return true
+                delegate: AudioStreamDelegate {
+                    streamData: model
+                    isActive: root.active
                 }
-                return AudioManager.streams.count === 0
+
+                StyledLabel {
+                    text: "No active application streams"
+                    type: "caption"
+                    opacity: 0.3
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    visible: AudioManager && AudioManager.streams && AudioManager.streams.count === 0
+                }
             }
         }
     }

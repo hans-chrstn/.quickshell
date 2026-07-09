@@ -19,6 +19,11 @@ ColumnLayout {
         Layout.fillWidth: true
     }
 
+    WeatherHourly {
+        id: weatherHourly
+        Layout.fillWidth: true
+    }
+
     WeatherStats {
         id: weatherStats
         Layout.fillWidth: true

@@ -8,10 +8,33 @@ Item {
   property bool hardwareGesturePressed: false
   property real gestureDeltaX: 0
   property real gestureDeltaY: 0
+  property string socketPath: ""
   
+  Timer {
+      interval: 2000
+      running: !crabSocket.connected
+      repeat: true
+      onTriggered: {
+          pathCheckProcess.running = true;
+      }
+  }
+
+  Process {
+      id: pathCheckProcess
+      command: ["sh", "-c", "if nc -U -z /run/crab/api.sock 2>/dev/null; then echo '/run/crab/api.sock'; elif nc -U -z /tmp/crab.sock 2>/dev/null; then echo '/tmp/crab.sock'; fi"]
+      stdout: SplitParser {
+          onRead: (data) => {
+              let res = data.trim();
+              if (res !== "" && socketPath !== res) {
+                  socketPath = res;
+              }
+          }
+      }
+  }
+
   Socket {
     id: crabSocket
-    path: "/tmp/crab.sock"
+    path: socketPath
     connected: true
 
     parser: SplitParser {

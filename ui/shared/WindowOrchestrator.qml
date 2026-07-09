@@ -256,7 +256,7 @@ Item {
             WlrLayershell.layer: WlrLayer.Overlay
             color: "transparent"
             
-            visible: ViewManager.activeDragWindowId !== -1 && (ViewManager.lastActiveScreenName === modelData.name)
+            visible: ViewManager.isDragging && (ViewManager.lastActiveScreenName === modelData.name)
             
             mask: Region {
                 Region { item: ghost }
@@ -280,7 +280,7 @@ Item {
                         )
                     }
                     
-                    ViewManager.activeDragWindowId = -1
+                    ViewManager.activeDragWindowId = null
                     ViewManager.activeDragIcon = ""
                     ViewManager.hoveredTargetWorkspaceId = -1
                     ViewManager.hoveredTargetWorkspaceRef = null

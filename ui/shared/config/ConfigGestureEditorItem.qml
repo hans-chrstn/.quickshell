@@ -69,9 +69,6 @@ Item {
         }
         
         onInternalTextChanged: {
-            // Only auto-load if we haven't successfully loaded yet, 
-            // so we don't overwrite user edits if it changes randomly?
-            // Actually, we WANT it to sync, but we are editing it, so maybe it's fine.
             parseGesturesData()
         }
         onLoaded: parseGesturesData()

@@ -39,7 +39,7 @@ RowLayout {
             onVisibleChanged: updateRegistration()
             Component.onCompleted: updateRegistration()
 
-            readonly property bool isTargeted: ViewManager.activeDragWindowId !== -1 && ws && ViewManager.hoveredTargetWorkspaceId === ws.id
+            readonly property bool isTargeted: ViewManager.isDragging && ws && ViewManager.hoveredTargetWorkspaceId === ws.id
             readonly property bool isMasterHovered: ws && (ViewManager.hoveredWorkspaceId === ws.id || isTargeted)
 
             Layout.preferredWidth: visible && ws ? (isMasterHovered ? 32 : (ws.isActive ? 24 : 8)) : 0
@@ -57,18 +57,18 @@ RowLayout {
                 id: maWs
                 anchors.fill: parent
                 hoverEnabled: true
-                cursorShape: ViewManager.activeDragWindowId !== -1 ? Qt.DragCopyCursor : Qt.PointingHandCursor
+                cursorShape: ViewManager.isDragging ? Qt.DragCopyCursor : Qt.PointingHandCursor
                 onClicked: WindowManager.focusWorkspaceById(ws.id)
 
                 onEntered: {
-                    if (ViewManager.activeDragWindowId === -1 && ws) {
+                    if (!ViewManager.isDragging && ws) {
                         WindowManager.forceUpdateLayouts()
                         ViewManager.setHoveredWorkspace(ws.id)
                     }
                 }
 
                 onExited: {
-                    if (ViewManager.activeDragWindowId === -1) {
+                    if (!ViewManager.isDragging) {
                         ViewManager.setHoveredWorkspace(-1)
                     }
                 }

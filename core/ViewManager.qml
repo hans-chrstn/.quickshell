@@ -15,13 +15,13 @@ Singleton {
     property bool previewHovered: false
     readonly property bool anyHovered: indicatorHovered || previewHovered
 
-    property int activeDragWindowId: -1
+    property var activeDragWindowId: null
     property string activeDragIcon: ""
     property real dragX: 0
     property real dragY: 0
     property int hoveredTargetWorkspaceId: -1
     property var hoveredTargetWorkspaceRef: null 
-    readonly property bool isDragging: activeDragWindowId !== -1
+    readonly property bool isDragging: activeDragWindowId !== -1 && activeDragWindowId !== null
 
     property var indicatorRects: ({})
 
@@ -81,11 +81,12 @@ Singleton {
 
     property bool dashboardTriggerHovered: false
     property bool dashboardContentHovered: false
+    property int activeContextMenus: 0
     property bool _leftDashboardOpen: false
     readonly property bool leftDashboardOpen: _leftDashboardOpen
 
     function updateDashboardState() {
-        if (dashboardTriggerHovered || dashboardContentHovered) {
+        if (dashboardTriggerHovered || dashboardContentHovered || activeContextMenus > 0) {
             dashboardHysteresis.stop()
             _leftDashboardOpen = true
         } else {
@@ -95,6 +96,7 @@ Singleton {
 
     onDashboardTriggerHoveredChanged: updateDashboardState()
     onDashboardContentHoveredChanged: updateDashboardState()
+    onActiveContextMenusChanged: updateDashboardState()
 
     Timer {
         id: dashboardHysteresis

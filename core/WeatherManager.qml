@@ -24,6 +24,9 @@ Singleton {
 
     readonly property ListModel forecastStore: ListModel {
     }
+    
+    readonly property ListModel hourlyStore: ListModel {
+    }
 
     readonly property string weatherCacheDirectory: {
         return Quickshell.cachePath("weather_images")
@@ -209,7 +212,7 @@ Singleton {
             longitude = "-0.1278"
         }
 
-        let url = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&timezone=auto"
+        let url = "https://api.open-meteo.com/v1/forecast?latitude=" + latitude + "&longitude=" + longitude + "&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,uv_index_max&hourly=temperature_2m,weather_code&timezone=auto"
         
         try {
             let xhr = new XMLHttpRequest()
@@ -241,6 +244,36 @@ Singleton {
                                         "icon": root.mapWeatherCodeToIcon(data.daily.weather_code[i]),
                                         "high": data.daily.temperature_2m_max[i],
                                         "low": data.daily.temperature_2m_min[i]
+                                    })
+                                }
+                            }
+                            
+                            if (data.hourly) {
+                                root.hourlyStore.clear()
+                                let currentTimeStr = data.current.time || ""
+                                let startIndex = 0
+                                for (let i = 0; i < data.hourly.time.length; i++) {
+                                    if (data.hourly.time[i] >= currentTimeStr) {
+                                        startIndex = i;
+                                        break;
+                                    }
+                                }
+                                
+                                for (let i = startIndex; i < startIndex + 24 && i < data.hourly.time.length; i++) {
+                                    let date = new Date(data.hourly.time[i])
+                                    // Parse time manually from the ISO string to avoid JS timezone shifts
+                                    // time is formatted as "YYYY-MM-DDTHH:MM"
+                                    let timeParts = data.hourly.time[i].split("T")[1].split(":")
+                                    let hr = parseInt(timeParts[0])
+                                    let ampm = hr >= 12 ? "PM" : "AM"
+                                    let hr12 = hr % 12
+                                    if (hr12 === 0) hr12 = 12
+                                    let timeLabel = i === startIndex ? "Now" : (hr12 + ampm)
+                                    
+                                    root.hourlyStore.append({
+                                        "timeLabel": timeLabel,
+                                        "icon": root.mapWeatherCodeToIcon(data.hourly.weather_code[i]),
+                                        "temp": data.hourly.temperature_2m[i]
                                     })
                                 }
                             }

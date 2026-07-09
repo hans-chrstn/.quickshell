@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
@@ -72,13 +73,72 @@ Item {
                         
                         TapHandler {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onTapped: (point) => {
-                                if (point.pressedButtons & Qt.RightButton) {
-                                    modelData.secondaryActivate()
+                            onTapped: (tapPoint) => {
+                                if (tapPoint.pressedButtons & Qt.RightButton) {
+                                    if (modelData.hasMenu) {
+                                        trayMenuLoader.trayMenu = modelData.menu
+                                        trayMenuLoader.active = true
+                                    } else {
+                                        modelData.secondaryActivate()
+                                    }
                                 } else {
                                     modelData.activate()
                                 }
                                 SoundManager.playToggle()
+                            }
+                        }
+
+                        Loader {
+                            id: trayMenuLoader
+                            active: false
+                            property var trayMenu: null
+
+                            onLoaded: {
+                                item.popup()
+                            }
+
+                            onActiveChanged: {
+                                if (!active) {
+                                    trayMenu = null
+                                }
+                            }
+
+                            sourceComponent: Component {
+                                BaseContextMenu {
+                                    id: trayCtxMenu
+                                    width: 220
+
+                                    onClosed: {
+                                        trayMenuLoader.active = false
+                                    }
+
+                                    QsMenuOpener {
+                                        id: menuOpener
+                                        menu: trayMenuLoader.trayMenu
+                                    }
+
+                                    Repeater {
+                                        model: menuOpener.children
+                                        delegate: MenuItem {
+                                            visible: !modelData.isSeparator
+                                            enabled: modelData.enabled !== false
+                                            height: visible ? 32 : 0
+
+                                            contentItem: StyledLabel {
+                                                text: modelData.text || ""
+                                                type: "caption"
+                                                font.pixelSize: 11
+                                                opacity: parent.enabled ? 1.0 : 0.4
+                                                leftPadding: 8
+                                            }
+
+                                            onTriggered: {
+                                                modelData.triggered()
+                                                trayCtxMenu.close()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         
