@@ -32,7 +32,8 @@ SystemPanel {
         { "id": "timer", "title": "Timers & Alarms", "icon": "󰔛" },
         { "id": "mixer", "title": "Audio Mixer", "icon": "󰕾" },
         { "id": "clipboard", "title": "Clipboard", "icon": "󰅍" },
-        { "id": "notes", "title": "Scratchpad", "icon": "󰠮" }
+        { "id": "notes", "title": "Scratchpad", "icon": "󰠮" },
+        { "id": "ai", "title": "AI Chat", "icon": "󰚩" }
     ]
 
     property bool suppressChronoOSD: false
