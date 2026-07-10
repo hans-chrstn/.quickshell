@@ -31,15 +31,14 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: 24
-            color: "#1c1c1e"
-            opacity: 0.95
+            color: ThemeManager.backgroundPrimaryColor
         }
 
         Rectangle {
             anchors.fill: parent
             anchors.margins: 1
             radius: 23
-            color: "#101012"
+            color: ThemeManager.backgroundPrimaryColor
         }
 
         Rectangle {

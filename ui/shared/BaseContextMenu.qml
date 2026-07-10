@@ -9,24 +9,16 @@ Menu {
     id: root
 
     property bool isOpen: false
-    property bool keepDashboardOpen: false
 
     property alias menuX: root.x
     property alias menuY: root.y
 
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    onOpened: {
-        if (root.keepDashboardOpen) {
-            ViewManager.activeContextMenus++
-        }
-    }
-
-    onClosed: {
-        if (root.keepDashboardOpen) {
-            ViewManager.activeContextMenus--
-        }
-    }
+    palette.text: ThemeManager.contentOnBackgroundColor
+    palette.buttonText: ThemeManager.contentOnBackgroundColor
+    palette.windowText: ThemeManager.contentOnBackgroundColor
+    palette.highlightedText: ThemeManager.contentOnBackgroundColor
 
     enter: Transition {
         ParallelAnimation {

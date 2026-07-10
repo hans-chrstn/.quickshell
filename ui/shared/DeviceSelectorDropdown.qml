@@ -67,7 +67,7 @@ Item {
             width: triggerButton.width
             x: 0
             y: triggerButton.height
-            keepDashboardOpen: true
+            onOpened: ViewManager.dashboardContentHovered = true
 
             onClosed: {
                 menuLoader.active = false

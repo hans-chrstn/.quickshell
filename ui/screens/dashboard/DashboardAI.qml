@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
+import QtQuick.Effects
 import qs.core
 import qs.ui.shared
 
@@ -7,225 +9,457 @@ ColumnLayout {
     id: root
 
     property bool active: false
+    property int editingPresetIndex: -1
+
+    onActiveChanged: {
+        if (!active) {
+            root.editingPresetIndex = -1
+        }
+    }
 
     anchors.fill: parent
     anchors.margins: 20
     spacing: 12
 
-    StyledLabel {
-        text: "AI Chat"
-        type: "heading"
-        font.pixelSize: 28
-    }
-
-    StyledLabel {
-        text: "Powered by DeepSeek"
-        type: "caption"
-        opacity: 0.3
-    }
-
-    ListView {
-        id: chatList
+    RowLayout {
         Layout.fillWidth: true
-        Layout.fillHeight: true
-        spacing: 12
-        clip: true
-        model: AIManager.messages
+        spacing: 10
 
-        onCountChanged: {
-            Qt.callLater(function() {
-                chatList.positionViewAtEnd()
-            })
+        StyledLabel {
+            text: "AI Chat"
+            type: "heading"
+            font.pixelSize: 28
         }
 
-        delegate: RowLayout {
-            width: chatList.width
-            property bool isUser: model.role === "user"
-            layoutDirection: isUser ? Qt.RightToLeft : Qt.LeftToRight
+        Item { Layout.fillWidth: true }
 
-            Item {
-                Layout.preferredWidth: Math.min(messageBubble.implicitWidth + 28, chatList.width * 0.8)
-                Layout.preferredHeight: messageBubble.implicitHeight + 20
+        BaseButton {
+            width: 32
+            height: 32
+            cornerRadius: 16
+            visible: AIManager.isConfigured
 
-                Rectangle {
-                    id: messageBubble
-                    anchors.right: isUser ? parent.right : undefined
-                    anchors.left: isUser ? undefined : parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: Math.min(textLayout.implicitWidth + 28, parent.width)
-                    height: textLayout.implicitHeight + 20
-                    radius: 16
-                    color: isUser ? ThemeManager.accentColor : "#1c1c1e"
+            onClicked: viewMenuLoader.active = true
 
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        radius: 15
-                        color: isUser ? ThemeManager.accentColor : "#101012"
-                        opacity: isUser ? 0.6 : 1.0
-                    }
+            StyledLabel {
+                anchors.centerIn: parent
+                text: "󰍉"
+                type: "icon"
+                font.pixelSize: 16
+                opacity: parent.isHovered ? 1.0 : 0.3
+            }
+        }
+    }
 
-                    Rectangle {
-                        anchors.fill: parent
-                        anchors.margins: 1
-                        radius: 15
-                        color: "transparent"
-                        border.color: isUser ? Qt.lighter(ThemeManager.accentColor, 1.2) : ThemeManager.outlineStrongColor
-                        border.width: 1
-                    }
+    Loader {
+        id: viewMenuLoader
+        active: false
 
-                    StyledLabel {
-                        id: textLayout
-                        anchors.centerIn: parent
-                        width: parent.width - 28
-                        text: model.content
-                        type: "body"
-                        font.pixelSize: 13
-                        font.weight: Font.Medium
-                        customColor: isUser ? "#111111" : "#f5f5f7"
-                        wrapMode: Text.WordWrap
-                    }
-                }
+        onLoaded: item.popup()
+
+        sourceComponent: BaseContextMenu {
+            width: 160
+
+            onOpened: ViewManager.dashboardContentHovered = true
+            onClosed: {
+                viewMenuLoader.active = false
             }
 
-            Item { Layout.fillWidth: true; visible: isUser }
+            MenuItem {
+                contentItem: StyledLabel {
+                    text: "Chat"
+                    type: "body"
+                    font.pixelSize: 13
+                    font.weight: AIManager.view === "chat" ? Font.DemiBold : Font.Medium
+                    leftPadding: 12
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                    radius: ThemeManager.radiusSmall
+                }
+                onTriggered: { AIManager.view = "chat"; close() }
+            }
+
+            MenuItem {
+                contentItem: StyledLabel {
+                    text: "History"
+                    type: "body"
+                    font.pixelSize: 13
+                    font.weight: AIManager.view === "history" ? Font.DemiBold : Font.Medium
+                    leftPadding: 12
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                    radius: ThemeManager.radiusSmall
+                }
+                onTriggered: { AIManager.view = "history"; close() }
+            }
+
+            MenuItem {
+                contentItem: StyledLabel {
+                    text: "Providers"
+                    type: "body"
+                    font.pixelSize: 13
+                    font.weight: AIManager.view === "settings" ? Font.DemiBold : Font.Medium
+                    leftPadding: 12
+                    verticalAlignment: Text.AlignVCenter
+                }
+                background: Rectangle {
+                    color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                    radius: ThemeManager.radiusSmall
+                }
+                onTriggered: { AIManager.view = "settings"; close() }
+            }
         }
     }
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: 8
+        visible: AIManager.isConfigured && AIManager.view !== "history"
 
-        BaseButton {
-            width: 36
-            height: 36
-            cornerRadius: 18
-            visible: AIManager.messages.count > 0 && !AIManager.isLoading
-
-            onClicked: AIManager.clearChat()
-
-            StyledLabel {
-                anchors.centerIn: parent
-                text: ThemeManager.iconTrash
-                type: "icon"
-                font.pixelSize: 14
-                opacity: parent.isHovered ? 1.0 : 0.4
+        StyledLabel {
+            text: {
+                if (!AIManager.isConfigured) return "Configure your AI provider to begin"
+                if (AIManager.view === "settings") return "Providers"
+                return AIManager.configuredName + " · " + AIManager.configuredModel
             }
-        }
-
-        Item {
+            type: "caption"
+            opacity: 0.3
             Layout.fillWidth: true
-            Layout.preferredHeight: 44
+        }
+    }
 
-            Rectangle {
-                anchors.fill: parent
-                radius: 22
-                color: "#1c1c1e"
-            }
+    Loader {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        active: !AIManager.isConfigured || AIManager.view === "settings"
+        visible: active
+        sourceComponent: dashboardSettingsComponent
+    }
 
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 1
-                radius: 21
-                color: "#101012"
-            }
+    Loader {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        active: AIManager.isConfigured && AIManager.view === "history"
+        visible: active
+        sourceComponent: DashboardAIHistory { }
+    }
 
-            Rectangle {
-                anchors.fill: parent
-                anchors.margins: 1
-                radius: 21
-                color: "transparent"
-                border.color: ThemeManager.outlineStrongColor
-                border.width: 1
-            }
+    Loader {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        active: AIManager.isConfigured && AIManager.view === "chat"
+        visible: active
+        sourceComponent: DashboardAIChat { }
+    }
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 18
-                anchors.rightMargin: 8
-                spacing: 8
+    Component {
+        id: dashboardSettingsComponent
 
-                TextInput {
-                    id: messageInput
+        Flickable {
+            id: setupFlickable
+            anchors.fill: parent
+            contentHeight: setupLayout.implicitHeight + 40
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+
+            ColumnLayout {
+                id: setupLayout
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                spacing: 12
+
+                StyledLabel {
                     Layout.fillWidth: true
-                    color: "#f5f5f7"
-                    font.family: ThemeManager.fontFamily
-                    font.pixelSize: 14
-                    font.weight: Font.Medium
-                    enabled: !AIManager.isLoading
-
-                    onAccepted: {
-                        AIManager.sendMessage(text)
-                        text = ""
-                    }
-
-                    StyledLabel {
-                        text: "Ask anything..."
-                        type: "body"
-                        font.pixelSize: 14
-                        font.weight: Font.Medium
-                        opacity: 0.15
-                        visible: !messageInput.text && !messageInput.activeFocus
-                    }
-                }
-
-                BaseButton {
-                    width: 32
-                    height: 32
-                    cornerRadius: 16
-                    visible: messageInput.text.trim() !== "" && !AIManager.isLoading
-
-                    onClicked: {
-                        AIManager.sendMessage(messageInput.text)
-                        messageInput.text = ""
-                    }
-
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 16
-                        color: parent.isHovered ? ThemeManager.accentColor : "transparent"
-                        Behavior on color { ColorAnimation { duration: 150 } }
-                    }
-
-                    StyledLabel {
-                        anchors.centerIn: parent
-                        text: "󰁔"
-                        type: "icon"
-                        font.pixelSize: 14
-                        customColor: parent.parent.isHovered ? "#111111" : ThemeManager.accentColor
-                    }
+                    text: "AI Providers"
+                    type: "title"
+                    letterSpacing: -0.35
+                    horizontalAlignment: Text.AlignHCenter
                 }
 
                 StyledLabel {
-                    text: "󰛑"
-                    type: "icon"
-                    font.pixelSize: 16
-                    visible: AIManager.isLoading
-                    opacity: 0.6
+                    text: AIManager.presets.count + " provider(s) saved"
+                    type: "caption"
+                    opacity: 0.3
+                    visible: AIManager.presets.count > 0
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                }
 
-                    NumberAnimation on rotation {
-                        from: 0
-                        to: 360
-                        duration: 1200
-                        loops: Animation.Infinite
-                        running: AIManager.isLoading
+                ListView {
+                    id: presetList
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.max(60, presetList.contentHeight)
+                    visible: AIManager.presets.count > 0
+                    spacing: 6
+                    clip: true
+                    interactive: contentHeight > height
+                    model: AIManager.presets
+
+                    delegate: ExpandableCard {
+                        width: presetList.width
+                        expanded: root.editingPresetIndex === index
+                        expandedHeight: 280
+
+                        MouseArea {
+                            anchors.fill: parent
+                            propagateComposedEvents: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                if (!expanded) {
+                                    AIManager.activatePreset(index)
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            height: 44
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: 2
+
+                                StyledLabel {
+                                    text: name
+                                    type: "body"
+                                    font.weight: Font.DemiBold
+                                    font.pixelSize: 13
+                                    Layout.fillWidth: true
+                                    elideMode: Text.ElideRight
+                                }
+
+                                StyledLabel {
+                                    text: modelName
+                                    type: "caption"
+                                    font.pixelSize: 10
+                                    opacity: 0.4
+                                    Layout.fillWidth: true
+                                    elideMode: Text.ElideRight
+                                }
+                            }
+
+                            BaseButton {
+                                width: 32
+                                height: 32
+                                cornerRadius: 16
+                                z: 1
+
+                                onClicked: {
+                                    presetCtxMenuLoader.presetIndex = index
+                                    presetCtxMenuLoader.active = true
+                                }
+
+                                StyledLabel {
+                                    anchors.centerIn: parent
+                                    text: "󰇙"
+                                    type: "icon"
+                                    font.pixelSize: 14
+                                    opacity: parent.isHovered ? 1.0 : 0.3
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.topMargin: 44
+                            anchors.leftMargin: 14
+                            anchors.rightMargin: 14
+                            spacing: 6
+                            visible: expanded
+
+                            StyledInput { id: editName; Layout.fillWidth: true; Layout.preferredHeight: 38; placeholder: "Name"; text: name }
+                            StyledInput { id: editUrl; Layout.fillWidth: true; Layout.preferredHeight: 38; placeholder: "API URL"; text: url }
+                            StyledInput { id: editModel; Layout.fillWidth: true; Layout.preferredHeight: 38; placeholder: "Model"; text: modelName }
+                            StyledInput { id: editKey; Layout.fillWidth: true; Layout.preferredHeight: 38; placeholder: "API Key"; text: key; isPassword: true }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                BaseButton {
+                                    Layout.fillWidth: true
+                                    height: 36
+                                    cornerRadius: 18
+
+                                    onClicked: {
+                                        AIManager.updatePreset(index, editName.text, editUrl.text, editModel.text, editKey.text)
+                                        root.editingPresetIndex = -1
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: 18
+                                        color: parent.isHovered ? ThemeManager.accentColor : "#25282e"
+                                        Behavior on color { ColorAnimation { duration: 150 } }
+                                    }
+
+                                    StyledLabel {
+                                        anchors.centerIn: parent
+                                        text: "Save"
+                                        type: "body"
+                                        font.weight: Font.DemiBold
+                                        font.pixelSize: 13
+                                        customColor: parent.parent.isHovered ? "#111111" : ThemeManager.contentOnBackgroundColor
+                                    }
+                                }
+
+                                BaseButton {
+                                    Layout.fillWidth: true
+                                    height: 36
+                                    cornerRadius: 18
+                                    onClicked: root.editingPresetIndex = -1
+                                    StyledLabel {
+                                        anchors.centerIn: parent; text: "Cancel"; type: "body"
+                                        font.weight: Font.DemiBold; font.pixelSize: 13; opacity: 0.5
+                                    }
+                                }
+                            }
+                        }
+
+                        Loader {
+                            id: presetCtxMenuLoader
+                            active: false
+                            property int presetIndex: -1
+                            onLoaded: item.popup()
+
+                            sourceComponent: BaseContextMenu {
+                                width: 180
+                                onOpened: ViewManager.dashboardContentHovered = true
+                                onClosed: {
+                                    presetCtxMenuLoader.active = false
+                                }
+
+                                MenuItem {
+                                    contentItem: StyledLabel {
+                                        text: "Connect"
+                                        type: "body"
+                                        font.pixelSize: 13
+                                        font.weight: Font.DemiBold
+                                        leftPadding: 12
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    background: Rectangle {
+                                        color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                                        radius: ThemeManager.radiusSmall
+                                    }
+                                    onTriggered: {
+                                        AIManager.activatePreset(presetCtxMenuLoader.presetIndex)
+                                        close()
+                                    }
+                                }
+
+                                MenuItem {
+                                    contentItem: StyledLabel {
+                                        text: "Edit"
+                                        type: "body"
+                                        font.pixelSize: 13
+                                        font.weight: Font.DemiBold
+                                        leftPadding: 12
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    background: Rectangle {
+                                        color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                                        radius: ThemeManager.radiusSmall
+                                    }
+                                    onTriggered: {
+                                        root.editingPresetIndex = presetCtxMenuLoader.presetIndex
+                                        close()
+                                    }
+                                }
+
+                                MenuSeparator { }
+
+                                MenuItem {
+                                    contentItem: StyledLabel {
+                                        text: "Delete"
+                                        type: "body"
+                                        font.pixelSize: 13
+                                        font.weight: Font.DemiBold
+                                        customColor: ThemeManager.dangerColor
+                                        leftPadding: 12
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    background: Rectangle {
+                                        color: parent.highlighted ? ThemeManager.surfaceVariantStrongColor : "transparent"
+                                        radius: ThemeManager.radiusSmall
+                                    }
+                                    onTriggered: {
+                                        AIManager.deletePreset(presetCtxMenuLoader.presetIndex)
+                                        close()
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                BaseButton {
-                    width: 32
-                    height: 32
-                    cornerRadius: 16
-                    visible: AIManager.messages.count >= 2 && !AIManager.isLoading && messageInput.text.trim() === ""
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 1
+                    color: ThemeManager.outlinePrimaryColor
+                    opacity: 0.3
+                    visible: AIManager.presets.count > 0
+                }
 
-                    onClicked: AIManager.regenerate()
+                StyledLabel {
+                    Layout.fillWidth: true
+                    text: "Add Provider"
+                    type: "label"
+                    font.weight: Font.DemiBold
+                }
 
-                    StyledLabel {
-                        anchors.centerIn: parent
-                        text: ThemeManager.iconRevert
-                        type: "icon"
-                        font.pixelSize: 12
-                        opacity: parent.isHovered ? 1.0 : 0.3
+                Item {
+                    id: addForm
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: addFormLayout.implicitHeight
+                    clip: true
+
+                    ColumnLayout {
+                        id: addFormLayout
+                        anchors.fill: parent
+                        spacing: 8
+
+                        StyledInput { id: addName; Layout.fillWidth: true; Layout.preferredHeight: 40; placeholder: "Preset name (e.g. DeepSeek)" }
+                        StyledInput { id: addUrl; Layout.fillWidth: true; Layout.preferredHeight: 40; placeholder: "API URL" }
+                        StyledInput { id: addModel; Layout.fillWidth: true; Layout.preferredHeight: 40; placeholder: "Model (e.g. deepseek-chat)" }
+                        StyledInput { id: addKey; Layout.fillWidth: true; Layout.preferredHeight: 40; placeholder: "API Key (sk-...)"; isPassword: true }
+
+                        BaseButton {
+                            Layout.alignment: Qt.AlignHCenter
+                            width: 160
+                            height: 40
+                            cornerRadius: 20
+                            onClicked: {
+                                AIManager.addPreset(addName.text, addUrl.text, addModel.text, addKey.text)
+                                addName.text = ""; addUrl.text = ""; addModel.text = ""; addKey.text = ""
+                            }
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 20
+                                color: parent.isHovered ? ThemeManager.accentColor : "#1c1c1e"
+                                Behavior on color { ColorAnimation { duration: 150 } }
+                            }
+                            StyledLabel {
+                                anchors.centerIn: parent
+                                text: "Add Provider"
+                                type: "body"
+                                font.weight: Font.DemiBold
+                                font.pixelSize: 14
+                                customColor: parent.parent.isHovered ? "#111111" : ThemeManager.contentOnBackgroundColor
+                            }
+                        }
                     }
                 }
             }

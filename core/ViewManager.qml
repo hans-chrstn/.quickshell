@@ -81,12 +81,11 @@ Singleton {
 
     property bool dashboardTriggerHovered: false
     property bool dashboardContentHovered: false
-    property int activeContextMenus: 0
     property bool _leftDashboardOpen: false
     readonly property bool leftDashboardOpen: _leftDashboardOpen
 
     function updateDashboardState() {
-        if (dashboardTriggerHovered || dashboardContentHovered || activeContextMenus > 0) {
+        if (dashboardTriggerHovered || dashboardContentHovered) {
             dashboardHysteresis.stop()
             _leftDashboardOpen = true
         } else {
@@ -96,7 +95,6 @@ Singleton {
 
     onDashboardTriggerHoveredChanged: updateDashboardState()
     onDashboardContentHoveredChanged: updateDashboardState()
-    onActiveContextMenusChanged: updateDashboardState()
 
     Timer {
         id: dashboardHysteresis
