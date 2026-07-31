@@ -7,7 +7,7 @@ import qs.ui.features.island
 import qs.ui.features.island.dynamic
 
 IslandSurface {
-    id: root
+    id: dynamicIslandRoot
 
     expandedWidth: ThemeManager.dynamicIslandExpandedWidth
     expandedHeight: ThemeManager.dynamicIslandExpandedHeight
@@ -24,9 +24,10 @@ IslandSurface {
     secondFilletX: width - 1
     secondFilletY: 16
 
-    onIsHoveredChanged: {
-        root.isExpanded = isHovered || tabView.moving
-    }
+    property int activeMenus: 0
+
+    // Declaratively bind expansion state so it stays open when hovered, moving, or when menus are active
+    isExpanded: isHovered || (tabView && tabView.moving) || activeMenus > 0
 
     DynamicIslandLogic {
         id: islandLogic
@@ -53,7 +54,7 @@ IslandSurface {
             readonly property bool musicPlaying: MusicManager.activePlayer && MusicManager.activePlayer.playbackState === MprisPlaybackState.Playing
             readonly property bool musicTabActive: tabView.currentIndex === 1
 
-            active: root.isExpanded && musicTabActive && musicPlaying
+            active: dynamicIslandRoot.isExpanded && musicTabActive && musicPlaying
             source: "music/AudioVisualizer.qml"
             visible: active && opacity > 0
             opacity: active ? 1 : 0
@@ -70,16 +71,13 @@ IslandSurface {
             anchors.fill: parent
             logic: islandLogic
             transform: Translate {
-                y: root.isExpanded ? 0 : 15
+                y: dynamicIslandRoot.isExpanded ? 0 : 15
                 Behavior on y {
                     NumberAnimation {
                         duration: 500
                         easing.type: Easing.OutExpo
                     }
                 }
-            }
-            onMovingChanged: {
-                root.isExpanded = root.isHovered || moving
             }
         }
 
@@ -90,13 +88,13 @@ IslandSurface {
             tabCount: tabView.count
             currentTabIndex: tabView.currentIndex
 
-            opacity: root.isExpanded ? 1 : 0
+            opacity: dynamicIslandRoot.isExpanded ? 1 : 0
             visible: opacity > 0.01
             
             Behavior on opacity {
                 SequentialAnimation {
                     PauseAnimation {
-                        duration: root.isExpanded ? 200 : 0
+                        duration: dynamicIslandRoot.isExpanded ? 200 : 0
                     }
                     NumberAnimation {
                         duration: 300

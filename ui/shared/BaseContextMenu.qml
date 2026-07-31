@@ -58,6 +58,7 @@ Menu {
     }
 
     background: Rectangle {
+        id: bgRect
         radius: ThemeManager.radiusLarge
         color: ThemeManager.backgroundPrimaryColor
         border.color: ThemeManager.outlineStrongColor
@@ -74,6 +75,16 @@ Menu {
     }
 
     padding: 6
+
+    onOpened: {
+        ViewManager.activeMenu = bgRect
+    }
+
+    onClosed: {
+        if (ViewManager.activeMenu === bgRect) {
+            ViewManager.activeMenu = null
+        }
+    }
 
     Connections {
         target: ViewManager

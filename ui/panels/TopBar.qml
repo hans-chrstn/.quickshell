@@ -36,6 +36,9 @@ SystemPanel {
         Region { item: islandMask }
         Region { item: previewMask }
         Region { item: ghostMask }
+        Region {
+            item: ViewManager.activeMenu
+        }
     }
 
     Item {

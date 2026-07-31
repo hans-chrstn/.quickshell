@@ -190,7 +190,7 @@ Singleton {
 
     Timer {
         id: updateTimer
-        interval: 3000
+        interval: 10000 // Polling acts strictly as a slow defensive fallback now
         running: Pipewire.ready
         repeat: true
         triggeredOnStart: true
@@ -202,5 +202,10 @@ Singleton {
         function onReadyChanged() { if (Pipewire.ready) root.updateNodes() }
         function onDefaultAudioSinkChanged() { root.updateNodes() }
         function onDefaultAudioSourceChanged() { root.updateNodes() }
+    }
+
+    Connections {
+        target: Pipewire.nodes
+        function onValuesChanged() { root.updateNodes() }
     }
 }

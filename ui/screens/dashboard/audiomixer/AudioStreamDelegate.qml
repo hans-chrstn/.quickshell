@@ -20,6 +20,26 @@ StyledCard {
     
     property int _routedSinkId: -1
 
+    // Find the hardware device (sink/source) the stream is actually connected to via Pipewire linkGroups.
+    readonly property PwNode linkedDeviceNode: {
+        if (!Pipewire.ready || !Pipewire.linkGroups || !Pipewire.linkGroups.values) return null
+        let lgs = Pipewire.linkGroups.values
+        for (let i = 0; i < lgs.length; i++) {
+            let lg = lgs[i]
+            if (lg.source && lg.source.id === root.streamId) {
+                if (lg.target && !lg.target.isStream) {
+                    return lg.target
+                }
+            }
+            if (lg.target && lg.target.id === root.streamId) {
+                if (lg.source && lg.source.id !== root.streamId && !lg.source.isStream) {
+                    return lg.source
+                }
+            }
+        }
+        return null
+    }
+
     property PwNode currentTargetNode: {
         if (root._routedSinkId > 0 && AudioManager.sinks) {
             for (let i = 0; i < AudioManager.sinks.count; i++) {
@@ -29,13 +49,28 @@ StyledCard {
                 }
             }
         }
-        if (root.streamNode && root.streamNode.targetNode) {
-            return root.streamNode.targetNode
+        if (root.linkedDeviceNode) {
+            return root.linkedDeviceNode
         }
-        return AudioManager.defaultSink
+        return (root.streamNode && root.streamNode.isSink) ? AudioManager.defaultSink : AudioManager.defaultSource
     }
 
-    property bool isExplicitlyRouted: root._routedSinkId > 0 || (root.streamNode && root.streamNode.targetNode !== null)
+    property int displayedTargetId: {
+        if (root._routedSinkId > 0) {
+            return root._routedSinkId
+        }
+        
+        let linkedNode = root.linkedDeviceNode
+        let defaultNode = (root.streamNode && root.streamNode.isSink) ? AudioManager.defaultSink : AudioManager.defaultSource
+        
+        if (linkedNode && defaultNode && linkedNode.id !== defaultNode.id) {
+            return linkedNode.id
+        }
+        
+        return -1
+    }
+
+    property bool isExplicitlyRouted: displayedTargetId > 0
 
     property var deviceModel: {
         let arr = [{ id: -1, name: "Default (Global)" }]
@@ -46,16 +81,6 @@ StyledCard {
             }
         }
         return arr
-    }
-
-    property int displayedTargetId: {
-        if (root._routedSinkId > 0) {
-            return root._routedSinkId
-        }
-        if (root.streamNode && root.streamNode.targetNode) {
-            return root.streamNode.targetNode.id
-        }
-        return -1
     }
 
     readonly property string streamName: {
@@ -88,14 +113,7 @@ StyledCard {
     Loader {
         id: nodeLoader
         anchors.fill: parent
-        active: {
-            let n = root.streamNode
-            return root.isActive 
-                && n !== null 
-                && n !== undefined 
-                && n.ready 
-                && n.audio !== undefined
-        }
+        active: root.isActive && root.streamNode !== null
 
         sourceComponent: Item {
             anchors.fill: parent
@@ -227,16 +245,4 @@ StyledCard {
         }
     }
 
-    StyledLabel {
-        anchors.centerIn: parent
-        text: "Synchronizing..."
-        type: "caption"
-        opacity: 0.3
-        visible: {
-            if (!root.isActive) {
-                return false
-            }
-            return !root.streamNode || !root.streamNode.ready || !root.streamNode.audio
-        }
-    }
 }

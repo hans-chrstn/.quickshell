@@ -88,7 +88,6 @@ Item {
                     cornerRadius: 4
 
                     onClicked: {
-                        root.currentId = modelData.id
                         root.deviceSelected(modelData.id, modelData)
                         popupMenu.close()
                     }

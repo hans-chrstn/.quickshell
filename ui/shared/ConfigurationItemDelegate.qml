@@ -64,6 +64,9 @@ Loader {
             case "gesture_editor": {
                 return gestureEditorComp
             }
+            case "default_apps_editor": {
+                return defaultAppsEditorComp
+            }
             default: {
                 return null
             }
@@ -115,6 +118,13 @@ Loader {
     Component {
         id: gestureEditorComp
         ConfigGestureEditorItem {
+            configurationItemData: root.configurationItemData
+        }
+    }
+
+    Component {
+        id: defaultAppsEditorComp
+        ConfigDefaultAppsEditorItem {
             configurationItemData: root.configurationItemData
         }
     }

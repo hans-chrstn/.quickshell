@@ -73,8 +73,8 @@ Item {
                         
                         TapHandler {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onTapped: (tapPoint) => {
-                                if (tapPoint.pressedButtons & Qt.RightButton) {
+                            onTapped: (tapPoint, button) => {
+                                if (button === Qt.RightButton) {
                                     if (modelData.hasMenu) {
                                         trayMenuLoader.trayMenu = modelData.menu
                                         trayMenuLoader.active = true
@@ -95,11 +95,17 @@ Item {
 
                             onLoaded: {
                                 item.popup()
+                                if (typeof dynamicIslandRoot !== "undefined") {
+                                    dynamicIslandRoot.activeMenus++
+                                }
                             }
 
                             onActiveChanged: {
                                 if (!active) {
                                     trayMenu = null
+                                    if (typeof dynamicIslandRoot !== "undefined") {
+                                        dynamicIslandRoot.activeMenus--
+                                    }
                                 }
                             }
 
@@ -120,16 +126,29 @@ Item {
                                     Repeater {
                                         model: menuOpener.children
                                         delegate: MenuItem {
+                                            id: menuItem
                                             visible: !modelData.isSeparator
                                             enabled: modelData.enabled !== false
                                             height: visible ? 32 : 0
+
+                                            background: Rectangle {
+                                                implicitWidth: 200
+                                                implicitHeight: 32
+                                                color: menuItem.hovered ? ThemeManager.surfaceVariantColor : "transparent"
+                                                radius: 4
+                                            }
 
                                             contentItem: StyledLabel {
                                                 text: modelData.text || ""
                                                 type: "caption"
                                                 font.pixelSize: 11
-                                                opacity: parent.enabled ? 1.0 : 0.4
+                                                opacity: menuItem.enabled ? 1.0 : 0.4
                                                 leftPadding: 8
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+
+                                            HoverHandler {
+                                                cursorShape: Qt.PointingHandCursor
                                             }
 
                                             onTriggered: {

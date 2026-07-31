@@ -614,6 +614,13 @@ Singleton {
                 { type: "text", label: "Menu Style (default, ctos, pills)", property: "radialMenuStyle", default: "default" },
                 { type: "gesture_editor" }
             ]
+        },
+        {
+            category: "Default Apps",
+            icon: "󰏚",
+            items: [
+                { type: "default_apps_editor" }
+            ]
         }
     ]
 

@@ -5,6 +5,8 @@ import Quickshell
 Singleton {
     id: root
 
+    property Item activeMenu: null
+
     property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
     
     property int hoveredWorkspaceId: -1
