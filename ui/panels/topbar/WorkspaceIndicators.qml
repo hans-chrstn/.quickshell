@@ -20,7 +20,7 @@ RowLayout {
         model: WindowManager.workspaces
         delegate: Rectangle {
             id: indicator
-            property var ws: WindowManager.getWorkspaceProps(WindowManager.isNiri ? model : modelData)
+            property var ws: WindowManager.getWorkspaceProps(modelData)
             readonly property bool onCurrentScreen: ws && ws.output === root.screenName
             visible: onCurrentScreen
             

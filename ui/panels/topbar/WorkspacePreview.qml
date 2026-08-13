@@ -79,13 +79,9 @@ ClippingRectangle {
         let audioPids = AudioManager.pidsPlayingAudio
         let audioApps = AudioManager.appNamesPlayingAudio
         
-        if (WindowManager.isNiri) {
-            windows.sort((a, b) => a.posX - b.posX)
-        }
-        
         let minX = 0;
         let minY = 0;
-        if (!WindowManager.isNiri && windows.length > 0) {
+        if (windows.length > 0) {
             minX = Math.min(...windows.map(w => w.posX));
             minY = Math.min(...windows.map(w => w.posY));
         }
@@ -115,13 +111,8 @@ ClippingRectangle {
             let finalX = 0;
             let finalY = 0;
 
-            if (WindowManager.isNiri) {
-                finalX = currentX;
-                currentX += w + ThemeManager.spacingSmall;
-            } else {
-                finalX = (win.posX - minX) * root.previewScale * 0.8;
-                finalY = (win.posY - minY) * root.previewScale * 0.8;
-            }
+            finalX = (win.posX - minX) * root.previewScale * 0.8;
+            finalY = (win.posY - minY) * root.previewScale * 0.8;
 
             maxW = Math.max(maxW, finalX + w);
             maxH = Math.max(maxH, finalY + h);
@@ -176,9 +167,8 @@ ClippingRectangle {
             Item {
                 id: windowContainer
                 width: root.layoutWidthNeeded
-                height: WindowManager.isNiri ? parent.height : root.layoutHeightNeeded
-                anchors.centerIn: WindowManager.isNiri ? undefined : parent
-                anchors.verticalCenter: WindowManager.isNiri ? parent.verticalCenter : undefined
+                height: root.layoutHeightNeeded
+                anchors.centerIn: parent
 
                 Repeater {
                     model: root.workspaceWindows
@@ -188,7 +178,7 @@ ClippingRectangle {
                         height: modelData.height
                         
                         x: modelData.posX
-                        y: WindowManager.isNiri ? (windowContainer.height - height) / 2 : modelData.posY
+                        y: modelData.posY
                         radius: ThemeManager.radiusSmall / 2
                         
                         readonly property bool isWindowHovered: maWin.containsMouse
