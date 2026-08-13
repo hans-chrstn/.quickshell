@@ -13,9 +13,8 @@ Singleton {
     readonly property string sessionsStorePath: Quickshell.cachePath("sessions.json")
     
     readonly property var defaultSessions: [
-        { name: "Niri", exec: "niri-session" },
-        { name: "Steam", exec: "steam-gamescope" },
-        { name: "Hyprland", exec: "start-hyprland" }
+        { name: "Hyprland", exec: "start-hyprland" },
+        { name: "Steam", exec: "steam-gamescope" }
     ]
 
     ListModel { id: sessionModel }

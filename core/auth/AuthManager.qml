@@ -129,7 +129,7 @@ Singleton {
                 }
                 
                 if (cmd.length === 0) {
-                    cmd = ["niri-session"]
+                    cmd = ["start-hyprland"]
                 }
                 
                 Greetd.launch(cmd, ["XDG_SESSION_TYPE=wayland"], false)
