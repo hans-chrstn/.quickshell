@@ -102,7 +102,7 @@
                   
                   monitor = ,prefer,auto,1
                 '';
-              in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.hyprland}/bin/Hyprland --config ${hyprlandConfig}";
+              in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.hyprland}/bin/hyprland --config ${hyprlandConfig}";
               user = "greeter";
             };
           };
