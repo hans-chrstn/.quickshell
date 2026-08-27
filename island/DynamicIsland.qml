@@ -5,6 +5,7 @@ import qs.components
 import qs.modules.clock
 import qs.modules.launcher
 import qs.modules.session
+import qs.modules.settings
 
 Item {
     id: root
@@ -27,6 +28,7 @@ Item {
         modules: [
             ClockModuleSpec { },
             LauncherModuleSpec { screenName: root.screenName },
+            SettingsModuleSpec { screenName: root.screenName },
             SessionModuleSpec { screenName: root.screenName }
         ]
     }

@@ -8,6 +8,7 @@ import Quickshell.Hyprland
 import qs.panels
 import qs.services.launcher
 import qs.services.session
+import qs.services.settings
 
 ShellRoot {
     IpcHandler {
@@ -21,6 +22,9 @@ ShellRoot {
         function session(): void { SessionService.toggle() }
         function sessionOpen(): void { SessionService.open() }
         function sessionClose(): void { SessionService.close() }
+        function settings(): void { SettingsService.toggle() }
+        function settingsOpen(): void { SettingsService.open() }
+        function settingsClose(): void { SettingsService.close() }
     }
 
     GlobalShortcut {

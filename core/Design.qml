@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services.settings
 
 Singleton {
     readonly property string fontDisplay: "SF Pro Display"
@@ -34,11 +35,11 @@ Singleton {
     readonly property int contentVerticalPadding: 6
     readonly property int expandedContentPadding: 18
 
-    readonly property int revealDuration: 300
-    readonly property int resizeDuration: 520
-    readonly property int contentRevealDuration: 180
-    readonly property int attentionExpandDelay: 170
-    readonly property int moduleCloseDuration: 440
-    readonly property int expandDelay: 420
-    readonly property int hideDelay: 1200
+    readonly property int revealDuration: SettingsService.revealDuration
+    readonly property int resizeDuration: SettingsService.resizeDuration
+    readonly property int contentRevealDuration: SettingsService.contentRevealDuration
+    readonly property int attentionExpandDelay: SettingsService.attentionExpandDelay
+    readonly property int moduleCloseDuration: SettingsService.moduleCloseDuration
+    readonly property int expandDelay: SettingsService.expandDelay
+    readonly property int hideDelay: SettingsService.hideDelay
 }

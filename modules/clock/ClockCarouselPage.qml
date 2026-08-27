@@ -3,9 +3,12 @@ import qs.core
 import qs.components
 import qs.services.launcher
 import qs.services.session
+import qs.services.settings
 
 Item {
     id: root
+
+    clip: true
 
     required property string page
     required property string screenName
@@ -30,39 +33,28 @@ Item {
         font.weight: root.expanded ? Font.Light : Font.Medium
     }
 
-    Row {
+    CarouselAction {
         anchors.centerIn: parent
-        visible: root.page !== "clock"
-        spacing: 7
-
-        IslandGlyph {
-            anchors.verticalCenter: parent.verticalCenter
-            name: root.page
-            glyphColor: actionHover.hovered ? Design.text : Design.textMuted
-        }
-
-        Text {
-            anchors.verticalCenter: parent.verticalCenter
-            text: root.page === "apps" ? "Apps" : "Power"
-            color: actionHover.hovered ? Design.text : Design.textMuted
-            font.family: Design.fontText
-            font.pixelSize: 12 + root.expansionProgress
-            font.weight: Font.Medium
-        }
+        visible: root.page === "power"
+        icon: "power"
+        label: "Power"
+        onActivated: SessionService.open(root.screenName)
     }
 
-    HoverHandler { id: actionHover }
+    Row {
+        anchors.centerIn: parent
+        visible: root.page === "utilities"
+        spacing: 8
 
-    TapHandler {
-        enabled: root.page !== "clock"
-        acceptedButtons: Qt.LeftButton
-        gesturePolicy: TapHandler.DragThreshold
-        grabPermissions: PointerHandler.ApprovesTakeOverByAnything
-        onTapped: {
-            if (root.page === "apps")
-                LauncherService.open("", root.screenName)
-            else
-                SessionService.open(root.screenName)
+        CarouselAction {
+            icon: "apps"
+            label: "Launcher"
+            onActivated: LauncherService.open("", root.screenName)
+        }
+        CarouselAction {
+            icon: "settings"
+            label: "Settings"
+            onActivated: SettingsService.open(root.screenName)
         }
     }
 }

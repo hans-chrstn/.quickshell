@@ -38,6 +38,22 @@ Canvas {
             ctx.beginPath()
             ctx.arc(8, 8.3, 5.4, -0.78, Math.PI + 0.78)
             ctx.stroke()
+        } else if (root.name === "settings") {
+            for (let i = 0; i < 8; ++i) {
+                const angle = i * Math.PI / 4
+                ctx.beginPath()
+                ctx.moveTo(8 + Math.cos(angle) * 5.1,
+                    8 + Math.sin(angle) * 5.1)
+                ctx.lineTo(8 + Math.cos(angle) * 6.7,
+                    8 + Math.sin(angle) * 6.7)
+                ctx.stroke()
+            }
+            ctx.beginPath()
+            ctx.arc(8, 8, 5.2, 0, Math.PI * 2)
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(8, 8, 1.8, 0, Math.PI * 2)
+            ctx.stroke()
         }
     }
 }

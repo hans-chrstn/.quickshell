@@ -6,7 +6,7 @@ Item {
     required property string screenName
     property bool expanded: false
     property real expansionProgress: 0
-    readonly property var pages: ["power", "clock", "apps", "power", "clock"]
+    readonly property var pages: ["power", "clock", "utilities", "power", "clock"]
 
     function normalizeEdge() {
         if (pagesView.currentIndex === 0) {
