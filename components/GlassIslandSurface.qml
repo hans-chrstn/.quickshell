@@ -7,6 +7,7 @@ Item {
     id: root
 
     property bool expanded: false
+    property real expansionProgress: 0
 
     layer.enabled: true
     layer.effect: MultiEffect {
@@ -19,9 +20,11 @@ Item {
 
     IslandShape {
         anchors.fill: parent
-        fillColor: root.expanded ? Design.islandExpanded : Design.island
-
-        Behavior on fillColor { ColorAnimation { duration: 220 } }
+        fillColor: Qt.rgba(
+            Design.island.r + (Design.islandExpanded.r - Design.island.r) * root.expansionProgress,
+            Design.island.g + (Design.islandExpanded.g - Design.island.g) * root.expansionProgress,
+            Design.island.b + (Design.islandExpanded.b - Design.island.b) * root.expansionProgress,
+            Design.island.a + (Design.islandExpanded.a - Design.island.a) * root.expansionProgress)
     }
 
     IslandShape {
@@ -29,9 +32,7 @@ Item {
         fillColor: "transparent"
         strokeColor: Design.glassStroke
         strokeWidth: 1
-        opacity: root.expanded ? 1 : 0.72
-
-        Behavior on opacity { NumberAnimation { duration: 220 } }
+        opacity: 0.72 + 0.28 * root.expansionProgress
     }
 
     Rectangle {
@@ -49,6 +50,6 @@ Item {
         width: Math.max(0, parent.width - (Design.wing + Design.bodyRadius) * 2)
         height: 1
         color: Design.glassShade
-        opacity: root.expanded ? 0.8 : 0.45
+        opacity: 0.45 + 0.35 * root.expansionProgress
     }
 }

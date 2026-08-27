@@ -10,10 +10,6 @@ Item {
     readonly property real expansionProgress: context?.expansionProgress ?? 0
 
     focus: true
-    opacity: Math.max(0, Math.min(1,
-        (expansionProgress - 0.24) / 0.48))
-    transform: Translate { y: (1 - root.opacity) * -7 }
-
     Component.onCompleted: focusTimer.start()
 
     Timer {

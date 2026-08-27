@@ -7,10 +7,12 @@ Item {
     required property IslandModule module
     property bool expanded: false
     property real expansionProgress: 0
+    property string screenName: ""
 
     readonly property QtObject moduleContext: QtObject {
         readonly property bool expanded: root.expanded
         readonly property real expansionProgress: root.expansionProgress
+        readonly property string screenName: root.screenName
     }
 
     clip: true
@@ -20,6 +22,20 @@ Item {
         anchors.fill: parent
         active: root.module !== null
         sourceComponent: root.module?.view ?? null
+        readonly property real revealProgress: {
+            if (!root.module?.revealWithExpansion)
+                return 1
+            const span = root.module.revealEnd - root.module.revealStart
+            if (span <= 0)
+                return root.expansionProgress >= root.module.revealEnd ? 1 : 0
+            return Math.max(0, Math.min(1,
+                (root.expansionProgress - root.module.revealStart) / span))
+        }
+        opacity: revealProgress
+        transform: Translate {
+            y: (1 - moduleLoader.revealProgress)
+                * root.module.revealOffsetY
+        }
         onLoaded: item.context = root.moduleContext
     }
 }

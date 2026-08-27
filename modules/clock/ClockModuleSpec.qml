@@ -6,6 +6,8 @@ IslandModule {
     moduleId: "clock"
     priority: 0
     active: true
+    expandedWidth: 280
+    expandedHeight: 68
 
     view: Component {
         ClockModule { }

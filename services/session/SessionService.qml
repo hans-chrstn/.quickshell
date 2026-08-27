@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.core
+import qs.services
 
 Singleton {
     id: root
@@ -23,17 +24,10 @@ Singleton {
           color: Design.red, destructive: true }
     ]
 
-    function focusedScreenName() {
-        const monitor = Hyprland.focusedMonitor
-        if (monitor?.name)
-            return monitor.name
-        return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : ""
-    }
-
-    function open() {
+    function open(preferredScreenName) {
         closeTimer.stop()
         closing = false
-        targetScreenName = focusedScreenName()
+        targetScreenName = ScreenService.resolve(preferredScreenName || "")
         selectedIndex = 0
         confirmingIndex = -1
         opened = true

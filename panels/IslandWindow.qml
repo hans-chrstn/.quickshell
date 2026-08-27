@@ -11,7 +11,7 @@ PanelWindow {
     anchors.left: true
     anchors.right: true
 
-    implicitHeight: island.expandedHeight + 24
+    implicitHeight: island.maximumExpandedHeight + 24
     exclusiveZone: 0
     color: "transparent"
     aboveWindows: true

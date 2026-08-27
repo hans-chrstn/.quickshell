@@ -31,18 +31,31 @@ Item {
         ]
     }
 
+    readonly property int maximumExpandedHeight: {
+        let maximum = Design.defaultExpandedHeight
+        for (let module of registry.modules)
+            maximum = Math.max(maximum, module?.expandedHeight ?? 0)
+        return maximum
+    }
+
     Connections {
         target: registry
         function onAttentionRequestedChanged() {
             root.attentionRequested = registry.attentionRequested
             if (root.attentionRequested) {
-                root.reveal(false)
-                attentionExpandTimer.restart()
+                hideTimer.stop()
+                if (root.expanded) {
+                    attentionExpandTimer.stop()
+                } else {
+                    root.reveal(false)
+                    attentionExpandTimer.restart()
+                }
             } else {
                 attentionExpandTimer.stop()
                 expandTimer.stop()
                 hideTimer.stop()
-                root.presentationState = root.collapsedState
+                root.presentationState = root.pointerPresent
+                    ? root.expandedState : root.collapsedState
                 moduleHandoffTimer.restart()
             }
         }
@@ -168,22 +181,24 @@ Item {
     GlassIslandSurface {
         anchors.fill: parent
         expanded: root.expanded
+        expansionProgress: root.expansionProgress
     }
 
     HoverHandler { id: islandHover }
 
     IslandContentHost {
         anchors.fill: parent
-        anchors.leftMargin: Design.wing + (root.expanded
-            ? Design.expandedContentPadding : Design.contentHorizontalPadding)
-        anchors.rightMargin: Design.wing + (root.expanded
-            ? Design.expandedContentPadding : Design.contentHorizontalPadding)
-        anchors.topMargin: root.expanded
-            ? Design.expandedContentPadding : Design.contentVerticalPadding
-        anchors.bottomMargin: root.expanded
-            ? Design.expandedContentPadding : Design.contentVerticalPadding
+        anchors.leftMargin: Design.wing + Design.contentHorizontalPadding
+            + (Design.expandedContentPadding - Design.contentHorizontalPadding)
+                * root.expansionProgress
+        anchors.rightMargin: anchors.leftMargin
+        anchors.topMargin: Design.contentVerticalPadding
+            + (Design.expandedContentPadding - Design.contentVerticalPadding)
+                * root.expansionProgress
+        anchors.bottomMargin: anchors.topMargin
         module: registry.current
         expanded: root.expanded
         expansionProgress: root.expansionProgress
+        screenName: root.screenName
     }
 }

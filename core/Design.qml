@@ -35,7 +35,7 @@ Singleton {
     readonly property int expandedContentPadding: 18
 
     readonly property int revealDuration: 300
-    readonly property int resizeDuration: 420
+    readonly property int resizeDuration: 520
     readonly property int contentRevealDuration: 180
     readonly property int attentionExpandDelay: 170
     readonly property int moduleCloseDuration: 440

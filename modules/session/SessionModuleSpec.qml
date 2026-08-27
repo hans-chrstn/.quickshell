@@ -15,6 +15,7 @@ IslandModule {
     collapsedWidth: 220
     expandedWidth: 520
     expandedHeight: 210
+    revealWithExpansion: true
 
     view: Component { SessionModule { } }
 }

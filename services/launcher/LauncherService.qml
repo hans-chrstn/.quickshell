@@ -2,9 +2,9 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import qs.core
 import qs.services.launcher
+import qs.services
 
 Singleton {
     id: root
@@ -49,17 +49,10 @@ Singleton {
                                                   results.length - 1))
     }
 
-    function focusedScreenName() {
-        const monitor = Hyprland.focusedMonitor
-        if (monitor?.name)
-            return monitor.name
-        return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : ""
-    }
-
-    function open(initialQuery) {
+    function open(initialQuery, preferredScreenName) {
         closeTimer.stop()
         closing = false
-        targetScreenName = focusedScreenName()
+        targetScreenName = ScreenService.resolve(preferredScreenName || "")
         query = initialQuery || ""
         selectedIndex = 0
         opened = true

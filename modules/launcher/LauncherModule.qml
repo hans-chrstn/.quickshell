@@ -34,10 +34,6 @@ Item {
     ColumnLayout {
         anchors.fill: parent
         spacing: 10
-        opacity: Math.max(0, Math.min(1,
-            (root.expansionProgress - 0.28) / 0.42))
-        transform: Translate { y: (1 - parent.opacity) * -8 }
-
         Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 42

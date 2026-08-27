@@ -16,6 +16,7 @@ IslandModule {
     collapsedWidth: 220
     expandedWidth: 680
     expandedHeight: 430
+    revealWithExpansion: true
 
     view: Component {
         LauncherModule { }
