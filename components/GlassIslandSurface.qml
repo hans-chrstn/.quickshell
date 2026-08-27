@@ -36,14 +36,6 @@ Item {
     }
 
     Rectangle {
-        anchors.top: parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.max(0, parent.width - (Design.wing + 10) * 2)
-        height: 1
-        color: Design.glassHighlight
-    }
-
-    Rectangle {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 1
