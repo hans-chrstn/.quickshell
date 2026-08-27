@@ -6,8 +6,6 @@
       url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-
   };
 
   outputs = {
@@ -89,17 +87,17 @@
               command = let
                 hyprlandConfig = pkgs.writeText "greeter-hyprland.conf" ''
                   exec-once = sh -c "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; hyprctl dispatch exit"
-                  
+
                   misc {
                     disable_hyprland_logo = true
                     disable_splash_rendering = true
                     background_color = 0x000000
                   }
-                  
+
                   decoration {
                     rounding = 0
                   }
-                  
+
                   monitor = ,prefer,auto,1
                 '';
               in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.hyprland}/bin/hyprland --config ${hyprlandConfig}";
@@ -140,7 +138,7 @@
           pkgs.upower
           pkgs.libnotify
           pkgs.wf-recorder
-          pkgs.swww
+          pkgs.awww
           pkgs.pulseaudio
           qtMultimedia
           kirigami
