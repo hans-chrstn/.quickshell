@@ -23,7 +23,8 @@ Singleton {
 
     readonly property var categories: [
         { id: "motion", title: "Motion" },
-        { id: "behavior", title: "Behavior" }
+        { id: "behavior", title: "Behavior" },
+        { id: "wallpaper", title: "Wallpaper" }
     ]
 
     function open(preferredScreenName) {
@@ -32,6 +33,18 @@ Singleton {
         targetScreenName = ScreenService.resolve(preferredScreenName || "")
         selectedCategory = 0
         opened = true
+    }
+
+    function openCategory(categoryId, preferredScreenName) {
+        const requested = String(categoryId || "").trim()
+        for (let index = 0; index < categories.length; ++index) {
+            if (categories[index].id === requested) {
+                open(preferredScreenName)
+                selectedCategory = index
+                return true
+            }
+        }
+        return false
     }
 
     function close() {

@@ -38,6 +38,7 @@ Item {
         visible: root.page === "power"
         icon: "power"
         label: "Power"
+        accent: Design.red
         onActivated: SessionService.open(root.screenName)
     }
 
@@ -49,11 +50,13 @@ Item {
         CarouselAction {
             icon: "apps"
             label: "Launcher"
+            accent: Design.blue
             onActivated: LauncherService.open("", root.screenName)
         }
         CarouselAction {
             icon: "settings"
             label: "Settings"
+            accent: Design.textMuted
             onActivated: SettingsService.open(root.screenName)
         }
     }

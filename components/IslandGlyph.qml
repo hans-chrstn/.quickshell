@@ -7,8 +7,8 @@ Canvas {
     property string name: "apps"
     property color glyphColor: Design.textMuted
 
-    implicitWidth: 16
-    implicitHeight: 16
+    implicitWidth: 17
+    implicitHeight: 17
 
     onNameChanged: requestPaint()
     onGlyphColorChanged: requestPaint()
@@ -22,37 +22,37 @@ Canvas {
         ctx.lineJoin = "round"
 
         if (root.name === "apps") {
-            const points = [4.5, 11.5]
+            const points = [4, 8.5, 13]
             for (let x of points) {
                 for (let y of points) {
                     ctx.beginPath()
-                    ctx.arc(x, y, 1.35, 0, Math.PI * 2)
+                    ctx.arc(x, y, 1.15, 0, Math.PI * 2)
                     ctx.fill()
                 }
             }
         } else if (root.name === "power") {
             ctx.beginPath()
-            ctx.moveTo(8, 2.2)
-            ctx.lineTo(8, 7.7)
+            ctx.moveTo(8.5, 2.3)
+            ctx.lineTo(8.5, 7.8)
             ctx.stroke()
             ctx.beginPath()
-            ctx.arc(8, 8.3, 5.4, -0.78, Math.PI + 0.78)
+            ctx.arc(8.5, 8.5, 5.35, -0.78, Math.PI + 0.78)
             ctx.stroke()
         } else if (root.name === "settings") {
             for (let i = 0; i < 8; ++i) {
                 const angle = i * Math.PI / 4
                 ctx.beginPath()
-                ctx.moveTo(8 + Math.cos(angle) * 5.1,
-                    8 + Math.sin(angle) * 5.1)
-                ctx.lineTo(8 + Math.cos(angle) * 6.7,
-                    8 + Math.sin(angle) * 6.7)
+                ctx.moveTo(8.5 + Math.cos(angle) * 5.0,
+                    8.5 + Math.sin(angle) * 5.0)
+                ctx.lineTo(8.5 + Math.cos(angle) * 6.6,
+                    8.5 + Math.sin(angle) * 6.6)
                 ctx.stroke()
             }
             ctx.beginPath()
-            ctx.arc(8, 8, 5.2, 0, Math.PI * 2)
+            ctx.arc(8.5, 8.5, 5.1, 0, Math.PI * 2)
             ctx.stroke()
             ctx.beginPath()
-            ctx.arc(8, 8, 1.8, 0, Math.PI * 2)
+            ctx.arc(8.5, 8.5, 1.75, 0, Math.PI * 2)
             ctx.stroke()
         }
     }

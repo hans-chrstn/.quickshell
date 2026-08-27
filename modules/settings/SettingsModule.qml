@@ -110,7 +110,9 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        sourceComponent: SettingsService.selectedCategory === 0 ? motionPage : behaviorPage
+        sourceComponent: SettingsService.selectedCategory === 0
+            ? motionPage : SettingsService.selectedCategory === 1
+                ? behaviorPage : wallpaperPage
     }
 
     Component {
@@ -120,5 +122,9 @@ Item {
     Component {
         id: behaviorPage
         BehaviorSettingsPage {}
+    }
+    Component {
+        id: wallpaperPage
+        WallpaperSettingsPage {}
     }
 }

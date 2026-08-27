@@ -138,7 +138,6 @@
           pkgs.upower
           pkgs.libnotify
           pkgs.wf-recorder
-          pkgs.awww
           pkgs.pulseaudio
           qtMultimedia
           kirigami
