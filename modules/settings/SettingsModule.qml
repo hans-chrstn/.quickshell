@@ -19,8 +19,8 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            if (SettingsService.currentSubpage.length > 0)
-                SettingsService.currentSubpage = ""
+            if (SettingsService.currentPage.length > 0)
+                SettingsService.back()
             else
                 SettingsService.close()
             event.accepted = true
@@ -61,8 +61,9 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         sourceComponent: {
-            switch (SettingsService.currentSubpage) {
+            switch (SettingsService.currentPage) {
             case "wallpaper": return wallpaperPage
+            case "wallpaper_directory": return wallpaperDirectoryPage
             case "island_style": return islandStylePage
             case "motion": return motionPage
             case "behavior": return behaviorPage
@@ -89,6 +90,11 @@ Item {
     Component {
         id: wallpaperPage
         WallpaperSettingsPage {}
+    }
+
+    Component {
+        id: wallpaperDirectoryPage
+        WallpaperDirectoryPage {}
     }
 
     Component {

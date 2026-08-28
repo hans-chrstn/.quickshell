@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services.config
 
 Singleton {
     id: root
@@ -13,17 +14,8 @@ Singleton {
     readonly property var excludedDirectoryNames: [
         "screenshots", "captures", ".thumbnails"
     ]
-    readonly property var defaultDirectories: {
-        const base = Quickshell.env("HOME") || ""
-        return [
-            base + "/.wallpapers",
-            base + "/Pictures",
-            "/usr/share/wallpapers",
-            "/usr/share/backgrounds"
-        ]
-    }
-
-    property var directories: defaultDirectories
+    readonly property var directories: ConfigService.wallpaperDirectories
+    readonly property bool configured: directories.length > 0
     property var wallpapers: []
     property bool scanning: false
     property string error: ""
@@ -81,7 +73,8 @@ Singleton {
 
     function rescan(requestedDirectories) {
         if (requestedDirectories !== undefined)
-            directories = normalizedDirectories(requestedDirectories)
+            ConfigService.setWallpaperDirectories(
+                normalizedDirectories(requestedDirectories))
 
         requestedGeneration += 1
         if (scanProcess.running) {
@@ -93,7 +86,6 @@ Singleton {
 
     function startScan() {
         const roots = normalizedDirectories(directories)
-        directories = roots
         scanPending = false
         activeGeneration = requestedGeneration
         error = ""

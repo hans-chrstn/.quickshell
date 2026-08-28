@@ -62,6 +62,16 @@ Canvas {
             ctx.lineTo(8.5 + direction * 1.5, 8.5)
             ctx.lineTo(8.5 - direction * 2.5, 12.5)
             ctx.stroke()
+        } else if (root.name === "folder") {
+            ctx.beginPath()
+            ctx.moveTo(2.2, 5.0)
+            ctx.lineTo(6.4, 5.0)
+            ctx.lineTo(7.7, 6.4)
+            ctx.lineTo(14.8, 6.4)
+            ctx.lineTo(14.8, 13.4)
+            ctx.lineTo(2.2, 13.4)
+            ctx.closePath()
+            ctx.stroke()
         }
     }
 }

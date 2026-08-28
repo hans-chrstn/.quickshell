@@ -52,6 +52,9 @@ Rectangle {
         IslandGlyph {
             name: "chevronRight"
             glyphColor: hover.hovered ? Design.text : Design.textMuted
+            Layout.preferredWidth: 17
+            Layout.preferredHeight: 17
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
         }
     }
 

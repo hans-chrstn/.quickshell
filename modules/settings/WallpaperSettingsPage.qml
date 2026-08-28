@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import qs.components.filepicker
 import qs.core
 import qs.services.wallpaper
 import qs.services.settings
@@ -20,7 +21,8 @@ SettingPage {
     }
 
     Component.onCompleted: {
-        if (WallpaperCatalogService.wallpapers.length === 0
+        if (WallpaperCatalogService.configured
+                && WallpaperCatalogService.wallpapers.length === 0
                 && !WallpaperCatalogService.scanning)
             WallpaperCatalogService.rescan()
     }
@@ -41,75 +43,109 @@ SettingPage {
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
+
+            PickerButton {
+                visible: WallpaperCatalogService.configured
+                label: WallpaperCatalogService.configured
+                    ? "Change Library" : "Choose Folder"
+                onActivated: SettingsService.openPage("wallpaper_directory")
+            }
         }
 
-        Flickable {
+        Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 34
-            contentWidth: targets.width
-            contentHeight: height
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
+            Layout.fillHeight: true
 
-            Row {
-                id: targets
-                height: parent.height
-                spacing: 6
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 10
 
-                WallpaperTargetButton {
-                    label: "All Displays"
-                    selected: root.targetScreenName.length === 0
-                    onActivated: root.targetScreenName = ""
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 34
+                    contentWidth: targets.width
+                    contentHeight: height
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+
+                    Row {
+                        id: targets
+                        height: parent.height
+                        spacing: 6
+
+                        WallpaperTargetButton {
+                            label: "All Displays"
+                            selected: root.targetScreenName.length === 0
+                            onActivated: root.targetScreenName = ""
+                        }
+
+                        Repeater {
+                            model: Quickshell.screens
+
+                            WallpaperTargetButton {
+                                required property var modelData
+                                label: modelData.name
+                                selected: root.targetScreenName === modelData.name
+                                onActivated: root.targetScreenName = modelData.name
+                            }
+                        }
+                    }
                 }
 
-                Repeater {
-                    model: Quickshell.screens
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Design.separator
+                }
 
-                    WallpaperTargetButton {
+                GridView {
+                    id: grid
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: WallpaperCatalogService.wallpapers
+                    cellWidth: Math.max(120, width / 3)
+                    cellHeight: 112
+
+                    delegate: WallpaperTile {
                         required property var modelData
-                        label: modelData.name
-                        selected: root.targetScreenName === modelData.name
-                        onActivated: root.targetScreenName = modelData.name
+                        width: grid.cellWidth - 8
+                        height: grid.cellHeight - 8
+                        path: String(modelData)
+                        selected: path === root.effectiveWallpaper
+                        onActivated: root.assign(path)
+                    }
+
+                    Column {
+                        anchors.centerIn: parent
+                        spacing: 8
+                        visible: !WallpaperCatalogService.scanning
+                            && WallpaperCatalogService.wallpapers.length === 0
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: !WallpaperCatalogService.configured
+                                ? "Choose a wallpaper folder to begin"
+                                : WallpaperCatalogService.error.length > 0
+                                    ? WallpaperCatalogService.error
+                                    : "No wallpapers found in this folder"
+                            color: Design.textMuted
+                            font.family: Design.fontText
+                            font.pixelSize: 12
+                        }
+
+                        PickerButton {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            label: WallpaperCatalogService.configured
+                                ? "Change Library" : "Choose Folder"
+                            primary: true
+                            onActivated: SettingsService.openPage("wallpaper_directory")
+                        }
                     }
                 }
             }
         }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: Design.separator
-        }
-
-        GridView {
-            id: grid
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            model: WallpaperCatalogService.wallpapers
-            cellWidth: Math.max(120, width / 3)
-            cellHeight: 112
-
-            delegate: WallpaperTile {
-                required property var modelData
-                width: grid.cellWidth - 8
-                height: grid.cellHeight - 8
-                path: String(modelData)
-                selected: path === root.effectiveWallpaper
-                onActivated: root.assign(path)
-            }
-
-            Text {
-                anchors.centerIn: parent
-                visible: !WallpaperCatalogService.scanning
-                    && WallpaperCatalogService.wallpapers.length === 0
-                text: WallpaperCatalogService.error.length > 0
-                    ? WallpaperCatalogService.error : "No wallpapers found"
-                color: Design.textMuted
-                font.family: Design.fontText
-                font.pixelSize: 12
-            }
-        }
     }
+
 }

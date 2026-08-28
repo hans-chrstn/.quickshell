@@ -2,8 +2,8 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import qs.services
+import qs.services.config
 
 Singleton {
     id: root
@@ -12,23 +12,24 @@ Singleton {
     property bool closing: false
     property string targetScreenName: ""
     property int selectedCategory: 0
-    onSelectedCategoryChanged: currentSubpage = ""
-    property string currentSubpage: ""
+    onSelectedCategoryChanged: clearPages()
+    property var pageStack: []
+    readonly property string currentPage: pageStack.length > 0
+        ? String(pageStack[pageStack.length - 1]) : ""
 
-    property alias revealDuration: data.revealDuration
-    property alias resizeDuration: data.resizeDuration
-    property alias contentRevealDuration: data.contentRevealDuration
-    property alias attentionExpandDelay: data.attentionExpandDelay
-    property alias moduleCloseDuration: data.moduleCloseDuration
-    property alias expandDelay: data.expandDelay
-    property alias hideDelay: data.hideDelay
-
-    property alias islandWing: data.islandWing
-    property alias islandCollapsedWidth: data.islandCollapsedWidth
-    property alias islandWidthPercent: data.islandWidthPercent
-    property alias islandHeightPercent: data.islandHeightPercent
-    property alias islandBodyRadius: data.islandBodyRadius
-    property alias enableBlur: data.enableBlur
+    readonly property int revealDuration: ConfigService.revealDuration
+    readonly property int resizeDuration: ConfigService.resizeDuration
+    readonly property int contentRevealDuration: ConfigService.contentRevealDuration
+    readonly property int attentionExpandDelay: ConfigService.attentionExpandDelay
+    readonly property int moduleCloseDuration: ConfigService.moduleCloseDuration
+    readonly property int expandDelay: ConfigService.expandDelay
+    readonly property int hideDelay: ConfigService.hideDelay
+    readonly property int islandWing: ConfigService.islandWing
+    readonly property int islandCollapsedWidth: ConfigService.islandCollapsedWidth
+    readonly property int islandWidthPercent: ConfigService.islandWidthPercent
+    readonly property int islandHeightPercent: ConfigService.islandHeightPercent
+    readonly property int islandBodyRadius: ConfigService.islandBodyRadius
+    readonly property bool enableBlur: ConfigService.enableBlur
 
     readonly property var categories: [
         {
@@ -54,7 +55,7 @@ Singleton {
         closing = false
         targetScreenName = ScreenService.resolve(preferredScreenName || "")
         selectedCategory = 0
-        currentSubpage = ""
+        clearPages()
         opened = true
     }
 
@@ -65,7 +66,7 @@ Singleton {
             if (categories[index].id === requested) {
                 open(preferredScreenName)
                 selectedCategory = index
-                currentSubpage = ""
+                clearPages()
                 return true
             }
         }
@@ -76,7 +77,7 @@ Singleton {
                 if (cat.subpages[subIndex].id === requested) {
                     open(preferredScreenName)
                     selectedCategory = index
-                    currentSubpage = requested
+                    pageStack = [requested]
                     return true
                 }
             }
@@ -89,7 +90,7 @@ Singleton {
             return
         opened = false
         closing = true
-        currentSubpage = ""
+        clearPages()
         closeTimer.restart()
     }
 
@@ -97,26 +98,57 @@ Singleton {
         opened ? close() : open(preferredScreenName)
     }
 
+    function setSetting(key, value) {
+        return ConfigService.setSetting(key, value)
+    }
+
+    function clearPages() {
+        pageStack = []
+    }
+
+    function openPage(pageId) {
+        const requested = String(pageId || "").trim()
+        if (requested.length === 0 || requested === currentPage)
+            return false
+        pageStack = pageStack.concat([requested])
+        return true
+    }
+
+    function back() {
+        if (pageStack.length === 0)
+            return false
+        pageStack = pageStack.slice(0, pageStack.length - 1)
+        return true
+    }
+
+    function openWallpaperDirectoryPicker(preferredScreenName) {
+        openCategory("wallpaper", preferredScreenName)
+        openPage("wallpaper_directory")
+    }
+
     function resetMotion() {
-        revealDuration = 300
-        resizeDuration = 520
-        contentRevealDuration = 180
-        attentionExpandDelay = 170
-        moduleCloseDuration = 440
+        ConfigService.setSettings({
+            revealDuration: 300,
+            resizeDuration: 520,
+            contentRevealDuration: 180,
+            attentionExpandDelay: 170,
+            moduleCloseDuration: 440
+        })
     }
 
     function resetBehavior() {
-        expandDelay = 420
-        hideDelay = 1200
+        ConfigService.setSettings({ expandDelay: 420, hideDelay: 1200 })
     }
 
     function resetStyle() {
-        islandWing = 16
-        islandCollapsedWidth = 184
-        islandWidthPercent = 100
-        islandHeightPercent = 100
-        islandBodyRadius = 20
-        enableBlur = true
+        ConfigService.setSettings({
+            islandWing: 16,
+            islandCollapsedWidth: 184,
+            islandWidthPercent: 100,
+            islandHeightPercent: 100,
+            islandBodyRadius: 20,
+            enableBlur: true
+        })
     }
 
     Timer {
@@ -125,42 +157,4 @@ Singleton {
         onTriggered: root.closing = false
     }
 
-    Timer {
-        id: saveTimer
-        interval: 180
-        onTriggered: settingsFile.writeAdapter()
-    }
-
-    FileView {
-        id: settingsFile
-        path: Quickshell.statePath("settings.json")
-        watchChanges: true
-        printErrors: false
-        onAdapterUpdated: saveTimer.restart()
-        onFileChanged: reload()
-        onLoadFailed: error => {
-            if (error === FileViewError.FileNotFound)
-                writeAdapter()
-            else
-                console.warn("Settings load failed:", error)
-        }
-
-        JsonAdapter {
-            id: data
-            property int revealDuration: 300
-            property int resizeDuration: 520
-            property int contentRevealDuration: 180
-            property int attentionExpandDelay: 170
-            property int moduleCloseDuration: 440
-            property int expandDelay: 420
-            property int hideDelay: 1200
-
-            property int islandWing: 16
-            property int islandCollapsedWidth: 184
-            property int islandWidthPercent: 100
-            property int islandHeightPercent: 100
-            property int islandBodyRadius: 20
-            property bool enableBlur: true
-        }
-    }
 }

@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import qs.panels
+import qs.services.config
 import qs.services.launcher
 import qs.services.session
 import qs.services.settings
@@ -28,6 +29,12 @@ ShellRoot {
         function settingsOpenCategory(category: string): bool {
             return SettingsService.openCategory(category)
         }
+        function settingsSet(key: string, value: string): bool {
+            return ConfigService.setSetting(key, value)
+        }
+        function configStatus(): string {
+            return JSON.stringify(ConfigService.snapshot())
+        }
         function settingsClose(): void { SettingsService.close() }
         function wallpapersRescan(): void {
             WallpaperCatalogService.rescan()
@@ -44,6 +51,9 @@ ShellRoot {
                 warnings: WallpaperCatalogService.warnings,
                 error: WallpaperCatalogService.error
             })
+        }
+        function wallpaperChooseDirectory(): void {
+            SettingsService.openWallpaperDirectoryPicker()
         }
         function wallpaperSetGlobal(path: string): bool {
             return WallpaperAssignmentService.setGlobal(path)

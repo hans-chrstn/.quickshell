@@ -21,7 +21,7 @@ SettingPage {
             from: 100; to: 300; stepSize: 5
             unit: "px"
             value: SettingsService.islandCollapsedWidth
-            onValueEdited: value => SettingsService.islandCollapsedWidth = value
+            onValueEdited: value => SettingsService.setSetting("islandCollapsedWidth", value)
         }
 
         SettingSlider {
@@ -31,7 +31,7 @@ SettingPage {
             from: 90; to: 125; stepSize: 1
             unit: "%"
             value: SettingsService.islandWidthPercent
-            onValueEdited: value => SettingsService.islandWidthPercent = value
+            onValueEdited: value => SettingsService.setSetting("islandWidthPercent", value)
         }
 
         SettingSlider {
@@ -41,7 +41,7 @@ SettingPage {
             from: 90; to: 125; stepSize: 1
             unit: "%"
             value: SettingsService.islandHeightPercent
-            onValueEdited: value => SettingsService.islandHeightPercent = value
+            onValueEdited: value => SettingsService.setSetting("islandHeightPercent", value)
         }
 
         SettingSlider {
@@ -51,7 +51,7 @@ SettingPage {
             from: 0; to: 40; stepSize: 1
             unit: "px"
             value: SettingsService.islandBodyRadius
-            onValueEdited: value => SettingsService.islandBodyRadius = value
+            onValueEdited: value => SettingsService.setSetting("islandBodyRadius", value)
         }
 
         SettingSlider {
@@ -61,7 +61,7 @@ SettingPage {
             from: 0; to: 40; stepSize: 1
             unit: "px"
             value: SettingsService.islandWing
-            onValueEdited: value => SettingsService.islandWing = value
+            onValueEdited: value => SettingsService.setSetting("islandWing", value)
         }
 
         SettingToggle {
@@ -69,7 +69,7 @@ SettingPage {
             title: "Compositor Blur"
             description: "Enable background blur effect behind the island"
             checked: SettingsService.enableBlur
-            onToggled: newValue => SettingsService.enableBlur = newValue
+            onToggled: newValue => SettingsService.setSetting("enableBlur", newValue)
         }
 
         Item { Layout.fillHeight: true }

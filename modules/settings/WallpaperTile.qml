@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Effects
 import qs.core
 
 Rectangle {
@@ -28,10 +29,25 @@ Rectangle {
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: true
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSpreadAtMin: 1
+            maskThresholdMin: 0.5
+            maskSource: ShaderEffectSource {
+                sourceItem: Rectangle {
+                    width: preview.width
+                    height: preview.height
+                    radius: Math.max(0, root.radius - preview.anchors.margins)
+                    color: "white"
+                }
+            }
+        }
     }
 
     Rectangle {
-        anchors.fill: parent
+        anchors.fill: preview
+        radius: Math.max(0, root.radius - preview.anchors.margins)
         color: "#52000000"
         visible: preview.status !== Image.Ready || hover.hovered
         Behavior on opacity { NumberAnimation { duration: 120 } }

@@ -18,7 +18,7 @@ SettingPage {
             description: "Expansion and contraction duration"
             from: 200; to: 900; stepSize: 10
             value: SettingsService.resizeDuration
-            onValueEdited: value => SettingsService.resizeDuration = value
+            onValueEdited: value => SettingsService.setSetting("resizeDuration", value)
         }
         SettingSlider {
             Layout.fillWidth: true
@@ -26,7 +26,7 @@ SettingPage {
             description: "Show and hide motion at the monitor edge"
             from: 120; to: 600; stepSize: 10
             value: SettingsService.revealDuration
-            onValueEdited: value => SettingsService.revealDuration = value
+            onValueEdited: value => SettingsService.setSetting("revealDuration", value)
         }
         SettingSlider {
             Layout.fillWidth: true
@@ -34,7 +34,7 @@ SettingPage {
             description: "Standard module content entrance"
             from: 80; to: 400; stepSize: 10
             value: SettingsService.contentRevealDuration
-            onValueEdited: value => SettingsService.contentRevealDuration = value
+            onValueEdited: value => SettingsService.setSetting("contentRevealDuration", value)
         }
         SettingSlider {
             Layout.fillWidth: true
@@ -42,7 +42,7 @@ SettingPage {
             description: "Pause before an invoked module expands"
             from: 0; to: 500; stepSize: 10
             value: SettingsService.attentionExpandDelay
-            onValueEdited: value => SettingsService.attentionExpandDelay = value
+            onValueEdited: value => SettingsService.setSetting("attentionExpandDelay", value)
         }
         SettingSlider {
             Layout.fillWidth: true
@@ -50,7 +50,7 @@ SettingPage {
             description: "Closing lifecycle before returning to the clock"
             from: 180; to: 800; stepSize: 10
             value: SettingsService.moduleCloseDuration
-            onValueEdited: value => SettingsService.moduleCloseDuration = value
+            onValueEdited: value => SettingsService.setSetting("moduleCloseDuration", value)
         }
 
         Item { Layout.fillHeight: true }

@@ -20,7 +20,7 @@ RowLayout {
         radius: 12
         color: backHover.hovered ? Design.surfaceRaised : "transparent"
         scale: backTap.pressed ? 0.94 : 1
-        visible: SettingsService.currentSubpage !== ""
+        visible: SettingsService.currentPage !== ""
 
         IslandGlyph {
             anchors.centerIn: parent
@@ -32,7 +32,7 @@ RowLayout {
         HoverHandler { id: backHover }
         TapHandler {
             id: backTap
-            onTapped: SettingsService.currentSubpage = ""
+            onTapped: SettingsService.back()
         }
     }
 

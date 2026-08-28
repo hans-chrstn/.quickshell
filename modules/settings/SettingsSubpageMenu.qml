@@ -30,7 +30,7 @@ Item {
                     Layout.fillWidth: true
                     title: modelData.title
                     description: modelData.desc
-                    onActivated: SettingsService.currentSubpage = modelData.id
+                    onActivated: SettingsService.openPage(modelData.id)
                 }
             }
         }

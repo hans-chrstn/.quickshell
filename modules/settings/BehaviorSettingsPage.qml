@@ -18,7 +18,7 @@ SettingPage {
             description: "Delay before the resting island expands"
             from: 0; to: 1000; stepSize: 20
             value: SettingsService.expandDelay
-            onValueEdited: value => SettingsService.expandDelay = value
+            onValueEdited: value => SettingsService.setSetting("expandDelay", value)
         }
         SettingSlider {
             Layout.fillWidth: true
@@ -26,7 +26,7 @@ SettingPage {
             description: "Delay before the unattended island hides"
             from: 300; to: 3000; stepSize: 50
             value: SettingsService.hideDelay
-            onValueEdited: value => SettingsService.hideDelay = value
+            onValueEdited: value => SettingsService.setSetting("hideDelay", value)
         }
 
         Item { Layout.fillHeight: true }
