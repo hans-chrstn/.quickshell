@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Qt.labs.folderlistmodel
 import Quickshell
 import qs.components
+import qs.components.scrolling
 import qs.core
 
 Item {
@@ -98,6 +99,10 @@ Item {
             spacing: 5
             model: folders
             boundsBehavior: Flickable.StopAtBounds
+
+            SmoothScrollBehavior {
+                target: folderList
+            }
 
             delegate: Rectangle {
                 id: folderRow
