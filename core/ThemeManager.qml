@@ -75,10 +75,10 @@ Singleton {
     property int radiusHuge: 32
 
     property int durationInstant: 100
-    property int durationFast: 200
-    property int durationMedium: 300
-    property int durationSlow: 500
-    property int durationLeisurely: 800
+    property int durationFast: 120
+    property int durationMedium: 280
+    property int durationSlow: 400
+    property int durationLeisurely: 600
 
     property bool useDynamicTheming: false
     property color backgroundColor: "#0D0D0F"
@@ -114,8 +114,8 @@ Singleton {
     property string iconMute: "󰝟"
     property string iconVolume: "󰕾"
     property string iconMusic: "󰝚"
-    property string iconAudioInput: "󰓃"
-    property string iconAudioOutput: "󰓄"
+    property string iconAudioInput: "󰍬"
+    property string iconAudioOutput: "󰕾"
     property string iconSelector: "󱗘"
     
     property string iconBrightness: "󰃠"
@@ -150,12 +150,12 @@ Singleton {
         "heading": {
             "pixelSize": 32,
             "weight": Font.Bold,
-            "letterSpacing": 0
+            "letterSpacing": -0.35
         },
         "clock": {
             "pixelSize": 52,
             "weight": Font.DemiBold,
-            "letterSpacing": -2
+            "letterSpacing": -0.45
         },
         "weatherTemp": {
             "pixelSize": 42,
@@ -165,12 +165,12 @@ Singleton {
         "title": {
             "pixelSize": 20,
             "weight": Font.DemiBold,
-            "letterSpacing": 0
+            "letterSpacing": -0.35
         },
         "body": {
             "pixelSize": 14,
             "weight": Font.Normal,
-            "letterSpacing": 0
+            "letterSpacing": -0.15
         },
         "label": {
             "pixelSize": 12,
@@ -255,7 +255,7 @@ Singleton {
     })
 
     property int animationDuration: 400
-    property int animationEasing: Easing.OutQuart
+    property int animationEasing: Easing.OutQuint
 
     property real shadowOpacity: 0.4
     property int shadowBlurRadius: 15
@@ -343,6 +343,14 @@ Singleton {
     property string googleCalendarAccount: ""
     property string googleCalendarClientId: ""
     property string googleCalendarClientSecret: ""
+
+    property string mouseForwardCommand: ""
+    property string mouseBackCommand: ""
+    property string mouseActionCommand: ""
+    property string mouseMiddleCommand: ""
+    property string mouseCenterCommand: ""
+    
+    property string radialMenuStyle: "default"
 
     signal themeResetOccurred()
     
@@ -584,6 +592,34 @@ Singleton {
                 { type: "header", label: "Task Manager" },
                 { type: "slider", label: "Refresh (ms)", property: "taskManagerInterval", default: 5000, min: 1000, max: 30000, step: 500 },
                 { type: "slider", label: "Process Limit", property: "taskManagerProcessLimit", default: 25, min: 5, max: 100 }
+            ]
+        },
+        {
+            category: "Mouse Actions",
+            icon: "󰍽",
+            items: [
+                { type: "header", label: "Button Bindings (Crab daemon)" },
+                { type: "text", label: "Forward Button", property: "mouseForwardCommand", default: "" },
+                { type: "text", label: "Back Button", property: "mouseBackCommand", default: "" },
+                { type: "text", label: "Action Button", property: "mouseActionCommand", default: "" },
+                { type: "text", label: "Middle Click", property: "mouseMiddleCommand", default: "" },
+                { type: "text", label: "Center Button", property: "mouseCenterCommand", default: "" }
+            ]
+        },
+        {
+            category: "Radial Gestures",
+            icon: "󰇄",
+            items: [
+                { type: "header", label: "Custom App Gestures" },
+                { type: "text", label: "Menu Style (default, ctos, pills)", property: "radialMenuStyle", default: "default" },
+                { type: "gesture_editor" }
+            ]
+        },
+        {
+            category: "Default Apps",
+            icon: "󰏚",
+            items: [
+                { type: "default_apps_editor" }
             ]
         }
     ]

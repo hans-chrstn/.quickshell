@@ -2,25 +2,22 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
+import Quickshell.Hyprland
 import QtQml.Models
-import Niri 0.1
 
 Singleton {
     id: root
 
-    property alias workspaces: niri.workspaces
-    property alias windows: niri.windows
-    property alias focusedWindow: niri.focusedWindow
-    readonly property bool isConnected: niri.isConnected()
+    property bool isNiri: false
+
+    property var workspaces: Hyprland.workspaces
+    property var windows: ToplevelManager.toplevels
+    property var focusedWindow: ToplevelManager.activeToplevel
+    readonly property bool isConnected: true
 
     property var windowLayouts: ({})
     signal layoutsChanged()
-
-    Niri {
-        id: niri
-        Component.onCompleted: connect()
-        onErrorOccurred: (err) => console.error("[NiriManager] Error:", err)
-    }
 
     function forceUpdateLayouts() {
         if (refreshProcess.running) return
@@ -29,7 +26,7 @@ Singleton {
 
     Process {
         id: refreshProcess
-        command: ["niri", "msg", "-j", "windows"]
+        command: ["hyprctl", "clients", "-j"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -37,7 +34,8 @@ Singleton {
                     let nextLayouts = {}
                     for (let i = 0; i < windows.length; i++) {
                         let win = windows[i]
-                        nextLayouts[win.id] = win.layout
+                        let hexAddr = win.address.replace("0x", "")
+                        nextLayouts[hexAddr] = win
                     }
                     root.windowLayouts = nextLayouts
                     root.layoutsChanged()
@@ -51,21 +49,34 @@ Singleton {
     }
 
     function focusWorkspaceById(id) {
-        niri.focusWorkspaceById(id)
+        if (Hyprland && Hyprland.workspaces) {
+            for (let i = 0; i < Hyprland.workspaces.count; i++) {
+                let ws = Hyprland.workspaces.get(i)
+                if (ws.id === id || ws.name === id.toString()) {
+                    ws.activate()
+                    break
+                }
+            }
+        }
     }
 
     function focusWindowById(id) {
-        niri.focusWindow(id)
+        if (!id) return;
+        if (typeof id === "string") {
+            Quickshell.execDetached(["hyprctl", "dispatch", "focuswindow", "address:0x" + id])
+        } else if (id.activate) {
+            id.activate()
+        }
     }
 
     function moveWindowToWorkspace(windowId, workspaceRef) {
         if (windowId === undefined || workspaceRef === null) return
         
-        Quickshell.execDetached([
-            "sh", "-c", 
-            "niri msg action move-window-to-workspace " + workspaceRef + " --window-id " + windowId + 
-            " && niri msg action focus-workspace " + workspaceRef
-        ])
+        if (typeof windowId === "string") {
+            Quickshell.execDetached(["hyprctl", "dispatch", "movetoworkspace", workspaceRef + ",address:0x" + windowId])
+        } else {
+            Quickshell.execDetached(["hyprctl", "dispatch", "movetoworkspace", workspaceRef.toString()])
+        }
 
         OSDManager.show(
             "Moved to Workspace " + workspaceRef,
@@ -74,16 +85,17 @@ Singleton {
     }
 
     function closeWindowById(id) {
-        niri.closeWindow(id)
+        if (!id) return;
+        if (id.close) id.close()
     }
 
     property var runningApplications: ({})
 
     Instantiator {
-        model: niri.windows
+        model: root.windows
         delegate: QtObject {
             readonly property string normalizedAppId: model.appId ? model.appId.toLowerCase() : ""
-            readonly property int windowId: model.id
+            readonly property var windowId: model
             
             Component.onCompleted: {
                 if (normalizedAppId) {
@@ -150,15 +162,56 @@ Singleton {
         if (!desktopAppId) return []
         let searchId = desktopAppId.toString().replace(".desktop", "").toLowerCase()
         let windows = []
-        for (let i = 0; i < niri.windows.count; i++) {
-            let index = niri.windows.index(i, 0)
-            let appId = niri.windows.data(index, 259)
-            if (appId && appId.toLowerCase().includes(searchId)) {
-                let id = niri.windows.data(index, 257)
-                let title = niri.windows.data(index, 258)
-                windows.push({ id: id, title: title })
+        for (let i = 0; i < root.windows.count; i++) {
+            let win = root.windows.get(i)
+            if (win.appId && win.appId.toLowerCase().includes(searchId)) {
+                windows.push({ id: win, title: win.title })
             }
         }
         return windows
+    }
+
+    function getAllWindows() {
+        let list = []
+        for (let i = 0; i < root.windows.count; i++) {
+            let win = root.windows.get(i)
+            list.push({ id: win, title: win.title || "", appId: win.appId || "" })
+        }
+        return list
+    }
+
+    function getWorkspaceWindows(wsId) {
+        let list = []
+        let layouts = root.windowLayouts;
+        for (let addr in layouts) {
+            let win = layouts[addr]
+            if (win.workspace && win.workspace.id === wsId) {
+                list.push({
+                    id: addr,
+                    pid: win.pid || 0,
+                    appId: win.class || "",
+                    title: win.title || "",
+                    iconPath: "",
+                    isFocused: (Hyprland.activeToplevel && Hyprland.activeToplevel.address === addr),
+                    isUrgent: false,
+                    width: win.size ? win.size[0] : 100,
+                    height: win.size ? win.size[1] : 100,
+                    posX: win.at ? win.at[0] : 0,
+                    posY: win.at ? win.at[1] : 0
+                })
+            }
+        }
+        return list
+    }
+
+    function getWorkspaceProps(model) {
+        if (!model) return null;
+        return {
+            id: model.id,
+            name: model.name,
+            isActive: model.active,
+            isFocused: model.focused,
+            output: model.monitor ? model.monitor.name : ""
+        }
     }
 }

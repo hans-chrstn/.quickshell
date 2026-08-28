@@ -16,10 +16,13 @@ import qs.ui.shared
 
 ShellRoot {
     id: root
+    readonly property string authMode: Quickshell.env.QS_AUTH_MODE || ""
+
+    Lock { }
 
     LazyContainer {
-        active: true
-        component: Lock { }
+        active: root.authMode === "fake" || root.authMode === "greet"
+        component: Greeter { }
     }
 
     Loader {

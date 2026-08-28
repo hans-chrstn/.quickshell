@@ -64,7 +64,7 @@ Singleton {
         
         currentWallpaperFile.setText(activeWallpaperPath)
         Quickshell.execDetached([
-            "swww", "img", previewWallpaperPath, 
+            "awww", "img", previewWallpaperPath, 
             "--transition-type", root.transitionType, 
             "--transition-pos", "center", 
             "--transition-duration", root.transitionDuration.toString()

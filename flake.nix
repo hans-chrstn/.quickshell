@@ -7,18 +7,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    qml-niri = {
-      url = "github:imiric/qml-niri/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";
-    };
+
   };
 
   outputs = {
     nixpkgs,
     quickshell,
     self,
-    qml-niri,
   }: let
     systems = ["x86_64-linux" "aarch64-linux"];
     forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
@@ -28,7 +23,7 @@
       qtMultimedia = pkgs.kdePackages.qtmultimedia;
       qtImageFormats = pkgs.kdePackages.qtimageformats;
       kirigami = pkgs.kdePackages.kirigami.unwrapped;
-      qmlNiri = qml-niri.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
+      qmlQuickshell = quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
     in rec {
       config = pkgs.stdenv.mkDerivation {
         name = "quickshell-config";
@@ -41,7 +36,7 @@
 
       quickshell = pkgs.symlinkJoin {
         name = "quickshell-wrapped";
-        paths = [qmlNiri];
+        paths = [qmlQuickshell];
         nativeBuildInputs = [pkgs.makeWrapper];
         postBuild = ''
           for bin in $out/bin/*; do
@@ -92,26 +87,28 @@
             terminal.vt = 1;
             default_session = {
               command = let
-                niriConfig = pkgs.writeText "greeter-niri.kdl" ''
-                  spawn-at-startup "sh" "-c" "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; niri msg action quit --skip-confirmation"
-                  hotkey-overlay {
-                    skip-at-startup
+                hyprlandConfig = pkgs.writeText "greeter-hyprland.conf" ''
+                  exec-once = sh -c "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; hyprctl dispatch exit"
+                  
+                  misc {
+                    disable_hyprland_logo = true
+                    disable_splash_rendering = true
+                    background_color = 0x000000
                   }
-                  layout {
-                    background-color "#000000"
+                  
+                  decoration {
+                    rounding = 0
                   }
-                  window-rule {
-                    geometry-corner-radius 0
-                    draw-border-with-background false
-                  }
+                  
+                  monitor = ,prefer,auto,1
                 '';
-              in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.niri}/bin/niri -c ${niriConfig}";
+              in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.hyprland}/bin/hyprland --config ${hyprlandConfig}";
               user = "greeter";
             };
           };
         };
 
-        environment.systemPackages = [pkgs.niri cfg.package];
+        environment.systemPackages = [pkgs.hyprland cfg.package];
         environment.variables.WLR_NO_HARDWARE_CURSORS = "1";
 
         systemd.services.greetd.serviceConfig = {
@@ -137,13 +134,14 @@
     in {
       default = pkgs.mkShell {
         nativeBuildInputs = [
-          qml-niri.packages.${pkgs.stdenv.hostPlatform.system}.quickshell
+          quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default
           pkgs.libcava
           pkgs.quickshell
           pkgs.upower
           pkgs.libnotify
           pkgs.wf-recorder
           pkgs.swww
+          pkgs.pulseaudio
           qtMultimedia
           kirigami
           pkgs.kdePackages.sonnet

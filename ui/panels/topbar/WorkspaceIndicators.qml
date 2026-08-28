@@ -17,10 +17,11 @@ RowLayout {
     }
 
     Repeater {
-        model: NiriManager.workspaces
+        model: WindowManager.workspaces
         delegate: Rectangle {
             id: indicator
-            readonly property bool onCurrentScreen: model.output === root.screenName
+            property var ws: WindowManager.getWorkspaceProps(modelData)
+            readonly property bool onCurrentScreen: ws && ws.output === root.screenName
             visible: onCurrentScreen
             
             function updateRegistration() {
@@ -29,8 +30,8 @@ RowLayout {
                 let gx = root.screen.x + pos.x
                 let gy = root.screen.y + pos.y
                 
-                let ref = (model.name && model.name !== "") ? model.name : model.index.toString()
-                ViewManager.registerIndicator(model.id, ref, Qt.rect(gx, gy, width, height))
+                let ref = (ws.name && ws.name !== "") ? ws.name : ws.id.toString()
+                ViewManager.registerIndicator(ws.id, ref, Qt.rect(gx, gy, width, height))
             }
 
             onXChanged: updateRegistration()
@@ -38,16 +39,16 @@ RowLayout {
             onVisibleChanged: updateRegistration()
             Component.onCompleted: updateRegistration()
 
-            readonly property bool isTargeted: ViewManager.activeDragWindowId !== -1 && ViewManager.hoveredTargetWorkspaceId === model.id
-            readonly property bool isMasterHovered: ViewManager.hoveredWorkspaceId === model.id || isTargeted
+            readonly property bool isTargeted: ViewManager.isDragging && ws && ViewManager.hoveredTargetWorkspaceId === ws.id
+            readonly property bool isMasterHovered: ws && (ViewManager.hoveredWorkspaceId === ws.id || isTargeted)
 
-            Layout.preferredWidth: visible ? (isMasterHovered ? 32 : (model.isActive ? 24 : 8)) : 0
+            Layout.preferredWidth: visible && ws ? (isMasterHovered ? 32 : (ws.isActive ? 24 : 8)) : 0
             Layout.preferredHeight: visible ? 6 : 0
 
             radius: 3
-            color: isTargeted ? "white" : (model.isFocused ? ThemeManager.accentColor : 
-                   model.isActive ? Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.5) : 
-                                    Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.2))
+            color: isTargeted ? "white" : (ws && ws.isFocused ? ThemeManager.accentColor : 
+                   ws && ws.isActive ? Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.5) : 
+                                       Qt.rgba(ThemeManager.contentOnBackgroundColor.r, ThemeManager.contentOnBackgroundColor.g, ThemeManager.contentOnBackgroundColor.b, 0.2))
 
             Behavior on color { ColorAnimation { duration: 200 } }
             Behavior on Layout.preferredWidth { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
@@ -56,18 +57,18 @@ RowLayout {
                 id: maWs
                 anchors.fill: parent
                 hoverEnabled: true
-                cursorShape: ViewManager.activeDragWindowId !== -1 ? Qt.DragCopyCursor : Qt.PointingHandCursor
-                onClicked: NiriManager.focusWorkspaceById(model.id)
+                cursorShape: ViewManager.isDragging ? Qt.DragCopyCursor : Qt.PointingHandCursor
+                onClicked: WindowManager.focusWorkspaceById(ws.id)
 
                 onEntered: {
-                    if (ViewManager.activeDragWindowId === -1) {
-                        NiriManager.forceUpdateLayouts()
-                        ViewManager.setHoveredWorkspace(model.id)
+                    if (!ViewManager.isDragging && ws) {
+                        WindowManager.forceUpdateLayouts()
+                        ViewManager.setHoveredWorkspace(ws.id)
                     }
                 }
 
                 onExited: {
-                    if (ViewManager.activeDragWindowId === -1) {
+                    if (!ViewManager.isDragging) {
                         ViewManager.setHoveredWorkspace(-1)
                     }
                 }

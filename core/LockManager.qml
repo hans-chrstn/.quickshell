@@ -3,46 +3,34 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Services.Pam
-import Quickshell.Services.Greetd
+import qs.core.auth
 
 Singleton {
     id: root
-
     property var lockModule: null
     property var lockObject: null
     property var pamObject: null
-
-    readonly property bool isLocked: lockObject ? !!lockObject.locked : false
-    readonly property bool isGreeterAvailable: Greetd.available
+    readonly property bool isLocked: {
+        return lockObject ? !!lockObject.locked : false
+    }
     
-    readonly property string passwordBuffer: pamObject ? pamObject.buffer : ""
-    readonly property string statusMessage: pamObject ? pamObject.message : ""
-    readonly property bool isErrorMessage: pamObject ? pamObject.messageIsError : false
-
     function register(module, lock, pam) {
         root.lockModule = module
         root.lockObject = lock
         root.pamObject = pam
     }
 
-    function processKeyEvent(event) {
-        if (pamObject) {
-            pamObject.handleKey(event)
-        }
-    }
-
     function lock() {
         if (lockObject) {
+            AuthManager.authMode = "lock"
+            AuthManager.updateHandler()
             lockObject.locked = true
         }
     }
 
     function unlock() {
         if (lockObject) {
-            lockObject.unlock()
+            lockObject.locked = false
         }
     }
-
-    readonly property var authenticationContext: pamObject ? pamObject.passwd : null
 }

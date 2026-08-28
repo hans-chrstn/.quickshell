@@ -72,6 +72,9 @@ Item {
                 if (index === 7) {
                     return scratchpadComponent
                 }
+                if (index === 8) {
+                    return aiComponent
+                }
                 return null
             }
 
@@ -163,6 +166,12 @@ Item {
     Component {
         id: scratchpadComponent
         DashboardScratchpad {
+        }
+    }
+
+    Component {
+        id: aiComponent
+        DashboardAI {
         }
     }
 }

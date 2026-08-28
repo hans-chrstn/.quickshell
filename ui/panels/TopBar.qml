@@ -36,6 +36,9 @@ SystemPanel {
         Region { item: islandMask }
         Region { item: previewMask }
         Region { item: ghostMask }
+        Region {
+            item: ViewManager.activeMenu
+        }
     }
 
     Item {
@@ -154,7 +157,7 @@ SystemPanel {
         color: Qt.rgba(ThemeManager.accentColor.r, ThemeManager.accentColor.g, ThemeManager.accentColor.b, 0.6)
         border.color: "white"
         border.width: 2
-        visible: ViewManager.activeDragWindowId !== -1 && (ViewManager.lastActiveScreenName === root.screen.name)
+        visible: ViewManager.isDragging && (ViewManager.lastActiveScreenName === root.screen.name)
         
         x: (ViewManager.dragX - (root.screen ? root.screen.x : 0)) - (width / 2)
         y: (ViewManager.dragY - (root.screen ? root.screen.y : 0)) - (height / 2)

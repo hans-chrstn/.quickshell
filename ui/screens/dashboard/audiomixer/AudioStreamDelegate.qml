@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.Pipewire
+import Quickshell.Io
 import qs.core
 import qs.ui.shared
 
@@ -11,12 +12,77 @@ StyledCard {
     property bool isActive: false
     
     width: parent ? parent.width : 0
-    height: 80
+    height: 120
 
     readonly property int streamId: {
         return root.streamData ? root.streamData.id : -1
     }
     
+    property int _routedSinkId: -1
+
+    // Find the hardware device (sink/source) the stream is actually connected to via Pipewire linkGroups.
+    readonly property PwNode linkedDeviceNode: {
+        if (!Pipewire.ready || !Pipewire.linkGroups || !Pipewire.linkGroups.values) return null
+        let lgs = Pipewire.linkGroups.values
+        for (let i = 0; i < lgs.length; i++) {
+            let lg = lgs[i]
+            if (lg.source && lg.source.id === root.streamId) {
+                if (lg.target && !lg.target.isStream) {
+                    return lg.target
+                }
+            }
+            if (lg.target && lg.target.id === root.streamId) {
+                if (lg.source && lg.source.id !== root.streamId && !lg.source.isStream) {
+                    return lg.source
+                }
+            }
+        }
+        return null
+    }
+
+    property PwNode currentTargetNode: {
+        if (root._routedSinkId > 0 && AudioManager.sinks) {
+            for (let i = 0; i < AudioManager.sinks.count; i++) {
+                let sink = AudioManager.sinks.get(i)
+                if (sink.id === root._routedSinkId) {
+                    return sink.nodeObj
+                }
+            }
+        }
+        if (root.linkedDeviceNode) {
+            return root.linkedDeviceNode
+        }
+        return (root.streamNode && root.streamNode.isSink) ? AudioManager.defaultSink : AudioManager.defaultSource
+    }
+
+    property int displayedTargetId: {
+        if (root._routedSinkId > 0) {
+            return root._routedSinkId
+        }
+        
+        let linkedNode = root.linkedDeviceNode
+        let defaultNode = (root.streamNode && root.streamNode.isSink) ? AudioManager.defaultSink : AudioManager.defaultSource
+        
+        if (linkedNode && defaultNode && linkedNode.id !== defaultNode.id) {
+            return linkedNode.id
+        }
+        
+        return -1
+    }
+
+    property bool isExplicitlyRouted: displayedTargetId > 0
+
+    property var deviceModel: {
+        let arr = [{ id: -1, name: "Default (Global)" }]
+        let hwNodes = (root.streamNode && root.streamNode.isSink) ? AudioManager.sinks : AudioManager.sources
+        if (hwNodes) {
+            for (let i = 0; i < hwNodes.count; i++) {
+                arr.push(hwNodes.get(i))
+            }
+        }
+        return arr
+    }
+
     readonly property string streamName: {
         return root.streamData ? (root.streamData.name || "Application") : "Application"
     }
@@ -47,14 +113,7 @@ StyledCard {
     Loader {
         id: nodeLoader
         anchors.fill: parent
-        active: {
-            let n = root.streamNode
-            return root.isActive 
-                && n !== null 
-                && n !== undefined 
-                && n.ready 
-                && n.audio !== undefined
-        }
+        active: root.isActive && root.streamNode !== null
 
         sourceComponent: Item {
             anchors.fill: parent
@@ -82,6 +141,14 @@ StyledCard {
 
                 RowLayout {
                     Layout.fillWidth: true
+                    spacing: 8
+
+                    StyledLabel {
+                        text: (root.streamNode && root.streamNode.isSink) ? ThemeManager.iconAudioOutput : ThemeManager.iconAudioInput
+                        type: "caption"
+                        font.pixelSize: 12
+                        opacity: 0.5
+                    }
 
                     StyledLabel {
                         text: root.streamName
@@ -90,12 +157,14 @@ StyledCard {
                         Layout.fillWidth: true
                     }
 
-                    StyledLabel {
-                        text: {
-                            return Math.round(parent.parent.parent.volumeValue * 100) + "%"
+                }
+                
+                Process {
+                    id: routeCmd
+                    onExited: (exitCode) => {
+                        if (exitCode !== 0) {
+                            console.log("AudioStreamDelegate: routing failed, exit code:", exitCode)
                         }
-                        type: "pillValue"
-                        opacity: 0.6
                     }
                 }
 
@@ -109,27 +178,71 @@ StyledCard {
                         return ThemeManager.iconVolume
                     }
                     sliderBarColor: ThemeManager.accentColor
-                    
                     onSliderMoved: (val) => {
                         if (nodeRef && nodeRef.ready && nodeRef.audio) {
-                            nodeRef.audio.volume = val
+                            if (Math.abs(nodeRef.audio.volume - val) > 0.001) {
+                                if (nodeRef.audio.muted && val > 0) {
+                                    nodeRef.audio.muted = false
+                                }
+                                nodeRef.audio.volume = val
+                            }
+                            if (val === 0 && !nodeRef.audio.muted) {
+                                nodeRef.audio.muted = true
+                            }
                         }
+                    }
+                }
+                
+                DeviceSelectorDropdown {
+                    Layout.fillWidth: true
+
+                    icon: (root.streamNode && root.streamNode.isSink) ? ThemeManager.iconAudioOutput : ThemeManager.iconAudioInput
+                    model: root.deviceModel
+                    currentId: root.displayedTargetId
+
+                    onDeviceSelected: (deviceId, deviceData) => {
+                        routeCmd.running = false
+
+                        let clientId = ""
+                        if (root.streamNode && root.streamNode.properties) {
+                            clientId = root.streamNode.properties["client.id"] || ""
+                        }
+
+                        if (deviceId === -1 || !deviceData) {
+                            if (clientId) {
+                                routeCmd.command = [
+                                    "sh", "-c",
+                                    "pw-metadata -n default " + root.streamId + " target.object - && pw-metadata -n default " + clientId + " target.object -"
+                                ]
+                            } else {
+                                routeCmd.command = [
+                                    "pw-metadata", "-n", "default",
+                                    String(root.streamId),
+                                    "target.object", "-"
+                                ]
+                            }
+                            root._routedSinkId = -1
+                        } else {
+                            if (clientId) {
+                                routeCmd.command = [
+                                    "sh", "-c",
+                                    "pw-metadata -n default " + root.streamId + " target.object " + deviceId + " Spa:Id && pw-metadata -n default " + clientId + " target.object " + deviceId + " Spa:Id"
+                                ]
+                            } else {
+                                routeCmd.command = [
+                                    "pw-metadata", "-n", "default",
+                                    String(root.streamId),
+                                    "target.object",
+                                    String(deviceId), "Spa:Id"
+                                ]
+                            }
+                            root._routedSinkId = deviceId
+                        }
+                        routeCmd.running = true
                     }
                 }
             }
         }
     }
 
-    StyledLabel {
-        anchors.centerIn: parent
-        text: "Synchronizing..."
-        type: "caption"
-        opacity: 0.3
-        visible: {
-            if (!root.isActive) {
-                return false
-            }
-            return !root.streamNode || !root.streamNode.ready || !root.streamNode.audio
-        }
-    }
 }

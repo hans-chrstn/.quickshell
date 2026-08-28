@@ -8,12 +8,13 @@ import qs.ui.features.island
 import qs.ui.features.island.corners
 import qs.ui.screens
 import qs.ui.features.notifications
+    import qs.ui.features.gestures
 
 Item {
     id: root
 
     readonly property var _viewManager: ViewManager
-    readonly property var _paletteManager: CommandPaletteManager
+    readonly property var _launcherManager: LauncherManager
     readonly property var _clipboardManager: ClipboardManager
 
     Variants {
@@ -146,7 +147,7 @@ Item {
             id: launcherDelegate
             required property var modelData
             active: LauncherManager.active || ViewManager.isRequested("commandPalette")
-            component: LauncherWindow { 
+            component: CommandPaletteWindow {
                 screen: launcherDelegate.modelData
             }
         }
@@ -230,18 +231,6 @@ Item {
         }
     }
 
-    Variants {
-        model: Quickshell.screens
-        delegate: LazyContainer {
-            id: commandPaletteLdr
-            required property var modelData
-            active: ViewManager.isRequested("commandPalette") && (ViewManager.lastActiveScreenName === modelData.name)
-            component: CommandPaletteWindow {
-                screen: commandPaletteLdr.modelData
-                closing: ViewManager.isClosing("commandPalette")
-            }
-        }
-    }
 
     Variants {
         model: Quickshell.screens
@@ -255,7 +244,7 @@ Item {
             WlrLayershell.layer: WlrLayer.Overlay
             color: "transparent"
             
-            visible: ViewManager.activeDragWindowId !== -1 && (ViewManager.lastActiveScreenName === modelData.name)
+            visible: ViewManager.isDragging && (ViewManager.lastActiveScreenName === modelData.name)
             
             mask: Region {
                 Region { item: ghost }
@@ -273,13 +262,13 @@ Item {
                 
                 onReleased: {
                     if (ViewManager.hoveredTargetWorkspaceRef !== null) {
-                        NiriManager.moveWindowToWorkspace(
+                        WindowManager.moveWindowToWorkspace(
                             ViewManager.activeDragWindowId, 
                             ViewManager.hoveredTargetWorkspaceRef
                         )
                     }
                     
-                    ViewManager.activeDragWindowId = -1
+                    ViewManager.activeDragWindowId = null
                     ViewManager.activeDragIcon = ""
                     ViewManager.hoveredTargetWorkspaceId = -1
                     ViewManager.hoveredTargetWorkspaceRef = null
@@ -318,4 +307,8 @@ Item {
     }
 
     Tooltip { }
+
+    GestureHUD {
+      id: gestureHUD
+    }
 }

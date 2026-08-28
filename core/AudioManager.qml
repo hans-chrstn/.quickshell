@@ -16,9 +16,16 @@ Singleton {
     property bool isAudioAvailable: !!defaultSink && areAudioToolsAvailable
 
     readonly property PwNode defaultSink: Pipewire.defaultAudioSink
+    readonly property PwNode defaultSource: Pipewire.defaultAudioSource
     
     PwObjectTracker { 
+        id: sinkTracker
         objects: root.defaultSink ? [root.defaultSink] : [] 
+    }
+    
+    PwObjectTracker {
+        id: sourceTracker
+        objects: root.defaultSource ? [root.defaultSource] : []
     }
 
     readonly property real volume: (defaultSink && defaultSink.ready && defaultSink.audio) ? defaultSink.audio.volume : 0.0
@@ -29,21 +36,28 @@ Singleton {
     property ListModel sinkModel: ListModel { }
     readonly property alias sinks: root.sinkModel
 
+    property ListModel sourceModel: ListModel { }
+    readonly property alias sources: root.sourceModel
+
     property ListModel streamModel: ListModel { }
     readonly property alias streams: root.streamModel
+    
+    property ListModel sourceStreamModel: ListModel { }
+    readonly property alias sourceStreams: root.sourceStreamModel
 
     property var pidsPlayingAudio: []
     property var appNamesPlayingAudio: []
 
-    function updateSinks() {
+    function updateNodes() {
         if (!Pipewire.ready) return
 
         let nodes = Pipewire.nodes.values
         let foundSinks = []
+        let foundSources = []
         let foundStreams = []
+        let foundSourceStreams = []
         let foundPids = []
         let foundAppNames = []
-        let currentId = defaultSink ? defaultSink.id : -1
 
         for (let i = 0; i < nodes.length; i++) {
             let node = nodes[i]
@@ -52,18 +66,29 @@ Singleton {
             let type = node.type
             let isAudio = (type & PwNodeType.Audio) !== 0
             let isSink = (type & PwNodeType.Sink) !== 0
+            let isSource = (type & PwNodeType.Source) !== 0
             let isStream = (type & PwNodeType.Stream) !== 0
             
-            if (isAudio && isSink && !isStream && node.id !== currentId) {
+            if (isAudio && isSink && !isStream) {
                 foundSinks.push({
                     "id": node.id,
-                    "name": node.description || node.name || "Unknown Device"
+                    "name": node.description || node.name || "Unknown Output",
+                    "nodeObj": node
+                })
+            } else if (isAudio && isSource && !isStream) {
+                foundSources.push({
+                    "id": node.id,
+                    "name": node.description || node.name || "Unknown Input",
+                    "nodeObj": node
                 })
             } else if (isAudio && isStream && node.audio) {
-                foundStreams.push({
+                let streamData = {
                     "id": node.id,
-                    "name": node.description || node.name || "Application"
-                })
+                    "name": node.description || node.name || "Application",
+                    "nodeObj": node
+                }
+                
+                foundStreams.push(streamData)
                 
                 let pid = node.properties["application.process.id"]
                 if (pid) {
@@ -91,7 +116,9 @@ Singleton {
         root.pidsPlayingAudio = foundPids
         root.appNamesPlayingAudio = foundAppNames
         root._syncModel(sinkModel, foundSinks)
+        root._syncModel(sourceModel, foundSources)
         root._syncModel(streamModel, foundStreams)
+        root._syncModel(sourceStreamModel, foundSourceStreams)
     }
 
     function _syncModel(model, data) {
@@ -119,7 +146,14 @@ Singleton {
     function selectSink(node) {
         if (node) {
             Pipewire.preferredDefaultAudioSink = node
-            Qt.callLater(() => { root.updateSinks() })
+            Qt.callLater(() => { root.updateNodes() })
+        }
+    }
+    
+    function selectSource(node) {
+        if (node) {
+            Pipewire.preferredDefaultAudioSource = node
+            Qt.callLater(() => { root.updateNodes() })
         }
     }
 
@@ -128,9 +162,19 @@ Singleton {
         
         if (defaultSink && defaultSink.ready && defaultSink.audio) {
             let clampedValue = MathUtils.clamp(value, 0, 1)
+            
             if (clampedValue === 0 && root.volume > 0) root.previousVolume = root.volume
-            defaultSink.audio.muted = (clampedValue === 0)
-            defaultSink.audio.volume = clampedValue
+            
+            if (Math.abs(defaultSink.audio.volume - clampedValue) > 0.001) {
+                if (defaultSink.audio.muted && clampedValue > 0) {
+                    defaultSink.audio.muted = false
+                }
+                defaultSink.audio.volume = clampedValue
+            }
+            
+            if (clampedValue === 0 && !defaultSink.audio.muted) {
+                defaultSink.audio.muted = true
+            }
         }
     }
 
@@ -146,16 +190,22 @@ Singleton {
 
     Timer {
         id: updateTimer
-        interval: 3000
+        interval: 10000 // Polling acts strictly as a slow defensive fallback now
         running: Pipewire.ready
         repeat: true
         triggeredOnStart: true
-        onTriggered: root.updateSinks()
+        onTriggered: root.updateNodes()
     }
 
     Connections {
         target: Pipewire
-        function onReadyChanged() { if (Pipewire.ready) root.updateSinks() }
-        function onDefaultAudioSinkChanged() { root.updateSinks() }
+        function onReadyChanged() { if (Pipewire.ready) root.updateNodes() }
+        function onDefaultAudioSinkChanged() { root.updateNodes() }
+        function onDefaultAudioSourceChanged() { root.updateNodes() }
+    }
+
+    Connections {
+        target: Pipewire.nodes
+        function onValuesChanged() { root.updateNodes() }
     }
 }

@@ -68,7 +68,7 @@ CornerContainer {
             iconText: ThemeManager.iconSnap
             labelText: "SNAP"
             onClicked: {
-                Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
+                Quickshell.execDetached(["sh", "-c", "grim -o $(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name') -t ppm - | satty --filename - -c ~/.config/satty/satty_config"])
             }
         }
         

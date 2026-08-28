@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
 import qs.core
@@ -78,17 +79,52 @@ Item {
                         }
 
                         ClippingRectangle {
+                            id: artContainer
                             anchors.fill: parent
-                            radius: ThemeManager.musicArtRadius
+                            radius: width / 2
                             color: ThemeManager.surfaceVariantColor
+
+                            property string resolvedArtUrl: ""
+
+                            Process {
+                                id: artConvertProc
+                                property string targetUrl: ""
+                                command: ["sh", "-c", "curl -s '" + targetUrl + "' -o /tmp/qs_art.webp && magick /tmp/qs_art.webp /tmp/qs_art.jpg"]
+                                onExited: (exitCode) => {
+                                    if (exitCode === 0) {
+                                        artContainer.resolvedArtUrl = "file:///tmp/qs_art.jpg";
+                                    } else {
+                                        artContainer.resolvedArtUrl = targetUrl;
+                                    }
+                                }
+                            }
+
+                            Connections {
+                                target: root.mediaPlayer
+                                function onTrackArtUrlChanged() {
+                                    artContainer.checkAndFetchArt()
+                                }
+                            }
+
+                            Component.onCompleted: checkAndFetchArt()
+
+                            function checkAndFetchArt() {
+                                let url = root.mediaPlayer ? (root.mediaPlayer.trackArtUrl || "") : "";
+                                if (url.startsWith("http") && url.includes("getCoverArt.view")) {
+                                    artConvertProc.targetUrl = url;
+                                    artConvertProc.running = true;
+                                } else {
+                                    artContainer.resolvedArtUrl = url;
+                                }
+                            }
 
                             Image {
                                 id: albumArtImage
                                 anchors.fill: parent
-                                source: root.mediaPlayer ? root.mediaPlayer.trackArtUrl : ""
+                                source: artContainer.resolvedArtUrl || ""
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
-                                cache: true
+                                cache: false
                                 opacity: status === Image.Ready ? 1 : 0
                                 Behavior on opacity {
                                     NumberAnimation {
@@ -155,31 +191,29 @@ Item {
             Item {
                 id: progressBarContainer
                 Layout.fillWidth: true
-                Layout.preferredHeight: progressBarMouseArea.containsMouse || progressBarMouseArea.pressed ? 6 : 3
+                Layout.preferredHeight: 6
                 Layout.topMargin: 12
-                
-                Behavior on Layout.preferredHeight {
-                    NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutQuart
-                    }
-                }
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: height / 2
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.1
+                    radius: 3
+                    color: "#333333"
                 }
 
                 Rectangle {
                     height: parent.height
-                    radius: height / 2
-                    color: ThemeManager.contentOnBackgroundColor
-                    opacity: 0.8
+                    radius: 3
+                    color: "white"
                     width: (root.mediaPlayer && root.mediaPlayer.length > 0)
                         ? parent.width * (root.mediaPlayer.position / root.mediaPlayer.length)
                         : 0
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: 500
+                            easing.type: Easing.OutCubic
+                        }
+                    }
                 }
 
                 MouseArea {

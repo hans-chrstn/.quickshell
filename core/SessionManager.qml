@@ -13,7 +13,7 @@ Singleton {
     readonly property string sessionsStorePath: Quickshell.cachePath("sessions.json")
     
     readonly property var defaultSessions: [
-        { name: "Niri", exec: "niri-session" },
+        { name: "Hyprland", exec: "start-hyprland" },
         { name: "Steam", exec: "steam-gamescope" }
     ]
 

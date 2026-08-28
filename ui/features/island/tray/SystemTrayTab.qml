@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Widgets
@@ -72,13 +73,91 @@ Item {
                         
                         TapHandler {
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
-                            onTapped: (point) => {
-                                if (point.pressedButtons & Qt.RightButton) {
-                                    modelData.secondaryActivate()
+                            onTapped: (tapPoint, button) => {
+                                if (button === Qt.RightButton) {
+                                    if (modelData.hasMenu) {
+                                        trayMenuLoader.trayMenu = modelData.menu
+                                        trayMenuLoader.active = true
+                                    } else {
+                                        modelData.secondaryActivate()
+                                    }
                                 } else {
                                     modelData.activate()
                                 }
                                 SoundManager.playToggle()
+                            }
+                        }
+
+                        Loader {
+                            id: trayMenuLoader
+                            active: false
+                            property var trayMenu: null
+
+                            onLoaded: {
+                                item.popup()
+                                if (typeof dynamicIslandRoot !== "undefined") {
+                                    dynamicIslandRoot.activeMenus++
+                                }
+                            }
+
+                            onActiveChanged: {
+                                if (!active) {
+                                    trayMenu = null
+                                    if (typeof dynamicIslandRoot !== "undefined") {
+                                        dynamicIslandRoot.activeMenus--
+                                    }
+                                }
+                            }
+
+                            sourceComponent: Component {
+                                BaseContextMenu {
+                                    id: trayCtxMenu
+                                    width: 220
+
+                                    onClosed: {
+                                        trayMenuLoader.active = false
+                                    }
+
+                                    QsMenuOpener {
+                                        id: menuOpener
+                                        menu: trayMenuLoader.trayMenu
+                                    }
+
+                                    Repeater {
+                                        model: menuOpener.children
+                                        delegate: MenuItem {
+                                            id: menuItem
+                                            visible: !modelData.isSeparator
+                                            enabled: modelData.enabled !== false
+                                            height: visible ? 32 : 0
+
+                                            background: Rectangle {
+                                                implicitWidth: 200
+                                                implicitHeight: 32
+                                                color: menuItem.hovered ? ThemeManager.surfaceVariantColor : "transparent"
+                                                radius: 4
+                                            }
+
+                                            contentItem: StyledLabel {
+                                                text: modelData.text || ""
+                                                type: "caption"
+                                                font.pixelSize: 11
+                                                opacity: menuItem.enabled ? 1.0 : 0.4
+                                                leftPadding: 8
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+
+                                            HoverHandler {
+                                                cursorShape: Qt.PointingHandCursor
+                                            }
+
+                                            onTriggered: {
+                                                modelData.triggered()
+                                                trayCtxMenu.close()
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         

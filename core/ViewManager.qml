@@ -5,6 +5,8 @@ import Quickshell
 Singleton {
     id: root
 
+    property Item activeMenu: null
+
     property string lastActiveScreenName: (Quickshell.screens.length > 0) ? Quickshell.screens[0].name : ""
     
     property int hoveredWorkspaceId: -1
@@ -15,13 +17,13 @@ Singleton {
     property bool previewHovered: false
     readonly property bool anyHovered: indicatorHovered || previewHovered
 
-    property int activeDragWindowId: -1
+    property var activeDragWindowId: null
     property string activeDragIcon: ""
     property real dragX: 0
     property real dragY: 0
     property int hoveredTargetWorkspaceId: -1
     property var hoveredTargetWorkspaceRef: null 
-    readonly property bool isDragging: activeDragWindowId !== -1
+    readonly property bool isDragging: activeDragWindowId !== -1 && activeDragWindowId !== null
 
     property var indicatorRects: ({})
 
@@ -142,6 +144,12 @@ Singleton {
             closeWindow(type)
         } else {
             openWindow(type)
+        }
+    }
+
+    function closeAllWindows() {
+        for (let type in root.activeWindows) {
+            closeWindow(type)
         }
     }
 
