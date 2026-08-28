@@ -14,7 +14,7 @@ Item {
         shadowEnabled: root.expanded
         shadowColor: "#a8000000"
         shadowBlur: 0.55
-        shadowVerticalOffset: 8
+        shadowVerticalOffset: 2
         saturation: 0.92
     }
 

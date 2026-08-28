@@ -9,6 +9,7 @@ Item {
     property bool enabled: true
 
     anchors.fill: parent
+    z: 20
 
     readonly property real minimumY: target.originY
     readonly property real maximumY: minimumY

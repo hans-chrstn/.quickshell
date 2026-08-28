@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Qt.labs.folderlistmodel
 import Quickshell
@@ -91,75 +92,85 @@ Item {
             }
         }
 
-        ListView {
-            id: folderList
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            clip: true
-            spacing: 5
-            model: folders
-            boundsBehavior: Flickable.StopAtBounds
 
             SmoothScrollBehavior {
                 target: folderList
             }
 
-            delegate: Rectangle {
-                id: folderRow
-                required property string fileName
-                required property url fileUrl
-                width: folderList.width
-                height: 38
-                radius: 10
-                color: rowHover.hovered ? Design.surfaceRaised : Design.surface
-                border.width: 1
-                border.color: rowHover.hovered
-                    ? Design.glassHighlight : Design.separator
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 10
-                    spacing: 10
-
-                    IslandGlyph {
-                        name: "folder"
-                        glyphColor: rowHover.hovered ? Design.blue : Design.textMuted
-                    }
-
-                    Text {
-                        Layout.fillWidth: true
-                        text: folderRow.fileName
-                        elide: Text.ElideRight
-                        color: Design.text
-                        font.family: Design.fontText
-                        font.pixelSize: 11
-                    }
-
-                    IslandGlyph {
-                        name: "chevronRight"
-                        glyphColor: Design.textMuted
-                        Layout.preferredWidth: 17
-                        Layout.preferredHeight: 17
-                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                    }
-                }
-
-                HoverHandler { id: rowHover }
-                TapHandler {
-                    acceptedButtons: Qt.LeftButton
-                    onTapped: root.enter(folderRow.fileUrl)
-                }
+            ScrollEdgeFeedback {
+                target: folderList
             }
 
-            Text {
-                anchors.centerIn: parent
-                visible: folders.status === FolderListModel.Ready
-                    && folders.count === 0
-                text: "No folders here"
-                color: Design.textMuted
-                font.family: Design.fontText
-                font.pixelSize: 11
+            ListView {
+                id: folderList
+                anchors.fill: parent
+                clip: true
+                spacing: 5
+                model: folders
+                boundsBehavior: Flickable.StopAtBounds
+
+                ScrollBar.vertical: MinimalScrollBar {}
+
+                delegate: Rectangle {
+                    id: folderRow
+                    required property string fileName
+                    required property url fileUrl
+                    width: Math.max(0, folderList.width - 10)
+                    height: 38
+                    radius: 10
+                    color: rowHover.hovered ? Design.surfaceRaised : Design.surface
+                    border.width: 1
+                    border.color: rowHover.hovered
+                        ? Design.glassHighlight : Design.separator
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 10
+                        spacing: 10
+
+                        IslandGlyph {
+                            name: "folder"
+                            glyphColor: rowHover.hovered ? Design.blue : Design.textMuted
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: folderRow.fileName
+                            elide: Text.ElideRight
+                            color: Design.text
+                            font.family: Design.fontText
+                            font.pixelSize: 11
+                        }
+
+                        IslandGlyph {
+                            name: "chevronRight"
+                            glyphColor: Design.textMuted
+                            Layout.preferredWidth: 17
+                            Layout.preferredHeight: 17
+                            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                        }
+                    }
+
+                    HoverHandler { id: rowHover }
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        onTapped: root.enter(folderRow.fileUrl)
+                    }
+                }
+
+                Text {
+                    anchors.centerIn: parent
+                    visible: folders.status === FolderListModel.Ready
+                        && folders.count === 0
+                    text: "No folders here"
+                    color: Design.textMuted
+                    font.family: Design.fontText
+                    font.pixelSize: 11
+                }
             }
         }
 
