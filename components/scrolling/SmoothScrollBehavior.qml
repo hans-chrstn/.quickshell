@@ -26,6 +26,11 @@ Item {
         return Math.max(minimumPosition, Math.min(maximumPosition, value))
     }
 
+    function cancel() {
+        wheelAnimation.stop()
+        destination = bounded(currentPosition)
+    }
+
     function syncDestination() {
         if (!wheelAnimation.running)
             destination = bounded(currentPosition)
