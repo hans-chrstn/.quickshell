@@ -24,13 +24,13 @@ Singleton {
     readonly property color yellow: "#ffd60a"
     readonly property color red: "#ff453a"
 
-    readonly property int wing: 16
-    readonly property int collapsedWidth: 184
+    readonly property int wing: SettingsService.islandWing
+    readonly property int collapsedWidth: SettingsService.islandCollapsedWidth
     readonly property int collapsedHeight: 34
-    readonly property int defaultExpandedWidth: 440
-    readonly property int defaultExpandedHeight: 154
+    readonly property int defaultExpandedWidth: scaledWidth(440)
+    readonly property int defaultExpandedHeight: scaledHeight(154)
     readonly property int triggerHeight: 6
-    readonly property int bodyRadius: 20
+    readonly property int bodyRadius: SettingsService.islandBodyRadius
     readonly property int contentHorizontalPadding: 14
     readonly property int contentVerticalPadding: 6
     readonly property int expandedContentPadding: 18
@@ -42,4 +42,12 @@ Singleton {
     readonly property int moduleCloseDuration: SettingsService.moduleCloseDuration
     readonly property int expandDelay: SettingsService.expandDelay
     readonly property int hideDelay: SettingsService.hideDelay
+
+    function scaledWidth(baseline) {
+        return Math.round(baseline * SettingsService.islandWidthPercent / 100)
+    }
+
+    function scaledHeight(baseline) {
+        return Math.round(baseline * SettingsService.islandHeightPercent / 100)
+    }
 }

@@ -12,6 +12,7 @@ Item {
     property real from: 0
     property real to: 1000
     property real stepSize: 10
+    property string unit: "ms"
     signal valueEdited(real value)
 
     implicitHeight: 58
@@ -43,7 +44,7 @@ Item {
             }
 
             Text {
-                text: Math.round(root.value) + " ms"
+                text: Math.round(root.value) + " " + root.unit
                 color: Design.textMuted
                 font.family: Design.fontMono
                 font.pixelSize: 10
@@ -80,10 +81,17 @@ Item {
                 x: control.leftPadding + control.visualPosition
                     * (control.availableWidth - width)
                 y: control.topPadding + control.availableHeight / 2 - height / 2
-                implicitWidth: 14
-                implicitHeight: 14
-                radius: 7
+                implicitWidth: 12
+                implicitHeight: 12
+                radius: 6
                 color: Design.text
+                scale: control.pressed ? 1.25 : (sliderHover.hovered ? 1.12 : 1)
+
+                Behavior on scale {
+                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                }
+
+                HoverHandler { id: sliderHover }
             }
         }
     }

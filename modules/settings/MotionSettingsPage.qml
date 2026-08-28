@@ -3,17 +3,13 @@ import QtQuick.Layouts
 import qs.core
 import qs.services.settings
 
-Item {
+SettingPage {
     ColumnLayout {
         anchors.fill: parent
         spacing: 6
 
-        Text {
-            text: "Motion"
-            color: Design.text
-            font.family: Design.fontDisplay
-            font.pixelSize: 20
-            font.weight: Font.DemiBold
+        SettingsHeader {
+            title: "Motion"
         }
 
         SettingSlider {
@@ -59,15 +55,11 @@ Item {
 
         Item { Layout.fillHeight: true }
 
-        Text {
-            text: "Reset Motion"
+        SettingButton {
+            label: "Reset Motion"
             Layout.preferredHeight: 18
             Layout.bottomMargin: 2
-            color: resetHover.hovered ? Design.text : Design.textMuted
-            font.family: Design.fontText
-            font.pixelSize: 11
-            HoverHandler { id: resetHover }
-            TapHandler { onTapped: SettingsService.resetMotion() }
+            onClicked: SettingsService.resetMotion()
         }
     }
 }

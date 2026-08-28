@@ -54,6 +54,14 @@ Canvas {
             ctx.beginPath()
             ctx.arc(8.5, 8.5, 1.75, 0, Math.PI * 2)
             ctx.stroke()
+        } else if (root.name === "chevronLeft"
+                || root.name === "chevronRight") {
+            const direction = root.name === "chevronLeft" ? -1 : 1
+            ctx.beginPath()
+            ctx.moveTo(8.5 - direction * 2.5, 4.5)
+            ctx.lineTo(8.5 + direction * 1.5, 8.5)
+            ctx.lineTo(8.5 - direction * 2.5, 12.5)
+            ctx.stroke()
         }
     }
 }

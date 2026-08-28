@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.island
 import qs.core
+import qs.services.settings
 
 PanelWindow {
     id: root
@@ -21,7 +22,7 @@ PanelWindow {
         Region { item: blurParkingTarget }
 
         Region {
-            item: island.hidden ? null : island.blurTarget
+            item: (island.hidden || !SettingsService.enableBlur) ? null : island.blurTarget
             topLeftRadius: 0
             topRightRadius: 0
             bottomLeftRadius: Design.bodyRadius

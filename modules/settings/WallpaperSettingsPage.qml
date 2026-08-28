@@ -3,8 +3,9 @@ import QtQuick.Layouts
 import Quickshell
 import qs.core
 import qs.services.wallpaper
+import qs.services.settings
 
-Item {
+SettingPage {
     id: root
 
     property string targetScreenName: ""
@@ -28,16 +29,8 @@ Item {
         anchors.fill: parent
         spacing: 10
 
-        RowLayout {
-            Layout.fillWidth: true
-
-            Text {
-                text: "Wallpaper"
-                color: Design.text
-                font.family: Design.fontDisplay
-                font.pixelSize: 20
-                font.weight: Font.DemiBold
-            }
+        SettingsHeader {
+            title: "Wallpaper"
 
             Item { Layout.fillWidth: true }
 

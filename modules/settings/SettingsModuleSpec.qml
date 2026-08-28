@@ -12,9 +12,9 @@ IslandModule {
         && SettingsService.targetScreenName === screenName
     attention: active && !SettingsService.closing
     wantsKeyboard: SettingsService.opened
-    collapsedWidth: 220
-    expandedWidth: 700
-    expandedHeight: 430
+    collapsedWidth: Design.collapsedWidth
+    expandedWidth: Design.scaledWidth(700)
+    expandedHeight: Design.scaledHeight(430)
     revealWithExpansion: true
 
     view: Component { SettingsModule { } }

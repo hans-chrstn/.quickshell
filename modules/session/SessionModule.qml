@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.core
+import qs.components
 import qs.services.session
 
 Item {
@@ -10,21 +11,12 @@ Item {
     readonly property real expansionProgress: context?.expansionProgress ?? 0
 
     focus: true
-    Component.onCompleted: focusTimer.start()
+    Component.onCompleted: focusRetrier.startFocus()
 
-    Timer {
-        id: focusTimer
-        property int attempts: 0
-        interval: 100
-        onTriggered: {
-            if (!SessionService.opened)
-                return
-            root.forceActiveFocus()
-            if (!root.activeFocus && attempts < 6) {
-                attempts += 1
-                restart()
-            }
-        }
+    FocusRetrier {
+        id: focusRetrier
+        targetItem: root
+        activeService: SessionService
     }
 
     Keys.onPressed: function(event) {

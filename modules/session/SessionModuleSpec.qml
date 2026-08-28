@@ -12,9 +12,9 @@ IslandModule {
         && SessionService.targetScreenName === screenName
     attention: active && !SessionService.closing
     wantsKeyboard: SessionService.opened
-    collapsedWidth: 220
-    expandedWidth: 520
-    expandedHeight: 210
+    collapsedWidth: Design.collapsedWidth
+    expandedWidth: Design.scaledWidth(520)
+    expandedHeight: Design.scaledHeight(210)
     revealWithExpansion: true
 
     view: Component { SessionModule { } }

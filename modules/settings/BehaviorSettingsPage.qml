@@ -3,17 +3,13 @@ import QtQuick.Layouts
 import qs.core
 import qs.services.settings
 
-Item {
+SettingPage {
     ColumnLayout {
         anchors.fill: parent
         spacing: 12
 
-        Text {
-            text: "Behavior"
-            color: Design.text
-            font.family: Design.fontDisplay
-            font.pixelSize: 20
-            font.weight: Font.DemiBold
+        SettingsHeader {
+            title: "Behavior"
         }
 
         SettingSlider {
@@ -35,13 +31,9 @@ Item {
 
         Item { Layout.fillHeight: true }
 
-        Text {
-            text: "Reset Behavior"
-            color: resetHover.hovered ? Design.text : Design.textMuted
-            font.family: Design.fontText
-            font.pixelSize: 11
-            HoverHandler { id: resetHover }
-            TapHandler { onTapped: SettingsService.resetBehavior() }
+        SettingButton {
+            label: "Reset Behavior"
+            onClicked: SettingsService.resetBehavior()
         }
     }
 }

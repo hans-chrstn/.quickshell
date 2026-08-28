@@ -38,6 +38,7 @@ Singleton {
             return false
         }
         error = ""
+        screenWallpapers = ({})
         globalWallpaper = normalized
         return true
     }

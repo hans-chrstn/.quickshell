@@ -13,9 +13,9 @@ IslandModule {
     attention: active
         && !LauncherService.closing
     wantsKeyboard: LauncherService.opened
-    collapsedWidth: 220
-    expandedWidth: 680
-    expandedHeight: 430
+    collapsedWidth: Design.collapsedWidth
+    expandedWidth: Design.scaledWidth(680)
+    expandedHeight: Design.scaledHeight(430)
     revealWithExpansion: true
 
     view: Component {

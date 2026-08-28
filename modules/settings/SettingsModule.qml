@@ -1,5 +1,5 @@
 import QtQuick
-import QtQuick.Layouts
+import qs.components
 import qs.core
 import qs.services.settings
 
@@ -9,89 +9,39 @@ Item {
     property QtObject context: null
     focus: true
 
-    Component.onCompleted: {
-        forceActiveFocus();
-        focusTimer.start();
-    }
+    Component.onCompleted: focusRetrier.startFocus()
 
-    Timer {
-        id: focusTimer
-        property int attempts: 0
-        interval: 100
-        onTriggered: {
-            if (!SettingsService.opened)
-                return;
-            root.forceActiveFocus();
-            if (!root.activeFocus && attempts < 6) {
-                attempts += 1;
-                restart();
-            }
-        }
+    FocusRetrier {
+        id: focusRetrier
+        targetItem: root
+        activeService: SettingsService
     }
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            SettingsService.close();
-            event.accepted = true;
+            if (SettingsService.currentSubpage.length > 0)
+                SettingsService.currentSubpage = ""
+            else
+                SettingsService.close()
+            event.accepted = true
         } else if (event.key === Qt.Key_Up) {
-            SettingsService.selectedCategory = Math.max(0, SettingsService.selectedCategory - 1);
-            event.accepted = true;
+            SettingsService.selectedCategory = Math.max(
+                0, SettingsService.selectedCategory - 1)
+            event.accepted = true
         } else if (event.key === Qt.Key_Down) {
-            SettingsService.selectedCategory = Math.min(SettingsService.categories.length - 1, SettingsService.selectedCategory + 1);
-            event.accepted = true;
+            SettingsService.selectedCategory = Math.min(
+                SettingsService.categories.length - 1,
+                SettingsService.selectedCategory + 1)
+            event.accepted = true
         }
     }
 
-    ColumnLayout {
+    SettingsCategoryRail {
         id: categoryRail
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: 96
-        spacing: 6
-
-        Text {
-            text: "Settings"
-            color: Design.text
-            font.family: Design.fontDisplay
-            font.pixelSize: 20
-            font.weight: Font.DemiBold
-            Layout.leftMargin: 10
-            Layout.bottomMargin: 8
-        }
-
-        Repeater {
-            model: SettingsService.categories
-
-            delegate: Rectangle {
-                id: category
-                required property int index
-                required property var modelData
-                Layout.fillWidth: true
-                Layout.preferredHeight: 38
-                radius: 10
-                color: index === SettingsService.selectedCategory ? Design.surfaceRaised : "transparent"
-
-                Text {
-                    anchors.left: parent.left
-                    anchors.leftMargin: 12
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: category.modelData.title
-                    color: category.index === SettingsService.selectedCategory ? Design.text : Design.textMuted
-                    font.family: Design.fontText
-                    font.pixelSize: 12
-                    font.weight: Font.Medium
-                }
-
-                    TapHandler {
-                        onTapped: SettingsService.selectedCategory = category.index
-                    }
-            }
-        }
-
-        Item {
-            Layout.fillHeight: true
-        }
+        width: 120
     }
 
     Rectangle {
@@ -110,21 +60,39 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        sourceComponent: SettingsService.selectedCategory === 0
-            ? motionPage : SettingsService.selectedCategory === 1
-                ? behaviorPage : wallpaperPage
+        sourceComponent: {
+            switch (SettingsService.currentSubpage) {
+            case "wallpaper": return wallpaperPage
+            case "island_style": return islandStylePage
+            case "motion": return motionPage
+            case "behavior": return behaviorPage
+            default: return subpageMenuPage
+            }
+        }
+    }
+
+    Component {
+        id: subpageMenuPage
+        SettingsSubpageMenu {}
     }
 
     Component {
         id: motionPage
         MotionSettingsPage {}
     }
+
     Component {
         id: behaviorPage
         BehaviorSettingsPage {}
     }
+
     Component {
         id: wallpaperPage
         WallpaperSettingsPage {}
+    }
+
+    Component {
+        id: islandStylePage
+        IslandStylePage {}
     }
 }

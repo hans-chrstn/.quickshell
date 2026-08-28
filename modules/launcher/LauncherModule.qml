@@ -14,21 +14,12 @@ Item {
 
     focus: true
 
-    Component.onCompleted: focusTimer.start()
+    Component.onCompleted: focusRetrier.startFocus()
 
-    Timer {
-        id: focusTimer
-        property int attempts: 0
-        interval: 100
-        onTriggered: {
-            if (!LauncherService.opened)
-                return
-            searchInput.forceActiveFocus()
-            if (!searchInput.activeFocus && attempts < 6) {
-                attempts += 1
-                restart()
-            }
-        }
+    FocusRetrier {
+        id: focusRetrier
+        targetItem: searchInput
+        activeService: LauncherService
     }
 
     ColumnLayout {
