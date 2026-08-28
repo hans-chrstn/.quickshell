@@ -4,6 +4,7 @@ Item {
     id: root
 
     required property Flickable target
+    property int orientation: Qt.Vertical
     property real wheelStep: 52
     property int wheelDuration: 150
     property bool enabled: true
@@ -11,68 +12,85 @@ Item {
     anchors.fill: parent
     z: 20
 
-    readonly property real minimumY: target.originY
-    readonly property real maximumY: minimumY
-        + Math.max(0, target.contentHeight - target.height)
-    property real destinationY: minimumY
+    readonly property bool horizontal: orientation === Qt.Horizontal
+    readonly property real minimumPosition:
+        horizontal ? target.originX : target.originY
+    readonly property real maximumPosition: minimumPosition + Math.max(0,
+        horizontal ? target.contentWidth - target.width
+                   : target.contentHeight - target.height)
+    readonly property real currentPosition:
+        horizontal ? target.contentX : target.contentY
+    property real destination: minimumPosition
 
     function bounded(value) {
-        return Math.max(minimumY, Math.min(maximumY, value))
+        return Math.max(minimumPosition, Math.min(maximumPosition, value))
     }
 
     function syncDestination() {
         if (!wheelAnimation.running)
-            destinationY = bounded(target.contentY)
+            destination = bounded(currentPosition)
     }
 
     function scrollPixels(delta) {
         wheelAnimation.stop()
-        const next = bounded(target.contentY - delta)
-        const moved = Math.abs(next - target.contentY) > 0.01
-        if (moved)
-            target.contentY = next
-        destinationY = next
+        const next = bounded(currentPosition - delta)
+        const moved = Math.abs(next - currentPosition) > 0.01
+        if (moved) {
+            if (horizontal)
+                target.contentX = next
+            else
+                target.contentY = next
+        }
+        destination = next
         return moved
     }
 
     function scrollSteps(delta) {
         const base = wheelAnimation.running
-            ? destinationY : bounded(target.contentY)
+            ? destination : bounded(currentPosition)
         const next = bounded(base - delta / 120 * wheelStep)
         if (Math.abs(next - base) <= 0.01)
             return false
 
-        destinationY = next
+        destination = next
         wheelAnimation.restart()
         return true
     }
 
-    onMinimumYChanged: destinationY = bounded(destinationY)
-    onMaximumYChanged: destinationY = bounded(destinationY)
+    onMinimumPositionChanged: destination = bounded(destination)
+    onMaximumPositionChanged: destination = bounded(destination)
 
     Connections {
         target: root.target
+        function onContentXChanged() { root.syncDestination() }
         function onContentYChanged() { root.syncDestination() }
     }
 
     NumberAnimation {
         id: wheelAnimation
         target: root.target
-        property: "contentY"
-        to: root.destinationY
+        property: root.horizontal ? "contentX" : "contentY"
+        to: root.destination
         duration: root.wheelDuration
         easing.type: Easing.OutCubic
     }
 
     WheelHandler {
         target: null
-        enabled: root.enabled && root.target.contentHeight > root.target.height
+        enabled: root.enabled && root.maximumPosition > root.minimumPosition
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: event => {
-            const pixelY = event.pixelDelta.y
-            const moved = pixelY !== 0
-                ? root.scrollPixels(pixelY)
-                : root.scrollSteps(event.angleDelta.y)
+            const pixelDelta = root.horizontal
+                ? (event.pixelDelta.x !== 0
+                    ? event.pixelDelta.x : event.pixelDelta.y)
+                : event.pixelDelta.y
+            const angleDelta = root.horizontal
+                ? (event.angleDelta.x !== 0
+                    ? event.angleDelta.x : event.angleDelta.y)
+                : event.angleDelta.y
+            const moved = pixelDelta !== 0
+                ? root.scrollPixels(pixelDelta)
+                : root.scrollSteps(angleDelta)
             event.accepted = moved
         }
     }
