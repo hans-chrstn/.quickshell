@@ -24,6 +24,14 @@ Singleton {
         data.experimentalFloatingWallpaperSuspension
     property alias experimentalPauseWallpaperOnBattery:
         data.experimentalPauseWallpaperOnBattery
+    property alias allowWallpaperOptimization:
+        data.allowWallpaperOptimization
+    property alias optimizeWallpaperResolution:
+        data.optimizeWallpaperResolution
+    property alias optimizeWallpaperFrameRate:
+        data.optimizeWallpaperFrameRate
+    property alias optimizeWallpaperBitRate:
+        data.optimizeWallpaperBitRate
     property alias wallpaperDirectories: data.wallpaperDirectories
 
     property bool loaded: false
@@ -44,7 +52,11 @@ Singleton {
         islandBodyRadius: { type: "int", minimum: 0, maximum: 40 },
         enableBlur: { type: "bool" },
         experimentalFloatingWallpaperSuspension: { type: "bool" },
-        experimentalPauseWallpaperOnBattery: { type: "bool" }
+        experimentalPauseWallpaperOnBattery: { type: "bool" },
+        allowWallpaperOptimization: { type: "bool" },
+        optimizeWallpaperResolution: { type: "bool" },
+        optimizeWallpaperFrameRate: { type: "bool" },
+        optimizeWallpaperBitRate: { type: "bool" }
     })
 
     function normalizedSetting(key, value) {
@@ -206,6 +218,10 @@ Singleton {
             property bool enableBlur: true
             property bool experimentalFloatingWallpaperSuspension: false
             property bool experimentalPauseWallpaperOnBattery: false
+            property bool allowWallpaperOptimization: true
+            property bool optimizeWallpaperResolution: true
+            property bool optimizeWallpaperFrameRate: true
+            property bool optimizeWallpaperBitRate: true
             property var wallpaperDirectories: []
         }
     }

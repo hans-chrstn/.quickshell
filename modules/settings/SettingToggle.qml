@@ -8,6 +8,7 @@ Item {
     required property string title
     required property string description
     required property bool checked
+    property bool dangerous: false
     signal toggled(bool newValue)
 
     implicitHeight: 38
@@ -22,7 +23,7 @@ Item {
 
             Text {
                 text: root.title
-                color: Design.text
+                color: root.dangerous ? Design.red : Design.text
                 font.family: Design.fontText
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
@@ -36,8 +37,9 @@ Item {
         }
 
         Rectangle {
-            width: 36
-            height: 20
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            Layout.preferredWidth: 36
+            Layout.preferredHeight: 20
             radius: 10
             color: root.checked ? Design.blue : Design.surfaceRaised
             border.width: 1

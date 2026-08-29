@@ -110,6 +110,28 @@ IpcHandler {
     function wallpaperMonitorPowerStatus(): string {
         return JSON.stringify(WallpaperMonitorPowerService.snapshot())
     }
+    function wallpaperGuardrails(): string {
+        return JSON.stringify(WallpaperGuardrailService.snapshot())
+    }
+    function wallpaperGuardrailFor(path: string): string {
+        return JSON.stringify(WallpaperGuardrailService.assessment(
+            "Inspection", path))
+    }
+    function wallpaperOptimize(target: string, path: string): bool {
+        return WallpaperOptimizationService.request(target, path)
+    }
+    function wallpaperOptimizationStatus(path: string): string {
+        return JSON.stringify(WallpaperOptimizationService.recordFor(path))
+    }
+    function wallpaperOptimizationCancel(): void {
+        WallpaperOptimizationService.cancel()
+    }
+    function wallpaperOptimizationClearCache(): bool {
+        return WallpaperOptimizationService.clearCache()
+    }
+    function wallpaperOptimizationCacheStatus(): string {
+        return JSON.stringify(WallpaperOptimizationService.cacheSnapshot())
+    }
     function monitors(): string {
         const renderers = WallpaperRenderService.snapshot()
         const overrides = WallpaperAssignmentService.screenWallpapers

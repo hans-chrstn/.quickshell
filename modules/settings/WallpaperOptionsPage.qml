@@ -5,6 +5,7 @@ import qs.components.scrolling
 import qs.core
 import qs.services.config
 import qs.services.settings
+import qs.services.wallpaper
 
 SettingPage {
     id: root
@@ -36,6 +37,51 @@ SettingPage {
                     id: optionsColumn
                     width: optionsScroller.width
                     spacing: 10
+
+                    Text {
+                        text: "Playback Assessment"
+                        color: Design.textMuted
+                        font.family: Design.fontText
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                    }
+
+                    SettingNavigationToggle {
+                        Layout.fillWidth: true
+                        title: "Allow media optimization · Dangerous"
+                        description: "Permits explicit transcoding with sustained CPU and disk use"
+                        dangerous: true
+                        checked: ConfigService.allowWallpaperOptimization
+                        onActivated: SettingsService.openPage(
+                            "wallpaper_optimization")
+                        onToggled: value => SettingsService.setSetting(
+                            "allowWallpaperOptimization", value)
+                    }
+
+                    Repeater {
+                        model: WallpaperGuardrailService.assignedAssessments
+
+                        WallpaperGuardrailCard {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            assessment: modelData
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        visible: WallpaperGuardrailService.assignedAssessments.length === 0
+                        text: "Assign a wallpaper to inspect playback cost"
+                        color: Design.textMuted
+                        font.family: Design.fontText
+                        font.pixelSize: 10
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 1
+                        color: Design.separator
+                    }
 
                     Text {
                         text: "Experimental"

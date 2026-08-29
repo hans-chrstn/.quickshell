@@ -5,10 +5,12 @@ Text {
     id: root
 
     required property string label
+    property bool dangerous: false
     signal clicked()
 
     text: label
-    color: hover.hovered ? Design.text : Design.textMuted
+    color: root.dangerous ? Design.red
+        : hover.hovered ? Design.text : Design.textMuted
     font.family: Design.fontText
     font.pixelSize: 11
 

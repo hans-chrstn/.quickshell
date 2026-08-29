@@ -28,6 +28,8 @@ Singleton {
             width: 0,
             height: 0,
             durationMs: 0,
+            frameRate: 0,
+            bitRate: 0,
             codec: "",
             container: "",
             cached: false,
@@ -63,6 +65,15 @@ Singleton {
         return Math.round(seconds * 1000)
     }
 
+    function rationalNumber(value) {
+        const text = String(value || "")
+        const parts = text.split("/")
+        const numerator = Number(parts[0])
+        const denominator = parts.length > 1 ? Number(parts[1]) : 1
+        return Number.isFinite(numerator) && Number.isFinite(denominator)
+                && denominator !== 0 ? numerator / denominator : 0
+    }
+
     function classify(path, payload) {
         const streams = payload.streams || []
         if (streams.length === 0)
@@ -77,6 +88,10 @@ Singleton {
         const width = Math.max(0, Number(stream.width) || 0)
         const height = Math.max(0, Number(stream.height) || 0)
         const durationMs = durationMilliseconds(stream, format)
+        const frameRate = rationalNumber(stream.avg_frame_rate
+            || stream.r_frame_rate)
+        const bitRate = Math.max(0, Number(stream.bit_rate)
+            || Number(format.bit_rate) || 0)
         const frames = Number(stream.nb_frames)
         let kind = "unsupported"
 
@@ -110,6 +125,8 @@ Singleton {
             width: width,
             height: height,
             durationMs: durationMs,
+            frameRate: frameRate,
+            bitRate: bitRate,
             codec: codec,
             container: container,
             cached: false,
@@ -123,6 +140,10 @@ Singleton {
             return null
         const record = entry.record || ({})
         if (record.state !== "ready")
+            return null
+        if (record.kind === "video"
+                && (record.frameRate === undefined
+                    || record.bitRate === undefined))
             return null
         return Object.assign({}, record, { cached: true })
     }
@@ -222,7 +243,7 @@ Singleton {
             WallpaperMediaTools.ffprobePath,
             "-v", "error", "-select_streams", "v:0",
             "-show_entries",
-            "stream=codec_name,width,height,nb_frames,duration:format=format_name,duration:format_tags=major_brand",
+            "stream=codec_name,width,height,nb_frames,duration,avg_frame_rate,r_frame_rate,bit_rate:format=format_name,duration,bit_rate:format_tags=major_brand",
             "-of", "json", "--", path
         ]
         probeProcess.running = true

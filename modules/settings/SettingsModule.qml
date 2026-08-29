@@ -64,6 +64,7 @@ Item {
             switch (SettingsService.currentPage) {
             case "wallpaper": return wallpaperPage
             case "wallpaper_options": return wallpaperOptionsPage
+            case "wallpaper_optimization": return wallpaperOptimizationPage
             case "wallpaper_directory": return wallpaperDirectoryPage
             case "island_style": return islandStylePage
             case "motion": return motionPage
@@ -96,6 +97,11 @@ Item {
     Component {
         id: wallpaperOptionsPage
         WallpaperOptionsPage {}
+    }
+
+    Component {
+        id: wallpaperOptimizationPage
+        WallpaperOptimizationPage {}
     }
 
     Component {
