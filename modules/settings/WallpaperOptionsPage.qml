@@ -58,6 +58,13 @@ SettingPage {
                             "allowWallpaperOptimization", value)
                     }
 
+                    SettingNavigationTile {
+                        Layout.fillWidth: true
+                        title: "Cache"
+                        description: "Inspect, clean, and clear generated media"
+                        onActivated: SettingsService.openPage("wallpaper_cache")
+                    }
+
                     Repeater {
                         model: WallpaperGuardrailService.assignedAssessments
 

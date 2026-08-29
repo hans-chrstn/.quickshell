@@ -6,11 +6,18 @@ import Quickshell
 import Quickshell.Hyprland
 import qs.panels
 import qs.services.ipc
+import qs.services.config
 import qs.services.launcher
 import qs.services.session
+import qs.services.wallpaper
 
 ShellRoot {
     ShellIpc {}
+
+    Loader {
+        active: ConfigService.automaticWallpaperCacheCleanup
+        sourceComponent: Component { WallpaperCacheCoordinator {} }
+    }
 
     GlobalShortcut {
         appid: "new-shell"

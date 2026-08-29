@@ -28,10 +28,16 @@ Singleton {
         data.allowWallpaperOptimization
     property alias optimizeWallpaperResolution:
         data.optimizeWallpaperResolution
+    property alias optimizeWallpaperResolutionScale:
+        data.optimizeWallpaperResolutionScale
     property alias optimizeWallpaperFrameRate:
         data.optimizeWallpaperFrameRate
+    property alias optimizeWallpaperFrameRateLimit:
+        data.optimizeWallpaperFrameRateLimit
     property alias optimizeWallpaperBitRate:
         data.optimizeWallpaperBitRate
+    property alias automaticWallpaperCacheCleanup:
+        data.automaticWallpaperCacheCleanup
     property alias wallpaperDirectories: data.wallpaperDirectories
 
     property bool loaded: false
@@ -55,8 +61,15 @@ Singleton {
         experimentalPauseWallpaperOnBattery: { type: "bool" },
         allowWallpaperOptimization: { type: "bool" },
         optimizeWallpaperResolution: { type: "bool" },
+        optimizeWallpaperResolutionScale: {
+            type: "enum", values: [1, 1.25, 1.5], defaultValue: 1
+        },
         optimizeWallpaperFrameRate: { type: "bool" },
-        optimizeWallpaperBitRate: { type: "bool" }
+        optimizeWallpaperFrameRateLimit: {
+            type: "enum", values: [15, 24, 30], defaultValue: 30
+        },
+        optimizeWallpaperBitRate: { type: "bool" },
+        automaticWallpaperCacheCleanup: { type: "bool" }
     })
 
     function normalizedSetting(key, value) {
@@ -68,6 +81,11 @@ Singleton {
                 return value.trim().toLowerCase() === "true"
             return Boolean(value)
         }
+        if (definition.type === "enum") {
+            const numeric = Number(value)
+            return definition.values.indexOf(numeric) >= 0
+                ? numeric : definition.defaultValue
+        }
         const numeric = Number(value)
         if (!Number.isFinite(numeric))
             return data[key]
@@ -76,6 +94,10 @@ Singleton {
     }
 
     function setSetting(key, value) {
+        const definition = settingSchema[key]
+        if (definition?.type === "enum"
+                && definition.values.indexOf(Number(value)) < 0)
+            return false
         const normalized = normalizedSetting(key, value)
         if (normalized === undefined)
             return false
@@ -220,8 +242,11 @@ Singleton {
             property bool experimentalPauseWallpaperOnBattery: false
             property bool allowWallpaperOptimization: true
             property bool optimizeWallpaperResolution: true
+            property real optimizeWallpaperResolutionScale: 1
             property bool optimizeWallpaperFrameRate: true
+            property int optimizeWallpaperFrameRateLimit: 30
             property bool optimizeWallpaperBitRate: true
+            property bool automaticWallpaperCacheCleanup: false
             property var wallpaperDirectories: []
         }
     }

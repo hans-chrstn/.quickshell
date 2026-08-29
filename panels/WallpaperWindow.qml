@@ -47,7 +47,9 @@ PanelWindow {
                     suspended: suspended,
                     suspendedReason: suspendedReason,
                     suspendedPositionMs: suspendedPositionMs,
-                    decoderEvicted: decoderEvicted
+                    decoderEvicted: decoderEvicted,
+                    decoderLoaded: decoderLoaded,
+                    playbackActive: playbackActive
                 })
         }
 
@@ -58,6 +60,8 @@ PanelWindow {
         onSuspendedReasonChanged: reportStatus()
         onSuspendedPositionMsChanged: if (suspended) reportStatus()
         onDecoderEvictedChanged: reportStatus()
+        onDecoderLoadedChanged: reportStatus()
+        onPlaybackActiveChanged: reportStatus()
     }
 
     onScreenNameChanged: wallpaper.reportStatus()

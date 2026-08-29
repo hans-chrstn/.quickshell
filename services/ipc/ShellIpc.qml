@@ -104,6 +104,9 @@ IpcHandler {
     function wallpaperRenderStatus(): string {
         return JSON.stringify(WallpaperRenderService.snapshot())
     }
+    function wallpaperDiagnostics(): string {
+        return JSON.stringify(WallpaperDiagnosticsService.snapshot())
+    }
     function wallpaperOcclusionStatus(): string {
         return JSON.stringify(WallpaperOcclusionService.snapshot())
     }
@@ -120,6 +123,27 @@ IpcHandler {
     function wallpaperOptimize(target: string, path: string): bool {
         return WallpaperOptimizationService.request(target, path)
     }
+    function wallpaperOptimizationSetScale(target: string, path: string,
+            multiplier: real): bool {
+        return WallpaperOptimizationService.setResolutionScale(
+            target, path, multiplier)
+    }
+    function wallpaperOptimizationScales(target: string, path: string): string {
+        return JSON.stringify({
+            selected: WallpaperOptimizationService.selectedResolutionScale(
+                target, path),
+            available: WallpaperOptimizationService.availableResolutionScales(
+                target, path),
+            candidates: WallpaperOptimizationService.resolutionScales.map(
+                multiplier => ({
+                    multiplier: multiplier,
+                    dimensions: WallpaperOptimizationService.candidateDimensions(
+                        target, path, multiplier),
+                    available: WallpaperOptimizationService.scaleAvailable(
+                        target, path, multiplier)
+                }))
+        })
+    }
     function wallpaperOptimizationStatus(path: string): string {
         return JSON.stringify(WallpaperOptimizationService.recordFor(path))
     }
@@ -131,6 +155,18 @@ IpcHandler {
     }
     function wallpaperOptimizationCacheStatus(): string {
         return JSON.stringify(WallpaperOptimizationService.cacheSnapshot())
+    }
+    function wallpaperCacheScan(): bool {
+        return WallpaperCacheService.scan()
+    }
+    function wallpaperCacheStatus(): string {
+        return JSON.stringify(WallpaperCacheService.snapshot())
+    }
+    function wallpaperCacheCleanupPlan(): string {
+        return JSON.stringify(WallpaperCacheService.buildPlan())
+    }
+    function wallpaperCacheCleanupExecute(): bool {
+        return WallpaperCacheService.executeCleanup()
     }
     function monitors(): string {
         const renderers = WallpaperRenderService.snapshot()

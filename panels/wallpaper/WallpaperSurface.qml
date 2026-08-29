@@ -27,6 +27,10 @@ Item {
         ? Number(renderer.item.suspendedPositionMs) || 0 : 0
     readonly property bool decoderEvicted: kind === "video" && renderer.item
         ? Boolean(renderer.item.decoderEvicted) : false
+    readonly property bool decoderLoaded: kind === "video" && renderer.item
+        ? Boolean(renderer.item.decoderLoaded) : false
+    readonly property bool playbackActive: kind === "video" && renderer.item
+        ? Boolean(renderer.item.playbackActive) : false
 
     function inspect() {
         if (path.length > 0)

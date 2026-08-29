@@ -22,9 +22,12 @@ Singleton {
     property string activeOutput: ""
     property string activeTemporaryOutput: ""
     property bool activeOptimizeResolution: true
+    property real activeResolutionScale: 1
     property bool activeOptimizeFrameRate: true
+    property int activeFrameRateLimit: 30
     property bool activeOptimizeBitRate: true
     property int generation: 0
+    property var resolutionSelections: ({})
     property string clearState: "idle"
     property string clearError: ""
 
@@ -53,16 +56,21 @@ Singleton {
         records = updated
     }
 
-    function recipeKey() {
+    readonly property var resolutionScales: [1, 1.25, 1.5]
+
+    function recipeKey(resolutionScale) {
         return recipeVersion
-            + "|resolution=" + ConfigService.optimizeWallpaperResolution
-            + "|fps=" + ConfigService.optimizeWallpaperFrameRate
+            + "|resolution=" + (ConfigService.optimizeWallpaperResolution
+                ? resolutionScale : "off")
+            + "|fps=" + (ConfigService.optimizeWallpaperFrameRate
+                ? ConfigService.optimizeWallpaperFrameRateLimit : "off")
             + "|bitrate=" + ConfigService.optimizeWallpaperBitRate
     }
 
-    function outputPath(path, identity, width, height) {
+    function outputPath(path, identity, width, height, resolutionScale) {
         const key = Qt.md5(path + "|" + identity + "|" + recipeVersion
-            + "|" + width + "x" + height + "|" + recipeKey())
+            + "|" + width + "x" + height + "|"
+            + recipeKey(resolutionScale))
         return cacheDirectory + "/" + key + ".mp4"
     }
 
@@ -88,12 +96,91 @@ Singleton {
         return String(path || "").startsWith(cacheDirectory + "/")
     }
 
+    function selectionKey(target, path) {
+        return String(target || "") + "|" + String(path || "")
+    }
+
+    function candidateDimensions(target, path, multiplier) {
+        const media = WallpaperProbeService.recordFor(path)
+        const sourceWidth = Math.max(0, Number(media.width) || 0)
+        const sourceHeight = Math.max(0, Number(media.height) || 0)
+        if (sourceWidth <= 0 || sourceHeight <= 0)
+            return { width: 0, height: 0, scale: 0 }
+        const targetSize = targetDimensions(String(target || ""))
+        const factor = Number(multiplier) || 0
+        const scale = Math.min(1,
+            targetSize.width * factor / sourceWidth,
+            targetSize.height * factor / sourceHeight)
+        return {
+            width: Math.max(2, Math.floor(sourceWidth * scale / 2) * 2),
+            height: Math.max(2, Math.floor(sourceHeight * scale / 2) * 2),
+            scale: scale
+        }
+    }
+
+    function scaleAvailable(target, path, multiplier) {
+        if (resolutionScales.indexOf(Number(multiplier)) < 0)
+            return false
+        const candidate = candidateDimensions(target, path, multiplier)
+        return candidate.width > 0 && candidate.height > 0
+            && candidate.scale < 0.999
+    }
+
+    function availableResolutionScales(target, path) {
+        return resolutionScales.filter(multiplier =>
+            scaleAvailable(target, path, multiplier))
+    }
+
+    function settingsResolutionScales() {
+        const assessments = WallpaperGuardrailService.assignedAssessments
+        let available = resolutionScales.slice()
+        let inspected = 0
+        for (const assessment of assessments) {
+            if (assessment.kind !== "video"
+                    || isOptimizedPath(assessment.path))
+                continue
+            const sourceAvailable = availableResolutionScales(
+                assessment.target, assessment.path)
+            available = available.filter(value =>
+                sourceAvailable.indexOf(value) >= 0)
+            inspected += 1
+        }
+        return inspected > 0 ? available : resolutionScales
+    }
+
+    function setDefaultResolutionScale(multiplier) {
+        const value = Number(multiplier)
+        if (settingsResolutionScales().indexOf(value) < 0)
+            return false
+        return ConfigService.setSetting(
+            "optimizeWallpaperResolutionScale", value)
+    }
+
+    function selectedResolutionScale(target, path) {
+        const key = selectionKey(target, path)
+        const selected = Number(resolutionSelections[key]
+            ?? ConfigService.optimizeWallpaperResolutionScale)
+        return selected
+    }
+
+    function setResolutionScale(target, path, multiplier) {
+        const value = Number(multiplier)
+        if (!scaleAvailable(target, path, value))
+            return false
+        const updated = Object.assign({}, resolutionSelections)
+        updated[selectionKey(target, path)] = value
+        resolutionSelections = updated
+        ConfigService.setSetting("optimizeWallpaperResolutionScale", value)
+        return true
+    }
+
     function desiredOutputPath(target, path) {
         const source = String(path || "")
         const identity = WallpaperProbeService.identityFor(source)
         if (identity.length === 0) return ""
         const size = targetDimensions(String(target || ""))
-        return outputPath(source, identity, size.width, size.height)
+        const scale = selectedResolutionScale(target, path)
+        return outputPath(source, identity, size.width, size.height, scale)
     }
 
     function assignedPath(target) {
@@ -186,12 +273,22 @@ Singleton {
         }
 
         const size = targetDimensions(String(target || ""))
+        const resolutionScale = selectedResolutionScale(target, source)
+        if (ConfigService.optimizeWallpaperResolution
+                && !scaleAvailable(target, source, resolutionScale)) {
+            publish(source, { state: "failed",
+                error: "Select a resolution multiplier below the source size" })
+            return false
+        }
         activeOptimizeResolution = ConfigService.optimizeWallpaperResolution
+        activeResolutionScale = resolutionScale
         activeOptimizeFrameRate = ConfigService.optimizeWallpaperFrameRate
+        activeFrameRateLimit = ConfigService.optimizeWallpaperFrameRateLimit
         activeOptimizeBitRate = ConfigService.optimizeWallpaperBitRate
         activeSource = source
         activeTarget = String(target || "")
-        activeOutput = outputPath(source, identity, size.width, size.height)
+        activeOutput = outputPath(source, identity, size.width, size.height,
+            resolutionScale)
         activeTemporaryOutput = activeOutput + ".part.mp4"
         publish(source, { state: "preparing", outputPath: activeOutput })
         timeoutTimer.restart()
@@ -225,12 +322,14 @@ Singleton {
         ]
         const filters = []
         if (activeOptimizeResolution) {
-            filters.push("scale='min(iw," + size.width + ")':'min(ih,"
-                + size.height + ")':force_original_aspect_ratio=decrease")
+            const width = Math.round(size.width * activeResolutionScale)
+            const height = Math.round(size.height * activeResolutionScale)
+            filters.push("scale='min(iw," + width + ")':'min(ih,"
+                + height + ")':force_original_aspect_ratio=decrease")
         }
         filters.push("pad=ceil(iw/2)*2:ceil(ih/2)*2")
         if (activeOptimizeFrameRate)
-            filters.push("fps=30")
+            filters.push("fps=" + activeFrameRateLimit)
         command = command.concat([
             "-vf", filters.join(","),
             "-c:v", "libx264", "-preset", "medium", "-crf", "23",
@@ -247,6 +346,22 @@ Singleton {
         publish(activeSource, { state: "inspecting", outputPath: activeOutput })
         WallpaperProbeService.enqueue(activeOutput)
         inspectTimer.restart()
+    }
+
+    function outputValid(record) {
+        if (activeOptimizeResolution) {
+            const limit = candidateDimensions(activeTarget, activeSource,
+                activeResolutionScale)
+            if (record.width > limit.width || record.height > limit.height)
+                return false
+            const source = WallpaperProbeService.recordFor(activeSource)
+            if (record.width >= source.width && record.height >= source.height)
+                return false
+        }
+        if (activeOptimizeFrameRate && Number(record.frameRate)
+                > activeFrameRateLimit + 0.05)
+            return false
+        return record.codec === "h264"
     }
 
     function applyOutput() {
@@ -307,7 +422,15 @@ Singleton {
         function onRecordsChanged() {
             if (root.activeOutput.length === 0) return
             const record = WallpaperProbeService.recordFor(root.activeOutput)
-            if (record.state === "ready") root.applyOutput()
+            if (record.state === "ready") {
+                if (root.outputValid(record)) root.applyOutput()
+                else {
+                    root.publish(root.activeSource, { state: "failed",
+                        outputPath: root.activeOutput,
+                        error: "Optimized wallpaper failed policy verification" })
+                    root.finish()
+                }
+            }
             else if (["failed", "unsupported"].indexOf(record.state) >= 0) {
                 root.publish(root.activeSource, { state: "failed",
                     outputPath: root.activeOutput,

@@ -30,13 +30,36 @@ SettingPage {
                 "optimizeWallpaperResolution", value)
         }
 
+        SettingChoiceRow {
+            Layout.fillWidth: true
+            visible: ConfigService.optimizeWallpaperResolution
+            title: "Resolution limit"
+            choices: WallpaperOptimizationService.resolutionScales
+            enabledChoices:
+                WallpaperOptimizationService.settingsResolutionScales()
+            value: ConfigService.optimizeWallpaperResolutionScale
+            formatChoice: value => value + "×"
+            onChoiceSelected: value =>
+                WallpaperOptimizationService.setDefaultResolutionScale(value)
+        }
+
         SettingToggle {
             Layout.fillWidth: true
             title: "Limit frame rate"
-            description: "Reduce continuous decoding to 30 FPS"
+            description: "Reduce continuous decoding to the selected rate"
             checked: ConfigService.optimizeWallpaperFrameRate
             onToggled: value => SettingsService.setSetting(
                 "optimizeWallpaperFrameRate", value)
+        }
+
+        SettingChoiceRow {
+            Layout.fillWidth: true
+            visible: ConfigService.optimizeWallpaperFrameRate
+            title: "Frame-rate limit"
+            choices: [15, 24, 30]
+            value: ConfigService.optimizeWallpaperFrameRateLimit
+            onChoiceSelected: value => SettingsService.setSetting(
+                "optimizeWallpaperFrameRateLimit", value)
         }
 
         SettingToggle {
@@ -46,51 +69,6 @@ SettingPage {
             checked: ConfigService.optimizeWallpaperBitRate
             onToggled: value => SettingsService.setSetting(
                 "optimizeWallpaperBitRate", value)
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 1
-            color: Design.separator
-        }
-
-        Text {
-            text: "Optimization Cache"
-            color: Design.textMuted
-            font.family: Design.fontText
-            font.pixelSize: 10
-            font.weight: Font.DemiBold
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-
-            Text {
-                Layout.fillWidth: true
-                text: {
-                    if (WallpaperOptimizationService.clearState === "clearing")
-                        return "Clearing cached derivatives…"
-                    if (WallpaperOptimizationService.clearState === "ready")
-                        return "Optimization cache cleared"
-                    if (WallpaperOptimizationService.clearState === "failed")
-                        return WallpaperOptimizationService.clearError
-                    if (WallpaperOptimizationService.hasAssignedOptimizedCopy())
-                        return "Select original wallpapers before clearing"
-                    return "Cached copies remain until explicitly cleared"
-                }
-                color: WallpaperOptimizationService.clearState === "failed"
-                    ? Design.red : Design.textMuted
-                font.family: Design.fontText
-                font.pixelSize: 9
-                wrapMode: Text.Wrap
-            }
-
-            SettingButton {
-                label: "Clear Cache"
-                dangerous: true
-                visible: !WallpaperOptimizationService.clearing
-                onClicked: WallpaperOptimizationService.clearCache()
-            }
         }
 
         Item { Layout.fillHeight: true }

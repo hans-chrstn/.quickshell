@@ -65,6 +65,7 @@ Item {
             case "wallpaper": return wallpaperPage
             case "wallpaper_options": return wallpaperOptionsPage
             case "wallpaper_optimization": return wallpaperOptimizationPage
+            case "wallpaper_cache": return wallpaperCachePage
             case "wallpaper_directory": return wallpaperDirectoryPage
             case "island_style": return islandStylePage
             case "motion": return motionPage
@@ -102,6 +103,11 @@ Item {
     Component {
         id: wallpaperOptimizationPage
         WallpaperOptimizationPage {}
+    }
+
+    Component {
+        id: wallpaperCachePage
+        WallpaperCachePage {}
     }
 
     Component {

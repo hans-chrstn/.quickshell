@@ -20,6 +20,8 @@ Item {
     property bool decoderRetained: true
     readonly property int decoderEvictionDelayMs: 30000
     readonly property bool decoderEvicted: !decoderRetained
+    readonly property bool decoderLoaded: decoder.item !== null
+    readonly property bool playbackActive: playingAllowed && decoderLoaded
 
     readonly property string state: decoder.item ? decoder.item.state
         : decoderRetained ? "loading" : "ready"
