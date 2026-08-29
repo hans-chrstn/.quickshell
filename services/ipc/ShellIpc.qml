@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services.config
 import qs.services.launcher
+import qs.services.power
 import qs.services.session
 import qs.services.settings
 import qs.services.wallpaper
@@ -18,6 +19,17 @@ IpcHandler {
     function sessionClose(): void { SessionService.close() }
     function sessionLockStatus(): string {
         return JSON.stringify(SessionLockService.snapshot())
+    }
+    function powerStatus(): string {
+        return JSON.stringify(PowerStateService.snapshot())
+    }
+    function powerTestSet(available: bool, onBattery: bool,
+            percentage: real): bool {
+        return PowerStateService.setSyntheticState(
+            available, onBattery, percentage)
+    }
+    function powerTestClear(): bool {
+        return PowerStateService.clearSyntheticState()
     }
     function settings(): void { SettingsService.toggle() }
     function settingsOpen(): void { SettingsService.open() }
@@ -69,6 +81,9 @@ IpcHandler {
     function wallpaperChooseDirectory(): void {
         SettingsService.openWallpaperDirectoryPicker()
     }
+    function wallpaperOpenOptions(): void {
+        SettingsService.openWallpaperOptions()
+    }
 
     function wallpaperSetGlobal(path: string): bool {
         return WallpaperAssignmentService.setGlobal(path)
@@ -88,6 +103,12 @@ IpcHandler {
     }
     function wallpaperRenderStatus(): string {
         return JSON.stringify(WallpaperRenderService.snapshot())
+    }
+    function wallpaperOcclusionStatus(): string {
+        return JSON.stringify(WallpaperOcclusionService.snapshot())
+    }
+    function wallpaperMonitorPowerStatus(): string {
+        return JSON.stringify(WallpaperMonitorPowerService.snapshot())
     }
     function monitors(): string {
         const renderers = WallpaperRenderService.snapshot()

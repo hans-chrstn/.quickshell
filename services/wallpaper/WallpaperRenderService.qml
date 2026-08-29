@@ -22,7 +22,9 @@ Singleton {
             state: String(state || "empty"),
             error: String(error || ""),
             suspended: Boolean(details?.suspended),
-            suspendedPositionMs: Number(details?.suspendedPositionMs) || 0
+            suspendedReason: String(details?.suspendedReason || ""),
+            suspendedPositionMs: Number(details?.suspendedPositionMs) || 0,
+            decoderEvicted: Boolean(details?.decoderEvicted)
         }
         screens = updated
     }

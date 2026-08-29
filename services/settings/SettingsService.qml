@@ -126,6 +126,11 @@ Singleton {
         openPage("wallpaper_directory")
     }
 
+    function openWallpaperOptions(preferredScreenName) {
+        openCategory("wallpaper", preferredScreenName)
+        openPage("wallpaper_options")
+    }
+
     function resetMotion() {
         ConfigService.setSettings({
             revealDuration: 300,

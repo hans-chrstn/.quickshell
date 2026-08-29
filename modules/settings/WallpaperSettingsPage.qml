@@ -54,6 +54,11 @@ SettingPage {
                     ? "Change Library" : "Choose Folder"
                 onActivated: SettingsService.openPage("wallpaper_directory")
             }
+
+            PickerButton {
+                label: "Options"
+                onActivated: SettingsService.openPage("wallpaper_options")
+            }
         }
 
         Item {
@@ -180,6 +185,7 @@ SettingPage {
                 }
             }
         }
+
     }
 
 }

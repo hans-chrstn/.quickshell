@@ -21,8 +21,12 @@ Item {
         : renderer.item ? renderer.item.error : ""
     readonly property bool suspended: kind === "video" && renderer.item
         ? Boolean(renderer.item.suspended) : false
+    readonly property string suspendedReason: suspended && renderer.item
+        ? String(renderer.item.suspendedReason || "") : ""
     readonly property int suspendedPositionMs: suspended && renderer.item
         ? Number(renderer.item.suspendedPositionMs) || 0 : 0
+    readonly property bool decoderEvicted: kind === "video" && renderer.item
+        ? Boolean(renderer.item.decoderEvicted) : false
 
     function inspect() {
         if (path.length > 0)
@@ -58,6 +62,7 @@ Item {
         id: videoComponent
         VideoWallpaper {
             path: root.path
+            screenName: root.screenName
             posterPath: root.poster.state === "ready" || root.poster.stale
                 ? root.poster.posterPath : ""
         }

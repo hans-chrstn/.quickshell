@@ -20,6 +20,10 @@ Singleton {
     property alias islandHeightPercent: data.islandHeightPercent
     property alias islandBodyRadius: data.islandBodyRadius
     property alias enableBlur: data.enableBlur
+    property alias experimentalFloatingWallpaperSuspension:
+        data.experimentalFloatingWallpaperSuspension
+    property alias experimentalPauseWallpaperOnBattery:
+        data.experimentalPauseWallpaperOnBattery
     property alias wallpaperDirectories: data.wallpaperDirectories
 
     property bool loaded: false
@@ -38,7 +42,9 @@ Singleton {
         islandWidthPercent: { type: "int", minimum: 90, maximum: 125 },
         islandHeightPercent: { type: "int", minimum: 90, maximum: 125 },
         islandBodyRadius: { type: "int", minimum: 0, maximum: 40 },
-        enableBlur: { type: "bool" }
+        enableBlur: { type: "bool" },
+        experimentalFloatingWallpaperSuspension: { type: "bool" },
+        experimentalPauseWallpaperOnBattery: { type: "bool" }
     })
 
     function normalizedSetting(key, value) {
@@ -198,6 +204,8 @@ Singleton {
             property int islandHeightPercent: 100
             property int islandBodyRadius: 20
             property bool enableBlur: true
+            property bool experimentalFloatingWallpaperSuspension: false
+            property bool experimentalPauseWallpaperOnBattery: false
             property var wallpaperDirectories: []
         }
     }
