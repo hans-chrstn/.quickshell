@@ -40,7 +40,9 @@ SettingPage {
 
             Text {
                 text: WallpaperCatalogService.scanning
-                    ? "Scanning…" : WallpaperCatalogService.wallpapers.length + " images"
+                    ? "Scanning…" : WallpaperCatalogService.classifying
+                        ? "Inspecting…"
+                        : WallpaperCatalogService.wallpapers.length + " media"
                 color: Design.textMuted
                 font.family: Design.fontText
                 font.pixelSize: 10
@@ -143,9 +145,9 @@ SettingPage {
                             required property var modelData
                             width: grid.cellWidth - 8
                             height: grid.cellHeight - 8
-                            path: String(modelData)
+                            record: modelData
                             selected: path === root.effectiveWallpaper
-                            onActivated: root.assign(path)
+                            onActivated: if (selectable) root.assign(path)
                         }
 
                         Column {

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.config
+import qs.services.wallpaper
 
 Singleton {
     id: root
@@ -11,13 +12,19 @@ Singleton {
     readonly property var supportedExtensions: [
         "jpg", "jpeg", "png", "webp", "avif"
     ]
+    readonly property var candidateExtensions: supportedExtensions.concat([
+        "gif", "mp4", "webm", "mkv", "mov"
+    ])
     readonly property var excludedDirectoryNames: [
         "screenshots", "captures", ".thumbnails"
     ]
     readonly property var directories: ConfigService.wallpaperDirectories
     readonly property bool configured: directories.length > 0
     property var wallpapers: []
+    property var candidatePaths: []
     property bool scanning: false
+    readonly property bool classifying: wallpapers.some(record =>
+        record.state === "queued" || record.state === "probing")
     property string error: ""
     property var warnings: []
 
@@ -47,6 +54,15 @@ Singleton {
         return false
     }
 
+    function isCandidate(path) {
+        const lower = String(path || "").toLowerCase()
+        for (let extension of candidateExtensions) {
+            if (lower.endsWith("." + extension))
+                return true
+        }
+        return false
+    }
+
     function isExcluded(path) {
         const segments = String(path || "").toLowerCase().split("/")
         for (let segment of segments) {
@@ -62,7 +78,7 @@ Singleton {
         for (let line of String(output || "").split("\n")) {
             const path = line.trim()
             if (path.length === 0 || seen[path]
-                    || !isSupported(path) || isExcluded(path))
+                    || !isCandidate(path) || isExcluded(path))
                 continue
             seen[path] = true
             unique.push(path)
@@ -71,12 +87,26 @@ Singleton {
         return unique
     }
 
+    function refreshRecords() {
+        wallpapers = candidatePaths.map(path =>
+            WallpaperProbeService.recordFor(path))
+    }
+
+    function classify(paths) {
+        WallpaperProbeService.cancelAll()
+        candidatePaths = paths
+        refreshRecords()
+        for (const path of paths)
+            WallpaperProbeService.enqueue(path)
+    }
+
     function rescan(requestedDirectories) {
         if (requestedDirectories !== undefined)
             ConfigService.setWallpaperDirectories(
                 normalizedDirectories(requestedDirectories))
 
         requestedGeneration += 1
+        WallpaperProbeService.cancelAll()
         if (scanProcess.running) {
             scanPending = true
             return
@@ -92,6 +122,7 @@ Singleton {
         warnings = []
 
         if (roots.length === 0) {
+            candidatePaths = []
             wallpapers = []
             scanning = false
             return
@@ -104,13 +135,18 @@ Singleton {
         scanProcess.running = true
     }
 
+    Connections {
+        target: WallpaperProbeService
+        function onRecordsChanged() { root.refreshRecords() }
+    }
+
     Process {
         id: scanProcess
 
         stdout: StdioCollector {
             onStreamFinished: {
                 if (root.activeGeneration === root.requestedGeneration)
-                    root.wallpapers = root.parseOutput(text)
+                    root.classify(root.parseOutput(text))
             }
         }
 
