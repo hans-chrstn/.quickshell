@@ -1,5 +1,6 @@
 import QtQuick
 import qs.components
+import qs.components.lifecycle
 import qs.core
 import qs.services.settings
 
@@ -7,6 +8,7 @@ Item {
     id: root
 
     property QtObject context: null
+    readonly property string screenName: context?.screenName ?? ""
     focus: true
 
     Component.onCompleted: focusRetrier.startFocus()
@@ -54,12 +56,22 @@ Item {
         color: Design.separator
     }
 
-    Loader {
+    LifecycleLoader {
         anchors.left: divider.right
         anchors.leftMargin: 14
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        resourceId: "settings.page." + root.screenName + "."
+            + (SettingsService.currentPage.length > 0
+                ? SettingsService.currentPage : "category-menu")
+        owner: "settings.module." + root.screenName
+        restorationSource: "SettingsService route and ConfigService"
+        classification: "active-only"
+        registrationEnabled: root.screenName.length > 0
+        requestedActive: true
+        retentionReason: "selected-route"
+        evictionReason: ""
         sourceComponent: {
             switch (SettingsService.currentPage) {
             case "wallpaper": return wallpaperPage

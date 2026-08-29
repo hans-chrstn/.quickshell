@@ -48,6 +48,9 @@ Singleton {
     }
 
     function publish(path, record) {
+        const previous = records[path]
+        if (previous && JSON.stringify(previous) === JSON.stringify(record))
+            return
         const updated = ({})
         for (const key in records)
             updated[key] = records[key]
@@ -186,7 +189,8 @@ Singleton {
                 "Wallpaper probe queue is full"))
             return false
         }
-        publish(normalized, emptyRecord(normalized, "queued", ""))
+        if (recordFor(normalized).state !== "ready")
+            publish(normalized, emptyRecord(normalized, "queued", ""))
         queue = queue.concat([normalized])
         startNext()
         return true
@@ -226,7 +230,8 @@ Singleton {
             Qt.callLater(startNext)
             return
         }
-        publish(path, emptyRecord(path, "probing", ""))
+        if (recordFor(path).state !== "ready")
+            publish(path, emptyRecord(path, "probing", ""))
         statProcess.statGeneration = generation
         statProcess.statPath = path
         statProcess.output = ""

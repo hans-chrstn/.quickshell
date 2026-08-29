@@ -36,8 +36,8 @@ Singleton {
     function close() {
         if (!opened || closing)
             return
-        opened = false
         closing = true
+        opened = false
         confirmingIndex = -1
         closeTimer.restart()
     }

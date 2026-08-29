@@ -38,6 +38,7 @@ Singleton {
         data.optimizeWallpaperBitRate
     property alias automaticWallpaperCacheCleanup:
         data.automaticWallpaperCacheCleanup
+    property alias adaptiveLifecycleEnabled: data.adaptiveLifecycleEnabled
     property alias wallpaperDirectories: data.wallpaperDirectories
 
     property bool loaded: false
@@ -69,7 +70,8 @@ Singleton {
             type: "enum", values: [15, 24, 30], defaultValue: 30
         },
         optimizeWallpaperBitRate: { type: "bool" },
-        automaticWallpaperCacheCleanup: { type: "bool" }
+        automaticWallpaperCacheCleanup: { type: "bool" },
+        adaptiveLifecycleEnabled: { type: "bool" }
     })
 
     function normalizedSetting(key, value) {
@@ -247,6 +249,7 @@ Singleton {
             property int optimizeWallpaperFrameRateLimit: 30
             property bool optimizeWallpaperBitRate: true
             property bool automaticWallpaperCacheCleanup: false
+            property bool adaptiveLifecycleEnabled: true
             property var wallpaperDirectories: []
         }
     }

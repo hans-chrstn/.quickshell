@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components.lifecycle
 import qs.core
 
 Item {
@@ -17,10 +18,17 @@ Item {
 
     clip: true
 
-    Loader {
+    LifecycleLoader {
         id: moduleLoader
         anchors.fill: parent
-        active: root.module !== null
+        resourceId: "island.module." + root.screenName + "."
+            + (root.module?.moduleId ?? "none")
+        owner: "island.content." + root.screenName
+        restorationSource: "ModuleRegistry and feature singleton service"
+        classification: "active-only"
+        requestedActive: root.module !== null
+        retentionReason: requestedActive ? "selected-module" : ""
+        evictionReason: requestedActive ? "" : "no-active-module"
         sourceComponent: root.module?.view ?? null
         readonly property real revealProgress: {
             if (!root.module?.revealWithExpansion)
@@ -36,6 +44,8 @@ Item {
             y: (1 - moduleLoader.revealProgress)
                 * root.module.revealOffsetY
         }
-        onLoaded: item.context = root.moduleContext
+        onInstanceLoaded: function(item) {
+            item.context = root.moduleContext
+        }
     }
 }

@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.components.lifecycle
 import qs.services.config
 
 Singleton {
@@ -27,9 +28,17 @@ Singleton {
     readonly property bool pauseRequested:
         optionEnabled && available && onBattery
 
-    Loader {
+    LifecycleLoader {
         id: provider
-        active: root.optionEnabled && !root.syntheticActive
+        resourceId: "power.upower-provider"
+        owner: "power-state-service"
+        restorationSource: "ConfigService and native UPower state"
+        classification: "active-only"
+        requestedActive: root.optionEnabled && !root.syntheticActive
+        retentionReason: requestedActive ? "battery-policy-enabled" : ""
+        evictionReason: requestedActive ? ""
+            : root.syntheticActive ? "synthetic-provider-active"
+            : "battery-policy-disabled"
         sourceComponent: UPowerStateProvider {}
     }
 

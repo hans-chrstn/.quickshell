@@ -3,10 +3,12 @@ import Quickshell
 import Quickshell.Io
 import qs.services.config
 import qs.services.launcher
+import qs.services.lifecycle
 import qs.services.power
 import qs.services.session
 import qs.services.settings
 import qs.services.wallpaper
+import "JsonFormat.js" as JsonFormat
 
 IpcHandler {
     target: "new-shell"
@@ -18,10 +20,10 @@ IpcHandler {
     function sessionOpen(): void { SessionService.open() }
     function sessionClose(): void { SessionService.close() }
     function sessionLockStatus(): string {
-        return JSON.stringify(SessionLockService.snapshot())
+        return JsonFormat.stringify(SessionLockService.snapshot())
     }
     function powerStatus(): string {
-        return JSON.stringify(PowerStateService.snapshot())
+        return JsonFormat.stringify(PowerStateService.snapshot())
     }
     function powerTestSet(available: bool, onBattery: bool,
             percentage: real): bool {
@@ -40,7 +42,13 @@ IpcHandler {
         return ConfigService.setSetting(key, value)
     }
     function configStatus(): string {
-        return JSON.stringify(ConfigService.snapshot())
+        return JsonFormat.stringify(ConfigService.snapshot())
+    }
+    function lifecycleStatus(): string {
+        return JsonFormat.stringify(LifecycleService.snapshot())
+    }
+    function lifecycleAdaptiveSet(enabled: bool): bool {
+        return ConfigService.setSetting("adaptiveLifecycleEnabled", enabled)
     }
     function settingsClose(): void { SettingsService.close() }
 
@@ -49,7 +57,7 @@ IpcHandler {
         WallpaperCatalogService.rescan(paths.length > 0 ? paths.split("|") : [])
     }
     function wallpapersStatus(): string {
-        return JSON.stringify({
+        return JsonFormat.stringify({
             scanning: WallpaperCatalogService.scanning,
             count: WallpaperCatalogService.wallpapers.length,
             wallpapers: WallpaperCatalogService.wallpapers,
@@ -61,11 +69,11 @@ IpcHandler {
         return WallpaperProbeService.enqueue(path)
     }
     function wallpaperProbeStatus(path: string): string {
-        return JSON.stringify(WallpaperProbeService.recordFor(path))
+        return JsonFormat.stringify(WallpaperProbeService.recordFor(path))
     }
     function wallpaperProbeCancel(): void { WallpaperProbeService.cancelAll() }
     function wallpaperProbeCacheStatus(): string {
-        return JSON.stringify({
+        return JsonFormat.stringify({
             loaded: WallpaperProbeService.cacheLoaded,
             entries: Object.keys(WallpaperProbeService.cacheEntries).length,
             maximumEntries: WallpaperProbeService.maximumCacheEntries
@@ -75,7 +83,7 @@ IpcHandler {
         return WallpaperPosterService.request(WallpaperProbeService.recordFor(path))
     }
     function wallpaperPosterStatus(path: string): string {
-        return JSON.stringify(WallpaperPosterService.recordFor(path))
+        return JsonFormat.stringify(WallpaperPosterService.recordFor(path))
     }
     function wallpaperPosterCancel(): void { WallpaperPosterService.cancelAll() }
     function wallpaperChooseDirectory(): void {
@@ -99,25 +107,25 @@ IpcHandler {
         return WallpaperAssignmentService.wallpaperForScreen(screen)
     }
     function wallpaperAssignments(): string {
-        return JSON.stringify(WallpaperAssignmentService.snapshot())
+        return JsonFormat.stringify(WallpaperAssignmentService.snapshot())
     }
     function wallpaperRenderStatus(): string {
-        return JSON.stringify(WallpaperRenderService.snapshot())
+        return JsonFormat.stringify(WallpaperRenderService.snapshot())
     }
     function wallpaperDiagnostics(): string {
-        return JSON.stringify(WallpaperDiagnosticsService.snapshot())
+        return JsonFormat.stringify(WallpaperDiagnosticsService.snapshot())
     }
     function wallpaperOcclusionStatus(): string {
-        return JSON.stringify(WallpaperOcclusionService.snapshot())
+        return JsonFormat.stringify(WallpaperOcclusionService.snapshot())
     }
     function wallpaperMonitorPowerStatus(): string {
-        return JSON.stringify(WallpaperMonitorPowerService.snapshot())
+        return JsonFormat.stringify(WallpaperMonitorPowerService.snapshot())
     }
     function wallpaperGuardrails(): string {
-        return JSON.stringify(WallpaperGuardrailService.snapshot())
+        return JsonFormat.stringify(WallpaperGuardrailService.snapshot())
     }
     function wallpaperGuardrailFor(path: string): string {
-        return JSON.stringify(WallpaperGuardrailService.assessment(
+        return JsonFormat.stringify(WallpaperGuardrailService.assessment(
             "Inspection", path))
     }
     function wallpaperOptimize(target: string, path: string): bool {
@@ -129,7 +137,7 @@ IpcHandler {
             target, path, multiplier)
     }
     function wallpaperOptimizationScales(target: string, path: string): string {
-        return JSON.stringify({
+        return JsonFormat.stringify({
             selected: WallpaperOptimizationService.selectedResolutionScale(
                 target, path),
             available: WallpaperOptimizationService.availableResolutionScales(
@@ -145,7 +153,7 @@ IpcHandler {
         })
     }
     function wallpaperOptimizationStatus(path: string): string {
-        return JSON.stringify(WallpaperOptimizationService.recordFor(path))
+        return JsonFormat.stringify(WallpaperOptimizationService.recordFor(path))
     }
     function wallpaperOptimizationCancel(): void {
         WallpaperOptimizationService.cancel()
@@ -154,16 +162,16 @@ IpcHandler {
         return WallpaperOptimizationService.clearCache()
     }
     function wallpaperOptimizationCacheStatus(): string {
-        return JSON.stringify(WallpaperOptimizationService.cacheSnapshot())
+        return JsonFormat.stringify(WallpaperOptimizationService.cacheSnapshot())
     }
     function wallpaperCacheScan(): bool {
         return WallpaperCacheService.scan()
     }
     function wallpaperCacheStatus(): string {
-        return JSON.stringify(WallpaperCacheService.snapshot())
+        return JsonFormat.stringify(WallpaperCacheService.snapshot())
     }
     function wallpaperCacheCleanupPlan(): string {
-        return JSON.stringify(WallpaperCacheService.buildPlan())
+        return JsonFormat.stringify(WallpaperCacheService.buildPlan())
     }
     function wallpaperCacheCleanupExecute(): bool {
         return WallpaperCacheService.executeCleanup()
@@ -171,7 +179,7 @@ IpcHandler {
     function monitors(): string {
         const renderers = WallpaperRenderService.snapshot()
         const overrides = WallpaperAssignmentService.screenWallpapers
-        return JSON.stringify(Quickshell.screens.map(screen => {
+        return JsonFormat.stringify(Quickshell.screens.map(screen => {
             const name = String(screen.name || "")
             return {
                 name: name,

@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components.lifecycle
 import qs.services.wallpaper
 
 Item {
@@ -46,11 +47,21 @@ Item {
     onPathChanged: inspect()
     onMediaChanged: preparePoster()
 
-    Loader {
+    LifecycleLoader {
         id: renderer
         anchors.fill: parent
-        active: root.path.length > 0 && root.media.state === "ready"
+        resourceId: "wallpaper.renderer." + root.screenName
+        owner: "wallpaper.surface." + root.screenName
+        restorationSource: "WallpaperAssignmentService and probe record"
+        classification: "expensive"
+        requestedActive: root.path.length > 0 && root.media.state === "ready"
             && (root.kind === "static" || root.kind === "video")
+        retentionReason: requestedActive
+            ? "assigned-" + root.kind : ""
+        evictionReason: requestedActive ? ""
+            : root.path.length === 0 ? "no-assignment"
+            : root.media.state !== "ready" ? "media-unavailable"
+            : "unsupported-renderer"
         sourceComponent: root.kind === "video" ? videoComponent : staticComponent
     }
 

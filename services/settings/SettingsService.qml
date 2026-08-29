@@ -88,8 +88,8 @@ Singleton {
     function close() {
         if (!opened || closing)
             return
-        opened = false
         closing = true
+        opened = false
         clearPages()
         closeTimer.restart()
     }

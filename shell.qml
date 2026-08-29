@@ -4,6 +4,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import qs.components.lifecycle
 import qs.panels
 import qs.services.ipc
 import qs.services.config
@@ -14,8 +15,14 @@ import qs.services.wallpaper
 ShellRoot {
     ShellIpc {}
 
-    Loader {
-        active: ConfigService.automaticWallpaperCacheCleanup
+    LifecycleLoader {
+        resourceId: "wallpaper.cache-coordinator"
+        owner: "shell"
+        restorationSource: "ConfigService and dedicated cache directories"
+        classification: "active-only"
+        requestedActive: ConfigService.automaticWallpaperCacheCleanup
+        retentionReason: requestedActive ? "automatic-cleanup-enabled" : ""
+        evictionReason: requestedActive ? "" : "automatic-cleanup-disabled"
         sourceComponent: Component { WallpaperCacheCoordinator {} }
     }
 

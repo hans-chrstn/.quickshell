@@ -88,8 +88,13 @@ Singleton {
     }
 
     function refreshRecords() {
-        wallpapers = candidatePaths.map(path =>
+        const refreshed = candidatePaths.map(path =>
             WallpaperProbeService.recordFor(path))
+        if (refreshed.length === wallpapers.length
+                && refreshed.every((record, index) =>
+                    record === wallpapers[index]))
+            return
+        wallpapers = refreshed
     }
 
     function classify(paths) {

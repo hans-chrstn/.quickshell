@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components.lifecycle
 import qs.services.power
 import qs.services.session
 import qs.services.wallpaper
@@ -18,6 +19,8 @@ Item {
     property bool firstFrameReady: false
     property int suspendedPositionMs: 0
     property bool decoderRetained: true
+    property bool adaptiveEvictionEligible: false
+    property string decoderEvictionReason: "sustained-suspension"
     readonly property int decoderEvictionDelayMs: 30000
     readonly property bool decoderEvicted: !decoderRetained
     readonly property bool decoderLoaded: decoder.item !== null
@@ -35,10 +38,13 @@ Item {
 
     function reconcilePlaybackRequest() {
         if (playbackRequested) {
+            adaptiveEligibilityTimer.stop()
+            adaptiveEvictionEligible = false
             resumeTimer.restart()
         } else {
             resumeTimer.stop()
             playingAllowed = false
+            adaptiveEligibilityTimer.restart()
             applyPlaybackPolicy()
         }
     }
@@ -48,6 +54,7 @@ Item {
             evictionTimer.stop()
             if (!decoderRetained) {
                 firstFrameReady = false
+                decoderEvictionReason = "sustained-suspension"
                 decoderRetained = true
             }
         } else {
@@ -55,6 +62,17 @@ Item {
                 decoder.item.captureAndPause()
             evictionTimer.restart()
         }
+    }
+
+    function evictDecoder(reason) {
+        if (playingAllowed || !decoderRetained)
+            return false
+        if (decoder.item)
+            decoder.item.captureAndPause()
+        firstFrameReady = false
+        decoderEvictionReason = String(reason || "sustained-suspension")
+        decoderRetained = false
+        return true
     }
 
     onPlaybackRequestedChanged: reconcilePlaybackRequest()
@@ -78,11 +96,24 @@ Item {
         visible: !root.firstFrameReady && status === Image.Ready
     }
 
-    Loader {
+    LifecycleLoader {
         id: decoder
         anchors.fill: parent
-        active: root.decoderRetained
+        resourceId: "wallpaper.video-decoder." + root.screenName
+        owner: "wallpaper.video." + root.screenName
+        restorationSource: "VideoWallpaper position and poster state"
+        classification: "briefly-warm"
+        adaptiveEligible: root.adaptiveEvictionEligible
+        estimatedCostUnits: 60
+        basePriority: 50
+        requestedActive: root.decoderRetained
+        usageActive: root.playingAllowed
+        retentionReason: root.playingAllowed ? "playback-active"
+            : root.decoderRetained ? "suspension-grace-period" : ""
+        evictionReason: root.decoderRetained ? ""
+            : root.decoderEvictionReason
         sourceComponent: decoderComponent
+        onAdaptiveEvictionRequested: reason => root.evictDecoder(reason)
     }
 
     Component {
@@ -101,16 +132,21 @@ Item {
     }
 
     Timer {
+        id: adaptiveEligibilityTimer
+        interval: 1500
+        repeat: false
+        onTriggered: {
+            if (!root.playbackRequested && root.decoderRetained)
+                root.adaptiveEvictionEligible = true
+        }
+    }
+
+    Timer {
         id: evictionTimer
         interval: root.decoderEvictionDelayMs
         repeat: false
         onTriggered: {
-            if (root.playingAllowed || !root.decoderRetained)
-                return
-            if (decoder.item)
-                decoder.item.captureAndPause()
-            root.firstFrameReady = false
-            root.decoderRetained = false
+            root.evictDecoder("sustained-suspension")
         }
     }
 

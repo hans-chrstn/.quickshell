@@ -61,8 +61,8 @@ Singleton {
     function close() {
         if (!opened || closing)
             return
-        opened = false
         closing = true
+        opened = false
         closeTimer.restart()
     }
 
