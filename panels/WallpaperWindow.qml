@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.panels.wallpaper
 import qs.services.wallpaper
 
 PanelWindow {
@@ -33,37 +34,21 @@ PanelWindow {
         item: inputParkingTarget
     }
 
-    Image {
+    WallpaperSurface {
         id: wallpaper
-
         anchors.fill: parent
-        source: root.wallpaperPath.length > 0
-            ? "file://" + root.wallpaperPath : ""
-        sourceSize.width: Math.ceil(root.width * (root.screen?.devicePixelRatio ?? 1))
-        sourceSize.height: Math.ceil(root.height * (root.screen?.devicePixelRatio ?? 1))
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        visible: status === Image.Ready
+        screenName: root.screenName
+        path: root.wallpaperPath
+        renderScale: root.screen?.devicePixelRatio ?? 1
 
         function reportStatus() {
-            let state = "empty"
-            let error = ""
-            if (root.wallpaperPath.length > 0) {
-                if (status === Image.Loading)
-                    state = "loading"
-                else if (status === Image.Ready)
-                    state = "ready"
-                else if (status === Image.Error) {
-                    state = "error"
-                    error = "Wallpaper could not be decoded"
-                }
-            }
             WallpaperRenderService.report(
-                root.screenName, root.wallpaperPath, state, error)
+                root.screenName, root.wallpaperPath, state, error, kind)
         }
 
-        onStatusChanged: reportStatus()
-        onSourceChanged: reportStatus()
+        onStateChanged: reportStatus()
+        onKindChanged: reportStatus()
+        onPathChanged: reportStatus()
     }
 
     onScreenNameChanged: wallpaper.reportStatus()

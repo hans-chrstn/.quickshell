@@ -129,7 +129,8 @@ Singleton {
     }
 
     function startNext() {
-        if (!directoryReady || activePath.length > 0
+        if (!directoryReady || !WallpaperMediaTools.posterChecked
+                || activePath.length > 0
                 || checkProcess.running || posterProcess.running
                 || queue.length === 0)
             return
@@ -148,12 +149,18 @@ Singleton {
     }
 
     function generate(item) {
+        if (WallpaperMediaTools.ffmpegPath.length === 0) {
+            publish(item.path, failedRecord(item, "FFmpeg is unavailable"))
+            finishActive()
+            return
+        }
         const seekSeconds = Math.min(5,
             Math.max(0, item.durationMs / 1000 * 0.1))
         posterProcess.item = item
         posterProcess.itemGeneration = generation
         posterProcess.command = [
-            "ffmpeg", "-v", "error", "-y",
+            WallpaperMediaTools.ffmpegPath, "-v", "error", "-y",
+            "-threads", "1", "-filter_threads", "1",
             "-ss", seekSeconds.toFixed(3), "-i", item.path,
             "-frames:v", "1", "-vf",
             "scale=" + posterWidth + ":" + posterHeight
@@ -175,6 +182,11 @@ Singleton {
     Component.onCompleted: {
         directoryProcess.command = ["mkdir", "-p", "--", cacheDirectory]
         directoryProcess.running = true
+    }
+
+    Connections {
+        target: WallpaperMediaTools
+        function onPosterCheckedChanged() { root.startNext() }
     }
 
     Timer {

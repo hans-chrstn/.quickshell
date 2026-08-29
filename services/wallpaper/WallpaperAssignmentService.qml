@@ -19,9 +19,13 @@ Singleton {
 
     function validWallpaper(path) {
         const normalized = normalizePath(path)
-        return normalized.length > 0
-            && WallpaperCatalogService.isSupported(normalized)
-            && !WallpaperCatalogService.isExcluded(normalized)
+        if (normalized.length === 0
+                || WallpaperCatalogService.isExcluded(normalized))
+            return false
+        if (WallpaperCatalogService.isSupported(normalized))
+            return true
+        const media = WallpaperProbeService.recordFor(normalized)
+        return media.state === "ready" && media.kind === "video"
     }
 
     function wallpaperForScreen(screenName) {

@@ -189,7 +189,8 @@ Singleton {
     }
 
     function startNext() {
-        if (statProcess.running || probeProcess.running
+        if (!WallpaperMediaTools.probeChecked
+                || statProcess.running || probeProcess.running
                 || activePath.length > 0 || queue.length === 0)
             return
         const remaining = queue.slice()
@@ -197,6 +198,13 @@ Singleton {
         queue = remaining
         activePath = path
         activeIdentity = ""
+        if (WallpaperMediaTools.ffprobePath.length === 0) {
+            publish(path, emptyRecord(path, "failed",
+                "FFprobe is unavailable"))
+            activePath = ""
+            Qt.callLater(startNext)
+            return
+        }
         publish(path, emptyRecord(path, "probing", ""))
         statProcess.statGeneration = generation
         statProcess.statPath = path
@@ -211,12 +219,18 @@ Singleton {
         probeProcess.probePath = path
         probeProcess.output = ""
         probeProcess.command = [
-            "ffprobe", "-v", "error", "-select_streams", "v:0",
+            WallpaperMediaTools.ffprobePath,
+            "-v", "error", "-select_streams", "v:0",
             "-show_entries",
             "stream=codec_name,width,height,nb_frames,duration:format=format_name,duration:format_tags=major_brand",
             "-of", "json", "--", path
         ]
         probeProcess.running = true
+    }
+
+    Connections {
+        target: WallpaperMediaTools
+        function onProbeCheckedChanged() { root.startNext() }
     }
 
     function finishActive() {

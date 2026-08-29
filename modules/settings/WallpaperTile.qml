@@ -16,7 +16,9 @@ Rectangle {
     }
     readonly property string state: String(record?.state || "unknown")
     readonly property string kind: String(record?.kind || "unsupported")
-    readonly property bool selectable: state === "ready" && kind === "static"
+    readonly property bool selectable: state === "ready"
+        && (kind === "static" || kind === "video")
+    readonly property bool needsPoster: state === "ready" && kind !== "static"
     readonly property var poster: WallpaperPosterService.recordFor(path)
     readonly property bool posterReady: poster.posterPath.length > 0
         && (poster.state === "ready" || poster.stale)
@@ -24,7 +26,7 @@ Rectangle {
     signal activated()
 
     function requestPoster() {
-        if (state === "ready" && !selectable)
+        if (needsPoster)
             WallpaperPosterService.request(record)
     }
 
@@ -50,8 +52,9 @@ Rectangle {
         id: preview
         anchors.fill: parent
         anchors.margins: root.selected ? 3 : 2
-        visible: root.selectable || root.posterReady
-        source: "file://" + (root.selectable ? root.path : root.poster.posterPath)
+        visible: root.kind === "static" || root.posterReady
+        source: "file://" + (root.kind === "static"
+            ? root.path : root.poster.posterPath)
         sourceSize.width: Math.ceil(width * 1.5)
         sourceSize.height: Math.ceil(height * 1.5)
         fillMode: Image.PreserveAspectCrop

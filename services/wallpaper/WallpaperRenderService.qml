@@ -8,7 +8,7 @@ Singleton {
 
     property var screens: ({})
 
-    function report(screenName, path, state, error) {
+    function report(screenName, path, state, error, kind) {
         const name = String(screenName || "").trim()
         if (name.length === 0)
             return
@@ -18,6 +18,7 @@ Singleton {
             updated[key] = screens[key]
         updated[name] = {
             path: String(path || ""),
+            kind: String(kind || "unknown"),
             state: String(state || "empty"),
             error: String(error || "")
         }
