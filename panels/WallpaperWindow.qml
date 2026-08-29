@@ -43,12 +43,17 @@ PanelWindow {
 
         function reportStatus() {
             WallpaperRenderService.report(
-                root.screenName, root.wallpaperPath, state, error, kind)
+                root.screenName, root.wallpaperPath, state, error, kind, {
+                    suspended: suspended,
+                    suspendedPositionMs: suspendedPositionMs
+                })
         }
 
         onStateChanged: reportStatus()
         onKindChanged: reportStatus()
         onPathChanged: reportStatus()
+        onSuspendedChanged: reportStatus()
+        onSuspendedPositionMsChanged: if (suspended) reportStatus()
     }
 
     onScreenNameChanged: wallpaper.reportStatus()

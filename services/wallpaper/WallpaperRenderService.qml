@@ -8,7 +8,7 @@ Singleton {
 
     property var screens: ({})
 
-    function report(screenName, path, state, error, kind) {
+    function report(screenName, path, state, error, kind, details) {
         const name = String(screenName || "").trim()
         if (name.length === 0)
             return
@@ -20,7 +20,9 @@ Singleton {
             path: String(path || ""),
             kind: String(kind || "unknown"),
             state: String(state || "empty"),
-            error: String(error || "")
+            error: String(error || ""),
+            suspended: Boolean(details?.suspended),
+            suspendedPositionMs: Number(details?.suspendedPositionMs) || 0
         }
         screens = updated
     }

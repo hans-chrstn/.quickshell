@@ -19,6 +19,10 @@ Item {
             || media.state === "unsupported"
         ? String(media.error || "Unsupported wallpaper media")
         : renderer.item ? renderer.item.error : ""
+    readonly property bool suspended: kind === "video" && renderer.item
+        ? Boolean(renderer.item.suspended) : false
+    readonly property int suspendedPositionMs: suspended && renderer.item
+        ? Number(renderer.item.suspendedPositionMs) || 0 : 0
 
     function inspect() {
         if (path.length > 0)
@@ -54,7 +58,8 @@ Item {
         id: videoComponent
         VideoWallpaper {
             path: root.path
-            posterPath: root.poster.posterPath || ""
+            posterPath: root.poster.state === "ready" || root.poster.stale
+                ? root.poster.posterPath : ""
         }
     }
 }

@@ -16,6 +16,9 @@ IpcHandler {
     function session(): void { SessionService.toggle() }
     function sessionOpen(): void { SessionService.open() }
     function sessionClose(): void { SessionService.close() }
+    function sessionLockStatus(): string {
+        return JSON.stringify(SessionLockService.snapshot())
+    }
     function settings(): void { SettingsService.toggle() }
     function settingsOpen(): void { SettingsService.open() }
     function settingsOpenCategory(category: string): bool {
