@@ -37,7 +37,7 @@ Item {
 
     FolderListModel {
         id: folders
-        folder: "file://" + root.currentPath
+        folder: LocalUrl.fromPath(root.currentPath)
         showDirs: true
         showFiles: false
         showDotAndDotDot: false

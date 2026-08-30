@@ -7,6 +7,57 @@ import qs.services.power
 Singleton {
     id: root
 
+    function mediaSnapshot(path) {
+        const media = WallpaperProbeService.recordFor(path)
+        return {
+            state: String(media?.state || "unknown"),
+            codec: String(media?.codec || ""),
+            container: String(media?.container || ""),
+            width: Number(media?.width) || 0,
+            height: Number(media?.height) || 0,
+            durationMs: Number(media?.durationMs) || 0,
+            frameRate: Number(media?.frameRate) || 0,
+            bitRate: Number(media?.bitRate) || 0
+        }
+    }
+
+    function optimizationSnapshot(path) {
+        const currentPath = String(path || "")
+        const records = WallpaperOptimizationService.records
+        let sourcePath = currentPath
+        let record = WallpaperOptimizationService.recordFor(currentPath)
+
+        if (WallpaperOptimizationService.isOptimizedPath(currentPath)) {
+            sourcePath = ""
+            record = null
+            for (const candidateSource in records) {
+                const candidate = records[candidateSource]
+                if (String(candidate.outputPath || "") === currentPath) {
+                    sourcePath = candidateSource
+                    record = candidate
+                    break
+                }
+            }
+        }
+
+        const outputPath = String(record?.outputPath || "")
+        const applied = WallpaperOptimizationService.isOptimizedPath(currentPath)
+        const available = sourcePath.length > 0 && outputPath.length > 0
+            && WallpaperProbeService.recordFor(outputPath).state === "ready"
+        return {
+            applied: applied,
+            available: available,
+            mappingKnown: sourcePath.length > 0,
+            sourcePath: sourcePath,
+            outputPath: outputPath,
+            state: String(record?.state || (applied ? "unknown" : "idle")),
+            error: String(record?.error || ""),
+            sourceMedia: sourcePath.length > 0
+                ? mediaSnapshot(sourcePath) : null,
+            outputMedia: available ? mediaSnapshot(outputPath) : null
+        }
+    }
+
     function snapshot() {
         const now = Date.now()
         const renderers = WallpaperRenderService.snapshot()
@@ -16,7 +67,6 @@ Singleton {
 
         for (const screenName in renderers) {
             const renderer = renderers[screenName]
-            const media = WallpaperProbeService.recordFor(renderer.path)
             screens[screenName] = {
                 path: renderer.path,
                 kind: renderer.kind,
@@ -29,15 +79,8 @@ Singleton {
                 suspendedReason: renderer.suspendedReason,
                 activeDurationMs: WallpaperRenderService.activeDuration(
                     screenName, now),
-                media: {
-                    state: String(media?.state || "unknown"),
-                    codec: String(media?.codec || ""),
-                    width: Number(media?.width) || 0,
-                    height: Number(media?.height) || 0,
-                    durationMs: Number(media?.durationMs) || 0,
-                    frameRate: Number(media?.frameRate) || 0,
-                    bitRate: Number(media?.bitRate) || 0
-                },
+                media: mediaSnapshot(renderer.path),
+                optimization: optimizationSnapshot(renderer.path),
                 occlusion: occlusion.screens?.[screenName] || null,
                 monitorPowered: monitorPower.screens?.[screenName] !== false
             }

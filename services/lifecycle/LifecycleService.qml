@@ -283,8 +283,16 @@ Singleton {
     function snapshot() {
         const now = Date.now()
         const result = ({})
-        for (const id in resources)
+        for (const id in resources) {
             result[id] = snapshotRecord(resources[id], now)
+            result[id].adaptiveCandidate = LifecyclePolicy.isCandidate(
+                result[id])
+            result[id].decayedFrequency = LifecyclePolicy.frequencyAt(
+                result[id], now, policy)
+            result[id].retentionScore = result[id].adaptiveEligible
+                ? LifecyclePolicy.retentionScore(result[id], now, policy)
+                : null
+        }
         const budgetPlan = LifecyclePolicy.buildPlan(
             Object.keys(result).map(id => result[id]),
             inactiveBudgetUnits, now, policy)

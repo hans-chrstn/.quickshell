@@ -1,5 +1,6 @@
 import QtQuick
 import QtMultimedia
+import qs.core
 
 Item {
     id: root
@@ -11,6 +12,8 @@ Item {
     property bool firstFrameReady: false
 
     readonly property int currentPositionMs: Number(player.position) || 0
+    readonly property bool actuallyPlaying:
+        player.playbackState === MediaPlayer.PlayingState
     readonly property string state: player.error !== MediaPlayer.NoError
         ? "error" : firstFrameReady ? "ready" : "loading"
     readonly property string error: player.error !== MediaPlayer.NoError
@@ -52,7 +55,7 @@ Item {
 
     MediaPlayer {
         id: player
-        source: root.path.length > 0 ? "file://" + root.path : ""
+        source: LocalUrl.fromPath(root.path)
         videoOutput: output
         loops: MediaPlayer.Infinite
 
@@ -70,6 +73,7 @@ Item {
 
     Connections {
         target: output.videoSink
+        enabled: !root.firstFrameReady
         function onVideoFrameChanged() { root.firstFrameReady = true }
     }
 

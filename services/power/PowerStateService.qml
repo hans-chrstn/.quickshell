@@ -63,7 +63,7 @@ Singleton {
     function snapshot() {
         return {
             provider: syntheticActive ? "synthetic"
-                : provider.active ? "upower" : "disabled",
+                : provider.loaded ? "upower" : "disabled",
             testMode: testMode,
             nativeReady: nativeReady,
             available: available,

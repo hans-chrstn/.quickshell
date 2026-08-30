@@ -1,4 +1,5 @@
 import QtQuick
+import qs.core
 
 Item {
     id: root
@@ -16,7 +17,7 @@ Item {
     Image {
         id: image
         anchors.fill: parent
-        source: root.path.length > 0 ? "file://" + root.path : ""
+        source: LocalUrl.fromPath(root.path)
         sourceSize.width: Math.ceil(width * root.renderScale)
         sourceSize.height: Math.ceil(height * root.renderScale)
         fillMode: Image.PreserveAspectCrop

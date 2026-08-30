@@ -13,6 +13,8 @@ Singleton {
     property var consumerScreens: ({})
     property var screenStates: ({})
     property string error: ""
+    property int evaluationAttempt: 0
+    readonly property int maximumEvaluationAttempts: 10
 
     readonly property int consumers: {
         let total = 0
@@ -78,6 +80,7 @@ Singleton {
             error = "Native Hyprland toplevel refresh is unavailable"
             return
         }
+        evaluationAttempt = 0
         Hyprland.refreshToplevels()
         evaluationTimer.restart()
     }
@@ -85,10 +88,18 @@ Singleton {
     function evaluateToplevels() {
         const clients = []
         const toplevels = Hyprland.toplevels?.values || []
+        let incomplete = false
         for (const toplevel of toplevels) {
             const client = toplevel?.lastIpcObject
             if (client)
                 clients.push(client)
+            else
+                incomplete = true
+        }
+        if (incomplete && evaluationAttempt < maximumEvaluationAttempts) {
+            ++evaluationAttempt
+            evaluationTimer.restart()
+            return
         }
         evaluate(clients)
     }
@@ -187,6 +198,11 @@ Singleton {
 
     function covered(screenName) {
         return Boolean(screenStates[String(screenName || "")]?.covered)
+    }
+
+    function known(screenName) {
+        const name = String(screenName || "")
+        return screenStates[name] !== undefined
     }
 
     function relevantEvent(name) {

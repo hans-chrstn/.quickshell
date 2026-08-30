@@ -53,8 +53,8 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: root.selected ? 3 : 2
         visible: root.kind === "static" || root.posterReady
-        source: root.kind === "static" ? "file://" + root.path
-            : root.posterReady ? "file://" + root.poster.posterPath : ""
+        source: root.kind === "static" ? LocalUrl.fromPath(root.path)
+            : root.posterReady ? LocalUrl.fromPath(root.poster.posterPath) : ""
         sourceSize.width: Math.ceil(width * 1.5)
         sourceSize.height: Math.ceil(height * 1.5)
         fillMode: Image.PreserveAspectCrop

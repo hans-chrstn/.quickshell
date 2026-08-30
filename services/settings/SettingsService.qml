@@ -47,6 +47,15 @@ Singleton {
                 { id: "motion", title: "Motion", desc: "Configure animation durations and curves" },
                 { id: "behavior", title: "Behavior", desc: "Adjust hover intent and auto-hide delays" }
             ]
+        },
+        {
+            id: "analytics",
+            title: "Analytics",
+            subpages: [
+                { id: "analytics_lifecycle", title: "Lifecycle", desc: "Inspect widget loading, retention, and eviction" },
+                { id: "analytics_wallpaper", title: "Wallpaper", desc: "Review renderer and playback activity" },
+                { id: "analytics_performance", title: "Performance", desc: "Understand measured shell resource behavior" }
+            ]
         }
     ]
 

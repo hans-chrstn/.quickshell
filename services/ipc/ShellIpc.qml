@@ -38,6 +38,7 @@ IpcHandler {
     function settingsOpenCategory(category: string): bool {
         return SettingsService.openCategory(category)
     }
+    function settingsBack(): bool { return SettingsService.back() }
     function settingsSet(key: string, value: string): bool {
         return ConfigService.setSetting(key, value)
     }

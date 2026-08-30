@@ -57,7 +57,7 @@ Singleton {
     }
 
     function snapshot() {
-        return screens
+        return Object.assign({}, screens)
     }
 
     function activeDuration(screenName, nowMs) {

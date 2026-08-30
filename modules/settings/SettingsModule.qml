@@ -82,6 +82,9 @@ Item {
             case "island_style": return islandStylePage
             case "motion": return motionPage
             case "behavior": return behaviorPage
+            case "analytics_lifecycle": return analyticsLifecyclePage
+            case "analytics_wallpaper": return analyticsWallpaperPage
+            case "analytics_performance": return analyticsPerformancePage
             default: return subpageMenuPage
             }
         }
@@ -130,5 +133,20 @@ Item {
     Component {
         id: islandStylePage
         IslandStylePage {}
+    }
+
+    Component {
+        id: analyticsLifecyclePage
+        LifecycleAnalyticsPage {}
+    }
+
+    Component {
+        id: analyticsWallpaperPage
+        WallpaperAnalyticsPage {}
+    }
+
+    Component {
+        id: analyticsPerformancePage
+        PerformanceAnalyticsPage {}
     }
 }

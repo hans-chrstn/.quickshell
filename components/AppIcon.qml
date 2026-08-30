@@ -18,7 +18,7 @@ Item {
         if (name.startsWith("file:") || name.startsWith("image:"))
             return name
         if (name.startsWith("/"))
-            return "file://" + name
+            return LocalUrl.fromPath(name)
 
         const resolved = name.length > 0 ? Quickshell.iconPath(name, true) : ""
         if (String(resolved || "").length > 0)

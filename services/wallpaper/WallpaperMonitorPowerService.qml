@@ -79,6 +79,11 @@ Singleton {
         return poweredScreens[name] !== false
     }
 
+    function known(screenName) {
+        const name = String(screenName || "")
+        return poweredScreens[name] !== undefined
+    }
+
     Timer {
         interval: 2000
         repeat: true
