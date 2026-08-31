@@ -22,10 +22,10 @@ Singleton {
         if (normalized.length === 0
                 || WallpaperCatalogService.isExcluded(normalized))
             return false
-        if (WallpaperCatalogService.isSupported(normalized))
-            return true
         const media = WallpaperProbeService.recordFor(normalized)
-        return media.state === "ready" && media.kind === "video"
+        if (media.state === "ready")
+            return WallpaperRenderSupportService.supported(media)
+        return WallpaperCatalogService.isSupported(normalized)
     }
 
     function wallpaperForScreen(screenName) {

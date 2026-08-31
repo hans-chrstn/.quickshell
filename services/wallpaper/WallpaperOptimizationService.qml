@@ -88,7 +88,6 @@ Singleton {
             width = 1920
             height = 1080
         }
-        // H.264/yuv420p requires even dimensions.
         return { width: width - width % 2, height: height - height % 2 }
     }
 

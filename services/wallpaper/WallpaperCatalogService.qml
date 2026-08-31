@@ -10,10 +10,10 @@ Singleton {
     id: root
 
     readonly property var supportedExtensions: [
-        "jpg", "jpeg", "png", "webp", "avif"
+        "jpg", "jpeg", "png", "avif"
     ]
     readonly property var candidateExtensions: supportedExtensions.concat([
-        "gif", "mp4", "webm", "mkv", "mov"
+        "webp", "gif", "apng", "mp4", "webm", "mkv", "mov"
     ])
     readonly property var excludedDirectoryNames: [
         "screenshots", "captures", ".thumbnails"

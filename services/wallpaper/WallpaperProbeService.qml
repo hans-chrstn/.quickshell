@@ -98,7 +98,7 @@ Singleton {
         const frames = Number(stream.nb_frames)
         let kind = "unsupported"
 
-        if (codec === "webp_anim"
+        if (codec === "apng" || codec === "webp_anim"
                 || (codec === "gif" && Number.isFinite(frames) && frames > 1)) {
             kind = "animatedImage"
         } else if ((["png", "mjpeg", "webp"].indexOf(codec) >= 0

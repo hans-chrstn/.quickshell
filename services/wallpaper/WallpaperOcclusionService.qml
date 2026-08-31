@@ -131,21 +131,6 @@ Singleton {
         return ids
     }
 
-    function monitorBounds(monitor, screen) {
-        const data = monitor?.lastIpcObject || ({})
-        const transform = Number(data.transform) || 0
-        const swapsAxes = transform === 1 || transform === 3
-            || transform === 5 || transform === 7
-        const physicalWidth = Number(data.width)
-        const physicalHeight = Number(data.height)
-        return {
-            x: Number(data.x ?? screen.x) || 0,
-            y: Number(data.y ?? screen.y) || 0,
-            width: swapsAxes ? physicalHeight : physicalWidth,
-            height: swapsAxes ? physicalWidth : physicalHeight
-        }
-    }
-
     function evaluate(clients) {
         const updated = ({})
         for (const name in consumerScreens) {
@@ -158,7 +143,8 @@ Singleton {
             }
 
             const workspaceIds = visibleWorkspaceIds(monitor)
-            const bounds = monitorBounds(monitor, screen)
+            const bounds = Geometry.monitorBounds(
+                monitor.lastIpcObject, screen)
             const floatingRectangles = []
             let tiledWindows = 0
             let floatingWindows = 0

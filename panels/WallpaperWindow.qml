@@ -8,9 +8,11 @@ PanelWindow {
     id: root
 
     readonly property string screenName: screen?.name ?? ""
+    property string retainedScreenName: screenName
     readonly property string wallpaperPath:
         WallpaperAssignmentService.loaded
-            ? WallpaperAssignmentService.wallpaperForScreen(screenName) : ""
+            ? WallpaperAssignmentService.wallpaperForScreen(
+                retainedScreenName) : ""
 
     anchors.top: true
     anchors.bottom: true
@@ -34,16 +36,26 @@ PanelWindow {
         item: inputParkingTarget
     }
 
+    function retainScreenIdentity() {
+        const nextName = String(screenName || "").trim()
+        if (nextName.length === 0 || nextName === retainedScreenName)
+            return
+        if (retainedScreenName.length > 0)
+            WallpaperRenderService.remove(retainedScreenName)
+        retainedScreenName = nextName
+    }
+
     WallpaperSurface {
         id: wallpaper
         anchors.fill: parent
-        screenName: root.screenName
+        screenName: root.retainedScreenName
         path: root.wallpaperPath
         renderScale: root.screen?.devicePixelRatio ?? 1
 
         function reportStatus() {
             WallpaperRenderService.report(
-                root.screenName, root.wallpaperPath, state, error, kind, {
+                root.retainedScreenName, root.wallpaperPath,
+                state, error, kind, {
                     suspended: suspended,
                     suspendedReason: suspendedReason,
                     suspendedPositionMs: suspendedPositionMs,
@@ -54,6 +66,7 @@ PanelWindow {
         }
 
         onStateChanged: reportStatus()
+        onErrorChanged: reportStatus()
         onKindChanged: reportStatus()
         onPathChanged: reportStatus()
         onSuspendedChanged: reportStatus()
@@ -64,7 +77,15 @@ PanelWindow {
         onPlaybackActiveChanged: reportStatus()
     }
 
-    onScreenNameChanged: wallpaper.reportStatus()
-    Component.onCompleted: wallpaper.reportStatus()
-    Component.onDestruction: WallpaperRenderService.remove(screenName)
+    onScreenNameChanged: {
+        retainScreenIdentity()
+        wallpaper.reportStatus()
+    }
+    Component.onCompleted: {
+        retainedScreenName = screenName
+        retainScreenIdentity()
+        wallpaper.reportStatus()
+    }
+    Component.onDestruction:
+        WallpaperRenderService.remove(retainedScreenName)
 }

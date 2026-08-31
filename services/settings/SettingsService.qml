@@ -12,7 +12,7 @@ Singleton {
     property bool closing: false
     property string targetScreenName: ""
     property int selectedCategory: 0
-    onSelectedCategoryChanged: clearPages()
+    onSelectedCategoryChanged: if (opened) clearPages()
     property var pageStack: []
     readonly property string currentPage: pageStack.length > 0
         ? String(pageStack[pageStack.length - 1]) : ""
@@ -30,6 +30,10 @@ Singleton {
     readonly property int islandHeightPercent: ConfigService.islandHeightPercent
     readonly property int islandBodyRadius: ConfigService.islandBodyRadius
     readonly property bool enableBlur: ConfigService.enableBlur
+    readonly property bool adaptiveLifecycleEnabled:
+        ConfigService.adaptiveLifecycleEnabled
+    readonly property int lifecycleInactiveBudgetUnits:
+        ConfigService.lifecycleInactiveBudgetUnits
 
     readonly property var categories: [
         {
@@ -55,6 +59,13 @@ Singleton {
                 { id: "analytics_lifecycle", title: "Lifecycle", desc: "Inspect widget loading, retention, and eviction" },
                 { id: "analytics_wallpaper", title: "Wallpaper", desc: "Review renderer and playback activity" },
                 { id: "analytics_performance", title: "Performance", desc: "Understand measured shell resource behavior" }
+            ]
+        },
+        {
+            id: "developer",
+            title: "Developer Options",
+            subpages: [
+                { id: "developer_advanced", title: "Advanced", desc: "Experimental and dangerous system controls" }
             ]
         }
     ]
@@ -99,7 +110,6 @@ Singleton {
             return
         closing = true
         opened = false
-        clearPages()
         closeTimer.restart()
     }
 
@@ -109,6 +119,17 @@ Singleton {
 
     function setSetting(key, value) {
         return ConfigService.setSetting(key, value)
+    }
+
+    function snapshot() {
+        return {
+            opened: opened,
+            closing: closing,
+            targetScreenName: targetScreenName,
+            selectedCategory: selectedCategory,
+            currentPage: currentPage,
+            pageStack: pageStack.slice()
+        }
     }
 
     function clearPages() {
@@ -165,10 +186,20 @@ Singleton {
         })
     }
 
+    function resetLifecycleSettings() {
+        ConfigService.setSettings({
+            adaptiveLifecycleEnabled: true,
+            lifecycleInactiveBudgetUnits: 100
+        })
+    }
+
     Timer {
         id: closeTimer
         interval: root.moduleCloseDuration
-        onTriggered: root.closing = false
+        onTriggered: {
+            root.closing = false
+            root.clearPages()
+        }
     }
 
 }

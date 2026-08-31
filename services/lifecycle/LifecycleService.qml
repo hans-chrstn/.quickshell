@@ -12,7 +12,8 @@ Singleton {
     readonly property bool adaptiveEnabled:
         ConfigService.adaptiveLifecycleEnabled
     property bool rebalanceScheduled: false
-    readonly property real inactiveBudgetUnits: 100
+    readonly property real inactiveBudgetUnits:
+        ConfigService.lifecycleInactiveBudgetUnits
     readonly property var policy: ({
         recencyHalfLifeMs: 120000,
         frequencyHalfLifeMs: 900000,
@@ -101,6 +102,8 @@ Singleton {
         else
             rebalanceScheduled = false
     }
+
+    onInactiveBudgetUnitsChanged: scheduleRebalance()
 
     function registerResource(resourceId, owner, classification) {
         const id = String(resourceId || "").trim()

@@ -1,5 +1,38 @@
 .pragma library
 
+function finiteNumber(value, fallback) {
+    const numeric = Number(value)
+    return Number.isFinite(numeric) ? numeric : fallback
+}
+
+function positiveNumber(value, fallback) {
+    const numeric = Number(value)
+    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback
+}
+
+function monitorBounds(data, screen) {
+    const native = data || ({})
+    const logical = screen || ({})
+    const transform = finiteNumber(native.transform, 0)
+    const swapsAxes = transform === 1 || transform === 3
+        || transform === 5 || transform === 7
+    const scale = positiveNumber(native.scale,
+        positiveNumber(logical.devicePixelRatio, 1))
+    const nativeWidth = positiveNumber(native.width, NaN) / scale
+    const nativeHeight = positiveNumber(native.height, NaN) / scale
+    const transformedWidth = swapsAxes ? nativeHeight : nativeWidth
+    const transformedHeight = swapsAxes ? nativeWidth : nativeHeight
+
+    return {
+        x: finiteNumber(native.x, finiteNumber(logical.x, 0)),
+        y: finiteNumber(native.y, finiteNumber(logical.y, 0)),
+        width: positiveNumber(transformedWidth,
+            Math.max(0, finiteNumber(logical.width, 0))),
+        height: positiveNumber(transformedHeight,
+            Math.max(0, finiteNumber(logical.height, 0)))
+    }
+}
+
 function clippedRectangle(client, screen) {
     const at = client?.at
     const size = client?.size

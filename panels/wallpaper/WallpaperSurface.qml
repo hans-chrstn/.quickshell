@@ -12,26 +12,28 @@ Item {
     readonly property var media: WallpaperProbeService.recordFor(path)
     readonly property string kind: media.state === "ready"
         ? String(media.kind || "unsupported") : "unknown"
+    readonly property string rendererBackend:
+        WallpaperRenderSupportService.rendererFor(media)
+    readonly property bool animatedSupported:
+        rendererBackend === "animated-image"
+            || rendererBackend === "animated-media"
+    readonly property bool motionWallpaper:
+        kind === "video" || animatedSupported
     readonly property var poster: WallpaperPosterService.recordFor(path)
-    readonly property string state: path.length === 0 ? "empty"
-        : media.state === "failed" || media.state === "unsupported" ? "error"
-        : renderer.item ? renderer.item.state : "loading"
-    readonly property string error: media.state === "failed"
-            || media.state === "unsupported"
-        ? String(media.error || "Unsupported wallpaper media")
-        : renderer.item ? renderer.item.error : ""
-    readonly property bool suspended: kind === "video" && renderer.item
-        ? Boolean(renderer.item.suspended) : false
-    readonly property string suspendedReason: suspended && renderer.item
-        ? String(renderer.item.suspendedReason || "") : ""
-    readonly property int suspendedPositionMs: suspended && renderer.item
-        ? Number(renderer.item.suspendedPositionMs) || 0 : 0
-    readonly property bool decoderEvicted: kind === "video" && renderer.item
-        ? Boolean(renderer.item.decoderEvicted) : false
-    readonly property bool decoderLoaded: kind === "video" && renderer.item
-        ? Boolean(renderer.item.decoderLoaded) : false
-    readonly property bool playbackActive: kind === "video" && renderer.item
-        ? Boolean(renderer.item.playbackActive) : false
+    readonly property string state: path.length === 0
+        ? "empty" : renderer.item?.state ?? "loading"
+    readonly property string error: renderer.item?.error ?? ""
+    readonly property bool suspended: Boolean(renderer.item?.suspended)
+    readonly property string suspendedReason:
+        String(renderer.item?.suspendedReason || "")
+    readonly property int suspendedPositionMs:
+        Number(renderer.item?.suspendedPositionMs) || 0
+    readonly property bool decoderEvicted:
+        Boolean(renderer.item?.decoderEvicted)
+    readonly property bool decoderLoaded:
+        Boolean(renderer.item?.decoderLoaded)
+    readonly property bool playbackActive:
+        Boolean(renderer.item?.playbackActive)
 
     function inspect() {
         if (path.length > 0)
@@ -39,13 +41,21 @@ Item {
     }
 
     function preparePoster() {
-        if (media.state === "ready" && media.kind === "video")
+        if (media.state === "ready" && motionWallpaper)
             WallpaperPosterService.request(media)
     }
 
-    Component.onCompleted: inspect()
+    Component.onCompleted: {
+        inspect()
+        Qt.callLater(preparePoster)
+    }
     onPathChanged: inspect()
-    onMediaChanged: preparePoster()
+    onMediaChanged: Qt.callLater(preparePoster)
+
+    Connections {
+        target: WallpaperProbeService
+        function onCacheEntriesChanged() { Qt.callLater(root.preparePoster) }
+    }
 
     LifecycleLoader {
         id: renderer
@@ -54,32 +64,26 @@ Item {
         owner: "wallpaper.surface." + root.screenName
         restorationSource: "WallpaperAssignmentService and probe record"
         classification: "expensive"
-        requestedActive: root.path.length > 0 && root.media.state === "ready"
-            && (root.kind === "static" || root.kind === "video")
+        requestedActive: root.path.length > 0
         retentionReason: requestedActive
             ? "assigned-" + root.kind : ""
         evictionReason: requestedActive ? ""
             : root.path.length === 0 ? "no-assignment"
             : root.media.state !== "ready" ? "media-unavailable"
             : "unsupported-renderer"
-        sourceComponent: root.kind === "video" ? videoComponent : staticComponent
+        sourceComponent: rendererHostComponent
     }
 
     Component {
-        id: staticComponent
-        StaticWallpaper {
-            path: root.path
-            renderScale: root.renderScale
-        }
-    }
-
-    Component {
-        id: videoComponent
-        VideoWallpaper {
-            path: root.path
+        id: rendererHostComponent
+        WallpaperRendererHost {
+            targetPath: root.path
+            targetMedia: root.media
+            targetBackend: root.rendererBackend
             screenName: root.screenName
-            posterPath: root.poster.state === "ready" || root.poster.stale
+            targetPosterPath: root.poster.state === "ready" || root.poster.stale
                 ? root.poster.posterPath : ""
+            renderScale: root.renderScale
         }
     }
 }

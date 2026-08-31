@@ -10,6 +10,7 @@ Item {
     property QtObject context: null
     readonly property string screenName: context?.screenName ?? ""
     focus: true
+    enabled: SettingsService.opened
 
     Component.onCompleted: focusRetrier.startFocus()
 
@@ -43,7 +44,7 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: 120
+        width: 144
     }
 
     Rectangle {
@@ -85,6 +86,8 @@ Item {
             case "analytics_lifecycle": return analyticsLifecyclePage
             case "analytics_wallpaper": return analyticsWallpaperPage
             case "analytics_performance": return analyticsPerformancePage
+            case "developer_advanced": return developerAdvancedPage
+            case "developer_lifecycle": return developerLifecyclePage
             default: return subpageMenuPage
             }
         }
@@ -148,5 +151,15 @@ Item {
     Component {
         id: analyticsPerformancePage
         PerformanceAnalyticsPage {}
+    }
+
+    Component {
+        id: developerAdvancedPage
+        AdvancedDeveloperPage {}
+    }
+
+    Component {
+        id: developerLifecyclePage
+        LifecycleDeveloperPage {}
     }
 }

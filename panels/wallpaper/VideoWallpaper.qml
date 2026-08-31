@@ -1,27 +1,18 @@
 import QtQuick
 import qs.components.lifecycle
 import qs.core
-import qs.services.power
-import qs.services.session
-import qs.services.wallpaper
 
 Item {
     id: root
 
     required property string path
     required property string screenName
+    property string lifecycleKey: screenName
     property string posterPath: ""
-    readonly property bool occlusionKnown:
-        WallpaperOcclusionService.known(screenName)
-    readonly property bool occluded: WallpaperOcclusionService.covered(screenName)
-    readonly property bool monitorPowerKnown:
-        WallpaperMonitorPowerService.known(screenName)
-    readonly property bool monitorPowered:
-        WallpaperMonitorPowerService.powered(screenName)
-    readonly property bool playbackRequested: occlusionKnown && monitorPowerKnown
-        && !SessionLockService.locked
-        && !PowerStateService.pauseRequested && monitorPowered && !occluded
-    property bool playingAllowed: false
+    readonly property bool playbackRequested:
+        playbackPolicy.playbackRequested
+    readonly property bool playingAllowed:
+        playbackPolicy.playbackAllowed
     property bool firstFrameReady: false
     property int suspendedPositionMs: 0
     property bool decoderRetained: false
@@ -32,30 +23,15 @@ Item {
     readonly property bool decoderLoaded: decoder.item !== null
     readonly property bool playbackActive:
         Boolean(decoder.item?.actuallyPlaying)
+    readonly property bool posterReady: posterImage.status === Image.Ready
+    readonly property bool visualReady: firstFrameReady || posterReady
 
     readonly property string state: decoder.item ? decoder.item.state
         : decoderRetained ? "loading" : "ready"
     readonly property string error: decoder.item ? decoder.item.error : ""
-    readonly property bool suspended: !playingAllowed
-    readonly property string suspendedReason: SessionLockService.locked
-        ? "session-locked" : PowerStateService.pauseRequested ? "on-battery"
-            : !occlusionKnown || !monitorPowerKnown ? "observing-display"
-            : !monitorPowered ? "monitor-off"
-            : occluded ? "window-covered"
-                : !playingAllowed ? "resuming" : ""
-
-    function reconcilePlaybackRequest() {
-        if (playbackRequested) {
-            adaptiveEligibilityTimer.stop()
-            adaptiveEvictionEligible = false
-            resumeTimer.restart()
-        } else {
-            resumeTimer.stop()
-            playingAllowed = false
-            adaptiveEligibilityTimer.restart()
-            applyPlaybackPolicy()
-        }
-    }
+    readonly property bool suspended: playbackPolicy.suspended
+    readonly property string suspendedReason:
+        playbackPolicy.suspendedReason
 
     function applyPlaybackPolicy() {
         if (playingAllowed) {
@@ -86,20 +62,24 @@ Item {
         return true
     }
 
-    onPlaybackRequestedChanged: reconcilePlaybackRequest()
-    onPlayingAllowedChanged: applyPlaybackPolicy()
-
-    Timer {
-        id: resumeTimer
-        interval: 250
-        repeat: false
-        onTriggered: {
-            if (root.playbackRequested)
-                root.playingAllowed = true
+    onPlaybackRequestedChanged: {
+        if (playbackRequested) {
+            adaptiveEligibilityTimer.stop()
+            adaptiveEvictionEligible = false
+        } else {
+            adaptiveEligibilityTimer.restart()
         }
+    }
+    onPlayingAllowedChanged: applyPlaybackPolicy()
+    Component.onCompleted: applyPlaybackPolicy()
+
+    WallpaperPlaybackPolicy {
+        id: playbackPolicy
+        screenName: root.screenName
     }
 
     Image {
+        id: posterImage
         anchors.fill: parent
         source: LocalUrl.fromPath(root.posterPath)
         fillMode: Image.PreserveAspectCrop
@@ -110,8 +90,8 @@ Item {
     LifecycleLoader {
         id: decoder
         anchors.fill: parent
-        resourceId: "wallpaper.video-decoder." + root.screenName
-        owner: "wallpaper.video." + root.screenName
+        resourceId: "wallpaper.video-decoder." + root.lifecycleKey
+        owner: "wallpaper.video." + root.lifecycleKey
         restorationSource: "VideoWallpaper position and poster state"
         classification: "briefly-warm"
         adaptiveEligible: root.adaptiveEvictionEligible
@@ -161,15 +141,4 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        SessionLockService.acquire()
-        WallpaperOcclusionService.acquire(screenName)
-        WallpaperMonitorPowerService.acquire(screenName)
-        reconcilePlaybackRequest()
-    }
-    Component.onDestruction: {
-        SessionLockService.release()
-        WallpaperOcclusionService.release(screenName)
-        WallpaperMonitorPowerService.release(screenName)
-    }
 }

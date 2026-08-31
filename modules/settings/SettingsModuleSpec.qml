@@ -13,7 +13,7 @@ IslandModule {
     attention: active && !SettingsService.closing
     wantsKeyboard: SettingsService.opened
     collapsedWidth: Design.collapsedWidth
-    expandedWidth: Design.scaledWidth(700)
+    expandedWidth: Design.scaledWidth(750)
     expandedHeight: Design.scaledHeight(430)
     revealWithExpansion: true
 

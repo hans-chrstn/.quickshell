@@ -16,8 +16,13 @@ Rectangle {
     }
     readonly property string state: String(record?.state || "unknown")
     readonly property string kind: String(record?.kind || "unsupported")
+    readonly property string rendererBackend:
+        WallpaperRenderSupportService.rendererFor(record)
+    readonly property bool animatedSupported:
+        rendererBackend === "animated-image"
+            || rendererBackend === "animated-media"
     readonly property bool selectable: state === "ready"
-        && (kind === "static" || kind === "video")
+        && rendererBackend.length > 0
     readonly property bool needsPoster: state === "ready" && kind !== "static"
     readonly property var poster: WallpaperPosterService.recordFor(path)
     readonly property bool posterReady: poster.posterPath.length > 0
@@ -59,7 +64,10 @@ Rectangle {
         sourceSize.height: Math.ceil(height * 1.5)
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
-        cache: true
+        // Posters already provide the persistent cache. Keeping every decoded
+        // grid preview in Qt's process-wide image cache retains that memory
+        // after the lazy Wallpaper page itself has been destroyed.
+        cache: false
         layer.enabled: true
         layer.effect: MultiEffect {
             maskEnabled: true

@@ -13,6 +13,7 @@ Item {
         : image.status === Image.Error ? "error" : "loading"
     readonly property string error: image.status === Image.Error
         ? "Wallpaper could not be decoded" : ""
+    readonly property bool visualReady: image.status === Image.Ready
 
     Image {
         id: image

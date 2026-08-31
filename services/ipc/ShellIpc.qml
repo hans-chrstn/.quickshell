@@ -38,9 +38,15 @@ IpcHandler {
     function settingsOpenCategory(category: string): bool {
         return SettingsService.openCategory(category)
     }
+    function settingsOpenPage(page: string): bool {
+        return SettingsService.openPage(page)
+    }
     function settingsBack(): bool { return SettingsService.back() }
     function settingsSet(key: string, value: string): bool {
         return ConfigService.setSetting(key, value)
+    }
+    function settingsStatus(): string {
+        return JsonFormat.stringify(SettingsService.snapshot())
     }
     function configStatus(): string {
         return JsonFormat.stringify(ConfigService.snapshot())
@@ -50,6 +56,9 @@ IpcHandler {
     }
     function lifecycleAdaptiveSet(enabled: bool): bool {
         return ConfigService.setSetting("adaptiveLifecycleEnabled", enabled)
+    }
+    function lifecycleReset(): void {
+        SettingsService.resetLifecycleSettings()
     }
     function settingsClose(): void { SettingsService.close() }
 
