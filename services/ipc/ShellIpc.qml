@@ -2,11 +2,15 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.config
+import qs.services.display
+import qs.services.hardware
 import qs.services.launcher
 import qs.services.lifecycle
+import qs.services.jobs
 import qs.services.power
 import qs.services.session
 import qs.services.settings
+import qs.services.time
 import qs.services.wallpaper
 import "JsonFormat.js" as JsonFormat
 
@@ -51,8 +55,44 @@ IpcHandler {
     function configStatus(): string {
         return JsonFormat.stringify(ConfigService.snapshot())
     }
+    function clockStatus(): string {
+        return JsonFormat.stringify(ClockService.snapshot())
+    }
+    function displayActivityStatus(): string {
+        return JsonFormat.stringify(DisplayActivityService.snapshot())
+    }
+    function displayActivityTestSetIdle(idle: bool): bool {
+        return DisplayActivityService.setSyntheticIdle(idle)
+    }
+    function displayActivityTestClear(): bool {
+        return DisplayActivityService.clearSyntheticIdle()
+    }
     function lifecycleStatus(): string {
         return JsonFormat.stringify(LifecycleService.snapshot())
+    }
+    function backgroundJobStatus(): string {
+        return JsonFormat.stringify(BackgroundJobTools.snapshot())
+    }
+    function videoCapabilitiesRefresh(): bool {
+        return VideoCapabilityService.refresh()
+    }
+    function videoCapabilitiesStatus(): string {
+        return JsonFormat.stringify(VideoCapabilityService.snapshot())
+    }
+    function videoCodecBenchmarkStart(path: string): bool {
+        return VideoCodecBenchmarkService.request(path)
+    }
+    function videoCodecBenchmarkStatus(): string {
+        return JsonFormat.stringify(VideoCodecBenchmarkService.snapshot())
+    }
+    function videoCodecBenchmarkPlaybackStart(): bool {
+        return VideoCodecBenchmarkService.startPlayback()
+    }
+    function videoCodecBenchmarkCancel(): bool {
+        return VideoCodecBenchmarkService.cancel()
+    }
+    function videoCodecBenchmarkClear(): bool {
+        return VideoCodecBenchmarkService.clear()
     }
     function lifecycleAdaptiveSet(enabled: bool): bool {
         return ConfigService.setSetting("adaptiveLifecycleEnabled", enabled)
@@ -119,6 +159,84 @@ IpcHandler {
     function wallpaperAssignments(): string {
         return JsonFormat.stringify(WallpaperAssignmentService.snapshot())
     }
+    function wallpaperPlaylists(): string {
+        return JsonFormat.stringify(WallpaperPlaylistService.snapshot())
+    }
+    function wallpaperPlaylistsReplace(document: string): bool {
+        return WallpaperPlaylistService.replaceJson(document)
+    }
+    function wallpaperPlaylistCreate(name: string, mode: string): string {
+        return WallpaperPlaylistService.createPlaylist(name, mode)
+    }
+    function wallpaperPlaylistRemove(id: string): bool {
+        return WallpaperPlaylistService.removePlaylist(id)
+    }
+    function wallpaperPlaylistRename(id: string, name: string): bool {
+        return WallpaperPlaylistService.renamePlaylist(id, name)
+    }
+    function wallpaperPlaylistConfigure(id: string, mode: string,
+            seed: int): bool {
+        return WallpaperPlaylistService.configurePlaylist(id, mode, seed)
+    }
+    function wallpaperPlaylistEntryAdd(id: string, path: string,
+            durationMs: int): string {
+        return WallpaperPlaylistService.addEntry(id, path, durationMs)
+    }
+    function wallpaperPlaylistEntryRemove(id: string,
+            entryId: string): bool {
+        return WallpaperPlaylistService.removeEntry(id, entryId)
+    }
+    function wallpaperPlaylistEntryUpdate(id: string, entryId: string,
+            path: string, durationMs: int): bool {
+        return WallpaperPlaylistService.updateEntry(
+            id, entryId, path, durationMs)
+    }
+    function wallpaperPlaylistEntryMove(id: string, entryId: string,
+            position: int): bool {
+        return WallpaperPlaylistService.moveEntry(id, entryId, position)
+    }
+    function wallpaperPlaylistOrder(id: string): string {
+        return JsonFormat.stringify(
+            WallpaperPlaylistService.resolvedEntries(id))
+    }
+    function wallpaperPlaylistSchedulerStatus(): string {
+        return JsonFormat.stringify(
+            WallpaperPlaylistSchedulerService.snapshot())
+    }
+    function wallpaperPlaylistSchedulerRefresh(nowMs: real): bool {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        return WallpaperPlaylistSchedulerService.reconcile(nowMs, "ipc-test")
+    }
+    function wallpaperPlaylistPlan(screen: string, nowMs: real,
+            entryId: string, startedAtMs: real): string {
+        return JsonFormat.stringify(WallpaperPlaylistSchedulerService.preview(
+            screen, nowMs, entryId, startedAtMs))
+    }
+    function wallpaperPlaylistsClear(): bool {
+        return WallpaperPlaylistService.clear()
+    }
+    function wallpaperPlaylistsValidate(): bool {
+        return WallpaperPlaylistService.validate()
+    }
+    function wallpaperPlaylistTargets(): string {
+        return JsonFormat.stringify(WallpaperPlaylistTargetService.snapshot())
+    }
+    function wallpaperPlaylistForScreen(screen: string): string {
+        return WallpaperPlaylistTargetService.playlistForScreen(screen)
+    }
+    function wallpaperPlaylistSetGlobal(id: string): bool {
+        return WallpaperPlaylistTargetService.setGlobal(id)
+    }
+    function wallpaperPlaylistClearGlobal(): bool {
+        return WallpaperPlaylistTargetService.clearGlobal()
+    }
+    function wallpaperPlaylistSetScreen(screen: string, id: string): bool {
+        return WallpaperPlaylistTargetService.setForScreen(screen, id)
+    }
+    function wallpaperPlaylistClearScreen(screen: string): bool {
+        return WallpaperPlaylistTargetService.clearScreen(screen)
+    }
     function wallpaperRenderStatus(): string {
         return JsonFormat.stringify(WallpaperRenderService.snapshot())
     }
@@ -148,8 +266,26 @@ IpcHandler {
     }
     function wallpaperOptimizationScales(target: string, path: string): string {
         return JsonFormat.stringify({
+            mode: WallpaperOptimizationService.resolutionMode(),
             selected: WallpaperOptimizationService.selectedResolutionScale(
                 target, path),
+            maximumCustom:
+                WallpaperOptimizationService.maximumResolutionScale(
+                    target, path),
+            frameRate: {
+                mode: WallpaperOptimizationService.frameRateMode(),
+                selected: WallpaperOptimizationService.selectedFrameRate(path),
+                maximumCustom:
+                    WallpaperOptimizationService.sourceFrameRate(path),
+                enabled: WallpaperOptimizationService.settingsFrameRateModes()
+            },
+            bitRateMbps: {
+                mode: WallpaperOptimizationService.bitRateMode(),
+                selected: WallpaperOptimizationService.selectedBitRate(path),
+                maximumCustom:
+                    WallpaperOptimizationService.sourceBitRateMbps(path),
+                enabled: WallpaperOptimizationService.settingsBitRateModes()
+            },
             available: WallpaperOptimizationService.availableResolutionScales(
                 target, path),
             candidates: WallpaperOptimizationService.resolutionScales.map(
@@ -164,6 +300,10 @@ IpcHandler {
     }
     function wallpaperOptimizationStatus(path: string): string {
         return JsonFormat.stringify(WallpaperOptimizationService.recordFor(path))
+    }
+    function wallpaperOptimizationRecipe(target: string, path: string): string {
+        return JsonFormat.stringify(
+            WallpaperOptimizationService.recipeSnapshot(target, path))
     }
     function wallpaperOptimizationCancel(): void {
         WallpaperOptimizationService.cancel()

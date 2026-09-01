@@ -91,6 +91,31 @@ SettingPage {
                     }
 
                     Text {
+                        text: "Playback"
+                        color: Design.textMuted
+                        font.family: Design.fontText
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                    }
+
+                    SettingToggle {
+                        Layout.fillWidth: true
+                        title: "Pause animation while idle"
+                        description: checked
+                            ? "Recommended · pauses decoding after 5 minutes away"
+                            : "Higher resource use · animation continues while you are away"
+                        checked: ConfigService.pauseWallpaperWhenIdle
+                        onToggled: value => SettingsService.setSetting(
+                            "pauseWallpaperWhenIdle", value)
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 1
+                        color: Design.separator
+                    }
+
+                    Text {
                         text: "Experimental"
                         color: Design.textMuted
                         font.family: Design.fontText

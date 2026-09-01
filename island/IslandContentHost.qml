@@ -6,11 +6,13 @@ Item {
     id: root
 
     required property IslandModule module
+    property bool presented: false
     property bool expanded: false
     property real expansionProgress: 0
     property string screenName: ""
 
     readonly property QtObject moduleContext: QtObject {
+        readonly property bool presented: root.presented
         readonly property bool expanded: root.expanded
         readonly property real expansionProgress: root.expansionProgress
         readonly property string screenName: root.screenName

@@ -20,6 +20,7 @@
       pkgs = import nixpkgs {inherit system;};
       qtMultimedia = pkgs.kdePackages.qtmultimedia;
       qtImageFormats = pkgs.kdePackages.qtimageformats;
+      libvaUtils = pkgs.libva-utils;
       kirigami = pkgs.kdePackages.kirigami.unwrapped;
       qmlQuickshell = quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
     in rec {
@@ -43,6 +44,7 @@
               --prefix QML2_IMPORT_PATH : "${kirigami}/lib/qt-6/qml" \
               --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
               --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
+              --prefix PATH : "${libvaUtils}/bin" \
               --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
               --set QS_LOG_FILE /dev/stderr \
               --add-flags "--verbose"
@@ -144,6 +146,7 @@
           pkgs.kdePackages.sonnet
           pkgs.kdePackages.qtimageformats
           pkgs.kdePackages.kimageformats
+          pkgs.libva-utils
         ];
 
         shellHook = ''

@@ -4,6 +4,7 @@ import qs.components
 import qs.services.launcher
 import qs.services.session
 import qs.services.settings
+import qs.services.time
 
 Item {
     id: root
@@ -14,19 +15,11 @@ Item {
     required property string screenName
     property bool expanded: false
     property real expansionProgress: 0
-    property date now: new Date()
-
-    Timer {
-        interval: 1000
-        running: root.visible && root.page === "clock"
-        repeat: true
-        onTriggered: root.now = new Date()
-    }
 
     Text {
         anchors.centerIn: parent
         visible: root.page === "clock"
-        text: Qt.formatDateTime(root.now, "hh:mm")
+        text: Qt.formatDateTime(ClockService.now, "hh:mm")
         color: Design.text
         font.family: Design.fontDisplay
         font.pixelSize: 14 + 10 * root.expansionProgress

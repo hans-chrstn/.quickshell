@@ -1,4 +1,6 @@
 import QtQuick
+import qs.services.config
+import qs.services.display
 import qs.services.power
 import qs.services.session
 import qs.services.wallpaper
@@ -18,11 +20,15 @@ Item {
         WallpaperMonitorPowerService.powered(screenName)
     readonly property bool playbackRequested: occlusionKnown
         && monitorPowerKnown && !SessionLockService.locked
+        && (!ConfigService.pauseWallpaperWhenIdle
+            || DisplayActivityService.desktopActive)
         && !PowerStateService.pauseRequested && monitorPowered && !occluded
     property bool playbackAllowed: false
     readonly property bool suspended: !playbackAllowed
     readonly property string suspendedReason: SessionLockService.locked
-        ? "session-locked" : PowerStateService.pauseRequested ? "on-battery"
+        ? "session-locked" : ConfigService.pauseWallpaperWhenIdle
+            && DisplayActivityService.idle ? "user-idle"
+        : PowerStateService.pauseRequested ? "on-battery"
             : !occlusionKnown || !monitorPowerKnown ? "observing-display"
             : !monitorPowered ? "monitor-off"
             : occluded ? "window-covered"
@@ -51,6 +57,7 @@ Item {
 
     Component.onCompleted: {
         SessionLockService.acquire()
+        DisplayActivityService.acquire(screenName)
         WallpaperOcclusionService.acquire(screenName)
         WallpaperMonitorPowerService.acquire(screenName)
         reconcile()
@@ -58,6 +65,7 @@ Item {
 
     Component.onDestruction: {
         SessionLockService.release()
+        DisplayActivityService.release(screenName)
         WallpaperOcclusionService.release(screenName)
         WallpaperMonitorPowerService.release(screenName)
     }

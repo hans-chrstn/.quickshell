@@ -1,12 +1,28 @@
 import QtQuick
+import qs.services.time
 
 Item {
     id: root
 
     required property string screenName
+    property bool presented: false
     property bool expanded: false
     property real expansionProgress: 0
     readonly property var pages: ["power", "clock", "utilities", "power", "clock"]
+    readonly property bool clockPresented: presented
+        && pages[pagesView.currentIndex] === "clock"
+    readonly property string clockConsumerId:
+        "island.clock." + screenName
+
+    function updateClockConsumer() {
+        ClockService.setConsumer(clockConsumerId, clockPresented)
+    }
+
+    onClockPresentedChanged: updateClockConsumer()
+    onClockConsumerIdChanged: updateClockConsumer()
+    Component.onCompleted: updateClockConsumer()
+    Component.onDestruction:
+        ClockService.setConsumer(clockConsumerId, false)
 
     function normalizeEdge() {
         if (pagesView.currentIndex === 0) {
@@ -81,6 +97,7 @@ Item {
         }
 
         onMovementEnded: root.normalizeEdge()
+        onCurrentIndexChanged: root.updateClockConsumer()
         Component.onCompleted: positionViewAtIndex(1, ListView.Beginning)
     }
 

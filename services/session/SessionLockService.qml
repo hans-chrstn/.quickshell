@@ -10,6 +10,7 @@ Singleton {
     readonly property string sessionId: Quickshell.env("XDG_SESSION_ID") || ""
     property int consumers: 0
     property bool locked: false
+    property bool preparingForSleep: false
     property bool available: false
     property string error: ""
 
@@ -17,6 +18,7 @@ Singleton {
     property string loginctlPath: ""
     property string dbusMonitorPath: ""
     property bool refreshPending: false
+    property bool awaitingSleepValue: false
 
     readonly property bool observing: consumers > 0 && monitor.running
 
@@ -36,6 +38,8 @@ Singleton {
         if (refreshProcess.running) refreshProcess.running = false
         available = false
         locked = false
+        preparingForSleep = false
+        awaitingSleepValue = false
     }
 
     function ensureObservation() {
@@ -72,7 +76,11 @@ Singleton {
                 dbusMonitorPath, "--system",
                 "type='signal',sender='org.freedesktop.login1',"
                     + "interface='org.freedesktop.DBus.Properties',"
-                    + "member='PropertiesChanged'"
+                    + "member='PropertiesChanged'",
+                "type='signal',sender='org.freedesktop.login1',"
+                    + "path='/org/freedesktop/login1',"
+                    + "interface='org.freedesktop.login1.Manager',"
+                    + "member='PrepareForSleep'"
             ]
             monitor.running = true
         }
@@ -134,8 +142,19 @@ Singleton {
         id: monitor
         stdout: SplitParser {
             onRead: line => {
-                if (String(line).indexOf('string "LockedHint"') >= 0)
+                const value = String(line || "")
+                if (value.indexOf('string "LockedHint"') >= 0)
                     root.refresh()
+                if (value.indexOf("member=PrepareForSleep") >= 0) {
+                    root.awaitingSleepValue = true
+                } else if (root.awaitingSleepValue) {
+                    const normalized = value.trim().toLowerCase()
+                    if (normalized === "boolean true"
+                            || normalized === "boolean false") {
+                        root.awaitingSleepValue = false
+                        root.preparingForSleep = normalized.endsWith("true")
+                    }
+                }
             }
         }
         onExited: {
@@ -157,6 +176,7 @@ Singleton {
             observing: observing,
             available: available,
             locked: locked,
+            preparingForSleep: preparingForSleep,
             error: error
         }
     }

@@ -10,6 +10,7 @@ Item {
     required property var value
     property var enabledChoices: choices
     property var formatChoice: value => String(value)
+    property real choiceWidth: 42
     signal choiceSelected(var value)
 
     implicitHeight: 34
@@ -38,7 +39,7 @@ Item {
                     readonly property bool choiceEnabled:
                         root.enabledChoices.indexOf(modelData) >= 0
 
-                    Layout.preferredWidth: 42
+                    Layout.preferredWidth: root.choiceWidth
                     Layout.preferredHeight: 24
                     radius: 12
                     color: selected ? Design.blue : Design.surfaceRaised
