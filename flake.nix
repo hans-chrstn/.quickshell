@@ -142,6 +142,7 @@
           pkgs.wf-recorder
           pkgs.pulseaudio
           qtMultimedia
+          pkgs.ffmpeg-full
           kirigami
           pkgs.kdePackages.sonnet
           pkgs.kdePackages.qtimageformats
