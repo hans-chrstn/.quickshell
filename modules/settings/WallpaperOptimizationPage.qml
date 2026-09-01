@@ -21,54 +21,119 @@ SettingPage {
             wrapMode: Text.Wrap
         }
 
-        SettingToggle {
-            Layout.fillWidth: true
-            title: "Limit resolution"
-            description: "Downscale to the selected monitor without upscaling"
-            checked: ConfigService.optimizeWallpaperResolution
-            onToggled: value => SettingsService.setSetting(
-                "optimizeWallpaperResolution", value)
-        }
-
         SettingChoiceRow {
             Layout.fillWidth: true
-            visible: ConfigService.optimizeWallpaperResolution
-            title: "Resolution limit"
-            choices: WallpaperOptimizationService.resolutionScales
-            enabledChoices:
-                WallpaperOptimizationService.settingsResolutionScales()
-            value: ConfigService.optimizeWallpaperResolutionScale
-            formatChoice: value => value + "×"
+            title: "Scale"
+            choices: [0, 1, 1.5, -1]
+            enabledChoices: WallpaperOptimizationService.settingsResolutionModes()
+            value: WallpaperOptimizationService.resolutionMode()
+            choiceWidth: 54
+            formatChoice: value => value === 0 ? "Native"
+                : value === -1 ? "Custom" : value + "×"
             onChoiceSelected: value =>
-                WallpaperOptimizationService.setDefaultResolutionScale(value)
+                WallpaperOptimizationService.setResolutionMode(value)
         }
 
-        SettingToggle {
+        RowLayout {
             Layout.fillWidth: true
-            title: "Limit frame rate"
-            description: "Reduce continuous decoding to the selected rate"
-            checked: ConfigService.optimizeWallpaperFrameRate
-            onToggled: value => SettingsService.setSetting(
-                "optimizeWallpaperFrameRate", value)
+            visible: WallpaperOptimizationService.resolutionMode() === -1
+
+            Text {
+                Layout.fillWidth: true
+                text: "Custom scale"
+                color: Design.textMuted
+                font.family: Design.fontText
+                font.pixelSize: 10
+            }
+
+            SettingNumericStepper {
+                value: ConfigService.optimizeWallpaperResolutionCustomScale
+                from: 0.5
+                to: Math.max(0.5,
+                    WallpaperOptimizationService.settingsMaximumResolutionScale())
+                stepSize: WallpaperOptimizationService.resolutionCustomStep
+                decimals: 2
+                suffix: "×"
+                accessibleName: "Custom wallpaper resolution scale"
+                onValueEdited: value =>
+                    WallpaperOptimizationService.setCustomResolutionScale(value)
+            }
         }
 
         SettingChoiceRow {
             Layout.fillWidth: true
-            visible: ConfigService.optimizeWallpaperFrameRate
-            title: "Frame-rate limit"
-            choices: [15, 24, 30]
-            value: ConfigService.optimizeWallpaperFrameRateLimit
-            onChoiceSelected: value => SettingsService.setSetting(
-                "optimizeWallpaperFrameRateLimit", value)
+            title: "Frame rate"
+            choices: [15, 24, 30, -1]
+            enabledChoices: WallpaperOptimizationService.settingsFrameRateModes()
+            value: WallpaperOptimizationService.frameRateMode()
+            choiceWidth: 54
+            formatChoice: value => value === -1 ? "Custom" : String(value)
+            onChoiceSelected: value =>
+                WallpaperOptimizationService.setFrameRateMode(value)
         }
 
-        SettingToggle {
+        RowLayout {
             Layout.fillWidth: true
-            title: "Limit bitrate"
-            description: "Cap output near 12 Mbps to reduce decode and I/O pressure"
-            checked: ConfigService.optimizeWallpaperBitRate
-            onToggled: value => SettingsService.setSetting(
-                "optimizeWallpaperBitRate", value)
+            visible: WallpaperOptimizationService.frameRateMode() === -1
+
+            Text {
+                Layout.fillWidth: true
+                text: "Custom frame rate"
+                color: Design.textMuted
+                font.family: Design.fontText
+                font.pixelSize: 10
+            }
+
+            SettingNumericStepper {
+                value: ConfigService.optimizeWallpaperFrameRateCustomLimit
+                from: 1
+                to: Math.max(1,
+                    WallpaperOptimizationService.settingsMaximumFrameRate())
+                stepSize: WallpaperOptimizationService.frameRateCustomStep
+                decimals: 2
+                suffix: "FPS"
+                accessibleName: "Custom wallpaper frame rate"
+                onValueEdited: value =>
+                    WallpaperOptimizationService.setCustomFrameRate(value)
+            }
+        }
+
+        SettingChoiceRow {
+            Layout.fillWidth: true
+            title: "Bitrate"
+            choices: [4, 8, 12, -1]
+            enabledChoices: WallpaperOptimizationService.settingsBitRateModes()
+            value: WallpaperOptimizationService.bitRateMode()
+            choiceWidth: 54
+            formatChoice: value => value === -1 ? "Custom" : String(value)
+            onChoiceSelected: value =>
+                WallpaperOptimizationService.setBitRateMode(value)
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            visible: WallpaperOptimizationService.bitRateMode() === -1
+
+            Text {
+                Layout.fillWidth: true
+                text: "Custom bitrate"
+                color: Design.textMuted
+                font.family: Design.fontText
+                font.pixelSize: 10
+            }
+
+            SettingNumericStepper {
+                value: ConfigService.optimizeWallpaperBitRateCustomLimit
+                from: 0.5
+                to: Math.max(0.5,
+                    WallpaperOptimizationService.settingsMaximumBitRate())
+                stepSize: WallpaperOptimizationService.bitRateCustomStep
+                decimals: 1
+                suffix: "Mbps"
+                accessibleName: "Custom wallpaper bitrate"
+                onValueEdited: value =>
+                    WallpaperOptimizationService.setCustomBitRate(value)
+            }
         }
 
         Item { Layout.fillHeight: true }

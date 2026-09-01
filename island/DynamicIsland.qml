@@ -199,6 +199,7 @@ Item {
                 * root.expansionProgress
         anchors.bottomMargin: anchors.topMargin
         module: registry.current
+        presented: !root.hidden
         expanded: root.expanded
         expansionProgress: root.expansionProgress
         screenName: root.screenName

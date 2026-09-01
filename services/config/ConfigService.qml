@@ -24,18 +24,34 @@ Singleton {
         data.experimentalFloatingWallpaperSuspension
     property alias experimentalPauseWallpaperOnBattery:
         data.experimentalPauseWallpaperOnBattery
+    property alias pauseWallpaperWhenIdle:
+        data.pauseWallpaperWhenIdle
     property alias allowWallpaperOptimization:
         data.allowWallpaperOptimization
     property alias optimizeWallpaperResolution:
         data.optimizeWallpaperResolution
     property alias optimizeWallpaperResolutionScale:
         data.optimizeWallpaperResolutionScale
+    property alias optimizeWallpaperResolutionCustom:
+        data.optimizeWallpaperResolutionCustom
+    property alias optimizeWallpaperResolutionCustomScale:
+        data.optimizeWallpaperResolutionCustomScale
     property alias optimizeWallpaperFrameRate:
         data.optimizeWallpaperFrameRate
     property alias optimizeWallpaperFrameRateLimit:
         data.optimizeWallpaperFrameRateLimit
+    property alias optimizeWallpaperFrameRateCustom:
+        data.optimizeWallpaperFrameRateCustom
+    property alias optimizeWallpaperFrameRateCustomLimit:
+        data.optimizeWallpaperFrameRateCustomLimit
     property alias optimizeWallpaperBitRate:
         data.optimizeWallpaperBitRate
+    property alias optimizeWallpaperBitRateLimit:
+        data.optimizeWallpaperBitRateLimit
+    property alias optimizeWallpaperBitRateCustom:
+        data.optimizeWallpaperBitRateCustom
+    property alias optimizeWallpaperBitRateCustomLimit:
+        data.optimizeWallpaperBitRateCustomLimit
     property alias automaticWallpaperCacheCleanup:
         data.automaticWallpaperCacheCleanup
     property alias adaptiveLifecycleEnabled: data.adaptiveLifecycleEnabled
@@ -45,6 +61,7 @@ Singleton {
 
     property bool loaded: false
     property string error: ""
+    readonly property int currentSchemaVersion: 2
 
     readonly property var settingSchema: ({
         revealDuration: { type: "int", minimum: 120, maximum: 600 },
@@ -62,16 +79,32 @@ Singleton {
         enableBlur: { type: "bool" },
         experimentalFloatingWallpaperSuspension: { type: "bool" },
         experimentalPauseWallpaperOnBattery: { type: "bool" },
+        pauseWallpaperWhenIdle: { type: "bool" },
         allowWallpaperOptimization: { type: "bool" },
         optimizeWallpaperResolution: { type: "bool" },
         optimizeWallpaperResolutionScale: {
-            type: "enum", values: [1, 1.25, 1.5], defaultValue: 1
+            type: "enum", values: [0.5, 1, 1.5], defaultValue: 1
+        },
+        optimizeWallpaperResolutionCustom: { type: "bool" },
+        optimizeWallpaperResolutionCustomScale: {
+            type: "real", minimum: 0.5, maximum: 4
         },
         optimizeWallpaperFrameRate: { type: "bool" },
         optimizeWallpaperFrameRateLimit: {
             type: "enum", values: [15, 24, 30], defaultValue: 30
         },
+        optimizeWallpaperFrameRateCustom: { type: "bool" },
+        optimizeWallpaperFrameRateCustomLimit: {
+            type: "real", minimum: 1, maximum: 240
+        },
         optimizeWallpaperBitRate: { type: "bool" },
+        optimizeWallpaperBitRateLimit: {
+            type: "enum", values: [4, 8, 12], defaultValue: 12
+        },
+        optimizeWallpaperBitRateCustom: { type: "bool" },
+        optimizeWallpaperBitRateCustomLimit: {
+            type: "real", minimum: 0.5, maximum: 500
+        },
         automaticWallpaperCacheCleanup: { type: "bool" },
         adaptiveLifecycleEnabled: { type: "bool" },
         lifecycleInactiveBudgetUnits: {
@@ -96,6 +129,9 @@ Singleton {
         const numeric = Number(value)
         if (!Number.isFinite(numeric))
             return data[key]
+        if (definition.type === "real")
+            return Math.max(definition.minimum,
+                Math.min(definition.maximum, numeric))
         return Math.round(Math.max(definition.minimum,
             Math.min(definition.maximum, numeric)))
     }
@@ -172,6 +208,21 @@ Singleton {
 
     function validateLoadedData() {
         let changed = false
+        const loadedVersion = Math.max(1, Number(data.schemaVersion) || 1)
+        if (loadedVersion < 2) {
+            if (!data.optimizeWallpaperFrameRate) {
+                data.optimizeWallpaperFrameRate = true
+                data.optimizeWallpaperFrameRateCustom = true
+                data.optimizeWallpaperFrameRateCustomLimit = 240
+            }
+            if (!data.optimizeWallpaperBitRate) {
+                data.optimizeWallpaperBitRate = true
+                data.optimizeWallpaperBitRateCustom = true
+                data.optimizeWallpaperBitRateCustomLimit = 500
+            }
+            data.schemaVersion = 2
+            changed = true
+        }
         for (const key in settingSchema) {
             const normalized = normalizedSetting(key, data[key])
             if (data[key] !== normalized) {
@@ -182,10 +233,6 @@ Singleton {
         const directories = normalizedDirectories(wallpaperDirectories)
         if (JSON.stringify(directories) !== JSON.stringify(wallpaperDirectories)) {
             wallpaperDirectories = directories
-            changed = true
-        }
-        if (data.schemaVersion !== 1) {
-            data.schemaVersion = 1
             changed = true
         }
         if (changed)
@@ -231,7 +278,7 @@ Singleton {
 
         JsonAdapter {
             id: data
-            property int schemaVersion: 1
+            property int schemaVersion: 2
             property int revealDuration: 300
             property int resizeDuration: 520
             property int contentRevealDuration: 180
@@ -247,12 +294,20 @@ Singleton {
             property bool enableBlur: true
             property bool experimentalFloatingWallpaperSuspension: false
             property bool experimentalPauseWallpaperOnBattery: false
+            property bool pauseWallpaperWhenIdle: true
             property bool allowWallpaperOptimization: true
             property bool optimizeWallpaperResolution: true
             property real optimizeWallpaperResolutionScale: 1
+            property bool optimizeWallpaperResolutionCustom: false
+            property real optimizeWallpaperResolutionCustomScale: 1
             property bool optimizeWallpaperFrameRate: true
             property int optimizeWallpaperFrameRateLimit: 30
+            property bool optimizeWallpaperFrameRateCustom: false
+            property real optimizeWallpaperFrameRateCustomLimit: 30
             property bool optimizeWallpaperBitRate: true
+            property int optimizeWallpaperBitRateLimit: 12
+            property bool optimizeWallpaperBitRateCustom: false
+            property real optimizeWallpaperBitRateCustomLimit: 12
             property bool automaticWallpaperCacheCleanup: false
             property bool adaptiveLifecycleEnabled: true
             property int lifecycleInactiveBudgetUnits: 100
