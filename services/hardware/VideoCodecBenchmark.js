@@ -23,7 +23,7 @@ function encoderArguments(codec, encoder) {
 
 function runnableCandidates(candidates) {
     return (candidates || []).filter(candidate =>
-        candidate && candidate.eligible === true
+        candidate && candidate.benchmarkable === true
             && encoderArguments(candidate.codec, candidate.encoder).length > 0)
 }
 

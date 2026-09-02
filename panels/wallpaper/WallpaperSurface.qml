@@ -34,6 +34,12 @@ Item {
         Boolean(renderer.item?.decoderLoaded)
     readonly property bool playbackActive:
         Boolean(renderer.item?.playbackActive)
+    readonly property bool transitionRunning:
+        Boolean(renderer.item?.transitionRunning)
+    readonly property string transitionReason:
+        String(renderer.item?.transitionReason || "")
+    readonly property int retainedRendererCount:
+        Number(renderer.item?.retainedRendererCount) || 0
 
     function inspect() {
         if (path.length > 0)
@@ -62,7 +68,7 @@ Item {
         anchors.fill: parent
         resourceId: "wallpaper.renderer." + root.screenName
         owner: "wallpaper.surface." + root.screenName
-        restorationSource: "WallpaperAssignmentService and probe record"
+        restorationSource: "Manual or scheduled assignment and probe record"
         classification: "expensive"
         requestedActive: root.path.length > 0
         retentionReason: requestedActive

@@ -35,7 +35,12 @@ Singleton {
             ? String(assigned) : globalWallpaper
     }
 
-    function setGlobal(path) {
+    function setGlobal(path, suppressAutomation) {
+        const manual = suppressAutomation !== false
+        if (manual && !WallpaperAutomationOverrideService.loaded) {
+            error = "Wallpaper automation overrides are still loading"
+            return false
+        }
         const normalized = normalizePath(path)
         if (!validWallpaper(normalized)) {
             error = "Unsupported wallpaper path"
@@ -44,6 +49,8 @@ Singleton {
         error = ""
         screenWallpapers = ({})
         globalWallpaper = normalized
+        if (manual)
+            WallpaperAutomationOverrideService.suppressGlobal()
         return true
     }
 
@@ -52,8 +59,13 @@ Singleton {
         globalWallpaper = ""
     }
 
-    function setForScreen(screenName, path) {
+    function setForScreen(screenName, path, suppressAutomation) {
         const name = String(screenName || "").trim()
+        const manual = suppressAutomation !== false
+        if (manual && !WallpaperAutomationOverrideService.loaded) {
+            error = "Wallpaper automation overrides are still loading"
+            return false
+        }
         const normalized = normalizePath(path)
         if (name.length === 0 || !validWallpaper(normalized)) {
             error = name.length === 0
@@ -67,6 +79,8 @@ Singleton {
         updated[name] = normalized
         error = ""
         screenWallpapers = updated
+        if (manual)
+            WallpaperAutomationOverrideService.suppressScreen(name)
         return true
     }
 

@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.services.config
 
 Singleton {
     id: root
@@ -10,7 +11,8 @@ Singleton {
     property var consumerScreens: ({})
     property int syntheticIdleState: -1
     property bool observerReady: false
-    readonly property int idleTimeoutSeconds: 300
+    readonly property int idleTimeoutSeconds:
+        ConfigService.wallpaperIdleTimeoutSeconds
     readonly property int consumers: {
         let total = 0
         for (const name in consumerScreens)

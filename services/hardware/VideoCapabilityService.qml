@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import "VideoCapabilityParser.js" as CapabilityParser
 import "VideoCodecEvidence.js" as CodecEvidence
+import "VideoCodecSelection.js" as CodecSelection
 
 Singleton {
     id: root
@@ -32,6 +33,8 @@ Singleton {
         verifiedDecodeCodecs, softwareEncoders)
     readonly property var codecEvaluations: CodecEvidence.evaluateCandidates(
         codecCandidates, codecEvidence)
+    readonly property var optimizationCandidate: CodecSelection.select(
+        codecEvaluations, codecCandidates)
 
     function refresh() {
         if (busy)
@@ -53,6 +56,14 @@ Singleton {
         encoderToolCheck.command = ["/bin/sh", "-c", "command -v ffmpeg"]
         encoderToolCheck.running = true
         return true
+    }
+
+    function acceptBenchmarkRecords(records) {
+        codecEvidence = CodecEvidence.fromBenchmarkRecords(records)
+    }
+
+    function clearBenchmarkEvidence() {
+        codecEvidence = ({})
     }
 
     function finishDiscovery() {
@@ -95,6 +106,7 @@ Singleton {
             codecCandidates: codecCandidates,
             measurementRequirements: CodecEvidence.requirements(),
             codecEvaluations: codecEvaluations,
+            optimizationCandidate: optimizationCandidate,
             conservativeCodec: "h264",
             autoSelectionReady:
                 CodecEvidence.automaticSelectionReady(codecEvaluations),

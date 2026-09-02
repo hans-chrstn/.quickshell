@@ -76,11 +76,13 @@ Singleton {
     function refresh() {
         if (consumers === 0)
             return
-        if (typeof Hyprland.refreshToplevels !== "function") {
-            error = "Native Hyprland toplevel refresh is unavailable"
+        if (typeof Hyprland.refreshMonitors !== "function"
+                || typeof Hyprland.refreshToplevels !== "function") {
+            error = "Native Hyprland monitor or toplevel refresh is unavailable"
             return
         }
         evaluationAttempt = 0
+        Hyprland.refreshMonitors()
         Hyprland.refreshToplevels()
         evaluationTimer.restart()
     }
@@ -88,12 +90,17 @@ Singleton {
     function evaluateToplevels() {
         const clients = []
         const toplevels = Hyprland.toplevels?.values || []
-        let incomplete = false
+        let incomplete = toplevels.length === 0
         for (const toplevel of toplevels) {
             const client = toplevel?.lastIpcObject
             if (client)
                 clients.push(client)
             else
+                incomplete = true
+        }
+        for (const name in consumerScreens) {
+            const monitor = monitorForScreen(name)
+            if (!monitor || activeWorkspaceId(monitor) === 0)
                 incomplete = true
         }
         if (incomplete && evaluationAttempt < maximumEvaluationAttempts) {
@@ -123,12 +130,22 @@ Singleton {
 
     function visibleWorkspaceIds(monitor) {
         const ids = ({})
-        if (monitor?.activeWorkspace)
-            ids[Number(monitor.activeWorkspace.id)] = true
+        const activeId = activeWorkspaceId(monitor)
+        if (activeId !== 0)
+            ids[activeId] = true
         const special = monitor?.lastIpcObject?.specialWorkspace
         if (special && Number(special.id) !== 0)
             ids[Number(special.id)] = true
         return ids
+    }
+
+    function activeWorkspaceId(monitor) {
+        const nativeId = Number(monitor?.activeWorkspace?.id)
+        const ipcId = Number(
+            monitor?.lastIpcObject?.activeWorkspace?.id)
+        const activeId = Number.isFinite(nativeId) && nativeId !== 0
+            ? nativeId : ipcId
+        return Number.isFinite(activeId) ? activeId : 0
     }
 
     function evaluate(clients) {

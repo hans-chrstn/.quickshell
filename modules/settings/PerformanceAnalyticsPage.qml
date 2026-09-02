@@ -9,11 +9,10 @@ import qs.services.analytics
 SettingPage {
     id: root
 
-    readonly property var evidence: PerformanceEvidenceService.snapshot()
-    readonly property var modest: evidence.constructionProfiles.modest
-    readonly property var stress: evidence.constructionProfiles.stress
-    readonly property var memoryBaseline: evidence.staticBaseline
-    readonly property var attribution: evidence.attribution
+    readonly property var metrics: PerformanceAnalyticsService.snapshot()
+
+    Component.onCompleted: PerformanceAnalyticsService.acquire()
+    Component.onDestruction: PerformanceAnalyticsService.release()
 
     Flickable {
         id: performanceScroll
@@ -32,210 +31,200 @@ SettingPage {
             width: performanceScroll.width - 8
             spacing: 9
 
-        SettingsHeader { title: "Performance" }
+            SettingsHeader { title: "Performance" }
 
-        RowLayout {
-            Layout.fillWidth: true
-
-            Text {
+            RowLayout {
                 Layout.fillWidth: true
-                text: "Observed evidence"
-                color: Design.green
-                font.family: Design.fontText
-                font.pixelSize: 9
-                font.weight: Font.DemiBold
-            }
 
-            Text {
-                text: "No live sampling"
-                color: Design.textMuted
-                font.family: Design.fontMono
-                font.pixelSize: 8
-            }
-        }
-
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 86
-            radius: 11
-            color: Design.surface
-            border.width: 1
-            border.color: Design.separator
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 5
-
-                RowLayout {
+                Text {
                     Layout.fillWidth: true
+                    text: root.metrics.available
+                        ? "Live process metrics" : "Metrics unavailable"
+                    color: root.metrics.available
+                        ? Design.green : Design.yellow
+                    font.family: Design.fontText
+                    font.pixelSize: 9
+                    font.weight: Font.DemiBold
+                }
+
+                Text {
+                    text: root.metrics.sampling ? "Reading…" : "Live"
+                    color: Design.textMuted
+                    font.family: Design.fontMono
+                    font.pixelSize: 8
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+
+                Repeater {
+                    model: [
+                        { label: "RSS", value: root.memoryText(
+                            root.metrics.rssKiB) },
+                        { label: "PSS", value: root.memoryText(
+                            root.metrics.pssKiB) },
+                        { label: "Private", value: root.memoryText(
+                            root.metrics.privateKiB) }
+                    ]
+
+                    Rectangle {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 42
+                        radius: 9
+                        color: Design.surface
+                        border.width: 1
+                        border.color: Design.separator
+
+                        Column {
+                            anchors.centerIn: parent
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.value
+                                color: Design.text
+                                font.family: Design.fontMono
+                                font.pixelSize: 10
+                                font.weight: Font.DemiBold
+                            }
+
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.label
+                                color: Design.textMuted
+                                font.family: Design.fontText
+                                font.pixelSize: 7
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 92
+                radius: 11
+                color: Design.surface
+                border.width: 1
+                border.color: Design.separator
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    spacing: 5
 
                     Text {
-                        Layout.fillWidth: true
-                        text: "Construction latency"
+                        text: "Current memory composition"
                         color: Design.text
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
                     }
 
-                    Text {
-                        text: "desktop → stress"
-                        color: Design.textMuted
-                        font.family: Design.fontMono
-                        font.pixelSize: 7
+                    MetricBarGraph {
+                        Layout.fillWidth: true
+                        metrics: [
+                            { label: "Anonymous", value: root.toMiB(
+                                root.metrics.anonymousKiB), color: Design.blue },
+                            { label: "Private", value: root.toMiB(
+                                root.metrics.privateKiB), color: Design.green },
+                            { label: "PSS", value: root.toMiB(
+                                root.metrics.pssKiB), color: Design.yellow },
+                            { label: "RSS", value: root.toMiB(
+                                root.metrics.rssKiB), color: Design.textMuted }
+                        ]
+                        unit: "M"
                     }
                 }
-
-                ComparisonBarGraph {
-                    Layout.fillWidth: true
-                    metrics: [
-                        { label: "Launcher", before: root.modest.launcherMs,
-                          after: root.stress.launcherMs,
-                          beforeText: root.modest.launcherMs + "ms",
-                          afterText: root.stress.launcherMs + "ms" },
-                        { label: "Settings", before: root.modest.settingsMs,
-                          after: root.stress.settingsMs,
-                          beforeText: root.modest.settingsMs + "ms",
-                          afterText: root.stress.settingsMs + "ms" },
-                        { label: "Wallpaper", before: root.modest.wallpaperMs,
-                          after: root.stress.wallpaperMs,
-                          beforeText: root.modest.wallpaperMs + "ms",
-                          afterText: root.stress.wallpaperMs + "ms" }
-                    ]
-                    beforeColor: Design.blue
-                    afterColor: Design.yellow
-                }
             }
-        }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 6
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
 
-            Repeater {
-                model: [
-                    { label: "RSS", value: root.formatMiB(
-                        root.memoryBaseline.rssKiB) },
-                    { label: "PSS", value: root.formatMiB(
-                        root.memoryBaseline.pssKiB) },
-                    { label: "Private", value: root.formatMiB(
-                        root.memoryBaseline.privateAnonymousKiB) }
-                ]
+                Repeater {
+                    model: [
+                        { label: "CPU", value: root.metrics.cpuPercent >= 0
+                            ? root.metrics.cpuPercent.toFixed(1) + "%" : "…" },
+                        { label: "Threads", value: String(root.metrics.threads) },
+                        { label: "Displays", value: String(
+                            root.metrics.screenCount) },
+                        { label: "Uptime", value: root.durationText(
+                            root.metrics.processUptimeSeconds) }
+                    ]
 
-                Rectangle {
-                    required property var modelData
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 38
-                    radius: 9
-                    color: Design.surface
-                    border.width: 1
-                    border.color: Design.separator
+                    Rectangle {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 38
+                        radius: 9
+                        color: Design.surface
+                        border.width: 1
+                        border.color: Design.separator
 
-                    Column {
-                        anchors.centerIn: parent
-                        spacing: 0
+                        Column {
+                            anchors.centerIn: parent
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.value
-                            color: Design.text
-                            font.family: Design.fontMono
-                            font.pixelSize: 10
-                            font.weight: Font.DemiBold
-                        }
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.value
+                                color: Design.text
+                                font.family: Design.fontMono
+                                font.pixelSize: 9
+                                font.weight: Font.DemiBold
+                            }
 
-                        Text {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            text: modelData.label
-                            color: Design.textMuted
-                            font.family: Design.fontText
-                            font.pixelSize: 7
+                            Text {
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                text: modelData.label
+                                color: Design.textMuted
+                                font.family: Design.fontText
+                                font.pixelSize: 7
+                            }
                         }
                     }
                 }
             }
-        }
 
-        Text {
-            Layout.fillWidth: true
-            text: root.memoryBaseline.label + " · "
-                + root.memoryBaseline.measurement
-            color: Design.textMuted
-            font.family: Design.fontMono
-            font.pixelSize: 7
-            wrapMode: Text.Wrap
-        }
+            Text {
+                Layout.fillWidth: true
+                visible: !root.metrics.available
+                text: root.metrics.error
+                color: Design.textMuted
+                font.family: Design.fontText
+                font.pixelSize: 8
+                wrapMode: Text.Wrap
+            }
 
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 84
-            radius: 11
-            color: Design.surface
-            border.width: 1
-            border.color: Design.separator
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 10
-                spacing: 5
-
-                Text {
-                    Layout.fillWidth: true
-                    text: "Private memory by composition"
-                    color: Design.text
-                    font.family: Design.fontText
-                    font.pixelSize: 10
-                    font.weight: Font.DemiBold
-                }
-
-                MetricBarGraph {
-                    Layout.fillWidth: true
-                    metrics: [
-                        { label: "Core", value: root.toMiB(
-                            root.attribution.structuralKiB),
-                          color: Design.textMuted },
-                        { label: "Islands", value: root.toMiB(
-                            root.attribution.islandWindowsKiB),
-                          color: Design.blue },
-                        { label: "Walls", value: root.toMiB(
-                            root.attribution.wallpaperWindowsKiB),
-                          color: Design.green },
-                        { label: "Full", value: root.toMiB(
-                            root.attribution.fullShellKiB),
-                          color: Design.yellow }
-                    ]
-                    unit: "M"
-                }
+            Text {
+                Layout.fillWidth: true
+                text: "RSS includes shared and file-backed mappings. PSS apportions shared memory; neither value alone proves a leak."
+                color: Design.textMuted
+                font.family: Design.fontText
+                font.pixelSize: 8
+                wrapMode: Text.Wrap
             }
         }
-
-        Text {
-            Layout.fillWidth: true
-            text: "Separate clean runs · compositions overlap and are not additive"
-            color: Design.textMuted
-            font.family: Design.fontMono
-            font.pixelSize: 7
-            wrapMode: Text.Wrap
-        }
-
-        Text {
-            Layout.fillWidth: true
-            text: root.evidence.limitation
-            color: Design.textMuted
-            font.family: Design.fontText
-            font.pixelSize: 8
-            wrapMode: Text.Wrap
-        }
-
-        }
-    }
-
-    function formatMiB(kibibytes) {
-        return (Number(kibibytes) / 1024).toFixed(0) + " MiB"
     }
 
     function toMiB(kibibytes) {
-        return Number(kibibytes) / 1024
+        return Math.max(0, Number(kibibytes) || 0) / 1024
+    }
+
+    function memoryText(kibibytes) {
+        if (!metrics.available)
+            return "—"
+        return toMiB(kibibytes).toFixed(0) + " MiB"
+    }
+
+    function durationText(seconds) {
+        const total = Math.max(0, Math.floor(Number(seconds) || 0))
+        if (total >= 3600)
+            return Math.floor(total / 3600) + "h"
+        if (total >= 60)
+            return Math.floor(total / 60) + "m"
+        return total + "s"
     }
 }

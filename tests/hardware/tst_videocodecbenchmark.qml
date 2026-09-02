@@ -7,18 +7,19 @@ TestCase {
 
     function test_candidateFiltering() {
         const candidates = Benchmark.runnableCandidates([
-            { codec: "h264", encoder: "libx264", eligible: true },
-            { codec: "hevc", encoder: "libx265", eligible: false },
-            { codec: "vp9", encoder: "libvpx-vp9", eligible: true }
+            { codec: "h264", encoder: "libx264", benchmarkable: true },
+            { codec: "hevc", encoder: "libx265", benchmarkable: true },
+            { codec: "vp9", encoder: "libvpx-vp9", benchmarkable: true }
         ])
-        compare(candidates.length, 1)
+        compare(candidates.length, 2)
         compare(candidates[0].codec, "h264")
+        compare(candidates[1].codec, "hevc")
     }
 
     function test_boundedH264Command() {
         const command = Benchmark.command("/bin/ffmpeg", "/tmp/in.mp4",
             "/tmp/out.mp4", {
-                codec: "h264", encoder: "libx264", eligible: true
+                codec: "h264", encoder: "libx264", benchmarkable: true
             })
         verify(command.indexOf("-t") >= 0)
         compare(command[command.indexOf("-t") + 1], "3")
@@ -29,7 +30,7 @@ TestCase {
 
     function test_unknownEncoderHasNoCommand() {
         compare(Benchmark.command("ffmpeg", "in", "out", {
-            codec: "av1", encoder: "unknown", eligible: true
+            codec: "av1", encoder: "unknown", benchmarkable: true
         }).length, 0)
     }
 }

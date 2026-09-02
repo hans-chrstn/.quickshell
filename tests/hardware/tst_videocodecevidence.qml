@@ -8,6 +8,7 @@ TestCase {
     readonly property var eligibleCandidate: ({
         codec: "av1",
         encoder: "libsvtav1",
+        benchmarkable: true,
         eligible: true
     })
 
@@ -34,6 +35,23 @@ TestCase {
             "verified hardware decode") >= 0)
     }
 
+    function test_explicitNullDroppedFramesRemainMissing() {
+        const result = Evidence.evaluateCandidate(eligibleCandidate, {
+            av1: {
+                runs: 3,
+                playbackMs: 15000,
+                encodeSucceeded: true,
+                qtPlaybackSucceeded: true,
+                hardwareDecodeVerified: true,
+                hardwareTexturesVerified: true,
+                droppedFrameRatio: null
+            }
+        })
+        verify(!result.measurementAccepted)
+        verify(result.missingEvidence.indexOf(
+            "observed dropped-frame ratio") >= 0)
+    }
+
     function test_completeEvidenceCanSelect() {
         const result = Evidence.evaluateCandidate(eligibleCandidate, {
             av1: {
@@ -54,6 +72,7 @@ TestCase {
     function test_unavailableCandidateCannotSelect() {
         const result = Evidence.evaluateCandidate({
             codec: "hevc",
+            benchmarkable: false,
             eligible: false
         }, {
             hevc: {
@@ -68,6 +87,26 @@ TestCase {
         })
         compare(result.measurementState, "unavailable")
         verify(!result.measurementAccepted)
+    }
+
+    function test_runtimeProofCanAcceptWithoutVainfoPreview() {
+        const result = Evidence.evaluateCandidate({
+            codec: "hevc",
+            encoder: "libx265",
+            benchmarkable: true,
+            eligible: false
+        }, {
+            hevc: {
+                runs: 3,
+                playbackMs: 15000,
+                encodeSucceeded: true,
+                qtPlaybackSucceeded: true,
+                hardwareDecodeVerified: true,
+                hardwareTexturesVerified: true,
+                droppedFrameRatio: 0
+            }
+        })
+        verify(result.measurementAccepted)
     }
 
     function test_droppedFrameBoundary() {

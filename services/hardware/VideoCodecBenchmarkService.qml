@@ -3,10 +3,13 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.core
 import qs.services.hardware
 import qs.services.jobs
 import qs.services.wallpaper
 import "VideoCodecBenchmark.js" as Benchmark
+import "VideoHardwareEvidence.js" as HardwareEvidence
+import "VideoPlaybackMetrics.js" as PlaybackMetrics
 
 Singleton {
     id: root
@@ -17,6 +20,7 @@ Singleton {
     readonly property int playbackRunMs: 5000
     readonly property int playbackRunsRequired: 3
     readonly property int playbackStartupTimeoutMs: 10000
+    readonly property int hardwareProbeMs: 4000
 
     property string state: "idle"
     property string error: ""
@@ -33,10 +37,13 @@ Singleton {
     property string activeOutput: ""
     property int playbackRecordIndex: -1
     property int playbackRunIndex: 0
+    property int hardwareRecordIndex: -1
+    property double playbackMeasurementStartedAtMs: 0
 
     readonly property bool busy: state === "preparing"
         || state === "encoding" || state === "verifying"
         || state === "playback-loading" || state === "playback-running"
+        || state === "hardware-probing"
     readonly property var activeCandidate: candidateIndex >= 0
             && candidateIndex < candidates.length
         ? candidates[candidateIndex] : null
@@ -62,8 +69,15 @@ Singleton {
                 requiredRuns: playbackRunsRequired,
                 runDurationMs: playbackRunMs
             },
+            hardwareProbe: {
+                activeRecordIndex: hardwareRecordIndex,
+                durationMs: hardwareProbeMs,
+                backendEvidence: "qt-ffmpeg-log",
+                textureEvidence: "unavailable-in-qml"
+            },
             persistence: "session-only",
-            affectsSelection: false
+            affectsSelection: VideoCapabilityService.codecEvaluations.some(
+                candidate => candidate.measurementAccepted === true)
         }
     }
 
@@ -165,7 +179,16 @@ Singleton {
             hardwareTexturesVerified: false,
             droppedFrameRatio: null,
             playbackRuns: 0,
-            playbackMs: 0
+            playbackMs: 0,
+            frameHandleTypes: [],
+            frameHandleObservation: "unavailable",
+            frameHandleError: "",
+            hardwareDecodeBackend: "",
+            hardwareDecodeError: "",
+            playbackMeasurements: [],
+            observedFrames: 0,
+            expectedFrames: 0,
+            droppedFrames: 0
         })
         records = updated
     }
@@ -222,6 +245,10 @@ Singleton {
             return
         }
         state = "playback-loading"
+        playbackLoader.setSource(
+            Qt.resolvedUrl("VideoCodecPlaybackProbe.qml"), {
+                path: String(records[playbackRecordIndex].outputPath || "")
+            })
         playbackLoader.active = true
         playbackStartupTimer.restart()
     }
@@ -233,6 +260,8 @@ Singleton {
             return
         playbackStartupTimer.stop()
         state = "playback-running"
+        item.beginFrameMeasurement()
+        playbackMeasurementStartedAtMs = Date.now()
         playbackRunTimer.restart()
     }
 
@@ -249,10 +278,38 @@ Singleton {
         const record = records[playbackRecordIndex]
         const runs = Number(record.playbackRuns || 0) + 1
         const elapsed = Number(record.playbackMs || 0) + playbackRunMs
+        const item = playbackLoader.item
+        const observedFrames = item ? item.endFrameMeasurement() : 0
+        const measurement = PlaybackMetrics.run(24, playbackRunMs,
+            observedFrames, Date.now() - playbackMeasurementStartedAtMs)
+        if (!measurement.valid) {
+            failPlaybackRun(measurement.error)
+            return
+        }
+        const handleType = item
+            ? String(item.frameHandleType || "unavailable") : "unavailable"
+        const handleError = item ? String(item.frameHandleError || "") : ""
+        const handles = Array.from(record.frameHandleTypes || [])
+        handles.push(handleType)
+        const allRhiTextures = handles.length === playbackRunsRequired
+            && handles.every(value => value === "rhi-texture")
+        const measurements = Array.from(record.playbackMeasurements || [])
+        measurements.push(measurement)
+        const aggregate = PlaybackMetrics.aggregate(measurements)
         updatePlaybackRecord({
             playbackRuns: runs,
             playbackMs: elapsed,
-            qtPlaybackSucceeded: true
+            qtPlaybackSucceeded: true,
+            frameHandleTypes: handles,
+            frameHandleObservation: handleType,
+            frameHandleError: handleError,
+            hardwareTexturesVerified: allRhiTextures,
+            playbackMeasurements: measurements,
+            observedFrames: aggregate.observedFrames,
+            expectedFrames: aggregate.expectedFrames,
+            droppedFrames: aggregate.droppedFrames,
+            droppedFrameRatio: aggregate.validRuns === playbackRunsRequired
+                ? aggregate.droppedFrameRatio : null
         })
         playbackRunIndex = runs
         playbackLoader.active = false
@@ -294,6 +351,75 @@ Singleton {
         state = "playback-ready"
     }
 
+    function startHardwareProbe() {
+        if (state !== "playback-ready" || busy)
+            return false
+        hardwareRecordIndex = nextHardwareRecord(0)
+        if (hardwareRecordIndex < 0) {
+            error = "No playback-compatible candidate is available"
+            state = "failed"
+            return false
+        }
+        runHardwareProbe()
+        return true
+    }
+
+    function nextHardwareRecord(startIndex) {
+        for (let index = Math.max(0, startIndex); index < records.length; ++index) {
+            const record = records[index]
+            if (record.qtPlaybackSucceeded && record.artifactAvailable
+                    && String(record.outputPath || "").length > 0)
+                return index
+        }
+        return -1
+    }
+
+    function runHardwareProbe() {
+        if (hardwareRecordIndex < 0
+                || hardwareRecordIndex >= records.length) {
+            finishHardwareProbe()
+            return
+        }
+        const record = records[hardwareRecordIndex]
+        hardwareProcess.output = ""
+        hardwareProcess.operationGeneration = generation
+        hardwareProcess.recordIndex = hardwareRecordIndex
+        hardwareProcess.environment = {
+            QT_LOGGING_RULES: "qt.multimedia.ffmpeg.hwaccel=true;"
+                + "qt.multimedia.ffmpeg.hwaccelvaapi=true;"
+                + "qt.multimedia.ffmpeg.streamdecoder=true",
+            QS_CODEC_PROBE_URL: String(LocalUrl.fromPath(record.outputPath))
+        }
+        hardwareProcess.command = ["/proc/self/exe", "-p",
+            Quickshell.shellPath(
+                "services/hardware/probes/VideoHardwareProbe.qml"),
+            "--no-color", "-v"]
+        state = "hardware-probing"
+        hardwareProcess.running = true
+        hardwareProbeTimer.restart()
+    }
+
+    function applyHardwareResult(recordIndex, output) {
+        if (recordIndex < 0 || recordIndex >= records.length)
+            return
+        const record = records[recordIndex]
+        const result = HardwareEvidence.parseQtFfmpegLog(output, record.codec)
+        const updated = records.slice()
+        updated[recordIndex] = Object.assign({}, record, {
+            hardwareDecodeVerified: result.hardwareDecodeVerified,
+            hardwareDecodeBackend: result.backend,
+            hardwareDecodeError: result.error
+        })
+        records = updated
+    }
+
+    function finishHardwareProbe() {
+        hardwareProbeTimer.stop()
+        hardwareRecordIndex = -1
+        VideoCapabilityService.acceptBenchmarkRecords(records)
+        state = "hardware-ready"
+    }
+
     function cancel() {
         if (!busy)
             return false
@@ -305,6 +431,9 @@ Singleton {
         playbackRunTimer.stop()
         playbackRestartTimer.stop()
         playbackLoader.active = false
+        hardwareProbeTimer.stop()
+        if (hardwareProcess.running)
+            hardwareProcess.signal(15)
         discardOutput(activeOutput)
         cancelCleanupProcess.command = ["find", cacheDirectory, "-maxdepth", "1",
             "-type", "f", "-name", "candidate-*.mp4", "-delete"]
@@ -315,6 +444,7 @@ Singleton {
         }))
         playbackRecordIndex = -1
         playbackRunIndex = 0
+        hardwareRecordIndex = -1
         state = "cancelled"
         error = "Benchmark cancelled"
         activeOutput = ""
@@ -332,6 +462,7 @@ Singleton {
         playbackRunIndex = 0
         state = "idle"
         error = ""
+        VideoCapabilityService.clearBenchmarkEvidence()
         clearProcess.command = ["find", cacheDirectory, "-maxdepth", "1",
             "-type", "f", "-name", "candidate-*.mp4", "-delete"]
         clearProcess.running = true
@@ -434,17 +565,33 @@ Singleton {
     Process { id: cleanupProcess }
     Process { id: cancelCleanupProcess }
 
+    Process {
+        id: hardwareProcess
+        property int operationGeneration: 0
+        property int recordIndex: -1
+        property string output: ""
+        stdout: StdioCollector {
+            onStreamFinished: hardwareProcess.output += "\n" + text
+        }
+        stderr: StdioCollector {
+            onStreamFinished: hardwareProcess.output += "\n" + text
+        }
+        onExited: exitCode => {
+            if (operationGeneration !== root.generation)
+                return
+            hardwareProbeTimer.stop()
+            root.applyHardwareResult(recordIndex, output)
+            root.hardwareRecordIndex = root.nextHardwareRecord(recordIndex + 1)
+            if (root.hardwareRecordIndex < 0)
+                root.finishHardwareProbe()
+            else
+                root.runHardwareProbe()
+        }
+    }
+
     Loader {
         id: playbackLoader
         active: false
-        sourceComponent: Component {
-            VideoCodecPlaybackProbe {
-                path: root.playbackRecordIndex >= 0
-                        && root.playbackRecordIndex < root.records.length
-                    ? String(root.records[root.playbackRecordIndex].outputPath
-                        || "") : ""
-            }
-        }
         onLoaded: root.tryStartPlaybackClock()
     }
 
@@ -477,6 +624,15 @@ Singleton {
         id: playbackRunTimer
         interval: root.playbackRunMs
         onTriggered: root.completePlaybackRun()
+    }
+
+    Timer {
+        id: hardwareProbeTimer
+        interval: root.hardwareProbeMs
+        onTriggered: {
+            if (hardwareProcess.running)
+                hardwareProcess.signal(15)
+        }
     }
 
     Timer {

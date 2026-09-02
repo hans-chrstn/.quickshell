@@ -17,6 +17,7 @@ Item {
     property string retentionReason: requestedActive ? "active-request" : ""
     property string evictionReason: requestedActive ? "" : "not-requested"
     property alias sourceComponent: instanceLoader.sourceComponent
+    property alias source: instanceLoader.source
     readonly property alias item: instanceLoader.item
     readonly property alias status: instanceLoader.status
     readonly property bool loaded: instanceLoader.item !== null

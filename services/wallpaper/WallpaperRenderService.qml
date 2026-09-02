@@ -40,6 +40,10 @@ Singleton {
             decoderEvicted: Boolean(details?.decoderEvicted),
             decoderLoaded: Boolean(details?.decoderLoaded),
             playbackActive: isActive,
+            transitionRunning: Boolean(details?.transitionRunning),
+            transitionReason: String(details?.transitionReason || ""),
+            retainedRendererCount: Math.max(0,
+                Math.min(2, Number(details?.retainedRendererCount) || 0)),
             activeDurationMs: activeDurationMs,
             activeSinceMs: activeSinceMs
         }

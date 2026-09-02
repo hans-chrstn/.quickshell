@@ -15,6 +15,7 @@ ColumnLayout {
     }
     property string unit: ""
     property int barHeight: 3
+    property int labelColumnWidth: 48
     spacing: 2
 
     Repeater {
@@ -26,7 +27,8 @@ ColumnLayout {
             spacing: 5
 
             Text {
-                Layout.preferredWidth: 24
+                Layout.preferredWidth: root.labelColumnWidth
+                Layout.minimumWidth: root.labelColumnWidth
                 text: modelData.label ?? ""
                 color: Design.textMuted
                 font.family: Design.fontText

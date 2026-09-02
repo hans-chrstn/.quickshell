@@ -49,7 +49,7 @@ Rectangle {
 
             Text {
                 text: root.assessment?.state !== "ready" ? "Unavailable"
-                    : root.severity >= 2 ? "High cost"
+                    : root.severity >= 2 ? "High demand"
                     : root.severity === 1 ? "Review" : "Recommended"
                 color: root.assessment?.state !== "ready" ? Design.textMuted
                     : root.severity >= 2 ? Design.red
@@ -118,7 +118,9 @@ Rectangle {
                         return "Optimized copy available"
                     if (state === "failed" || state === "cancelled")
                         return String(root.optimization?.error || "Optimization failed")
-                    return "Preserves the original · display-sized H.264 · 30 FPS"
+                    return WallpaperOptimizationService.recipeDescription(
+                        String(root.assessment?.target || ""),
+                        String(root.assessment?.path || ""))
                 }
                 color: root.optimization?.state === "failed"
                     ? Design.red : Design.textMuted

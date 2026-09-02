@@ -36,5 +36,15 @@ TestCase {
         compare(candidates[0].policy, "conservative")
         compare(candidates[1].policy, "measurement-required")
         compare(candidates[2].encoder, "libsvtav1")
+        verify(candidates[2].benchmarkable)
+    }
+
+    function test_unverifiedDecodeRemainsBenchmarkable() {
+        const candidates = Parser.codecCandidates([], [
+            "libx264", "libx265", "libsvtav1"
+        ])
+        compare(candidates[1].policy, "runtime-proof-required")
+        verify(candidates[1].benchmarkable)
+        verify(!candidates[1].eligible)
     }
 }

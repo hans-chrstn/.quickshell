@@ -9,10 +9,14 @@ PanelWindow {
 
     readonly property string screenName: screen?.name ?? ""
     property string retainedScreenName: screenName
-    readonly property string wallpaperPath:
+    readonly property string scheduledWallpaperPath:
+        WallpaperScheduledOverlayService.pathForScreen(retainedScreenName)
+    readonly property string manualWallpaperPath:
         WallpaperAssignmentService.loaded
             ? WallpaperAssignmentService.wallpaperForScreen(
                 retainedScreenName) : ""
+    readonly property string wallpaperPath: scheduledWallpaperPath.length > 0
+        ? scheduledWallpaperPath : manualWallpaperPath
 
     anchors.top: true
     anchors.bottom: true
@@ -61,7 +65,10 @@ PanelWindow {
                     suspendedPositionMs: suspendedPositionMs,
                     decoderEvicted: decoderEvicted,
                     decoderLoaded: decoderLoaded,
-                    playbackActive: playbackActive
+                    playbackActive: playbackActive,
+                    transitionRunning: transitionRunning,
+                    transitionReason: transitionReason,
+                    retainedRendererCount: retainedRendererCount
                 })
         }
 
@@ -75,6 +82,9 @@ PanelWindow {
         onDecoderEvictedChanged: reportStatus()
         onDecoderLoadedChanged: reportStatus()
         onPlaybackActiveChanged: reportStatus()
+        onTransitionRunningChanged: reportStatus()
+        onTransitionReasonChanged: reportStatus()
+        onRetainedRendererCountChanged: reportStatus()
     }
 
     onScreenNameChanged: {

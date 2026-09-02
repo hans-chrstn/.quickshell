@@ -15,7 +15,7 @@ import qs.services.wallpaper
 ShellRoot {
     ShellIpc {}
 
-    Component.onCompleted: WallpaperPlaylistSchedulerService.initialize()
+    WallpaperAutomationActivator {}
 
     LifecycleLoader {
         resourceId: "wallpaper.cache-coordinator"

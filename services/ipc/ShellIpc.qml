@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services.analytics
 import qs.services.config
 import qs.services.display
 import qs.services.hardware
@@ -25,6 +26,13 @@ IpcHandler {
     function sessionClose(): void { SessionService.close() }
     function sessionLockStatus(): string {
         return JsonFormat.stringify(SessionLockService.snapshot())
+    }
+    function sessionSetTestState(locked: bool,
+            preparingForSleep: bool): bool {
+        return SessionLockService.setTestState(locked, preparingForSleep)
+    }
+    function sessionClearTestState(): bool {
+        return SessionLockService.clearTestState()
     }
     function powerStatus(): string {
         return JsonFormat.stringify(PowerStateService.snapshot())
@@ -70,6 +78,9 @@ IpcHandler {
     function lifecycleStatus(): string {
         return JsonFormat.stringify(LifecycleService.snapshot())
     }
+    function performanceStatus(): string {
+        return JsonFormat.stringify(PerformanceAnalyticsService.snapshot())
+    }
     function backgroundJobStatus(): string {
         return JsonFormat.stringify(BackgroundJobTools.snapshot())
     }
@@ -87,6 +98,9 @@ IpcHandler {
     }
     function videoCodecBenchmarkPlaybackStart(): bool {
         return VideoCodecBenchmarkService.startPlayback()
+    }
+    function videoCodecBenchmarkHardwareStart(): bool {
+        return VideoCodecBenchmarkService.startHardwareProbe()
     }
     function videoCodecBenchmarkCancel(): bool {
         return VideoCodecBenchmarkService.cancel()
@@ -159,6 +173,16 @@ IpcHandler {
     function wallpaperAssignments(): string {
         return JsonFormat.stringify(WallpaperAssignmentService.snapshot())
     }
+    function wallpaperAutomationOverrides(): string {
+        return JsonFormat.stringify(
+            WallpaperAutomationOverrideService.snapshot())
+    }
+    function wallpaperAutomationResumeAll(): bool {
+        return WallpaperAutomationOverrideService.resumeAll()
+    }
+    function wallpaperAutomationResumeScreen(screen: string): bool {
+        return WallpaperAutomationOverrideService.resumeScreen(screen)
+    }
     function wallpaperPlaylists(): string {
         return JsonFormat.stringify(WallpaperPlaylistService.snapshot())
     }
@@ -203,6 +227,10 @@ IpcHandler {
         return JsonFormat.stringify(
             WallpaperPlaylistSchedulerService.snapshot())
     }
+    function wallpaperPlaylistApplicationStatus(): string {
+        return JsonFormat.stringify(
+            WallpaperPlaylistApplicationService.snapshot())
+    }
     function wallpaperPlaylistSchedulerRefresh(nowMs: real): bool {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
             return false
@@ -236,6 +264,86 @@ IpcHandler {
     }
     function wallpaperPlaylistClearScreen(screen: string): bool {
         return WallpaperPlaylistTargetService.clearScreen(screen)
+    }
+    function wallpaperTimeRules(): string {
+        return JsonFormat.stringify(WallpaperTimeRuleService.snapshot())
+    }
+    function wallpaperTimeRulesReplace(document: string): bool {
+        return WallpaperTimeRuleService.replaceJson(document)
+    }
+    function wallpaperTimeRuleCreate(name: string, playlistId: string,
+            screen: string, days: string, startMinute: int,
+            endMinute: int, priority: int): string {
+        return WallpaperTimeRuleService.createRule(name, playlistId,
+            screen, days, startMinute, endMinute, priority)
+    }
+    function wallpaperTimeRuleUpdate(id: string, name: string,
+            playlistId: string, screen: string, days: string,
+            startMinute: int, endMinute: int, priority: int,
+            enabled: bool): bool {
+        return WallpaperTimeRuleService.updateRule(id, name, playlistId,
+            screen, days, startMinute, endMinute, priority, enabled)
+    }
+    function wallpaperTimeRuleSetEnabled(id: string,
+            enabled: bool): bool {
+        return WallpaperTimeRuleService.setEnabled(id, enabled)
+    }
+    function wallpaperTimeRuleRemove(id: string): bool {
+        return WallpaperTimeRuleService.removeRule(id)
+    }
+    function wallpaperTimeRulesClear(): bool {
+        return WallpaperTimeRuleService.clear()
+    }
+    function wallpaperHooks(): string {
+        return JsonFormat.stringify(WallpaperHookService.snapshot())
+    }
+    function wallpaperHooksReplace(document: string): bool {
+        return WallpaperHookService.replaceJson(document)
+    }
+    function wallpaperHookCreate(name: string, phase: string,
+            executable: string, argumentsJson: string, screen: string,
+            timeoutMs: int, priority: int): string {
+        return WallpaperHookService.createHook(name, phase, executable,
+            argumentsJson, screen, timeoutMs, priority)
+    }
+    function wallpaperHookUpdate(id: string, name: string, phase: string,
+            executable: string, argumentsJson: string, screen: string,
+            timeoutMs: int, priority: int, enabled: bool): bool {
+        return WallpaperHookService.updateHook(id, name, phase, executable,
+            argumentsJson, screen, timeoutMs, priority, enabled)
+    }
+    function wallpaperHookSetEnabled(id: string, enabled: bool): bool {
+        return WallpaperHookService.setEnabled(id, enabled)
+    }
+    function wallpaperHookRemove(id: string): bool {
+        return WallpaperHookService.removeHook(id)
+    }
+    function wallpaperHooksClear(): bool {
+        return WallpaperHookService.clear()
+    }
+    function wallpaperHookExecutorStatus(): string {
+        return JsonFormat.stringify(WallpaperHookExecutorService.snapshot())
+    }
+    function wallpaperHookStatus(): string {
+        return JsonFormat.stringify(
+            WallpaperHookDiagnosticsService.snapshot())
+    }
+    function wallpaperHookRunTest(phase: string,
+            contextJson: string): string {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return ""
+        try {
+            return WallpaperHookExecutorService.runPhase(
+                phase, JSON.parse(contextJson))
+        } catch (exception) {
+            return ""
+        }
+    }
+    function wallpaperHookCancelTest(runId: string): bool {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        return WallpaperHookExecutorService.cancelRun(
+            runId, "ipc-test-cancel")
     }
     function wallpaperRenderStatus(): string {
         return JsonFormat.stringify(WallpaperRenderService.snapshot())

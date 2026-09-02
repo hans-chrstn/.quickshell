@@ -102,11 +102,90 @@ SettingPage {
                         Layout.fillWidth: true
                         title: "Pause animation while idle"
                         description: checked
-                            ? "Recommended · pauses decoding after 5 minutes away"
+                            ? "Recommended · pauses decoding after "
+                                + root.idleTimeoutLabel()
                             : "Higher resource use · animation continues while you are away"
                         checked: ConfigService.pauseWallpaperWhenIdle
                         onToggled: value => SettingsService.setSetting(
                             "pauseWallpaperWhenIdle", value)
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        visible: ConfigService.pauseWallpaperWhenIdle
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Idle timeout"
+                            color: Design.textMuted
+                            font.family: Design.fontText
+                            font.pixelSize: 10
+                        }
+
+                        SettingNumericStepper {
+                            value: ConfigService.wallpaperIdleTimeoutSeconds / 60
+                            from: 1
+                            to: 120
+                            stepSize: 1
+                            decimals: 0
+                            suffix: "min"
+                            accessibleName: "Animated wallpaper idle timeout"
+                            onValueEdited: value => SettingsService.setSetting(
+                                "wallpaperIdleTimeoutSeconds", value * 60)
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 1
+                        color: Design.separator
+                    }
+
+                    Text {
+                        text: "Transitions"
+                        color: Design.textMuted
+                        font.family: Design.fontText
+                        font.pixelSize: 10
+                        font.weight: Font.DemiBold
+                    }
+
+                    SettingToggle {
+                        Layout.fillWidth: true
+                        title: "Wallpaper transitions"
+                        description: checked
+                            ? "Crossfade between settled wallpaper selections"
+                            : "Switch wallpapers immediately"
+                        checked: ConfigService.wallpaperTransitionsEnabled
+                        onToggled: value => SettingsService.setSetting(
+                            "wallpaperTransitionsEnabled", value)
+                    }
+
+                    SettingSlider {
+                        Layout.fillWidth: true
+                        enabled: ConfigService.wallpaperTransitionsEnabled
+                            && !ConfigService.reduceWallpaperMotion
+                        opacity: enabled ? 1 : 0.45
+                        title: "Transition duration"
+                        description: "Duration of the bounded two-renderer crossfade"
+                        from: 120
+                        to: 800
+                        stepSize: 20
+                        value: ConfigService.wallpaperTransitionDuration
+                        onValueEdited: value => SettingsService.setSetting(
+                            "wallpaperTransitionDuration", value)
+                    }
+
+                    SettingToggle {
+                        Layout.fillWidth: true
+                        enabled: ConfigService.wallpaperTransitionsEnabled
+                        opacity: enabled ? 1 : 0.45
+                        title: "Reduce wallpaper motion"
+                        description: checked
+                            ? "Use immediate swaps without wallpaper motion"
+                            : "Allow the configured crossfade"
+                        checked: ConfigService.reduceWallpaperMotion
+                        onToggled: value => SettingsService.setSetting(
+                            "reduceWallpaperMotion", value)
                     }
 
                     Rectangle {
@@ -143,5 +222,11 @@ SettingPage {
                 }
             }
         }
+    }
+
+    function idleTimeoutLabel() {
+        const minutes = Math.max(1, Math.round(
+            ConfigService.wallpaperIdleTimeoutSeconds / 60))
+        return minutes === 1 ? "1 minute away" : minutes + " minutes away"
     }
 }

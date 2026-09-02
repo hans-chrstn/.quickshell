@@ -87,11 +87,14 @@ function codecCandidates(decodeCodecs, encoders) {
             encoder: encoder,
             encoderAvailable: encoder.length > 0,
             decodeVerified: decodeVerified,
+            benchmarkable: encoder.length > 0,
             eligible: encoder.length > 0
                 && (decodeVerified || codec === "h264"),
             policy: codec === "h264" ? "conservative"
                 : decodeVerified && encoder.length > 0
-                    ? "measurement-required" : "unavailable"
+                    ? "measurement-required"
+                    : encoder.length > 0
+                        ? "runtime-proof-required" : "unavailable"
         })
     }
     return result

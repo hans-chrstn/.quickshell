@@ -135,6 +135,27 @@ Singleton {
         })
     }
 
+    function validationForPlaylist(playlistId) {
+        const id = String(playlistId || "").trim()
+        return (validation.playlists || []).find(item => item.id === id)
+            || null
+    }
+
+    function validatedResolvedEntries(playlistId) {
+        if (validation.state !== "ready")
+            return []
+        const report = validationForPlaylist(playlistId)
+        if (!report)
+            return []
+        const validIds = ({})
+        for (const entry of report.entries || []) {
+            if (entry.status === "valid")
+                validIds[String(entry.id || "")] = true
+        }
+        return resolvedEntries(playlistId)
+            .filter(entry => validIds[String(entry.id || "")] === true)
+    }
+
     function commitPlaylist(index, playlist) {
         const updated = playlists.slice()
         updated[index] = playlist

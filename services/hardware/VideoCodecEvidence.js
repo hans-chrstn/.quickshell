@@ -27,9 +27,36 @@ function recordFor(evidence, codec) {
         qtPlaybackSucceeded: source.qtPlaybackSucceeded === true,
         hardwareDecodeVerified: source.hardwareDecodeVerified === true,
         hardwareTexturesVerified: source.hardwareTexturesVerified === true,
+        encodeElapsedMs: Math.max(0,
+            finiteNumber(source.encodeElapsedMs, 0)),
         droppedFrameRatio: source.droppedFrameRatio === undefined
+                || source.droppedFrameRatio === null
             ? null : Math.max(0, finiteNumber(source.droppedFrameRatio, 1))
     }
+}
+
+function fromBenchmarkRecords(records) {
+    const evidence = ({})
+    for (const record of records || []) {
+        const codec = String(record?.codec || "").toLowerCase()
+        if (codec.length === 0)
+            continue
+        evidence[codec] = {
+            runs: Math.max(0, Number(record.playbackRuns) || 0),
+            playbackMs: Math.max(0, Number(record.playbackMs) || 0),
+            encodeSucceeded: record.encodeSucceeded === true,
+            encodeElapsedMs: Math.max(0,
+                Number(record.encodeElapsedMs) || 0),
+            qtPlaybackSucceeded: record.qtPlaybackSucceeded === true,
+            hardwareDecodeVerified:
+                record.hardwareDecodeVerified === true,
+            hardwareTexturesVerified:
+                record.hardwareTexturesVerified === true,
+            droppedFrameRatio: record.droppedFrameRatio === undefined
+                ? null : record.droppedFrameRatio
+        }
+    }
+    return evidence
 }
 
 function evaluateCandidate(candidate, evidence) {
@@ -38,11 +65,11 @@ function evaluateCandidate(candidate, evidence) {
     const required = requirements()
     const missing = []
 
-    if (!candidate || candidate.eligible !== true)
+    if (!candidate || candidate.benchmarkable !== true)
         return Object.assign({}, candidate || ({}), {
             measurementState: "unavailable",
             measurementAccepted: false,
-            missingEvidence: ["eligible codec candidate"],
+            missingEvidence: ["benchmarkable codec candidate"],
             evidence: record
         })
 

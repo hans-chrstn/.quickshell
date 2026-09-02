@@ -26,6 +26,14 @@ Singleton {
         data.experimentalPauseWallpaperOnBattery
     property alias pauseWallpaperWhenIdle:
         data.pauseWallpaperWhenIdle
+    property alias wallpaperIdleTimeoutSeconds:
+        data.wallpaperIdleTimeoutSeconds
+    property alias wallpaperTransitionsEnabled:
+        data.wallpaperTransitionsEnabled
+    property alias wallpaperTransitionDuration:
+        data.wallpaperTransitionDuration
+    property alias reduceWallpaperMotion:
+        data.reduceWallpaperMotion
     property alias allowWallpaperOptimization:
         data.allowWallpaperOptimization
     property alias optimizeWallpaperResolution:
@@ -80,6 +88,14 @@ Singleton {
         experimentalFloatingWallpaperSuspension: { type: "bool" },
         experimentalPauseWallpaperOnBattery: { type: "bool" },
         pauseWallpaperWhenIdle: { type: "bool" },
+        wallpaperIdleTimeoutSeconds: {
+            type: "int", minimum: 60, maximum: 7200
+        },
+        wallpaperTransitionsEnabled: { type: "bool" },
+        wallpaperTransitionDuration: {
+            type: "int", minimum: 120, maximum: 800
+        },
+        reduceWallpaperMotion: { type: "bool" },
         allowWallpaperOptimization: { type: "bool" },
         optimizeWallpaperResolution: { type: "bool" },
         optimizeWallpaperResolutionScale: {
@@ -295,6 +311,10 @@ Singleton {
             property bool experimentalFloatingWallpaperSuspension: false
             property bool experimentalPauseWallpaperOnBattery: false
             property bool pauseWallpaperWhenIdle: true
+            property int wallpaperIdleTimeoutSeconds: 300
+            property bool wallpaperTransitionsEnabled: true
+            property int wallpaperTransitionDuration: 420
+            property bool reduceWallpaperMotion: false
             property bool allowWallpaperOptimization: true
             property bool optimizeWallpaperResolution: true
             property real optimizeWallpaperResolutionScale: 1

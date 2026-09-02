@@ -13,6 +13,7 @@ Singleton {
     property bool preparingForSleep: false
     property bool available: false
     property string error: ""
+    property bool synthetic: false
 
     property bool toolsChecked: false
     property string loginctlPath: ""
@@ -39,6 +40,7 @@ Singleton {
         available = false
         locked = false
         preparingForSleep = false
+        synthetic = false
         awaitingSleepValue = false
     }
 
@@ -87,7 +89,7 @@ Singleton {
     }
 
     function refresh() {
-        if (consumers === 0 || loginctlPath.length === 0)
+        if (synthetic || consumers === 0 || loginctlPath.length === 0)
             return
         if (refreshProcess.running) {
             refreshPending = true
@@ -100,6 +102,26 @@ Singleton {
             "--property=LockedHint", "--value"
         ]
         refreshProcess.running = true
+    }
+
+    function setTestState(lockState, sleepState) {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        synthetic = true
+        available = true
+        error = ""
+        locked = Boolean(lockState)
+        preparingForSleep = Boolean(sleepState)
+        return true
+    }
+
+    function clearTestState() {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        synthetic = false
+        preparingForSleep = false
+        refresh()
+        return true
     }
 
     Process {
@@ -125,6 +147,8 @@ Singleton {
         onExited: exitCode => {
             if (root.consumers === 0)
                 return
+            if (root.synthetic)
+                return
             if (exitCode === 0) {
                 root.locked = output.trim().toLowerCase() === "yes"
                 root.available = true
@@ -142,6 +166,8 @@ Singleton {
         id: monitor
         stdout: SplitParser {
             onRead: line => {
+                if (root.synthetic)
+                    return
                 const value = String(line || "")
                 if (value.indexOf('string "LockedHint"') >= 0)
                     root.refresh()
@@ -177,6 +203,7 @@ Singleton {
             available: available,
             locked: locked,
             preparingForSleep: preparingForSleep,
+            synthetic: synthetic,
             error: error
         }
     }

@@ -153,6 +153,12 @@ Singleton {
         onTriggered: stateFile.writeAdapter()
     }
 
+    Timer {
+        id: reloadTimer
+        interval: 260
+        onTriggered: stateFile.reload()
+    }
+
     Connections {
         target: WallpaperPlaylistService
         function onLoadedChanged() { root.scheduleReconcile() }
@@ -165,7 +171,7 @@ Singleton {
         watchChanges: true
         printErrors: false
         onAdapterUpdated: if (root.loaded) saveTimer.restart()
-        onFileChanged: reload()
+        onFileChanged: reloadTimer.restart()
         onLoaded: {
             root.loaded = true
             try {

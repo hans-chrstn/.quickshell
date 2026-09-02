@@ -1,4 +1,7 @@
 import QtQuick
+import qs.services.config
+import qs.services.wallpaper
+import "WallpaperTransitionPolicy.js" as TransitionPolicy
 
 Item {
     id: root
@@ -17,6 +20,15 @@ Item {
     property string failedPath: ""
     property string failedBackend: ""
     property string handoffError: ""
+    property int transitionOutgoingIndex: -1
+    property bool pendingRapidSelection: false
+
+    readonly property bool transitionRunning: transition.running
+    readonly property real transitionProgress: transition.progress
+    readonly property string transitionReason: transitionDecision.reason || ""
+    readonly property int retainedRendererCount:
+        (slotA.configured ? 1 : 0) + (slotB.configured ? 1 : 0)
+    property var transitionDecision: TransitionPolicy.decision({})
 
     readonly property WallpaperRendererSlot currentSlot:
         currentIndex === 0 ? slotA : currentIndex === 1 ? slotB : null
@@ -56,7 +68,7 @@ Item {
         if (updateScheduled)
             return
         updateScheduled = true
-        Qt.callLater(applyTarget)
+        targetUpdateTimer.restart()
     }
 
     function cancelPending() {
@@ -65,9 +77,22 @@ Item {
         pendingIndex = -1
     }
 
+    function cancelTransition() {
+        if (!transition.running && transitionOutgoingIndex < 0)
+            return
+        transition.cancel()
+        const outgoingIndex = transitionOutgoingIndex
+        transitionOutgoingIndex = -1
+        if (outgoingIndex >= 0 && outgoingIndex !== currentIndex)
+            slotFor(outgoingIndex).clear()
+    }
+
     function applyTarget() {
         updateScheduled = false
         handoffGeneration += 1
+        pendingRapidSelection = transition.running
+        if (transition.running)
+            cancelTransition()
         if (failedPath !== targetPath || failedBackend !== targetBackend) {
             failedPath = ""
             failedBackend = ""
@@ -75,6 +100,17 @@ Item {
         }
         if (!targetSupported) {
             cancelPending()
+            if (targetMedia?.state === "failed"
+                    || targetMedia?.state === "unsupported") {
+                transitionDecision = TransitionPolicy.decision({
+                    outgoingPath: currentSlot?.path || "",
+                    outgoingBackend: currentSlot?.backend || "",
+                    incomingPath: targetPath,
+                    incomingBackend: targetBackend.length > 0
+                        ? targetBackend : "unsupported",
+                    incomingFailed: true
+                })
+            }
             return
         }
         if (currentMatchesTarget) {
@@ -98,28 +134,94 @@ Item {
         const outgoingIndex = currentIndex
         currentIndex = pendingIndex
         pendingIndex = -1
-        if (outgoingIndex >= 0 && outgoingIndex !== currentIndex) {
-            const outgoing = slotFor(outgoingIndex)
-            Qt.callLater(() => {
-                if (currentIndex !== outgoingIndex)
-                    outgoing.clear()
-            })
+        transitionDecision = TransitionPolicy.decision({
+            outgoingPath: outgoingIndex >= 0
+                ? slotFor(outgoingIndex).path : "",
+            outgoingBackend: outgoingIndex >= 0
+                ? slotFor(outgoingIndex).backend : "",
+            incomingPath: slot.path,
+            incomingBackend: slot.backend,
+            presentationVisible:
+                !WallpaperOcclusionService.known(screenName)
+                || !WallpaperOcclusionService.covered(screenName),
+            outgoingSuspended: outgoingIndex >= 0
+                && slotFor(outgoingIndex).suspended,
+            outgoingEvicted: outgoingIndex >= 0
+                && slotFor(outgoingIndex).decoderEvicted,
+            incomingSuspended: slot.suspended,
+            incomingEvicted: slot.decoderEvicted,
+            rapidSelection: pendingRapidSelection,
+            enabled: ConfigService.wallpaperTransitionsEnabled,
+            reducedMotion: ConfigService.reduceWallpaperMotion,
+            durationMs: ConfigService.wallpaperTransitionDuration
+        })
+        pendingRapidSelection = false
+        if (outgoingIndex < 0 || outgoingIndex === currentIndex)
+            return
+        if (!transitionDecision.enabled) {
+            slotFor(outgoingIndex).clear()
+            return
         }
+        transitionOutgoingIndex = outgoingIndex
+        transition.start(handoffGeneration, transitionDecision.durationMs)
     }
 
-    function handleSlotState(slot) {
-        if (!slot || pendingSlot !== slot || slot.state !== "error")
+    function finishTransition(generation) {
+        if (generation !== handoffGeneration)
             return
+        const outgoingIndex = transitionOutgoingIndex
+        transitionOutgoingIndex = -1
+        if (outgoingIndex >= 0 && outgoingIndex !== currentIndex)
+            slotFor(outgoingIndex).clear()
+    }
+
+    function recordHandoffFailure(slot, fallbackMessage) {
         failedPath = targetPath
         failedBackend = targetBackend
         handoffError = slot.error.length > 0
-            ? slot.error : "Wallpaper renderer failed before handoff"
-        const failedIndex = pendingIndex
-        pendingIndex = -1
+            ? slot.error : fallbackMessage
+        transitionDecision = TransitionPolicy.decision({
+            outgoingPath: currentSlot?.path || "",
+            outgoingBackend: currentSlot?.backend || "",
+            incomingPath: targetPath,
+            incomingBackend: targetBackend,
+            incomingFailed: true
+        })
+    }
+
+    function clearFailedSlotLater(slot, failedIndex, failedGeneration) {
         Qt.callLater(() => {
-            if (currentIndex !== failedIndex)
+            if (slot.generation === failedGeneration
+                    && currentIndex !== failedIndex
+                    && pendingIndex !== failedIndex)
                 slot.clear()
         })
+    }
+
+    function handleSlotState(slot) {
+        if (!slot || slot.state !== "error")
+            return
+        if (pendingSlot === slot) {
+            recordHandoffFailure(slot,
+                "Wallpaper renderer failed before handoff")
+            const failedIndex = pendingIndex
+            const failedGeneration = slot.generation
+            pendingIndex = -1
+            clearFailedSlotLater(slot, failedIndex, failedGeneration)
+            return
+        }
+        if (transition.running && currentSlot === slot
+                && transitionOutgoingIndex >= 0) {
+            recordHandoffFailure(slot,
+                "Wallpaper renderer failed during handoff")
+            const failedIndex = currentIndex
+            const failedGeneration = slot.generation
+            const fallbackIndex = transitionOutgoingIndex
+            transition.cancel()
+            transitionOutgoingIndex = -1
+            currentIndex = fallbackIndex
+            clearFailedSlotLater(slot, failedIndex, failedGeneration)
+        }
     }
 
     onTargetPathChanged: scheduleTarget()
@@ -128,12 +230,43 @@ Item {
     onTargetPosterPathChanged: scheduleTarget()
     onRenderScaleChanged: scheduleTarget()
 
+    Connections {
+        target: ConfigService
+
+        function onWallpaperTransitionsEnabledChanged() {
+            if (!ConfigService.wallpaperTransitionsEnabled)
+                root.cancelTransition()
+        }
+
+        function onReduceWallpaperMotionChanged() {
+            if (ConfigService.reduceWallpaperMotion)
+                root.cancelTransition()
+        }
+    }
+
+    Timer {
+        id: targetUpdateTimer
+        interval: 0
+        repeat: false
+        onTriggered: root.applyTarget()
+    }
+
+    WallpaperTransitionController {
+        id: transition
+        onCompleted: generation => root.finishTransition(generation)
+    }
+
     WallpaperRendererSlot {
         id: slotA
         slotKey: "A"
         anchors.fill: parent
-        z: root.pendingIndex === 0 ? 2 : root.currentIndex === 0 ? 1 : 0
+        z: root.currentIndex === 0 ? 2
+            : root.transitionOutgoingIndex === 0 ? 1
+            : root.pendingIndex === 0 ? 2 : 0
         visible: root.pendingIndex === 0 || root.currentIndex === 0
+            || root.transitionOutgoingIndex === 0
+        opacity: root.transitionRunning && root.currentIndex === 0
+            ? root.transitionProgress : 1
         onVisualReadyChanged: root.tryPromote(slotA)
         onStateChanged: root.handleSlotState(slotA)
     }
@@ -142,8 +275,13 @@ Item {
         id: slotB
         slotKey: "B"
         anchors.fill: parent
-        z: root.pendingIndex === 1 ? 2 : root.currentIndex === 1 ? 1 : 0
+        z: root.currentIndex === 1 ? 2
+            : root.transitionOutgoingIndex === 1 ? 1
+            : root.pendingIndex === 1 ? 2 : 0
         visible: root.pendingIndex === 1 || root.currentIndex === 1
+            || root.transitionOutgoingIndex === 1
+        opacity: root.transitionRunning && root.currentIndex === 1
+            ? root.transitionProgress : 1
         onVisualReadyChanged: root.tryPromote(slotB)
         onStateChanged: root.handleSlotState(slotB)
     }

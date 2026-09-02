@@ -4,15 +4,19 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.config
+import qs.services.hardware
 import qs.services.jobs
 import qs.services.wallpaper
+import "VideoOptimizationCodec.js" as OptimizationCodec
+import "WallpaperRecipeSummary.js" as RecipeSummary
+import "WallpaperTargetGeometry.js" as TargetGeometry
 
 Singleton {
     id: root
 
     readonly property string cacheDirectory:
         Quickshell.cachePath("wallpaper-optimized")
-    readonly property string recipeVersion: "h264-crf23-clean-v3"
+    readonly property string recipeVersion: selectedCodecRecipe().version
     readonly property int optimizationTimeout: 30 * 60 * 1000
 
     property bool directoryReady: false
@@ -28,6 +32,9 @@ Singleton {
     property real activeFrameRateLimit: 30
     property bool activeOptimizeBitRate: true
     property real activeBitRateLimit: 12
+    property string activeCodec: "h264"
+    property string activeEncoder: "libx264"
+    property var activeCodecArguments: []
     property int generation: 0
     property var resolutionSelections: ({})
     property string clearState: "idle"
@@ -213,6 +220,11 @@ Singleton {
         return maximum > 0 ? Math.min(configured, maximum) : configured
     }
 
+    function selectedCodecRecipe() {
+        return OptimizationCodec.recipe(
+            VideoCapabilityService.optimizationCandidate)
+    }
+
     function maximumResolutionScale(target, path) {
         const media = WallpaperProbeService.recordFor(path)
         const sourceWidth = Math.max(0, Number(media.width) || 0)
@@ -220,6 +232,8 @@ Singleton {
         if (sourceWidth <= 0 || sourceHeight <= 0)
             return 4
         const targetSize = targetDimensions(String(target || ""))
+        if (!targetSize.available)
+            return 0
         const targetScalePerMultiplier = Math.min(
             targetSize.width / sourceWidth,
             targetSize.height / sourceHeight)
@@ -235,7 +249,10 @@ Singleton {
     }
 
     function recipeKey(path, resolutionScale) {
-        return recipeVersion
+        const codecRecipe = selectedCodecRecipe()
+        return codecRecipe.version
+            + "|codec=" + codecRecipe.codec
+            + "|encoder=" + codecRecipe.encoder
             + "|resolution=" + (ConfigService.optimizeWallpaperResolution
                 ? resolutionScale : "off")
             + "|fps=" + selectedFrameRate(path)
@@ -243,27 +260,15 @@ Singleton {
     }
 
     function outputPath(path, identity, width, height, resolutionScale) {
-        const key = Qt.md5(path + "|" + identity + "|" + recipeVersion
+        const key = Qt.md5(path + "|" + identity
             + "|" + width + "x" + height + "|"
             + recipeKey(path, resolutionScale))
         return cacheDirectory + "/" + key + ".mp4"
     }
 
     function targetDimensions(target) {
-        let width = 0
-        let height = 0
-        for (const screen of Quickshell.screens) {
-            if (target !== "All Displays" && screen.name !== target)
-                continue
-            const scale = Math.max(1, Number(screen.devicePixelRatio) || 1)
-            width = Math.max(width, Math.round(screen.width * scale))
-            height = Math.max(height, Math.round(screen.height * scale))
-        }
-        if (width <= 0 || height <= 0) {
-            width = 1920
-            height = 1080
-        }
-        return { width: width - width % 2, height: height - height % 2 }
+        return TargetGeometry.physicalDimensions(
+            Quickshell.screens, String(target || ""))
     }
 
     function isOptimizedPath(path) {
@@ -281,6 +286,8 @@ Singleton {
         if (sourceWidth <= 0 || sourceHeight <= 0)
             return { width: 0, height: 0, scale: 0 }
         const targetSize = targetDimensions(String(target || ""))
+        if (!targetSize.available)
+            return { width: 0, height: 0, scale: 0 }
         const factor = Number(multiplier) || 0
         const scale = Math.min(1,
             targetSize.width * factor / sourceWidth,
@@ -426,6 +433,8 @@ Singleton {
         const identity = WallpaperProbeService.identityFor(source)
         if (identity.length === 0) return ""
         const size = targetDimensions(String(target || ""))
+        if (!size.available)
+            return ""
         const scale = selectedResolutionScale(target, path)
         return outputPath(source, identity, size.width, size.height, scale)
     }
@@ -441,6 +450,7 @@ Singleton {
                 height: Number(WallpaperProbeService.recordFor(source).height) || 0,
                 scale: 1
             }
+        const codecRecipe = selectedCodecRecipe()
         return {
             source: source,
             target: String(target || ""),
@@ -451,11 +461,22 @@ Singleton {
                 ? scale : "native",
             outputWidth: dimensions.width,
             outputHeight: dimensions.height,
+            codec: codecRecipe.codec,
+            encoder: codecRecipe.encoder,
+            codecSelectionReason:
+                VideoCapabilityService.optimizationCandidate.selectionReason,
             frameRate: selectedFrameRate(source),
             bitRateMbps: selectedBitRate(source),
+            audioRemoved: true,
             targetWidth: size.width,
-            targetHeight: size.height
+            targetHeight: size.height,
+            targetAvailable: size.available,
+            targetError: size.error
         }
+    }
+
+    function recipeDescription(target, path) {
+        return RecipeSummary.describe(recipeSnapshot(target, path))
     }
 
     function assignedPath(target) {
@@ -548,6 +569,10 @@ Singleton {
         }
 
         const size = targetDimensions(String(target || ""))
+        if (!size.available) {
+            publish(source, { state: "failed", error: size.error })
+            return false
+        }
         const resolutionScale = selectedResolutionScale(target, source)
         if (ConfigService.optimizeWallpaperResolution
                 && !scaleAvailable(target, source, resolutionScale)) {
@@ -561,6 +586,10 @@ Singleton {
         activeFrameRateLimit = selectedFrameRate(source)
         activeOptimizeBitRate = true
         activeBitRateLimit = selectedBitRate(source)
+        const codecRecipe = selectedCodecRecipe()
+        activeCodec = codecRecipe.codec
+        activeEncoder = codecRecipe.encoder
+        activeCodecArguments = codecRecipe.arguments.slice()
         activeSource = source
         activeTarget = String(target || "")
         activeOutput = outputPath(source, identity, size.width, size.height,
@@ -591,6 +620,13 @@ Singleton {
 
     function generate() {
         const size = targetDimensions(activeTarget)
+        if (!size.available) {
+            publish(activeSource, { state: "failed", outputPath: activeOutput,
+                error: size.error })
+            discardTemporaryOutput(activeTemporaryOutput)
+            finish()
+            return
+        }
         publish(activeSource, { state: "optimizing", outputPath: activeOutput })
         optimizeProcess.operationGeneration = generation
         let command = [
@@ -608,11 +644,8 @@ Singleton {
         filters.push("pad=ceil(iw/2)*2:ceil(ih/2)*2")
         if (activeOptimizeFrameRate)
             filters.push("fps=" + activeFrameRateLimit)
-        command = command.concat([
-            "-vf", filters.join(","),
-            "-c:v", "libx264", "-preset", "medium", "-crf", "23",
-            "-pix_fmt", "yuv420p"
-        ])
+        command = command.concat(["-vf", filters.join(",")])
+            .concat(activeCodecArguments)
         if (activeOptimizeBitRate) {
             command = command.concat(["-maxrate", activeBitRateLimit + "M",
                 "-bufsize", (activeBitRateLimit * 2) + "M"])
@@ -642,7 +675,7 @@ Singleton {
                 && Number(record.bitRate)
                     > activeBitRateLimit * 1000000 * 1.05)
             return false
-        return record.codec === "h264"
+        return record.codec === activeCodec
     }
 
     function applyOutput() {
@@ -650,8 +683,8 @@ Singleton {
         const output = activeOutput
         const target = activeTarget
         const applied = target === "All Displays"
-            ? WallpaperAssignmentService.setGlobal(output)
-            : WallpaperAssignmentService.setForScreen(target, output)
+            ? WallpaperAssignmentService.setGlobal(output, false)
+            : WallpaperAssignmentService.setForScreen(target, output, false)
         publish(source, {
             state: applied ? "ready" : "failed",
             outputPath: output,
@@ -667,6 +700,9 @@ Singleton {
         activeTarget = ""
         activeOutput = ""
         activeTemporaryOutput = ""
+        activeCodec = "h264"
+        activeEncoder = "libx264"
+        activeCodecArguments = []
     }
 
     function cancel() {
