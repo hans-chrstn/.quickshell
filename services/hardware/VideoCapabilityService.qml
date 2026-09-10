@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../core/JsonCopy.js" as JsonCopy
 import "VideoCapabilityParser.js" as CapabilityParser
 import "VideoCodecEvidence.js" as CodecEvidence
 import "VideoCodecSelection.js" as CodecSelection
@@ -98,15 +99,15 @@ Singleton {
             state: state,
             backend: vainfoPath.length > 0 ? "vainfo-vaapi" : "fallback",
             error: error,
-            devices: deviceRecords,
-            verifiedDecodeCodecs: verifiedDecodeCodecs,
+            devices: JsonCopy.value(deviceRecords),
+            verifiedDecodeCodecs: verifiedDecodeCodecs.slice(),
             decodePreferredCodec: recommendedCodec,
             recommendationVerified: recommendationVerified,
-            softwareEncoders: softwareEncoders,
-            codecCandidates: codecCandidates,
+            softwareEncoders: softwareEncoders.slice(),
+            codecCandidates: JsonCopy.value(codecCandidates),
             measurementRequirements: CodecEvidence.requirements(),
-            codecEvaluations: codecEvaluations,
-            optimizationCandidate: optimizationCandidate,
+            codecEvaluations: JsonCopy.value(codecEvaluations),
+            optimizationCandidate: JsonCopy.value(optimizationCandidate),
             conservativeCodec: "h264",
             autoSelectionReady:
                 CodecEvidence.automaticSelectionReady(codecEvaluations),

@@ -65,5 +65,7 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         edgeHovered: edgeHover.hovered
         screenName: root.screen?.name ?? ""
+        availableWidth: root.screen?.width ?? root.width
+        availableHeight: root.screen?.height ?? root.height
     }
 }

@@ -4,7 +4,6 @@ import qs.components
 import qs.services.launcher
 import qs.services.session
 import qs.services.settings
-import qs.services.time
 
 Item {
     id: root
@@ -15,18 +14,28 @@ Item {
     required property string screenName
     property bool expanded: false
     property real expansionProgress: 0
+    readonly property real collapsedImplicitWidth:
+        clockView.collapsedImplicitWidth
+    readonly property real collapsedImplicitHeight:
+        clockView.collapsedImplicitHeight
+    readonly property real expandedImplicitWidth: page === "clock"
+        ? clockView.expandedImplicitWidth
+        : (page === "power" ? powerAction.implicitWidth
+            : utilitiesRow.implicitWidth)
+    readonly property real expandedImplicitHeight: page === "clock"
+        ? clockView.expandedImplicitHeight
+        : (page === "power" ? powerAction.implicitHeight
+            : utilitiesRow.implicitHeight)
 
-    Text {
-        anchors.centerIn: parent
+    ClockDateTimeView {
+        id: clockView
+        anchors.fill: parent
         visible: root.page === "clock"
-        text: Qt.formatDateTime(ClockService.now, "hh:mm")
-        color: Design.text
-        font.family: Design.fontDisplay
-        font.pixelSize: 14 + 10 * root.expansionProgress
-        font.weight: root.expanded ? Font.Light : Font.Medium
+        expansionProgress: root.expansionProgress
     }
 
     CarouselAction {
+        id: powerAction
         anchors.centerIn: parent
         visible: root.page === "power"
         icon: "power"
@@ -36,6 +45,7 @@ Item {
     }
 
     Row {
+        id: utilitiesRow
         anchors.centerIn: parent
         visible: root.page === "utilities"
         spacing: 8

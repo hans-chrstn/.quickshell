@@ -9,8 +9,29 @@ Item {
 
     property QtObject context: null
     readonly property string screenName: context?.screenName ?? ""
+    readonly property url currentPageSource: pageSource(
+        SettingsService.currentPage)
     focus: true
     enabled: SettingsService.opened
+
+    function pageSource(pageId) {
+        switch (pageId) {
+        case "wallpaper": return Qt.resolvedUrl("WallpaperSettingsPage.qml")
+        case "wallpaper_options": return Qt.resolvedUrl("WallpaperOptionsPage.qml")
+        case "wallpaper_optimization": return Qt.resolvedUrl("WallpaperOptimizationPage.qml")
+        case "wallpaper_cache": return Qt.resolvedUrl("WallpaperCachePage.qml")
+        case "wallpaper_directory": return Qt.resolvedUrl("WallpaperDirectoryPage.qml")
+        case "island_style": return Qt.resolvedUrl("IslandStylePage.qml")
+        case "motion": return Qt.resolvedUrl("MotionSettingsPage.qml")
+        case "behavior": return Qt.resolvedUrl("BehaviorSettingsPage.qml")
+        case "analytics_lifecycle": return Qt.resolvedUrl("LifecycleAnalyticsPage.qml")
+        case "analytics_wallpaper": return Qt.resolvedUrl("WallpaperAnalyticsPage.qml")
+        case "analytics_performance": return Qt.resolvedUrl("PerformanceAnalyticsPage.qml")
+        case "developer_advanced": return Qt.resolvedUrl("AdvancedDeveloperPage.qml")
+        case "developer_lifecycle": return Qt.resolvedUrl("LifecycleDeveloperPage.qml")
+        default: return Qt.resolvedUrl("SettingsSubpageMenu.qml")
+        }
+    }
 
     Component.onCompleted: focusRetrier.startFocus()
 
@@ -73,93 +94,6 @@ Item {
         requestedActive: true
         retentionReason: "selected-route"
         evictionReason: ""
-        sourceComponent: {
-            switch (SettingsService.currentPage) {
-            case "wallpaper": return wallpaperPage
-            case "wallpaper_options": return wallpaperOptionsPage
-            case "wallpaper_optimization": return wallpaperOptimizationPage
-            case "wallpaper_cache": return wallpaperCachePage
-            case "wallpaper_directory": return wallpaperDirectoryPage
-            case "island_style": return islandStylePage
-            case "motion": return motionPage
-            case "behavior": return behaviorPage
-            case "analytics_lifecycle": return analyticsLifecyclePage
-            case "analytics_wallpaper": return analyticsWallpaperPage
-            case "analytics_performance": return analyticsPerformancePage
-            case "developer_advanced": return developerAdvancedPage
-            case "developer_lifecycle": return developerLifecyclePage
-            default: return subpageMenuPage
-            }
-        }
-    }
-
-    Component {
-        id: subpageMenuPage
-        SettingsSubpageMenu {}
-    }
-
-    Component {
-        id: motionPage
-        MotionSettingsPage {}
-    }
-
-    Component {
-        id: behaviorPage
-        BehaviorSettingsPage {}
-    }
-
-    Component {
-        id: wallpaperPage
-        WallpaperSettingsPage {}
-    }
-
-    Component {
-        id: wallpaperOptionsPage
-        WallpaperOptionsPage {}
-    }
-
-    Component {
-        id: wallpaperOptimizationPage
-        WallpaperOptimizationPage {}
-    }
-
-    Component {
-        id: wallpaperCachePage
-        WallpaperCachePage {}
-    }
-
-    Component {
-        id: wallpaperDirectoryPage
-        WallpaperDirectoryPage {}
-    }
-
-    Component {
-        id: islandStylePage
-        IslandStylePage {}
-    }
-
-    Component {
-        id: analyticsLifecyclePage
-        LifecycleAnalyticsPage {}
-    }
-
-    Component {
-        id: analyticsWallpaperPage
-        WallpaperAnalyticsPage {}
-    }
-
-    Component {
-        id: analyticsPerformancePage
-        PerformanceAnalyticsPage {}
-    }
-
-    Component {
-        id: developerAdvancedPage
-        AdvancedDeveloperPage {}
-    }
-
-    Component {
-        id: developerLifecyclePage
-        LifecycleDeveloperPage {}
+        source: root.currentPageSource
     }
 }

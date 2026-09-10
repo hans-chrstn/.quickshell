@@ -29,6 +29,45 @@ Item {
     readonly property string suspendedReason:
         playbackPolicy.suspendedReason
 
+    function rendererSource() {
+        if (backend === "image")
+            return Qt.resolvedUrl("AnimatedImageWallpaper.qml")
+        if (backend === "media")
+            return Qt.resolvedUrl("VideoDecoder.qml")
+        return ""
+    }
+
+    function loadRenderer() {
+        const source = rendererSource()
+        if (String(source).length === 0) {
+            renderer.source = ""
+            return
+        }
+        const properties = backend === "image" ? {
+            path: root.path,
+            renderScale: root.renderScale,
+            playbackAllowed: playbackPolicy.playbackAllowed
+        } : {
+            path: root.path,
+            playbackAllowed: playbackPolicy.playbackAllowed
+        }
+        renderer.setSource(source, properties)
+    }
+
+    function syncRenderer() {
+        if (!renderer.item)
+            return
+        renderer.item.path = path
+        renderer.item.playbackAllowed = playbackPolicy.playbackAllowed
+        if (backend === "image")
+            renderer.item.renderScale = renderScale
+    }
+
+    onBackendChanged: loadRenderer()
+    onPathChanged: syncRenderer()
+    onRenderScaleChanged: syncRenderer()
+    Component.onCompleted: loadRenderer()
+
     WallpaperPlaybackPolicy {
         id: playbackPolicy
         screenName: root.screenName
@@ -38,8 +77,8 @@ Item {
         id: posterImage
         anchors.fill: parent
         source: LocalUrl.fromPath(root.posterPath)
-        sourceSize.width: Math.ceil(width * root.renderScale)
-        sourceSize.height: Math.ceil(height * root.renderScale)
+        sourceSize.width: Math.max(1, Math.ceil(width * root.renderScale))
+        sourceSize.height: Math.max(1, Math.ceil(height * root.renderScale))
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         visible: !root.firstFrameReady && status === Image.Ready
@@ -48,25 +87,11 @@ Item {
     Loader {
         id: renderer
         anchors.fill: parent
-        active: root.backend.length > 0
-        sourceComponent: root.backend === "image"
-            ? imageComponent : mediaComponent
+        onLoaded: root.syncRenderer()
     }
 
-    Component {
-        id: imageComponent
-        AnimatedImageWallpaper {
-            path: root.path
-            renderScale: root.renderScale
-            playbackAllowed: playbackPolicy.playbackAllowed
-        }
-    }
-
-    Component {
-        id: mediaComponent
-        VideoDecoder {
-            path: root.path
-            playbackAllowed: playbackPolicy.playbackAllowed
-        }
+    Connections {
+        target: playbackPolicy
+        function onPlaybackAllowedChanged() { root.syncRenderer() }
     }
 }

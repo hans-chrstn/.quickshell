@@ -35,19 +35,29 @@ Singleton {
     readonly property int contentVerticalPadding: 6
     readonly property int expandedContentPadding: 18
 
+    readonly property int editorMaximumWidth: 1600
+    readonly property int editorMaximumHeight: 1040
+    readonly property int editorOuterMargin: 44
+    readonly property int editorPanelRadius: 28
+    readonly property int editorSectionRadius: 18
+    readonly property int editorGap: 12
+
     readonly property int revealDuration: SettingsService.revealDuration
     readonly property int resizeDuration: SettingsService.resizeDuration
+    readonly property int islandMorphEasing: Easing.InOutCubic
     readonly property int contentRevealDuration: SettingsService.contentRevealDuration
     readonly property int attentionExpandDelay: SettingsService.attentionExpandDelay
     readonly property int moduleCloseDuration: SettingsService.moduleCloseDuration
+    readonly property int moduleHandoffDuration:
+        SettingsService.moduleHandoffDuration
     readonly property int expandDelay: SettingsService.expandDelay
     readonly property int hideDelay: SettingsService.hideDelay
 
     function scaledWidth(baseline) {
-        return Math.round(baseline * SettingsService.islandWidthPercent / 100)
+        return Math.round(baseline * SettingsService.islandWidthPercent / 100);
     }
 
     function scaledHeight(baseline) {
-        return Math.round(baseline * SettingsService.islandHeightPercent / 100)
+        return Math.round(baseline * SettingsService.islandHeightPercent / 100);
     }
 }

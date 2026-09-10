@@ -25,18 +25,18 @@ SettingPage {
             Layout.fillWidth: true
             title: "Scale"
             choices: [0, 1, 1.5, -1]
-            enabledChoices: WallpaperOptimizationService.settingsResolutionModes()
-            value: WallpaperOptimizationService.resolutionMode()
+            enabledChoices: WallpaperOptimizationPolicyService.settingsResolutionModes()
+            value: WallpaperOptimizationPolicyService.resolutionMode()
             choiceWidth: 54
             formatChoice: value => value === 0 ? "Native"
                 : value === -1 ? "Custom" : value + "×"
             onChoiceSelected: value =>
-                WallpaperOptimizationService.setResolutionMode(value)
+                WallpaperOptimizationPolicyService.setResolutionMode(value)
         }
 
         RowLayout {
             Layout.fillWidth: true
-            visible: WallpaperOptimizationService.resolutionMode() === -1
+            visible: WallpaperOptimizationPolicyService.resolutionMode() === -1
 
             Text {
                 Layout.fillWidth: true
@@ -50,13 +50,13 @@ SettingPage {
                 value: ConfigService.optimizeWallpaperResolutionCustomScale
                 from: 0.5
                 to: Math.max(0.5,
-                    WallpaperOptimizationService.settingsMaximumResolutionScale())
-                stepSize: WallpaperOptimizationService.resolutionCustomStep
+                    WallpaperOptimizationPolicyService.settingsMaximumResolutionScale())
+                stepSize: WallpaperOptimizationPolicyService.resolutionCustomStep
                 decimals: 2
                 suffix: "×"
                 accessibleName: "Custom wallpaper resolution scale"
                 onValueEdited: value =>
-                    WallpaperOptimizationService.setCustomResolutionScale(value)
+                    WallpaperOptimizationPolicyService.setCustomResolutionScale(value)
             }
         }
 
@@ -64,17 +64,17 @@ SettingPage {
             Layout.fillWidth: true
             title: "Frame rate"
             choices: [15, 24, 30, -1]
-            enabledChoices: WallpaperOptimizationService.settingsFrameRateModes()
-            value: WallpaperOptimizationService.frameRateMode()
+            enabledChoices: WallpaperOptimizationPolicyService.settingsFrameRateModes()
+            value: WallpaperOptimizationPolicyService.frameRateMode()
             choiceWidth: 54
             formatChoice: value => value === -1 ? "Custom" : String(value)
             onChoiceSelected: value =>
-                WallpaperOptimizationService.setFrameRateMode(value)
+                WallpaperOptimizationPolicyService.setFrameRateMode(value)
         }
 
         RowLayout {
             Layout.fillWidth: true
-            visible: WallpaperOptimizationService.frameRateMode() === -1
+            visible: WallpaperOptimizationPolicyService.frameRateMode() === -1
 
             Text {
                 Layout.fillWidth: true
@@ -88,13 +88,13 @@ SettingPage {
                 value: ConfigService.optimizeWallpaperFrameRateCustomLimit
                 from: 1
                 to: Math.max(1,
-                    WallpaperOptimizationService.settingsMaximumFrameRate())
-                stepSize: WallpaperOptimizationService.frameRateCustomStep
+                    WallpaperOptimizationPolicyService.settingsMaximumFrameRate())
+                stepSize: WallpaperOptimizationPolicyService.frameRateCustomStep
                 decimals: 2
                 suffix: "FPS"
                 accessibleName: "Custom wallpaper frame rate"
                 onValueEdited: value =>
-                    WallpaperOptimizationService.setCustomFrameRate(value)
+                    WallpaperOptimizationPolicyService.setCustomFrameRate(value)
             }
         }
 
@@ -102,17 +102,17 @@ SettingPage {
             Layout.fillWidth: true
             title: "Bitrate"
             choices: [4, 8, 12, -1]
-            enabledChoices: WallpaperOptimizationService.settingsBitRateModes()
-            value: WallpaperOptimizationService.bitRateMode()
+            enabledChoices: WallpaperOptimizationPolicyService.settingsBitRateModes()
+            value: WallpaperOptimizationPolicyService.bitRateMode()
             choiceWidth: 54
             formatChoice: value => value === -1 ? "Custom" : String(value)
             onChoiceSelected: value =>
-                WallpaperOptimizationService.setBitRateMode(value)
+                WallpaperOptimizationPolicyService.setBitRateMode(value)
         }
 
         RowLayout {
             Layout.fillWidth: true
-            visible: WallpaperOptimizationService.bitRateMode() === -1
+            visible: WallpaperOptimizationPolicyService.bitRateMode() === -1
 
             Text {
                 Layout.fillWidth: true
@@ -126,13 +126,13 @@ SettingPage {
                 value: ConfigService.optimizeWallpaperBitRateCustomLimit
                 from: 0.5
                 to: Math.max(0.5,
-                    WallpaperOptimizationService.settingsMaximumBitRate())
-                stepSize: WallpaperOptimizationService.bitRateCustomStep
+                    WallpaperOptimizationPolicyService.settingsMaximumBitRate())
+                stepSize: WallpaperOptimizationPolicyService.bitRateCustomStep
                 decimals: 1
                 suffix: "Mbps"
                 accessibleName: "Custom wallpaper bitrate"
                 onValueEdited: value =>
-                    WallpaperOptimizationService.setCustomBitRate(value)
+                    WallpaperOptimizationPolicyService.setCustomBitRate(value)
             }
         }
 

@@ -12,6 +12,11 @@ Singleton {
     property alias screenWallpapers: data.screenWallpapers
     property bool loaded: false
     property string error: ""
+    // Assignment mutations suppress automation synchronously. Keep that small
+    // state owner initialized with this service so the first mutation does not
+    // become the operation that starts loading it.
+    readonly property bool automationOverridesLoaded:
+        WallpaperAutomationOverrideService.loaded
 
     function normalizePath(path) {
         return String(path || "").trim()
@@ -37,7 +42,7 @@ Singleton {
 
     function setGlobal(path, suppressAutomation) {
         const manual = suppressAutomation !== false
-        if (manual && !WallpaperAutomationOverrideService.loaded) {
+        if (manual && !automationOverridesLoaded) {
             error = "Wallpaper automation overrides are still loading"
             return false
         }
@@ -62,7 +67,7 @@ Singleton {
     function setForScreen(screenName, path, suppressAutomation) {
         const name = String(screenName || "").trim()
         const manual = suppressAutomation !== false
-        if (manual && !WallpaperAutomationOverrideService.loaded) {
+        if (manual && !automationOverridesLoaded) {
             error = "Wallpaper automation overrides are still loading"
             return false
         }
@@ -101,7 +106,7 @@ Singleton {
         return {
             loaded: loaded,
             global: globalWallpaper,
-            screens: screenWallpapers,
+            screens: Object.assign({}, screenWallpapers),
             error: error
         }
     }

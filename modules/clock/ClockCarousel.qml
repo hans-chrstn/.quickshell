@@ -8,11 +8,20 @@ Item {
     property bool presented: false
     property bool expanded: false
     property real expansionProgress: 0
+    property bool returningToClock: false
     readonly property var pages: ["power", "clock", "utilities", "power", "clock"]
     readonly property bool clockPresented: presented
-        && pages[pagesView.currentIndex] === "clock"
+        && (returningToClock || pages[pagesView.currentIndex] === "clock")
     readonly property string clockConsumerId:
         "island.clock." + screenName
+    readonly property real collapsedImplicitWidth:
+        pagesView.currentItem?.collapsedImplicitWidth ?? 0
+    readonly property real collapsedImplicitHeight:
+        pagesView.currentItem?.collapsedImplicitHeight ?? 0
+    readonly property real expandedImplicitWidth:
+        pagesView.currentItem?.expandedImplicitWidth ?? 0
+    readonly property real expandedImplicitHeight:
+        pagesView.currentItem?.expandedImplicitHeight ?? 0
 
     function updateClockConsumer() {
         ClockService.setConsumer(clockConsumerId, clockPresented)
@@ -34,16 +43,21 @@ Item {
         }
     }
 
-    function resetToClock() {
+    function beginClockReturn() {
         wheelGuard.stop()
-        pagesView.currentIndex = 1
-        pagesView.positionViewAtIndex(1, ListView.Beginning)
+        returningToClock = pages[pagesView.currentIndex] !== "clock"
     }
 
-    onExpandedChanged: if (!expanded) resetToClock()
+    onExpandedChanged: if (!expanded) beginClockReturn()
+    onExpansionProgressChanged: if (returningToClock
+            && expansionProgress <= 0.001) {
+        pagesView.currentIndex = 1
+        pagesView.positionViewAtIndex(1, ListView.Beginning)
+        returningToClock = false
+    }
 
     function step(direction) {
-        if (wheelGuard.running)
+        if (returningToClock || wheelGuard.running)
             return
         wheelGuard.restart()
 
@@ -58,13 +72,18 @@ Item {
             pagesView.positionViewAtIndex(base, ListView.Beginning)
         }
 
-        const next = base + direction
-        pagesView.currentIndex = next
+        pagesView.currentIndex = base + direction
     }
 
     Timer {
         id: wheelGuard
         interval: 180
+    }
+
+    ClockReturnLayer {
+        anchors.fill: parent
+        visible: root.returningToClock && root.presented
+        progress: 1 - root.expansionProgress
     }
 
     ListView {
@@ -74,7 +93,8 @@ Item {
         model: root.pages
         currentIndex: 1
         clip: true
-        interactive: true
+        interactive: !root.returningToClock
+        opacity: root.returningToClock ? root.expansionProgress : 1
         boundsBehavior: Flickable.StopAtBounds
         flickDeceleration: 2600
         maximumFlickVelocity: width * 7

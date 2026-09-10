@@ -1,6 +1,6 @@
 import QtQuick
-import QtQuick.Effects
 import qs.core
+import qs.components.media
 import qs.services.wallpaper
 
 Rectangle {
@@ -23,25 +23,8 @@ Rectangle {
             || rendererBackend === "animated-media"
     readonly property bool selectable: state === "ready"
         && rendererBackend.length > 0
-    readonly property bool needsPoster: state === "ready" && kind !== "static"
-    readonly property var poster: WallpaperPosterService.recordFor(path)
-    readonly property bool posterReady: poster.posterPath.length > 0
-        && (poster.state === "ready" || poster.stale)
     property bool selected: false
     signal activated()
-
-    function requestPoster() {
-        if (needsPoster)
-            WallpaperPosterService.request(record)
-    }
-
-    Component.onCompleted: requestPoster()
-    onRecordChanged: requestPoster()
-
-    Connections {
-        target: WallpaperProbeService
-        function onCacheEntriesChanged() { root.requestPoster() }
-    }
 
     radius: 12
     color: Design.surface
@@ -53,51 +36,26 @@ Rectangle {
     Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
     Behavior on border.color { ColorAnimation { duration: 120 } }
 
-    Image {
+    MediaThumbnail {
         id: preview
         anchors.fill: parent
         anchors.margins: root.selected ? 3 : 2
-        visible: root.kind === "static" || root.posterReady
-        source: root.kind === "static" ? LocalUrl.fromPath(root.path)
-            : root.posterReady ? LocalUrl.fromPath(root.poster.posterPath) : ""
-        sourceSize.width: Math.ceil(width * 1.5)
-        sourceSize.height: Math.ceil(height * 1.5)
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        // Posters already provide the persistent cache. Keeping every decoded
-        // grid preview in Qt's process-wide image cache retains that memory
-        // after the lazy Wallpaper page itself has been destroyed.
-        cache: false
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            maskEnabled: true
-            maskSpreadAtMin: 1
-            maskThresholdMin: 0.5
-            maskSource: ShaderEffectSource {
-                sourceItem: Rectangle {
-                    width: preview.width
-                    height: preview.height
-                    radius: Math.max(0, root.radius - preview.anchors.margins)
-                    color: "white"
-                }
-            }
-        }
+        record: root.record
+        cornerRadius: Math.max(0, root.radius - anchors.margins)
     }
 
     Rectangle {
         anchors.fill: preview
         radius: Math.max(0, root.radius - preview.anchors.margins)
         color: "#52000000"
-        visible: (!root.selectable && !root.posterReady)
-            || preview.status !== Image.Ready || hover.hovered
+        visible: !preview.previewReady || hover.hovered
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
 
     Column {
         anchors.centerIn: parent
         spacing: 4
-        visible: (!root.selectable && !root.posterReady)
-            || preview.status !== Image.Ready
+            visible: !preview.previewReady
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
@@ -106,13 +64,13 @@ Rectangle {
                     return "Inspecting"
                 if (root.state === "failed") return "Unavailable"
                 if (root.state === "unsupported") return "Unsupported"
-                if (root.poster.state === "queued"
-                        || root.poster.state === "checking"
-                        || root.poster.state === "generating") return "Preparing preview"
-                if (root.poster.state === "failed") return "Preview unavailable"
+                if (preview.poster.state === "queued"
+                        || preview.poster.state === "checking"
+                        || preview.poster.state === "generating") return "Preparing preview"
+                if (preview.poster.state === "failed") return "Preview unavailable"
                 if (root.kind === "animatedImage") return "Animated image"
                 if (root.kind === "video") return "Video"
-                return preview.status === Image.Error ? "Unavailable" : "Loading"
+                return "Loading"
             }
             color: Design.textMuted
             font.family: Design.fontText

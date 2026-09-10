@@ -5,14 +5,17 @@ import qs.services.analytics
 import qs.services.config
 import qs.services.display
 import qs.services.hardware
+import qs.services.island
 import qs.services.launcher
 import qs.services.lifecycle
+import qs.services.notifications
 import qs.services.jobs
 import qs.services.power
 import qs.services.session
 import qs.services.settings
 import qs.services.time
 import qs.services.wallpaper
+import qs.services.wallpaper.projects
 import "JsonFormat.js" as JsonFormat
 
 IpcHandler {
@@ -78,6 +81,19 @@ IpcHandler {
     function lifecycleStatus(): string {
         return JsonFormat.stringify(LifecycleService.snapshot())
     }
+    function islandSizingStatus(): string {
+        return JsonFormat.stringify(IslandSizingService.snapshot())
+    }
+    function notificationStatus(): string {
+        return JsonFormat.stringify(NotificationService.snapshot())
+    }
+    function notificationTestPush(severity: string, title: string,
+            message: string, screen: string): bool {
+        if (Quickshell.env("QS_TEST_MODE") !== "1") return false
+        return NotificationService.notify({ severity: severity, title: title,
+            message: message, screenName: screen, source: "test" })
+    }
+    function notificationDismiss(): void { NotificationService.dismiss() }
     function performanceStatus(): string {
         return JsonFormat.stringify(PerformanceAnalyticsService.snapshot())
     }
@@ -150,6 +166,121 @@ IpcHandler {
         return JsonFormat.stringify(WallpaperPosterService.recordFor(path))
     }
     function wallpaperPosterCancel(): void { WallpaperPosterService.cancelAll() }
+    function wallpaperProjects(): string {
+        return JsonFormat.stringify(WallpaperProjectService.snapshot())
+    }
+    function wallpaperProject(projectId: string): string {
+        return JsonFormat.stringify(
+            WallpaperProjectService.projectSnapshot(projectId))
+    }
+    function wallpaperProjectCreate(name: string): string {
+        return WallpaperProjectService.createProject(name)
+    }
+    function wallpaperProjectUpsert(document: string): bool {
+        return WallpaperProjectService.upsertJson(document)
+    }
+    function wallpaperProjectRemove(projectId: string): bool {
+        return WallpaperProjectService.removeProject(projectId)
+    }
+    function wallpaperProjectSelect(projectId: string): bool {
+        return WallpaperProjectService.selectProject(projectId)
+    }
+    function wallpaperProjectRelink(projectId: string, assetId: string,
+            sourcePath: string, portablePath: string): bool {
+        return WallpaperProjectService.relinkAsset(
+            projectId, assetId, sourcePath, portablePath)
+    }
+    function wallpaperProjectImportAssets(projectId: string,
+            candidates: string): string {
+        return JsonFormat.stringify(
+            WallpaperProjectService.importAssetsJson(projectId, candidates))
+    }
+    function wallpaperDraftCreate(projectId: string): string {
+        return WallpaperDraftWorkspaceService.createDraft(projectId)
+    }
+    function wallpaperDraftDiscard(workspaceId: string,
+            confirmation: string): bool {
+        return WallpaperDraftWorkspaceService.discardDraft(
+            workspaceId, confirmation)
+    }
+    function wallpaperDraftStatus(): string {
+        return JsonFormat.stringify(WallpaperDraftWorkspaceService.snapshot())
+    }
+    function wallpaperDraftCopy(workspaceId: string, sourcePath: string,
+            role: string, assetId: string): string {
+        return WallpaperDraftCopyService.enqueue(
+            workspaceId, sourcePath, role, assetId)
+    }
+    function wallpaperDraftCopyCancel(jobId: string): bool {
+        return WallpaperDraftCopyService.cancel(jobId)
+    }
+    function wallpaperDraftCopyStatus(): string {
+        return JsonFormat.stringify(WallpaperDraftCopyService.snapshot())
+    }
+    function wallpaperDraftDerivativeRequest(workspaceId: string,
+            assetId: string, role: string): bool {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        return WallpaperDraftDerivativeService.request(
+            workspaceId, assetId, role)
+    }
+    function wallpaperDraftDerivativeCancel(workspaceId: string,
+            assetId: string, role: string): bool {
+        if (Quickshell.env("QS_TEST_MODE") !== "1")
+            return false
+        return WallpaperDraftDerivativeService.cancel(
+            workspaceId, assetId, role)
+    }
+    function wallpaperDraftDerivativeStatus(): string {
+        return JsonFormat.stringify(WallpaperDraftDerivativeService.snapshot())
+    }
+    function wallpaperProjectsReplace(document: string): bool {
+        return WallpaperProjectService.replaceJson(document)
+    }
+    function wallpaperProjectInspect(projectId: string): bool {
+        return WallpaperProjectAvailabilityService.inspect(projectId)
+    }
+    function wallpaperProjectAvailability(): string {
+        return JsonFormat.stringify(
+            WallpaperProjectAvailabilityService.snapshot())
+    }
+    function wallpaperProjectRuntimePlan(): string {
+        return JsonFormat.stringify(
+            WallpaperProjectAvailabilityService.runtimePlan())
+    }
+    function wallpaperProjectApplySuggestedRelink(assetId: string): bool {
+        return WallpaperProjectAvailabilityService.applySuggestedRelink(assetId)
+    }
+    function wallpaperEditorOpen(screen: string): void {
+        WallpaperEditorService.open(screen)
+    }
+    function wallpaperEditorClose(): void {
+        WallpaperEditorService.close()
+    }
+    function wallpaperEditorToggle(screen: string): void {
+        WallpaperEditorService.toggle(screen)
+    }
+    function wallpaperEditorStatus(): string {
+        return JsonFormat.stringify(WallpaperEditorService.snapshot())
+    }
+    function wallpaperEditorSelectAsset(assetId: string): bool {
+        return WallpaperEditorService.selectAsset(assetId)
+    }
+    function wallpaperEditorPickerOpen(): bool {
+        return WallpaperEditorService.openPicker()
+    }
+    function wallpaperEditorPickerCancel(): void {
+        WallpaperEditorService.cancelPicker()
+    }
+    function wallpaperEditorSaveAsOpen(): bool {
+        return WallpaperEditorService.openSaveAs()
+    }
+    function wallpaperEditorSaveAsClose(): void {
+        WallpaperEditorService.closeSaveAs()
+    }
+    function wallpaperEditorImportPath(path: string): bool {
+        return WallpaperEditorService.requestImport([path])
+    }
     function wallpaperChooseDirectory(): void {
         SettingsService.openWallpaperDirectoryPicker()
     }
@@ -369,39 +500,39 @@ IpcHandler {
     }
     function wallpaperOptimizationSetScale(target: string, path: string,
             multiplier: real): bool {
-        return WallpaperOptimizationService.setResolutionScale(
+        return WallpaperOptimizationPolicyService.setResolutionScale(
             target, path, multiplier)
     }
     function wallpaperOptimizationScales(target: string, path: string): string {
         return JsonFormat.stringify({
-            mode: WallpaperOptimizationService.resolutionMode(),
-            selected: WallpaperOptimizationService.selectedResolutionScale(
+            mode: WallpaperOptimizationPolicyService.resolutionMode(),
+            selected: WallpaperOptimizationPolicyService.selectedResolutionScale(
                 target, path),
             maximumCustom:
-                WallpaperOptimizationService.maximumResolutionScale(
+                WallpaperOptimizationPolicyService.maximumResolutionScale(
                     target, path),
             frameRate: {
-                mode: WallpaperOptimizationService.frameRateMode(),
-                selected: WallpaperOptimizationService.selectedFrameRate(path),
+                mode: WallpaperOptimizationPolicyService.frameRateMode(),
+                selected: WallpaperOptimizationPolicyService.selectedFrameRate(path),
                 maximumCustom:
-                    WallpaperOptimizationService.sourceFrameRate(path),
-                enabled: WallpaperOptimizationService.settingsFrameRateModes()
+                    WallpaperOptimizationPolicyService.sourceFrameRate(path),
+                enabled: WallpaperOptimizationPolicyService.settingsFrameRateModes()
             },
             bitRateMbps: {
-                mode: WallpaperOptimizationService.bitRateMode(),
-                selected: WallpaperOptimizationService.selectedBitRate(path),
+                mode: WallpaperOptimizationPolicyService.bitRateMode(),
+                selected: WallpaperOptimizationPolicyService.selectedBitRate(path),
                 maximumCustom:
-                    WallpaperOptimizationService.sourceBitRateMbps(path),
-                enabled: WallpaperOptimizationService.settingsBitRateModes()
+                    WallpaperOptimizationPolicyService.sourceBitRateMbps(path),
+                enabled: WallpaperOptimizationPolicyService.settingsBitRateModes()
             },
-            available: WallpaperOptimizationService.availableResolutionScales(
+            available: WallpaperOptimizationPolicyService.availableResolutionScales(
                 target, path),
-            candidates: WallpaperOptimizationService.resolutionScales.map(
+            candidates: WallpaperOptimizationPolicyService.resolutionScales.map(
                 multiplier => ({
                     multiplier: multiplier,
-                    dimensions: WallpaperOptimizationService.candidateDimensions(
+                    dimensions: WallpaperOptimizationPolicyService.candidateDimensions(
                         target, path, multiplier),
-                    available: WallpaperOptimizationService.scaleAvailable(
+                    available: WallpaperOptimizationPolicyService.scaleAvailable(
                         target, path, multiplier)
                 }))
         })
@@ -411,7 +542,7 @@ IpcHandler {
     }
     function wallpaperOptimizationRecipe(target: string, path: string): string {
         return JsonFormat.stringify(
-            WallpaperOptimizationService.recipeSnapshot(target, path))
+            WallpaperOptimizationPolicyService.recipeSnapshot(target, path))
     }
     function wallpaperOptimizationCancel(): void {
         WallpaperOptimizationService.cancel()

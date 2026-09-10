@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
+import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
     id: root
@@ -115,7 +116,7 @@ Singleton {
             observing: observing,
             intervalMs: 2000,
             backend: "quickshell-native-hyprland",
-            screens: poweredScreens,
+            screens: JsonCopy.value(poweredScreens),
             error: error
         }
     }

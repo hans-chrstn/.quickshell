@@ -2,12 +2,9 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
-import qs.core
+import "../../core/JsonCopy.js" as JsonCopy
 import qs.services.hardware
-import qs.services.jobs
 import qs.services.wallpaper
-import "VideoCodecBenchmark.js" as Benchmark
 import "VideoHardwareEvidence.js" as HardwareEvidence
 import "VideoPlaybackMetrics.js" as PlaybackMetrics
 
@@ -16,7 +13,6 @@ Singleton {
 
     readonly property string cacheDirectory:
         Quickshell.cachePath("codec-benchmarks")
-    readonly property int candidateTimeoutMs: 2 * 60 * 1000
     readonly property int playbackRunMs: 5000
     readonly property int playbackRunsRequired: 3
     readonly property int playbackStartupTimeoutMs: 10000
@@ -25,28 +21,15 @@ Singleton {
     property string state: "idle"
     property string error: ""
     property string sourcePath: ""
-    property var candidates: []
-    property int candidateIndex: -1
     property var records: []
-    property int generation: 0
-    property bool directoryReady: false
-    property bool directoryChecked: false
-    property bool staleCleanupChecked: false
-    property double startedAtMs: 0
-    property int pendingElapsedMs: 0
-    property string activeOutput: ""
     property int playbackRecordIndex: -1
     property int playbackRunIndex: 0
     property int hardwareRecordIndex: -1
-    property double playbackMeasurementStartedAtMs: 0
 
     readonly property bool busy: state === "preparing"
         || state === "encoding" || state === "verifying"
         || state === "playback-loading" || state === "playback-running"
         || state === "hardware-probing"
-    readonly property var activeCandidate: candidateIndex >= 0
-            && candidateIndex < candidates.length
-        ? candidates[candidateIndex] : null
 
     function snapshot() {
         return {
@@ -59,10 +42,10 @@ Singleton {
                 maximumHeight: 720,
                 frameRate: 24
             },
-            candidateIndex: candidateIndex,
-            candidateCount: candidates.length,
-            activeCodec: activeCandidate ? activeCandidate.codec : "",
-            records: records,
+            candidateIndex: encoder.candidateIndex,
+            candidateCount: encoder.candidates.length,
+            activeCodec: encoder.activeCodec,
+            records: JsonCopy.value(records),
             playback: {
                 activeRecordIndex: playbackRecordIndex,
                 run: playbackRunIndex,
@@ -83,7 +66,7 @@ Singleton {
 
     function request(path) {
         const source = String(path || "")
-        if (busy || clearProcess.running || source.length === 0)
+        if (busy || encoder.clearing || source.length === 0)
             return false
         const probe = WallpaperProbeService.recordFor(source)
         if (probe.state !== "ready" || probe.kind !== "video") {
@@ -93,122 +76,19 @@ Singleton {
         }
         if (VideoCapabilityService.state === "idle")
             VideoCapabilityService.refresh()
-        generation += 1
         sourcePath = source
         error = ""
-        state = "preparing"
         records = []
-        candidates = []
-        candidateIndex = -1
-        directoryChecked = false
-        directoryReady = false
-        staleCleanupChecked = false
-        directoryProcess.operationGeneration = generation
-        directoryProcess.command = ["mkdir", "-p", "--", cacheDirectory]
-        directoryProcess.running = true
-        staleCleanupProcess.operationGeneration = generation
-        staleCleanupProcess.command = ["find", cacheDirectory, "-maxdepth", "1",
-            "-type", "f", "-name", "candidate-*.mp4", "-delete"]
-        staleCleanupProcess.running = true
-        tryPrepare()
+        if (!encoder.request(source))
+            return false
+        state = "preparing"
         return true
     }
 
-    function tryPrepare() {
-        if (state !== "preparing" || !directoryChecked
-                || !staleCleanupChecked
-                || VideoCapabilityService.busy
-                || !BackgroundJobTools.ready)
-            return
-        if (!directoryReady || VideoCapabilityService.ffmpegPath.length === 0) {
-            fail(!directoryReady ? "Benchmark cache is unavailable"
-                : "FFmpeg is unavailable")
-            return
-        }
-        candidates = Benchmark.runnableCandidates(
-            VideoCapabilityService.codecCandidates)
-        if (candidates.length === 0) {
-            fail("No verified codec candidate can be benchmarked")
-            return
-        }
-        candidateIndex = 0
-        encodeCurrent()
-    }
-
-    function outputFor(candidate) {
-        return cacheDirectory + "/candidate-" + candidate.codec + "."
-            + Benchmark.outputExtension(candidate.codec)
-    }
-
-    function encodeCurrent() {
-        if (!activeCandidate) {
-            state = "ready"
-            activeOutput = ""
-            return
-        }
-        activeOutput = outputFor(activeCandidate)
-        const command = Benchmark.command(VideoCapabilityService.ffmpegPath,
-            sourcePath, activeOutput, activeCandidate)
-        if (command.length === 0) {
-            appendRecord(false, 0, "Unsupported benchmark encoder")
-            advance()
-            return
-        }
-        state = "encoding"
-        startedAtMs = Date.now()
-        timeoutTimer.restart()
-        encodeProcess.operationGeneration = generation
-        encodeProcess.targetPath = activeOutput
-        encodeProcess.command = BackgroundJobTools.wrap(command)
-        encodeProcess.running = true
-    }
-
-    function appendRecord(succeeded, elapsedMs, recordError) {
-        const candidate = activeCandidate || ({})
+    function appendRecord(record) {
         const updated = records.slice()
-        updated.push({
-            codec: String(candidate.codec || ""),
-            encoder: String(candidate.encoder || ""),
-            encodeSucceeded: succeeded === true,
-            encodeElapsedMs: Math.max(0, Math.round(Number(elapsedMs) || 0)),
-            outputPath: succeeded ? activeOutput : "",
-            artifactAvailable: succeeded === true,
-            error: String(recordError || ""),
-            qtPlaybackSucceeded: false,
-            hardwareDecodeVerified: false,
-            hardwareTexturesVerified: false,
-            droppedFrameRatio: null,
-            playbackRuns: 0,
-            playbackMs: 0,
-            frameHandleTypes: [],
-            frameHandleObservation: "unavailable",
-            frameHandleError: "",
-            hardwareDecodeBackend: "",
-            hardwareDecodeError: "",
-            playbackMeasurements: [],
-            observedFrames: 0,
-            expectedFrames: 0,
-            droppedFrames: 0
-        })
+        updated.push(record)
         records = updated
-    }
-
-    function advance() {
-        timeoutTimer.stop()
-        activeOutput = ""
-        candidateIndex += 1
-        if (candidateIndex >= candidates.length) {
-            state = "ready"
-            return
-        }
-        encodeCurrent()
-    }
-
-    function fail(message) {
-        timeoutTimer.stop()
-        state = "failed"
-        error = String(message || "Codec benchmark failed")
-        activeOutput = ""
     }
 
     function startPlayback() {
@@ -234,7 +114,6 @@ Singleton {
     }
 
     function beginPlaybackRun() {
-        playbackLoader.active = false
         playbackRestartTimer.restart()
     }
 
@@ -244,25 +123,9 @@ Singleton {
             finishPlayback()
             return
         }
-        state = "playback-loading"
-        playbackLoader.setSource(
-            Qt.resolvedUrl("VideoCodecPlaybackProbe.qml"), {
-                path: String(records[playbackRecordIndex].outputPath || "")
-            })
-        playbackLoader.active = true
-        playbackStartupTimer.restart()
-    }
-
-    function tryStartPlaybackClock() {
-        const item = playbackLoader.item
-        if (state !== "playback-loading" || !item
-                || !item.firstFrameReady || !item.actuallyPlaying)
-            return
-        playbackStartupTimer.stop()
-        state = "playback-running"
-        item.beginFrameMeasurement()
-        playbackMeasurementStartedAtMs = Date.now()
-        playbackRunTimer.restart()
+        if (!playbackRunner.start(
+                String(records[playbackRecordIndex].outputPath || "")))
+            failPlaybackRun("Qt Multimedia playback runner is unavailable")
     }
 
     function updatePlaybackRecord(values) {
@@ -274,21 +137,13 @@ Singleton {
         records = updated
     }
 
-    function completePlaybackRun() {
+    function completePlaybackRun(evidence) {
         const record = records[playbackRecordIndex]
         const runs = Number(record.playbackRuns || 0) + 1
         const elapsed = Number(record.playbackMs || 0) + playbackRunMs
-        const item = playbackLoader.item
-        const observedFrames = item ? item.endFrameMeasurement() : 0
-        const measurement = PlaybackMetrics.run(24, playbackRunMs,
-            observedFrames, Date.now() - playbackMeasurementStartedAtMs)
-        if (!measurement.valid) {
-            failPlaybackRun(measurement.error)
-            return
-        }
-        const handleType = item
-            ? String(item.frameHandleType || "unavailable") : "unavailable"
-        const handleError = item ? String(item.frameHandleError || "") : ""
+        const measurement = evidence.measurement
+        const handleType = String(evidence.frameHandleType || "unavailable")
+        const handleError = String(evidence.frameHandleError || "")
         const handles = Array.from(record.frameHandleTypes || [])
         handles.push(handleType)
         const allRhiTextures = handles.length === playbackRunsRequired
@@ -312,7 +167,6 @@ Singleton {
                 ? aggregate.droppedFrameRatio : null
         })
         playbackRunIndex = runs
-        playbackLoader.active = false
         if (runs < playbackRunsRequired) {
             beginPlaybackRun()
             return
@@ -327,13 +181,10 @@ Singleton {
     }
 
     function failPlaybackRun(message) {
-        playbackStartupTimer.stop()
-        playbackRunTimer.stop()
         updatePlaybackRecord({
             qtPlaybackSucceeded: false,
             error: String(message || "Qt Multimedia playback failed")
         })
-        playbackLoader.active = false
         playbackRecordIndex = nextPlaybackRecord(playbackRecordIndex + 1)
         playbackRunIndex = 0
         if (playbackRecordIndex < 0)
@@ -343,9 +194,7 @@ Singleton {
     }
 
     function finishPlayback() {
-        playbackStartupTimer.stop()
-        playbackRunTimer.stop()
-        playbackLoader.active = false
+        playbackRunner.cancel()
         playbackRecordIndex = -1
         playbackRunIndex = 0
         state = "playback-ready"
@@ -380,23 +229,20 @@ Singleton {
             finishHardwareProbe()
             return
         }
-        const record = records[hardwareRecordIndex]
-        hardwareProcess.output = ""
-        hardwareProcess.operationGeneration = generation
-        hardwareProcess.recordIndex = hardwareRecordIndex
-        hardwareProcess.environment = {
-            QT_LOGGING_RULES: "qt.multimedia.ffmpeg.hwaccel=true;"
-                + "qt.multimedia.ffmpeg.hwaccelvaapi=true;"
-                + "qt.multimedia.ffmpeg.streamdecoder=true",
-            QS_CODEC_PROBE_URL: String(LocalUrl.fromPath(record.outputPath))
+        hardwareRestartTimer.restart()
+    }
+
+    function instantiateHardwareProbe() {
+        if (hardwareRecordIndex < 0
+                || hardwareRecordIndex >= records.length) {
+            finishHardwareProbe()
+            return
         }
-        hardwareProcess.command = ["/proc/self/exe", "-p",
-            Quickshell.shellPath(
-                "services/hardware/probes/VideoHardwareProbe.qml"),
-            "--no-color", "-v"]
         state = "hardware-probing"
-        hardwareProcess.running = true
-        hardwareProbeTimer.restart()
+        if (!hardwareRunner.start(records[hardwareRecordIndex].outputPath)) {
+            error = "Hardware playback probe is unavailable"
+            state = "failed"
+        }
     }
 
     function applyHardwareResult(recordIndex, output) {
@@ -414,7 +260,7 @@ Singleton {
     }
 
     function finishHardwareProbe() {
-        hardwareProbeTimer.stop()
+        hardwareRunner.cancel()
         hardwareRecordIndex = -1
         VideoCapabilityService.acceptBenchmarkRecords(records)
         state = "hardware-ready"
@@ -423,21 +269,14 @@ Singleton {
     function cancel() {
         if (!busy)
             return false
-        generation += 1
-        timeoutTimer.stop()
-        if (encodeProcess.running)
-            encodeProcess.signal(15)
-        playbackStartupTimer.stop()
-        playbackRunTimer.stop()
+        encoder.cancel()
+        // Later evidence phases no longer keep the encoder busy, but cancelling
+        // the overall benchmark still owns removal of its session artifacts.
+        encoder.cleanupCandidates()
         playbackRestartTimer.stop()
-        playbackLoader.active = false
-        hardwareProbeTimer.stop()
-        if (hardwareProcess.running)
-            hardwareProcess.signal(15)
-        discardOutput(activeOutput)
-        cancelCleanupProcess.command = ["find", cacheDirectory, "-maxdepth", "1",
-            "-type", "f", "-name", "candidate-*.mp4", "-delete"]
-        cancelCleanupProcess.running = true
+        hardwareRestartTimer.stop()
+        playbackRunner.cancel()
+        hardwareRunner.cancel()
         records = records.map(record => Object.assign({}, record, {
             outputPath: "",
             artifactAvailable: false
@@ -447,163 +286,63 @@ Singleton {
         hardwareRecordIndex = -1
         state = "cancelled"
         error = "Benchmark cancelled"
-        activeOutput = ""
         return true
     }
 
     function clear() {
-        if (busy || clearProcess.running)
+        if (busy || !encoder.clearArtifacts())
             return false
         records = []
-        candidates = []
         sourcePath = ""
-        candidateIndex = -1
         playbackRecordIndex = -1
         playbackRunIndex = 0
         state = "idle"
         error = ""
         VideoCapabilityService.clearBenchmarkEvidence()
-        clearProcess.command = ["find", cacheDirectory, "-maxdepth", "1",
-            "-type", "f", "-name", "candidate-*.mp4", "-delete"]
-        clearProcess.running = true
         return true
     }
 
-    function discardOutput(path) {
-        const output = String(path || "")
-        if (!output.startsWith(cacheDirectory + "/candidate-")
-                || !output.endsWith(".mp4"))
-            return false
-        cleanupProcess.command = ["rm", "-f", "--", output]
-        cleanupProcess.running = true
-        return true
-    }
+    VideoCodecBenchmarkEncoder {
+        id: encoder
+        cacheDirectory: root.cacheDirectory
 
-    Connections {
-        target: VideoCapabilityService
-        function onStateChanged() { root.tryPrepare() }
-        function onCodecCandidatesChanged() { root.tryPrepare() }
-    }
-
-    Connections {
-        target: BackgroundJobTools
-        function onReadyChanged() { root.tryPrepare() }
-    }
-
-    Process {
-        id: directoryProcess
-        property int operationGeneration: 0
-        onExited: exitCode => {
-            if (operationGeneration !== root.generation)
-                return
-            root.directoryChecked = true
-            root.directoryReady = exitCode === 0
-            root.tryPrepare()
+        onStateChanged: {
+            if (state === "preparing" || state === "encoding"
+                    || state === "verifying")
+                root.state = state
+        }
+        onRecordProduced: record => root.appendRecord(record)
+        onCompleted: root.state = "ready"
+        onFailed: message => {
+            root.error = message
+            root.state = "failed"
         }
     }
 
-    Process {
-        id: staleCleanupProcess
-        property int operationGeneration: 0
-        onExited: exitCode => {
-            if (operationGeneration !== root.generation)
-                return
-            root.staleCleanupChecked = true
-            root.tryPrepare()
+    VideoCodecPlaybackRunner {
+        id: playbackRunner
+        runDurationMs: root.playbackRunMs
+        startupTimeoutMs: root.playbackStartupTimeoutMs
+        onStateChanged: {
+            if (state === "loading") root.state = "playback-loading"
+            else if (state === "running") root.state = "playback-running"
         }
+        onCompleted: evidence => root.completePlaybackRun(evidence)
+        onFailed: message => root.failPlaybackRun(message)
     }
 
-    Process {
-        id: encodeProcess
-        property int operationGeneration: 0
-        property string targetPath: ""
-        stderr: StdioCollector { onStreamFinished: encodeProcess.output = text }
-        property string output: ""
-        onExited: exitCode => {
-            if (operationGeneration !== root.generation) {
-                root.discardOutput(targetPath)
-                return
-            }
-            timeoutTimer.stop()
-            const elapsed = Date.now() - root.startedAtMs
-            if (exitCode !== 0) {
-                root.appendRecord(false, elapsed,
-                    output.trim() || "Encoder exited with " + exitCode)
-                root.discardOutput(root.activeOutput)
-                root.advance()
-                return
-            }
-            root.state = "verifying"
-            root.pendingElapsedMs = elapsed
-            verifyProcess.operationGeneration = root.generation
-            verifyProcess.output = ""
-            verifyProcess.command = ["stat", "--printf=%s", "--",
-                root.activeOutput]
-            verifyProcess.running = true
-        }
-    }
-
-    Process {
-        id: verifyProcess
-        property int operationGeneration: 0
-        property string output: ""
-        stdout: StdioCollector { onStreamFinished: verifyProcess.output = text }
-        onExited: exitCode => {
-            if (operationGeneration !== root.generation)
-                return
-            const bytes = Number(output.trim()) || 0
-            const valid = exitCode === 0 && bytes > 0
-            root.appendRecord(valid, root.pendingElapsedMs,
-                valid ? "" : "Encoder produced no usable output")
-            if (!valid)
-                root.discardOutput(root.activeOutput)
-            root.advance()
-        }
-    }
-
-    Process { id: clearProcess }
-    Process { id: cleanupProcess }
-    Process { id: cancelCleanupProcess }
-
-    Process {
-        id: hardwareProcess
-        property int operationGeneration: 0
-        property int recordIndex: -1
-        property string output: ""
-        stdout: StdioCollector {
-            onStreamFinished: hardwareProcess.output += "\n" + text
-        }
-        stderr: StdioCollector {
-            onStreamFinished: hardwareProcess.output += "\n" + text
-        }
-        onExited: exitCode => {
-            if (operationGeneration !== root.generation)
-                return
-            hardwareProbeTimer.stop()
-            root.applyHardwareResult(recordIndex, output)
-            root.hardwareRecordIndex = root.nextHardwareRecord(recordIndex + 1)
+    VideoCodecHardwareProbeRunner {
+        id: hardwareRunner
+        durationMs: root.hardwareProbeMs
+        onCompleted: output => {
+            const completedIndex = root.hardwareRecordIndex
+            root.applyHardwareResult(completedIndex, output)
+            root.hardwareRecordIndex = root.nextHardwareRecord(
+                completedIndex + 1)
             if (root.hardwareRecordIndex < 0)
                 root.finishHardwareProbe()
             else
                 root.runHardwareProbe()
-        }
-    }
-
-    Loader {
-        id: playbackLoader
-        active: false
-        onLoaded: root.tryStartPlaybackClock()
-    }
-
-    Connections {
-        target: playbackLoader.item
-        ignoreUnknownSignals: true
-        function onActuallyPlayingChanged() { root.tryStartPlaybackClock() }
-        function onFirstFrameReadyChanged() { root.tryStartPlaybackClock() }
-        function onErrorChanged() {
-            if (playbackLoader.item
-                    && playbackLoader.item.error.length > 0)
-                root.failPlaybackRun(playbackLoader.item.error)
         }
     }
 
@@ -614,38 +353,9 @@ Singleton {
     }
 
     Timer {
-        id: playbackStartupTimer
-        interval: root.playbackStartupTimeoutMs
-        onTriggered: root.failPlaybackRun(
-            "Qt Multimedia did not produce a playing frame within ten seconds")
+        id: hardwareRestartTimer
+        interval: 0
+        onTriggered: root.instantiateHardwareProbe()
     }
 
-    Timer {
-        id: playbackRunTimer
-        interval: root.playbackRunMs
-        onTriggered: root.completePlaybackRun()
-    }
-
-    Timer {
-        id: hardwareProbeTimer
-        interval: root.hardwareProbeMs
-        onTriggered: {
-            if (hardwareProcess.running)
-                hardwareProcess.signal(15)
-        }
-    }
-
-    Timer {
-        id: timeoutTimer
-        interval: root.candidateTimeoutMs
-        onTriggered: {
-            if (encodeProcess.running)
-                encodeProcess.signal(15)
-            root.generation += 1
-            root.appendRecord(false, Date.now() - root.startedAtMs,
-                "Encoder exceeded the two-minute candidate limit")
-            root.discardOutput(root.activeOutput)
-            root.fail("Codec benchmark stopped after a candidate timeout")
-        }
-    }
 }

@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services.session
 import qs.services.wallpaper
+import "../../core/JsonCopy.js" as JsonCopy
 import "WallpaperPlaylistSchedule.js" as PlaylistSchedule
 import "WallpaperScheduleSelection.js" as ScheduleSelection
 import "WallpaperScheduleDiagnostics.js" as ScheduleDiagnostics
@@ -336,10 +337,10 @@ Singleton {
             applicationSuppressedReason: applicationSuppressedReason,
             validationState: WallpaperPlaylistService.validation.state,
             validationPending: validationPending,
-            cursors: Object.assign({}, cursors),
-            plans: Object.assign({}, plans),
-            rulePlans: Object.assign({}, rulePlans),
-            diagnostics: diagnostics,
+            cursors: JsonCopy.value(cursors),
+            plans: JsonCopy.value(plans),
+            rulePlans: JsonCopy.value(rulePlans),
+            diagnostics: JsonCopy.value(diagnostics),
             error: error,
             state: active ? (applicationSuppressed
                 ? "cursor-ready-suppressed" : "cursor-ready")

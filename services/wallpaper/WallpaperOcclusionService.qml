@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.services.config
+import "../../core/JsonCopy.js" as JsonCopy
 import "WallpaperOcclusionGeometry.js" as Geometry
 
 Singleton {
@@ -271,7 +272,7 @@ Singleton {
             floatingSuspensionEnabled:
                 ConfigService.experimentalFloatingWallpaperSuspension,
             threshold: floatingCoverageThreshold,
-            screens: screenStates,
+            screens: JsonCopy.value(screenStates),
             error: error
         }
     }

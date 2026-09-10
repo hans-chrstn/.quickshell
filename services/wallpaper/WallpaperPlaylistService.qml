@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.wallpaper
+import "../../core/JsonCopy.js" as JsonCopy
 import "WallpaperPlaylistModel.js" as PlaylistModel
 import "WallpaperPlaylistOrder.js" as PlaylistOrder
 
@@ -320,8 +321,8 @@ Singleton {
         return {
             loaded: loaded,
             schemaVersion: data.schemaVersion,
-            playlists: playlists,
-            validation: validation,
+            playlists: JsonCopy.value(playlists),
+            validation: JsonCopy.value(validation),
             error: error
         }
     }

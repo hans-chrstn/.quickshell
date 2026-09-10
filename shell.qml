@@ -5,17 +5,35 @@ import QtQuick
 import Quickshell
 import Quickshell.Hyprland
 import qs.components.lifecycle
+import qs.editor
 import qs.panels
 import qs.services.ipc
 import qs.services.config
 import qs.services.launcher
+import qs.services.notifications
 import qs.services.session
 import qs.services.wallpaper
+import qs.services.wallpaper.projects
 
 ShellRoot {
     ShellIpc {}
 
+    NotificationDaemon {}
+
     WallpaperAutomationActivator {}
+
+    LifecycleLoader {
+        resourceId: "wallpaper.editor-window"
+        owner: "shell"
+        restorationSource: "WallpaperEditorService and WallpaperProjectService"
+        classification: "active-only"
+        requestedActive: WallpaperEditorService.opened
+            || WallpaperEditorService.closing
+        usageActive: WallpaperEditorService.opened
+        retentionReason: requestedActive ? "editor-visible-or-closing" : ""
+        evictionReason: requestedActive ? "" : "editor-closed"
+        source: Qt.resolvedUrl("editor/WallpaperEditorWindow.qml")
+    }
 
     LifecycleLoader {
         resourceId: "wallpaper.cache-coordinator"

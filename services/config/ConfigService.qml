@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
     id: root
@@ -212,7 +213,7 @@ Singleton {
             loaded: loaded,
             schemaVersion: data.schemaVersion,
             settings: settings,
-            wallpaperDirectories: wallpaperDirectories,
+            wallpaperDirectories: JsonCopy.value(wallpaperDirectories),
             error: error
         }
     }
@@ -303,7 +304,7 @@ Singleton {
             property int expandDelay: 420
             property int hideDelay: 1200
             property int islandWing: 16
-            property int islandCollapsedWidth: 184
+            property int islandCollapsedWidth: 220
             property int islandWidthPercent: 100
             property int islandHeightPercent: 100
             property int islandBodyRadius: 20

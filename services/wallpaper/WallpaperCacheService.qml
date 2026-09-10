@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.wallpaper
+import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
     id: root
@@ -297,8 +298,8 @@ Singleton {
                 count: optimizedEntries.length,
                 bytes: optimizedBytes
             },
-            entries: entries,
-            cleanupPlan: cleanupPlan,
+            entries: JsonCopy.value(entries),
+            cleanupPlan: JsonCopy.value(cleanupPlan),
             cleanup: {
                 state: cleanupState,
                 cleaning: cleaning,

@@ -72,6 +72,18 @@ Canvas {
             ctx.lineTo(2.2, 13.4)
             ctx.closePath()
             ctx.stroke()
+        } else if (root.name === "document") {
+            ctx.beginPath()
+            ctx.moveTo(4.0, 2.3)
+            ctx.lineTo(10.2, 2.3)
+            ctx.lineTo(13.8, 5.9)
+            ctx.lineTo(13.8, 14.7)
+            ctx.lineTo(4.0, 14.7)
+            ctx.closePath()
+            ctx.moveTo(10.2, 2.3)
+            ctx.lineTo(10.2, 5.9)
+            ctx.lineTo(13.8, 5.9)
+            ctx.stroke()
         }
     }
 }

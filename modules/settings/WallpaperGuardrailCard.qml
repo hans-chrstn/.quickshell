@@ -103,7 +103,7 @@ Rectangle {
                 Layout.fillWidth: true
                 text: {
                     const state = String(root.optimization?.state || "idle")
-                    if (WallpaperOptimizationService.isOptimizedPath(
+                    if (WallpaperOptimizationPolicyService.isOptimizedPath(
                             root.assessment?.path || ""))
                         return "Using a performance-optimized cache copy"
                     if (!ConfigService.allowWallpaperOptimization)
@@ -118,7 +118,7 @@ Rectangle {
                         return "Optimized copy available"
                     if (state === "failed" || state === "cancelled")
                         return String(root.optimization?.error || "Optimization failed")
-                    return WallpaperOptimizationService.recipeDescription(
+                    return WallpaperOptimizationPolicyService.recipeDescription(
                         String(root.assessment?.target || ""),
                         String(root.assessment?.path || ""))
                 }
@@ -133,7 +133,7 @@ Rectangle {
                 visible: !WallpaperOptimizationService.busy
                     && ConfigService.allowWallpaperOptimization
                     && !root.optimizedCopyApplied
-                    && !WallpaperOptimizationService.isOptimizedPath(
+                    && !WallpaperOptimizationPolicyService.isOptimizedPath(
                         root.assessment?.path || "")
                 label: root.optimizedCopyAvailable
                     ? "Use Optimized" : "Optimize & Use"

@@ -25,8 +25,8 @@ Item {
         id: animation
         anchors.fill: parent
         source: LocalUrl.fromPath(root.path)
-        sourceSize.width: Math.ceil(width * root.renderScale)
-        sourceSize.height: Math.ceil(height * root.renderScale)
+        sourceSize.width: Math.max(1, Math.ceil(width * root.renderScale))
+        sourceSize.height: Math.max(1, Math.ceil(height * root.renderScale))
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: false

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.services.hardware
 import qs.services.wallpaper
+import "../../core/JsonCopy.js" as JsonCopy
 import "WallpaperGuardrailPolicy.js" as GuardrailPolicy
 
 Singleton {
@@ -58,6 +59,6 @@ Singleton {
     }
 
     function snapshot() {
-        return assignedAssessments
+        return JsonCopy.value(assignedAssessments)
     }
 }

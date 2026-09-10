@@ -27,7 +27,7 @@ Singleton {
         let sourcePath = currentPath
         let record = WallpaperOptimizationService.recordFor(currentPath)
 
-        if (WallpaperOptimizationService.isOptimizedPath(currentPath)) {
+        if (WallpaperOptimizationPolicyService.isOptimizedPath(currentPath)) {
             sourcePath = ""
             record = null
             for (const candidateSource in records) {
@@ -41,7 +41,8 @@ Singleton {
         }
 
         const outputPath = String(record?.outputPath || "")
-        const applied = WallpaperOptimizationService.isOptimizedPath(currentPath)
+        const applied = WallpaperOptimizationPolicyService.isOptimizedPath(
+            currentPath)
         const available = sourcePath.length > 0 && outputPath.length > 0
             && WallpaperProbeService.recordFor(outputPath).state === "ready"
         return {

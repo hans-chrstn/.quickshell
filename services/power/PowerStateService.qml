@@ -39,7 +39,7 @@ Singleton {
         evictionReason: requestedActive ? ""
             : root.syntheticActive ? "synthetic-provider-active"
             : "battery-policy-disabled"
-        sourceComponent: UPowerStateProvider {}
+        source: Qt.resolvedUrl("UPowerStateProvider.qml")
     }
 
     function setSyntheticState(available, onBattery, percentage) {

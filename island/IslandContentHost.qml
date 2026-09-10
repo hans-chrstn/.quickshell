@@ -9,7 +9,16 @@ Item {
     property bool presented: false
     property bool expanded: false
     property real expansionProgress: 0
+    property bool returningToClock: false
     property string screenName: ""
+    readonly property real collapsedImplicitWidth:
+        Number(moduleLoader.item?.collapsedImplicitWidth) || 0
+    readonly property real collapsedImplicitHeight:
+        Number(moduleLoader.item?.collapsedImplicitHeight) || 0
+    readonly property real expandedImplicitWidth:
+        Number(moduleLoader.item?.expandedImplicitWidth) || 0
+    readonly property real expandedImplicitHeight:
+        Number(moduleLoader.item?.expandedImplicitHeight) || 0
 
     readonly property QtObject moduleContext: QtObject {
         readonly property bool presented: root.presented
@@ -41,11 +50,8 @@ Item {
             return Math.max(0, Math.min(1,
                 (root.expansionProgress - root.module.revealStart) / span))
         }
-        opacity: revealProgress
-        transform: Translate {
-            y: (1 - moduleLoader.revealProgress)
-                * root.module.revealOffsetY
-        }
+        opacity: root.returningToClock
+            ? root.expansionProgress : revealProgress
         onInstanceLoaded: function(item) {
             item.context = root.moduleContext
         }

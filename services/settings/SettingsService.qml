@@ -22,6 +22,8 @@ Singleton {
     readonly property int contentRevealDuration: ConfigService.contentRevealDuration
     readonly property int attentionExpandDelay: ConfigService.attentionExpandDelay
     readonly property int moduleCloseDuration: ConfigService.moduleCloseDuration
+    readonly property int moduleHandoffDuration: Math.max(
+        moduleCloseDuration, resizeDuration)
     readonly property int expandDelay: ConfigService.expandDelay
     readonly property int hideDelay: ConfigService.hideDelay
     readonly property int islandWing: ConfigService.islandWing
@@ -178,7 +180,7 @@ Singleton {
     function resetStyle() {
         ConfigService.setSettings({
             islandWing: 16,
-            islandCollapsedWidth: 184,
+            islandCollapsedWidth: 220,
             islandWidthPercent: 100,
             islandHeightPercent: 100,
             islandBodyRadius: 20,
@@ -195,7 +197,7 @@ Singleton {
 
     Timer {
         id: closeTimer
-        interval: root.moduleCloseDuration
+        interval: root.moduleHandoffDuration
         onTriggered: {
             root.closing = false
             root.clearPages()

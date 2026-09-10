@@ -16,6 +16,7 @@ Rectangle {
     border.width: primary ? 0 : 1
     border.color: Design.separator
     scale: tap.pressed ? 0.97 : 1
+    opacity: enabled ? 1 : 0.45
 
     Behavior on color { ColorAnimation { duration: 110 } }
     Behavior on scale {
@@ -36,6 +37,7 @@ Rectangle {
     HoverHandler { id: hover }
     TapHandler {
         id: tap
+        enabled: root.enabled
         acceptedButtons: Qt.LeftButton
         onTapped: root.activated()
     }

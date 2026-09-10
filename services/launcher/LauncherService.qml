@@ -93,7 +93,7 @@ Singleton {
 
     Timer {
         id: closeTimer
-        interval: Design.moduleCloseDuration
+        interval: Design.moduleHandoffDuration
         onTriggered: {
             root.closing = false
             root.query = ""
