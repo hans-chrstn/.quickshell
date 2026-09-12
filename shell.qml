@@ -1,30 +1,80 @@
 //@ pragma Env QS_NO_RELOAD_POPUP=1
-//@ pragma Env QSG_RENDER_LOOP=threaded
-//@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
-//@ pragma Env QT_MEDIA_BACKEND=ffmpeg
-//@ pragma Env QT_FFMPEG_DECODING_HW_DEVICE_TYPES=vaapi
-//@ pragma Env QT_FFMPEG_ENCODING_HW_DEVICE_TYPES=vaapi
 //@ pragma Env QT_WAYLAND_DISABLE_WINDOWDECORATION=1
-//@ pragma Env QT_QUICK_CONTROLS_STYLE=Material
-//@ pragma Env QSG_RHI_BACKEND=vulkan
 
 import QtQuick
 import Quickshell
-import qs.core
-import qs.ui.screens
-import qs.ui.shared
+import Quickshell.Hyprland
+import qs.components.lifecycle
+import qs.editor
+import qs.panels
+import qs.services.ipc
+import qs.services.config
+import qs.services.launcher
+import qs.services.notifications
+import qs.services.session
+import qs.services.wallpaper
+import qs.services.wallpaper.projects
 
 ShellRoot {
-    id: root
+    ShellIpc {}
 
-    LazyContainer {
-        active: true
-        component: Lock { }
+    NotificationDaemon {}
+
+    WallpaperAutomationActivator {}
+
+    LifecycleLoader {
+        resourceId: "wallpaper.editor-window"
+        owner: "shell"
+        restorationSource: "WallpaperEditorService and WallpaperProjectService"
+        classification: "active-only"
+        requestedActive: WallpaperEditorService.opened
+            || WallpaperEditorService.closing
+        usageActive: WallpaperEditorService.opened
+        retentionReason: requestedActive ? "editor-visible-or-closing" : ""
+        evictionReason: requestedActive ? "" : "editor-closed"
+        source: Qt.resolvedUrl("editor/WallpaperEditorWindow.qml")
     }
 
-    Loader {
-        id: orchestratorLoader
-        active: true
-        sourceComponent: WindowOrchestrator { }
+    LifecycleLoader {
+        resourceId: "wallpaper.cache-coordinator"
+        owner: "shell"
+        restorationSource: "ConfigService and dedicated cache directories"
+        classification: "active-only"
+        requestedActive: ConfigService.automaticWallpaperCacheCleanup
+        retentionReason: requestedActive ? "automatic-cleanup-enabled" : ""
+        evictionReason: requestedActive ? "" : "automatic-cleanup-disabled"
+        sourceComponent: Component { WallpaperCacheCoordinator {} }
+    }
+
+    GlobalShortcut {
+        appid: "new-shell"
+        name: "launcher"
+        description: "Open the application launcher"
+        onPressed: LauncherService.toggle()
+    }
+
+    GlobalShortcut {
+        appid: "new-shell"
+        name: "session"
+        description: "Open the session and power menu"
+        onPressed: SessionService.toggle()
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        delegate: WallpaperWindow {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        delegate: IslandWindow {
+            required property var modelData
+            screen: modelData
+        }
     }
 }
