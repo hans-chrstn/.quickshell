@@ -9,6 +9,12 @@ Item {
 
     property QtObject context: null
     readonly property real expansionProgress: context?.expansionProgress ?? 0
+    readonly property real collapsedImplicitWidth: headerRow.implicitWidth
+    readonly property real collapsedImplicitHeight: headerRow.implicitHeight
+    readonly property real expandedImplicitWidth: Math.max(
+        headerRow.implicitWidth, actionsRow.implicitWidth)
+    readonly property real expandedImplicitHeight: headerRow.implicitHeight
+        + contentColumn.spacing + actionsRow.implicitHeight
 
     focus: true
     Component.onCompleted: focusRetrier.startFocus()
@@ -38,10 +44,12 @@ Item {
     }
 
     ColumnLayout {
+        id: contentColumn
         anchors.fill: parent
         spacing: 10
 
         RowLayout {
+            id: headerRow
             Layout.fillWidth: true
             Layout.preferredHeight: 22
 
@@ -65,6 +73,7 @@ Item {
         }
 
         RowLayout {
+            id: actionsRow
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 8
@@ -81,6 +90,10 @@ Item {
                         index === SessionService.selectedIndex
                     readonly property bool confirming:
                         index === SessionService.confirmingIndex
+                    implicitWidth: Math.max(132,
+                        tileContent.implicitWidth + 16)
+                    implicitHeight: Math.max(126,
+                        tileContent.implicitHeight + 20)
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
@@ -105,6 +118,7 @@ Item {
                     }
 
                     ColumnLayout {
+                        id: tileContent
                         anchors.centerIn: parent
                         width: parent.width - 16
                         spacing: 8

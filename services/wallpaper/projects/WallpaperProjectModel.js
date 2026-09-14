@@ -209,6 +209,7 @@ function normalizeTrack(value, index) {
         type: enumValue(source.type,
             ["media", "transition", "trigger", "audio"], "media"),
         enabled: source.enabled !== false,
+        locked: source.locked === true,
         clips: collection(source.clips).map((clip, clipIndex) =>
             normalizeClip(clip, id, clipIndex))
     }

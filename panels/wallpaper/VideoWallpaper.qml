@@ -9,10 +9,13 @@ Item {
     required property string screenName
     property string lifecycleKey: screenName
     property string posterPath: ""
+    property bool previewMode: false
+    property bool previewPlaying: false
+    property int previewPositionMs: 0
     readonly property bool playbackRequested:
         playbackPolicy.playbackRequested
     readonly property bool playingAllowed:
-        playbackPolicy.playbackAllowed
+        root.previewMode ? root.previewPlaying : playbackPolicy.playbackAllowed
     property bool firstFrameReady: false
     property int suspendedPositionMs: 0
     property bool decoderRetained: false
@@ -21,6 +24,8 @@ Item {
     readonly property int decoderEvictionDelayMs: 30000
     readonly property bool decoderEvicted: !decoderRetained
     readonly property bool decoderLoaded: decoder.item !== null
+    readonly property bool decoderRequested:
+        root.previewMode || root.decoderRetained
     readonly property bool playbackActive:
         Boolean(decoder.item?.actuallyPlaying)
     readonly property bool posterReady: posterImage.status === Image.Ready
@@ -52,7 +57,7 @@ Item {
     }
 
     function evictDecoder(reason) {
-        if (playingAllowed || !decoderRetained)
+        if (root.previewMode || playingAllowed || !decoderRetained)
             return false
         if (decoder.item)
             decoder.item.captureAndPause()
@@ -70,12 +75,19 @@ Item {
             adaptiveEligibilityTimer.restart()
         }
     }
+    onPreviewModeChanged: applyPlaybackPolicy()
+    onPreviewPlayingChanged: applyPlaybackPolicy()
+    onPreviewPositionMsChanged: {
+        if (root.previewMode && !root.previewPlaying && decoder.item)
+            decoder.item.seekTo(root.previewPositionMs)
+    }
     onPlayingAllowedChanged: applyPlaybackPolicy()
     Component.onCompleted: applyPlaybackPolicy()
 
     WallpaperPlaybackPolicy {
         id: playbackPolicy
         screenName: root.screenName
+        observe: !root.previewMode
     }
 
     Image {
@@ -97,7 +109,7 @@ Item {
         adaptiveEligible: root.adaptiveEvictionEligible
         estimatedCostUnits: 60
         basePriority: 50
-        requestedActive: root.decoderRetained
+        requestedActive: root.decoderRequested
         usageActive: root.playingAllowed
         retentionReason: root.playingAllowed ? "playback-active"
             : root.decoderRetained ? "suspension-grace-period" : ""
@@ -112,7 +124,8 @@ Item {
         VideoDecoder {
             path: root.path
             playbackAllowed: root.playingAllowed
-            resumePositionMs: root.suspendedPositionMs
+            resumePositionMs: root.previewMode
+                ? root.previewPositionMs : root.suspendedPositionMs
             onPositionCaptured: positionMs => {
                 root.suspendedPositionMs = positionMs
             }

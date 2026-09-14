@@ -11,6 +11,10 @@ Item {
     property string screenName: ""
     property string posterPath: ""
     property real renderScale: 1
+    property bool previewMode: false
+    property bool previewPlaying: false
+    property int previewPositionMs: 0
+    property string lifecycleNamespace: "wallpaper"
 
     readonly property bool configured: path.length > 0 && backend.length > 0
     readonly property string state: configured
@@ -42,8 +46,11 @@ Item {
             return {
                 path: root.path,
                 screenName: root.screenName,
-                lifecycleKey: root.screenName + "." + root.slotKey,
-                posterPath: root.posterPath
+                lifecycleKey: root.lifecycleNamespace + "." + root.screenName + "." + root.slotKey,
+                posterPath: root.posterPath,
+                previewMode: root.previewMode,
+                previewPlaying: root.previewPlaying,
+                previewPositionMs: root.previewPositionMs
             }
         }
         if (backend === "animated-image" || backend === "animated-media") {
@@ -52,7 +59,8 @@ Item {
                 media: root.media,
                 screenName: root.screenName,
                 posterPath: root.posterPath,
-                renderScale: root.renderScale
+                renderScale: root.renderScale,
+                previewMode: root.previewMode
             }
         }
         if (backend === "static")
@@ -76,14 +84,20 @@ Item {
         item.path = path
         if (backend === "video") {
             item.screenName = screenName
-            item.lifecycleKey = screenName + "." + slotKey
+            item.lifecycleKey = lifecycleNamespace + "." + screenName + "." + slotKey
             item.posterPath = posterPath
+            item.previewMode = previewMode
+            item.previewPlaying = previewPlaying
+            item.previewPositionMs = previewPositionMs
         } else if (backend === "animated-image"
                 || backend === "animated-media") {
             item.media = media
             item.screenName = screenName
             item.posterPath = posterPath
             item.renderScale = renderScale
+            item.previewMode = previewMode
+            item.previewPlaying = previewPlaying
+            item.previewPositionMs = previewPositionMs
         } else if (backend === "static") {
             item.renderScale = renderScale
         }
@@ -94,6 +108,7 @@ Item {
         generation = nextGeneration
         screenName = nextScreenName
         renderScale = nextRenderScale
+        previewMode = root.previewMode
         media = nextMedia
         posterPath = nextPosterPath
         path = nextPath
@@ -115,6 +130,9 @@ Item {
         backend = ""
         posterPath = ""
     }
+
+    onPreviewPlayingChanged: syncRendererContext()
+    onPreviewPositionMsChanged: syncRendererContext()
 
     Loader {
         id: renderer

@@ -21,8 +21,25 @@
       qtMultimedia = pkgs.kdePackages.qtmultimedia;
       qtImageFormats = pkgs.kdePackages.qtimageformats;
       libvaUtils = pkgs.libva-utils;
+      ffmpeg = pkgs.ffmpeg-full;
       kirigami = pkgs.kdePackages.kirigami.unwrapped;
       qmlQuickshell = quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
+      mediaEngine = pkgs.stdenv.mkDerivation {
+        pname = "qs-mediaengine";
+        version = "0.1.0";
+        src = ./plugins/mediaengine;
+        nativeBuildInputs = [pkgs.cmake pkgs.ninja];
+        buildInputs = [pkgs.qt6.qtbase pkgs.qt6.qtdeclarative pkgs.sqlite];
+        dontWrapQtApps = true;
+      };
+      cachePlugin = pkgs.stdenv.mkDerivation {
+        pname = "qs-cache";
+        version = "0.1.0";
+        src = ./plugins/cache;
+        nativeBuildInputs = [pkgs.cmake pkgs.ninja];
+        buildInputs = [pkgs.qt6.qtbase pkgs.qt6.qtdeclarative pkgs.sqlite];
+        dontWrapQtApps = true;
+      };
     in rec {
       config = pkgs.stdenv.mkDerivation {
         name = "quickshell-config";
@@ -35,16 +52,20 @@
 
       quickshell = pkgs.symlinkJoin {
         name = "quickshell-wrapped";
-        paths = [qmlQuickshell];
+        meta.mainProgram = "qs";
+        paths = [qmlQuickshell mediaEngine cachePlugin];
         nativeBuildInputs = [pkgs.makeWrapper];
         postBuild = ''
           for bin in $out/bin/*; do
             wrapProgram "$bin" \
               --prefix QML2_IMPORT_PATH : "${qtMultimedia}/lib/qt-6/qml" \
+              --prefix QML2_IMPORT_PATH : "${mediaEngine}/lib/qt-6/qml" \
+              --prefix QML2_IMPORT_PATH : "${cachePlugin}/lib/qt-6/qml" \
               --prefix QML2_IMPORT_PATH : "${kirigami}/lib/qt-6/qml" \
               --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
               --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
               --prefix PATH : "${libvaUtils}/bin" \
+              --prefix PATH : "${ffmpeg}/bin" \
               --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
               --set QS_LOG_FILE /dev/stderr \
               --add-flags "--verbose"
@@ -54,6 +75,66 @@
 
       default = quickshell;
     });
+
+    apps = forAllSystems (system: let
+      pkgs = import nixpkgs {inherit system;};
+      qualityTools = [pkgs.git pkgs.bash pkgs.qt6.qtdeclarative pkgs.clang-tools pkgs.nixfmt];
+      makeQualityApp = name: text: {
+        type = "app";
+        meta.description = "Quickshell project quality tool: ${name}";
+        program = "${pkgs.writeShellApplication {
+          inherit name;
+          runtimeInputs = qualityTools;
+          inherit text;
+        }}/bin/${name}";
+      };
+      formatCheck = ''
+        root=$(git rev-parse --show-toplevel)
+        cd "$root"
+        if (($#)); then files=("$@"); else
+          mapfile -t files < <(git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**')
+        fi
+        status=0
+        tmp=$(mktemp -d)
+        trap 'rm -rf "$tmp"' EXIT
+        for file in "''${files[@]}"; do
+          [[ -f "$file" ]] || continue
+          case "$file" in
+            *.qml)
+              out="$tmp/$(basename "$file")"
+              if ! qmlformat "$file" > "$out"; then echo "format: qmlformat failed: $file" >&2; status=1
+              elif ! diff -u "$file" "$out" >/dev/null; then echo "format: $file is not qmlformat-clean" >&2; status=1; fi ;;
+            *.cpp|*.h) clang-format --dry-run --Werror "$file" >/dev/null || { echo "format: $file is not clang-format-clean" >&2; status=1; } ;;
+            flake.nix) nixfmt --check "$file" >/dev/null || { echo "format: $file is not nixfmt-clean" >&2; status=1; } ;;
+          esac
+        done
+        exit "$status"
+      '';
+      format = ''
+        root=$(git rev-parse --show-toplevel)
+        cd "$root"
+        if (($#)); then files=("$@"); else mapfile -t files < <(rg --files -g '*.qml' -g '*.cpp' -g '*.h' -g 'flake.nix' -g '!temp/**' -g '!notes/**' -g '!result/**'); fi
+        for file in "''${files[@]}"; do
+          [[ -f "$file" ]] || continue
+          case "$file" in *.qml) qmlformat -i "$file" ;; *.cpp|*.h) clang-format -i "$file" ;; flake.nix) nixfmt "$file" ;; esac
+        done
+      '';
+      lint = ''
+        root=$(git rev-parse --show-toplevel)
+        cd "$root"
+        if (($#)); then files=("$@"); else mapfile -t files < <(git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' ':!temp/**' ':!notes/**'); fi
+        status=0
+        lintArgs=(--max-warnings -1 --import disable --missing-property disable --missing-type disable --unresolved-type disable --unqualified disable --access-singleton-via-object disable --signal-handler-parameters disable)
+        for file in "''${files[@]}"; do [[ -f "$file" ]] || continue; qmllint "''${lintArgs[@]}" "$file" || status=1; done
+        exit "$status"
+      '';
+    in {
+      format-check = makeQualityApp "quickshell-format-check" formatCheck;
+      format = makeQualityApp "quickshell-format" format;
+      lint = makeQualityApp "quickshell-lint" lint;
+    });
+
+    formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
 
     nixosModules.default = {
       pkgs,
@@ -148,6 +229,8 @@
           pkgs.kdePackages.qtimageformats
           pkgs.kdePackages.kimageformats
           pkgs.libva-utils
+          pkgs.clang-tools
+          pkgs.nixfmt
         ];
 
         shellHook = ''

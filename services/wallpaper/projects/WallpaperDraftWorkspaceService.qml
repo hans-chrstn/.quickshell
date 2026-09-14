@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services.cache
 import "../../../core/JsonCopy.js" as JsonCopy
 import "WallpaperDraftRegistry.js" as Registry
 import "WallpaperProjectBundleModel.js" as Bundle
@@ -270,6 +271,11 @@ Singleton {
             return
         }
         const id = pendingEntry.id
+        const discardedManifest = manifests[id]
+        for (const file of discardedManifest?.workspace?.files || []) {
+            if (file.role === "thumbnail" || file.role === "proxy")
+                CacheService.removeArtifact("draft:" + id + ":" + file.id)
+        }
         const updated = Registry.remove(registryDocument(), id, rootDirectory)
         workspaces = updated.document.workspaces
         manifests = publishMap(manifests, id, undefined)

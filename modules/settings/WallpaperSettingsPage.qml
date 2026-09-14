@@ -2,10 +2,12 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import qs.components
 import qs.components.filepicker
 import qs.components.scrolling
 import qs.core
 import qs.services.wallpaper
+import qs.services.wallpaper.projects
 import qs.services.settings
 
 SettingPage {
@@ -20,6 +22,12 @@ SettingPage {
             WallpaperAssignmentService.setForScreen(targetScreenName, path)
         else
             WallpaperAssignmentService.setGlobal(path)
+    }
+
+    function openEditor() {
+        const screenName = SettingsService.targetScreenName
+        WallpaperEditorService.open(screenName)
+        SettingsService.close()
     }
 
     Component.onCompleted: {
@@ -58,6 +66,14 @@ SettingPage {
             PickerButton {
                 label: "Options"
                 onActivated: SettingsService.openPage("wallpaper_options")
+            }
+
+            GlyphButton {
+                glyph: "edit"
+                accessibleName: "Open Wallpaper Studio"
+                toolTip: "Open Wallpaper Studio"
+                primary: true
+                onActivated: root.openEditor()
             }
         }
 

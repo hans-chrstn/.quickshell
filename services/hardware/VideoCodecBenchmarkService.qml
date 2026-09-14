@@ -270,8 +270,6 @@ Singleton {
         if (!busy)
             return false
         encoder.cancel()
-        // Later evidence phases no longer keep the encoder busy, but cancelling
-        // the overall benchmark still owns removal of its session artifacts.
         encoder.cleanupCandidates()
         playbackRestartTimer.stop()
         hardwareRestartTimer.stop()

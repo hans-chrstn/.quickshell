@@ -9,28 +9,30 @@ Rectangle {
     required property var asset
     required property string workspaceId
     property bool selected: false
-    signal activated()
+    readonly property bool dragAvailable: asset.state === "available"
+    readonly property int sourceDurationMs: asset.declaredKind === "static" ? 0 : Math.max(0, Math.round(Number(asset.media?.durationMs) || 0))
+    signal activated
     signal contextRequested(real localX, real localY)
 
     readonly property string extension: {
-        const path = asset.resolvedPath || asset.sourcePath || ""
-        const name = path.slice(path.lastIndexOf("/") + 1)
-        const dot = name.lastIndexOf(".")
-        return dot >= 0 ? name.slice(dot + 1).toUpperCase() : "MEDIA"
+        const path = asset.resolvedPath || asset.sourcePath || "";
+        const name = path.slice(path.lastIndexOf("/") + 1);
+        const dot = name.lastIndexOf(".");
+        return dot >= 0 ? name.slice(dot + 1).toUpperCase() : "MEDIA";
     }
-    readonly property color stateColor: asset.state === "available"
-        ? Design.green : asset.state === "pending" ? Design.yellow : Design.red
+    readonly property color stateColor: asset.state === "available" ? Design.green : asset.state === "pending" ? Design.yellow : Design.red
 
     implicitHeight: 58
     radius: 13
-    color: selected ? Qt.rgba(
-        Design.blue.r, Design.blue.g, Design.blue.b, 0.15)
-        : hover.hovered ? Qt.rgba(1, 1, 1, 0.055) : "transparent"
+    color: selected ? Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.15) : hover.hovered ? Qt.rgba(1, 1, 1, 0.055) : "transparent"
     border.width: selected ? 1 : 0
-    border.color: Qt.rgba(
-        Design.blue.r, Design.blue.g, Design.blue.b, 0.42)
+    border.color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.42)
 
-    Behavior on color { ColorAnimation { duration: 100 } }
+    Behavior on color {
+        ColorAnimation {
+            duration: 100
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -92,9 +94,7 @@ Rectangle {
             }
             Text {
                 Layout.fillWidth: true
-                text: root.asset.state === "available"
-                    ? root.asset.declaredKind.replace("-", " ")
-                    : root.asset.state
+                text: root.asset.state === "available" ? root.asset.declaredKind.replace("-", " ") : root.asset.state
                 color: Design.textMuted
                 elide: Text.ElideRight
                 font.family: Design.fontText
@@ -104,7 +104,43 @@ Rectangle {
         }
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
+
+    Item {
+        id: dragTransport
+
+        width: 1
+        height: 1
+        z: 20
+
+        Drag.dragType: Drag.None
+        Drag.source: root
+        Drag.keys: ["wallpaper-editor-media"]
+        Drag.supportedActions: Qt.CopyAction
+        Drag.proposedAction: Qt.CopyAction
+        Drag.hotSpot.x: 0
+        Drag.hotSpot.y: 0
+    }
+
+    DragHandler {
+        id: assetDrag
+        target: dragTransport
+        enabled: root.dragAvailable
+        acceptedButtons: Qt.LeftButton
+        dragThreshold: 7
+        onActiveChanged: {
+            if (active) {
+                root.activated();
+                dragTransport.Drag.start(Qt.CopyAction);
+            } else {
+                dragTransport.Drag.drop();
+                dragTransport.x = 0;
+                dragTransport.y = 0;
+            }
+        }
+    }
     TapHandler {
         acceptedButtons: Qt.LeftButton
         onTapped: root.activated()
@@ -112,8 +148,8 @@ Rectangle {
     TapHandler {
         acceptedButtons: Qt.RightButton
         onTapped: eventPoint => {
-            root.activated()
-            root.contextRequested(eventPoint.position.x, eventPoint.position.y)
+            root.activated();
+            root.contextRequested(eventPoint.position.x, eventPoint.position.y);
         }
     }
 }

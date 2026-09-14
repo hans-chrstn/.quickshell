@@ -10,6 +10,7 @@ Item {
     required property string screenName
     property string posterPath: ""
     property real renderScale: 1
+    property bool previewMode: false
 
     readonly property string backend:
         WallpaperRenderSupportService.animatedBackendFor(media)
@@ -46,10 +47,10 @@ Item {
         const properties = backend === "image" ? {
             path: root.path,
             renderScale: root.renderScale,
-            playbackAllowed: playbackPolicy.playbackAllowed
+            playbackAllowed: root.previewMode || playbackPolicy.playbackAllowed
         } : {
             path: root.path,
-            playbackAllowed: playbackPolicy.playbackAllowed
+            playbackAllowed: root.previewMode || playbackPolicy.playbackAllowed
         }
         renderer.setSource(source, properties)
     }
@@ -71,6 +72,7 @@ Item {
     WallpaperPlaybackPolicy {
         id: playbackPolicy
         screenName: root.screenName
+        observe: !root.previewMode
     }
 
     Image {

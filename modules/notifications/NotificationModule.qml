@@ -107,7 +107,8 @@ Item {
                 Text {
                     id: countText
                     visible: root.hasCount
-                    text: "×" + root.notice.occurrenceCount
+                    text: root.hasCount
+                        ? "×" + Number(root.notice?.occurrenceCount || 1) : ""
                     color: Design.textMuted
                     font.family: Design.fontMono
                     font.pixelSize: 9

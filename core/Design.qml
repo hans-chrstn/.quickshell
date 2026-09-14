@@ -34,7 +34,6 @@ Singleton {
     readonly property int contentHorizontalPadding: 14
     readonly property int contentVerticalPadding: 6
     readonly property int expandedContentPadding: 18
-
     readonly property int editorMaximumWidth: 1600
     readonly property int editorMaximumHeight: 1040
     readonly property int editorOuterMargin: 44

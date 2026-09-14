@@ -256,6 +256,7 @@ Singleton {
     function markDirty() {
         if (!loaded) return
         revision += 1
+        reloadTimer.stop()
         saveTimer.restart()
     }
 
@@ -277,7 +278,9 @@ Singleton {
     Timer {
         id: reloadTimer
         interval: 260
-        onTriggered: stateFile.reload()
+        onTriggered: {
+            if (!root.dirty) stateFile.reload()
+        }
     }
 
     FileView {
@@ -287,6 +290,7 @@ Singleton {
         printErrors: false
         onFileChanged: reloadTimer.restart()
         onLoaded: {
+            if (root.loaded && root.dirty) return
             root.loaded = true
             try {
                 const accepted = root.applyLibrary(JSON.parse(text()), false)

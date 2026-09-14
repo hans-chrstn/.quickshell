@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.services.cache
 
 Singleton {
     id: root
@@ -45,6 +46,11 @@ Singleton {
     function identityFor(path) {
         const entry = cacheEntries[String(path || "")]
         return entry ? String(entry.identity || "") : ""
+    }
+
+    function metadataKey(path, identity) {
+        return "probe:" + Qt.md5(String(path || "") + "|"
+            + String(identity || ""))
     }
 
     function publish(path, record) {
@@ -305,8 +311,27 @@ Singleton {
                 return
             }
             root.activeIdentity = identity
+            const central = CacheService.metadataFor(
+                root.metadataKey(path, identity), identity)
+            if (central.payload) {
+                try {
+                    const centralRecord = JSON.parse(central.payload)
+                    if (centralRecord.state === "ready") {
+                        root.publish(path, Object.assign({}, centralRecord,
+                            { cached: true }))
+                        CacheService.storeMetadata(
+                            root.metadataKey(path, identity), identity,
+                            central.payload, Date.now())
+                        root.finishActive()
+                        return
+                    }
+                } catch (error) {}
+            }
             const cached = root.cachedRecord(path, identity)
             if (cached) {
+                CacheService.storeMetadata(
+                    root.metadataKey(path, identity), identity,
+                    JSON.stringify(cached), Date.now())
                 root.publish(path, cached)
                 root.finishActive()
                 return
@@ -337,6 +362,9 @@ Singleton {
                 try {
                     const record = root.classify(path,
                         JSON.parse(probeProcess.output || "{}"))
+                    CacheService.storeMetadata(
+                        root.metadataKey(path, root.activeIdentity),
+                        root.activeIdentity, JSON.stringify(record), Date.now())
                     root.storeCache(path, root.activeIdentity, record)
                     root.publish(path, record)
                 } catch (error) {

@@ -11,6 +11,8 @@ Item {
     property real expansionProgress: 0
     property bool returningToClock: false
     property string screenName: ""
+    property real availableWidth: 0
+    property real availableHeight: 0
     readonly property real collapsedImplicitWidth:
         Number(moduleLoader.item?.collapsedImplicitWidth) || 0
     readonly property real collapsedImplicitHeight:
@@ -25,6 +27,8 @@ Item {
         readonly property bool expanded: root.expanded
         readonly property real expansionProgress: root.expansionProgress
         readonly property string screenName: root.screenName
+        readonly property real availableWidth: root.availableWidth
+        readonly property real availableHeight: root.availableHeight
     }
 
     clip: true

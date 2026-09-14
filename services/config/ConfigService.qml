@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "../../components/layout/BoundedSplitModel.js" as SplitModel
 import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
@@ -21,239 +22,346 @@ Singleton {
     property alias islandHeightPercent: data.islandHeightPercent
     property alias islandBodyRadius: data.islandBodyRadius
     property alias enableBlur: data.enableBlur
-    property alias experimentalFloatingWallpaperSuspension:
-        data.experimentalFloatingWallpaperSuspension
-    property alias experimentalPauseWallpaperOnBattery:
-        data.experimentalPauseWallpaperOnBattery
-    property alias pauseWallpaperWhenIdle:
-        data.pauseWallpaperWhenIdle
-    property alias wallpaperIdleTimeoutSeconds:
-        data.wallpaperIdleTimeoutSeconds
-    property alias wallpaperTransitionsEnabled:
-        data.wallpaperTransitionsEnabled
-    property alias wallpaperTransitionDuration:
-        data.wallpaperTransitionDuration
-    property alias reduceWallpaperMotion:
-        data.reduceWallpaperMotion
-    property alias allowWallpaperOptimization:
-        data.allowWallpaperOptimization
-    property alias optimizeWallpaperResolution:
-        data.optimizeWallpaperResolution
-    property alias optimizeWallpaperResolutionScale:
-        data.optimizeWallpaperResolutionScale
-    property alias optimizeWallpaperResolutionCustom:
-        data.optimizeWallpaperResolutionCustom
-    property alias optimizeWallpaperResolutionCustomScale:
-        data.optimizeWallpaperResolutionCustomScale
-    property alias optimizeWallpaperFrameRate:
-        data.optimizeWallpaperFrameRate
-    property alias optimizeWallpaperFrameRateLimit:
-        data.optimizeWallpaperFrameRateLimit
-    property alias optimizeWallpaperFrameRateCustom:
-        data.optimizeWallpaperFrameRateCustom
-    property alias optimizeWallpaperFrameRateCustomLimit:
-        data.optimizeWallpaperFrameRateCustomLimit
-    property alias optimizeWallpaperBitRate:
-        data.optimizeWallpaperBitRate
-    property alias optimizeWallpaperBitRateLimit:
-        data.optimizeWallpaperBitRateLimit
-    property alias optimizeWallpaperBitRateCustom:
-        data.optimizeWallpaperBitRateCustom
-    property alias optimizeWallpaperBitRateCustomLimit:
-        data.optimizeWallpaperBitRateCustomLimit
-    property alias automaticWallpaperCacheCleanup:
-        data.automaticWallpaperCacheCleanup
+    property alias experimentalFloatingWallpaperSuspension: data.experimentalFloatingWallpaperSuspension
+    property alias experimentalPauseWallpaperOnBattery: data.experimentalPauseWallpaperOnBattery
+    property alias pauseWallpaperWhenIdle: data.pauseWallpaperWhenIdle
+    property alias wallpaperIdleTimeoutSeconds: data.wallpaperIdleTimeoutSeconds
+    property alias wallpaperTransitionsEnabled: data.wallpaperTransitionsEnabled
+    property alias wallpaperTransitionDuration: data.wallpaperTransitionDuration
+    property alias reduceWallpaperMotion: data.reduceWallpaperMotion
+    property alias allowWallpaperOptimization: data.allowWallpaperOptimization
+    property alias optimizeWallpaperResolution: data.optimizeWallpaperResolution
+    property alias optimizeWallpaperResolutionScale: data.optimizeWallpaperResolutionScale
+    property alias optimizeWallpaperResolutionCustom: data.optimizeWallpaperResolutionCustom
+    property alias optimizeWallpaperResolutionCustomScale: data.optimizeWallpaperResolutionCustomScale
+    property alias optimizeWallpaperFrameRate: data.optimizeWallpaperFrameRate
+    property alias optimizeWallpaperFrameRateLimit: data.optimizeWallpaperFrameRateLimit
+    property alias optimizeWallpaperFrameRateCustom: data.optimizeWallpaperFrameRateCustom
+    property alias optimizeWallpaperFrameRateCustomLimit: data.optimizeWallpaperFrameRateCustomLimit
+    property alias optimizeWallpaperBitRate: data.optimizeWallpaperBitRate
+    property alias optimizeWallpaperBitRateLimit: data.optimizeWallpaperBitRateLimit
+    property alias optimizeWallpaperBitRateCustom: data.optimizeWallpaperBitRateCustom
+    property alias optimizeWallpaperBitRateCustomLimit: data.optimizeWallpaperBitRateCustomLimit
+    property alias automaticWallpaperCacheCleanup: data.automaticWallpaperCacheCleanup
     property alias adaptiveLifecycleEnabled: data.adaptiveLifecycleEnabled
-    property alias lifecycleInactiveBudgetUnits:
-        data.lifecycleInactiveBudgetUnits
+    property alias lifecycleInactiveBudgetUnits: data.lifecycleInactiveBudgetUnits
     property alias wallpaperDirectories: data.wallpaperDirectories
+    property alias editorHorizontalSplitWeights: data.editorHorizontalSplitWeights
+    property alias editorVerticalSplitWeights: data.editorVerticalSplitWeights
 
     property bool loaded: false
     property string error: ""
-    readonly property int currentSchemaVersion: 2
+    readonly property int currentSchemaVersion: 3
 
     readonly property var settingSchema: ({
-        revealDuration: { type: "int", minimum: 120, maximum: 600 },
-        resizeDuration: { type: "int", minimum: 200, maximum: 900 },
-        contentRevealDuration: { type: "int", minimum: 80, maximum: 400 },
-        attentionExpandDelay: { type: "int", minimum: 0, maximum: 500 },
-        moduleCloseDuration: { type: "int", minimum: 180, maximum: 800 },
-        expandDelay: { type: "int", minimum: 0, maximum: 1000 },
-        hideDelay: { type: "int", minimum: 300, maximum: 3000 },
-        islandWing: { type: "int", minimum: 0, maximum: 40 },
-        islandCollapsedWidth: { type: "int", minimum: 100, maximum: 300 },
-        islandWidthPercent: { type: "int", minimum: 90, maximum: 125 },
-        islandHeightPercent: { type: "int", minimum: 90, maximum: 125 },
-        islandBodyRadius: { type: "int", minimum: 0, maximum: 40 },
-        enableBlur: { type: "bool" },
-        experimentalFloatingWallpaperSuspension: { type: "bool" },
-        experimentalPauseWallpaperOnBattery: { type: "bool" },
-        pauseWallpaperWhenIdle: { type: "bool" },
-        wallpaperIdleTimeoutSeconds: {
-            type: "int", minimum: 60, maximum: 7200
-        },
-        wallpaperTransitionsEnabled: { type: "bool" },
-        wallpaperTransitionDuration: {
-            type: "int", minimum: 120, maximum: 800
-        },
-        reduceWallpaperMotion: { type: "bool" },
-        allowWallpaperOptimization: { type: "bool" },
-        optimizeWallpaperResolution: { type: "bool" },
-        optimizeWallpaperResolutionScale: {
-            type: "enum", values: [0.5, 1, 1.5], defaultValue: 1
-        },
-        optimizeWallpaperResolutionCustom: { type: "bool" },
-        optimizeWallpaperResolutionCustomScale: {
-            type: "real", minimum: 0.5, maximum: 4
-        },
-        optimizeWallpaperFrameRate: { type: "bool" },
-        optimizeWallpaperFrameRateLimit: {
-            type: "enum", values: [15, 24, 30], defaultValue: 30
-        },
-        optimizeWallpaperFrameRateCustom: { type: "bool" },
-        optimizeWallpaperFrameRateCustomLimit: {
-            type: "real", minimum: 1, maximum: 240
-        },
-        optimizeWallpaperBitRate: { type: "bool" },
-        optimizeWallpaperBitRateLimit: {
-            type: "enum", values: [4, 8, 12], defaultValue: 12
-        },
-        optimizeWallpaperBitRateCustom: { type: "bool" },
-        optimizeWallpaperBitRateCustomLimit: {
-            type: "real", minimum: 0.5, maximum: 500
-        },
-        automaticWallpaperCacheCleanup: { type: "bool" },
-        adaptiveLifecycleEnabled: { type: "bool" },
-        lifecycleInactiveBudgetUnits: {
-            type: "enum", values: [0, 60, 100, 120, 180], defaultValue: 100
-        }
-    })
+            revealDuration: {
+                type: "int",
+                minimum: 120,
+                maximum: 600
+            },
+            resizeDuration: {
+                type: "int",
+                minimum: 200,
+                maximum: 900
+            },
+            contentRevealDuration: {
+                type: "int",
+                minimum: 80,
+                maximum: 400
+            },
+            attentionExpandDelay: {
+                type: "int",
+                minimum: 0,
+                maximum: 500
+            },
+            moduleCloseDuration: {
+                type: "int",
+                minimum: 180,
+                maximum: 800
+            },
+            expandDelay: {
+                type: "int",
+                minimum: 0,
+                maximum: 1000
+            },
+            hideDelay: {
+                type: "int",
+                minimum: 300,
+                maximum: 3000
+            },
+            islandWing: {
+                type: "int",
+                minimum: 0,
+                maximum: 40
+            },
+            islandCollapsedWidth: {
+                type: "int",
+                minimum: 100,
+                maximum: 300
+            },
+            islandWidthPercent: {
+                type: "int",
+                minimum: 90,
+                maximum: 125
+            },
+            islandHeightPercent: {
+                type: "int",
+                minimum: 90,
+                maximum: 125
+            },
+            islandBodyRadius: {
+                type: "int",
+                minimum: 0,
+                maximum: 40
+            },
+            enableBlur: {
+                type: "bool"
+            },
+            experimentalFloatingWallpaperSuspension: {
+                type: "bool"
+            },
+            experimentalPauseWallpaperOnBattery: {
+                type: "bool"
+            },
+            pauseWallpaperWhenIdle: {
+                type: "bool"
+            },
+            wallpaperIdleTimeoutSeconds: {
+                type: "int",
+                minimum: 60,
+                maximum: 7200
+            },
+            wallpaperTransitionsEnabled: {
+                type: "bool"
+            },
+            wallpaperTransitionDuration: {
+                type: "int",
+                minimum: 120,
+                maximum: 800
+            },
+            reduceWallpaperMotion: {
+                type: "bool"
+            },
+            allowWallpaperOptimization: {
+                type: "bool"
+            },
+            optimizeWallpaperResolution: {
+                type: "bool"
+            },
+            optimizeWallpaperResolutionScale: {
+                type: "enum",
+                values: [0.5, 1, 1.5],
+                defaultValue: 1
+            },
+            optimizeWallpaperResolutionCustom: {
+                type: "bool"
+            },
+            optimizeWallpaperResolutionCustomScale: {
+                type: "real",
+                minimum: 0.5,
+                maximum: 4
+            },
+            optimizeWallpaperFrameRate: {
+                type: "bool"
+            },
+            optimizeWallpaperFrameRateLimit: {
+                type: "enum",
+                values: [15, 24, 30],
+                defaultValue: 30
+            },
+            optimizeWallpaperFrameRateCustom: {
+                type: "bool"
+            },
+            optimizeWallpaperFrameRateCustomLimit: {
+                type: "real",
+                minimum: 1,
+                maximum: 240
+            },
+            optimizeWallpaperBitRate: {
+                type: "bool"
+            },
+            optimizeWallpaperBitRateLimit: {
+                type: "enum",
+                values: [4, 8, 12],
+                defaultValue: 12
+            },
+            optimizeWallpaperBitRateCustom: {
+                type: "bool"
+            },
+            optimizeWallpaperBitRateCustomLimit: {
+                type: "real",
+                minimum: 0.5,
+                maximum: 500
+            },
+            automaticWallpaperCacheCleanup: {
+                type: "bool"
+            },
+            adaptiveLifecycleEnabled: {
+                type: "bool"
+            },
+            lifecycleInactiveBudgetUnits: {
+                type: "enum",
+                values: [0, 60, 100, 120, 180],
+                defaultValue: 100
+            }
+        })
 
     function normalizedSetting(key, value) {
-        const definition = settingSchema[key]
+        const definition = settingSchema[key];
         if (!definition)
-            return undefined
+            return undefined;
         if (definition.type === "bool") {
             if (typeof value === "string")
-                return value.trim().toLowerCase() === "true"
-            return Boolean(value)
+                return value.trim().toLowerCase() === "true";
+            return Boolean(value);
         }
         if (definition.type === "enum") {
-            const numeric = Number(value)
-            return definition.values.indexOf(numeric) >= 0
-                ? numeric : definition.defaultValue
+            const numeric = Number(value);
+            return definition.values.indexOf(numeric) >= 0 ? numeric : definition.defaultValue;
         }
-        const numeric = Number(value)
+        const numeric = Number(value);
         if (!Number.isFinite(numeric))
-            return data[key]
+            return data[key];
         if (definition.type === "real")
-            return Math.max(definition.minimum,
-                Math.min(definition.maximum, numeric))
-        return Math.round(Math.max(definition.minimum,
-            Math.min(definition.maximum, numeric)))
+            return Math.max(definition.minimum, Math.min(definition.maximum, numeric));
+        return Math.round(Math.max(definition.minimum, Math.min(definition.maximum, numeric)));
     }
 
     function setSetting(key, value) {
-        const definition = settingSchema[key]
-        if (definition?.type === "enum"
-                && definition.values.indexOf(Number(value)) < 0)
-            return false
-        const normalized = normalizedSetting(key, value)
+        const definition = settingSchema[key];
+        if (definition?.type === "enum" && definition.values.indexOf(Number(value)) < 0)
+            return false;
+        const normalized = normalizedSetting(key, value);
         if (normalized === undefined)
-            return false
+            return false;
         if (data[key] === normalized)
-            return true
-        data[key] = normalized
-        markDirty()
-        return true
+            return true;
+        data[key] = normalized;
+        markDirty();
+        return true;
     }
 
     function setSettings(values) {
-        let changed = false
+        let changed = false;
         for (const key in values || {}) {
-            const normalized = normalizedSetting(key, values[key])
+            const normalized = normalizedSetting(key, values[key]);
             if (normalized === undefined || data[key] === normalized)
-                continue
-            data[key] = normalized
-            changed = true
+                continue;
+            data[key] = normalized;
+            changed = true;
         }
         if (changed)
-            markDirty()
+            markDirty();
     }
 
     function normalizedDirectories(values) {
-        const result = []
-        const seen = ({})
+        const result = [];
+        const seen = ({});
         for (let raw of values || []) {
-            let path = String(raw || "").trim()
+            let path = String(raw || "").trim();
             if (path.startsWith("file://"))
-                path = decodeURIComponent(path.slice(7))
-            path = path.replace(/\/+$/, "") || "/"
+                path = decodeURIComponent(path.slice(7));
+            path = path.replace(/\/+$/, "") || "/";
             if (path.length === 0 || seen[path])
-                continue
-            seen[path] = true
-            result.push(path)
+                continue;
+            seen[path] = true;
+            result.push(path);
         }
-        return result
+        return result;
     }
 
     function setWallpaperDirectories(values) {
-        const normalized = normalizedDirectories(values)
+        const normalized = normalizedDirectories(values);
         if (JSON.stringify(normalized) === JSON.stringify(wallpaperDirectories))
-            return
-        wallpaperDirectories = normalized
-        markDirty()
+            return;
+        wallpaperDirectories = normalized;
+        markDirty();
+    }
+
+    function normalizedSplitWeights(values, count, fallback) {
+        if (!Array.isArray(values) || values.length !== count)
+            return fallback.slice();
+        return SplitModel.normalizedWeights(values, count);
+    }
+
+    function setEditorLayoutPreferences(horizontal, vertical) {
+        const nextHorizontal = normalizedSplitWeights(horizontal, 3, [0.7 / 7.5, 6 / 7.5, 0.8 / 7.5]);
+        const nextVertical = normalizedSplitWeights(vertical, 2, [0.8, 0.2]);
+        if (JSON.stringify(nextHorizontal) === JSON.stringify(editorHorizontalSplitWeights) && JSON.stringify(nextVertical) === JSON.stringify(editorVerticalSplitWeights))
+            return true;
+        editorHorizontalSplitWeights = nextHorizontal;
+        editorVerticalSplitWeights = nextVertical;
+        markDirty();
+        return true;
     }
 
     function snapshot() {
-        const settings = ({})
+        const settings = ({});
         for (const key in settingSchema)
-            settings[key] = data[key]
+            settings[key] = data[key];
         return {
             loaded: loaded,
             schemaVersion: data.schemaVersion,
             settings: settings,
             wallpaperDirectories: JsonCopy.value(wallpaperDirectories),
+            editorLayout: {
+                horizontalWeights: JsonCopy.value(editorHorizontalSplitWeights),
+                verticalWeights: JsonCopy.value(editorVerticalSplitWeights)
+            },
             error: error
-        }
+        };
     }
 
     function markDirty() {
         if (loaded)
-            saveTimer.restart()
+            saveTimer.restart();
     }
 
     function validateLoadedData() {
-        let changed = false
-        const loadedVersion = Math.max(1, Number(data.schemaVersion) || 1)
+        let changed = false;
+        const loadedVersion = Math.max(1, Number(data.schemaVersion) || 1);
         if (loadedVersion < 2) {
             if (!data.optimizeWallpaperFrameRate) {
-                data.optimizeWallpaperFrameRate = true
-                data.optimizeWallpaperFrameRateCustom = true
-                data.optimizeWallpaperFrameRateCustomLimit = 240
+                data.optimizeWallpaperFrameRate = true;
+                data.optimizeWallpaperFrameRateCustom = true;
+                data.optimizeWallpaperFrameRateCustomLimit = 240;
             }
             if (!data.optimizeWallpaperBitRate) {
-                data.optimizeWallpaperBitRate = true
-                data.optimizeWallpaperBitRateCustom = true
-                data.optimizeWallpaperBitRateCustomLimit = 500
+                data.optimizeWallpaperBitRate = true;
+                data.optimizeWallpaperBitRateCustom = true;
+                data.optimizeWallpaperBitRateCustomLimit = 500;
             }
-            data.schemaVersion = 2
-            changed = true
+            data.schemaVersion = 2;
+            changed = true;
+        }
+        if (loadedVersion < 3) {
+            data.schemaVersion = 3;
+            changed = true;
         }
         for (const key in settingSchema) {
-            const normalized = normalizedSetting(key, data[key])
+            const normalized = normalizedSetting(key, data[key]);
             if (data[key] !== normalized) {
-                data[key] = normalized
-                changed = true
+                data[key] = normalized;
+                changed = true;
             }
         }
-        const directories = normalizedDirectories(wallpaperDirectories)
+        const directories = normalizedDirectories(wallpaperDirectories);
         if (JSON.stringify(directories) !== JSON.stringify(wallpaperDirectories)) {
-            wallpaperDirectories = directories
-            changed = true
+            wallpaperDirectories = directories;
+            changed = true;
+        }
+        const horizontalWeights = normalizedSplitWeights(editorHorizontalSplitWeights, 3, [0.7 / 7.5, 6 / 7.5, 0.8 / 7.5]);
+        const verticalWeights = normalizedSplitWeights(editorVerticalSplitWeights, 2, [0.8, 0.2]);
+        if (JSON.stringify(horizontalWeights) !== JSON.stringify(editorHorizontalSplitWeights)) {
+            editorHorizontalSplitWeights = horizontalWeights;
+            changed = true;
+        }
+        if (JSON.stringify(verticalWeights) !== JSON.stringify(editorVerticalSplitWeights)) {
+            editorVerticalSplitWeights = verticalWeights;
+            changed = true;
         }
         if (changed)
-            markDirty()
+            markDirty();
     }
 
     Timer {
@@ -273,29 +381,30 @@ Singleton {
         path: Quickshell.statePath("settings.json")
         watchChanges: true
         printErrors: false
-        onAdapterUpdated: if (root.loaded) saveTimer.restart()
+        onAdapterUpdated: if (root.loaded)
+            saveTimer.restart()
         onFileChanged: reloadTimer.restart()
         onLoaded: {
-            root.loaded = true
+            root.loaded = true;
             try {
-                JSON.parse(text())
-                root.error = ""
-                root.validateLoadedData()
+                JSON.parse(text());
+                root.error = "";
+                root.validateLoadedData();
             } catch (exception) {
-                root.error = "Configuration JSON is invalid; defaults are active"
+                root.error = "Configuration JSON is invalid; defaults are active";
             }
         }
         onLoadFailed: failure => {
-            root.loaded = true
+            root.loaded = true;
             if (failure === FileViewError.FileNotFound)
-                root.error = ""
+                root.error = "";
             else
-                root.error = "Configuration could not be loaded; defaults are active"
+                root.error = "Configuration could not be loaded; defaults are active";
         }
 
         JsonAdapter {
             id: data
-            property int schemaVersion: 2
+            property int schemaVersion: 3
             property int revealDuration: 300
             property int resizeDuration: 520
             property int contentRevealDuration: 180
@@ -333,6 +442,8 @@ Singleton {
             property bool adaptiveLifecycleEnabled: true
             property int lifecycleInactiveBudgetUnits: 100
             property var wallpaperDirectories: []
+            property var editorHorizontalSplitWeights: [0.7 / 7.5, 6 / 7.5, 0.8 / 7.5]
+            property var editorVerticalSplitWeights: [0.8, 0.2]
         }
     }
 }

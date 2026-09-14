@@ -12,9 +12,6 @@ Singleton {
     property alias screenWallpapers: data.screenWallpapers
     property bool loaded: false
     property string error: ""
-    // Assignment mutations suppress automation synchronously. Keep that small
-    // state owner initialized with this service so the first mutation does not
-    // become the operation that starts loading it.
     readonly property bool automationOverridesLoaded:
         WallpaperAutomationOverrideService.loaded
 

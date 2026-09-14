@@ -66,6 +66,24 @@ Singleton {
         })
     }
 
+    function refreshProjectDocument() {
+        if (activeProjectId.length === 0)
+            return
+        const current = WallpaperProjectService.projectSnapshot(activeProjectId)
+        if (!current) {
+            active = false
+            projectDocument = null
+            diagnostics = Object.assign({}, diagnostics, {
+                state: "failed", error: "Project was removed",
+                projectId: activeProjectId, complete: true
+            })
+            return
+        }
+        projectDocument = current
+        active = true
+        recompute()
+    }
+
     function suggestedRelink(assetId) {
         const id = String(assetId || "")
         const record = diagnostics.assets.find(asset => asset.assetId === id)
@@ -91,10 +109,22 @@ Singleton {
         }
     }
 
-    function runtimePlan() {
-        if (!projectDocument)
+    function runtimePlan(documentOverride) {
+        const document = documentOverride || projectDocument
+        if (!document)
             return { accepted: false, error: "No project inspected", plan: null }
-        return JsonCopy.value(RuntimePlan.build(projectDocument, diagnostics))
+        return JsonCopy.value(RuntimePlan.build(document, diagnostics))
+    }
+
+    Connections {
+        target: WallpaperProjectService
+        function onRevisionChanged() { root.refreshProjectDocument() }
+        function onActiveProjectIdChanged() {
+            if (WallpaperProjectService.activeProjectId.length === 0)
+                return
+            if (root.activeProjectId !== WallpaperProjectService.activeProjectId)
+                root.inspect(WallpaperProjectService.activeProjectId)
+        }
     }
 
     Connections {

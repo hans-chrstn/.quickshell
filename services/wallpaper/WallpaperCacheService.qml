@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.wallpaper
+import qs.services.cache
 import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
@@ -206,6 +207,11 @@ Singleton {
             || value.startsWith(optimizedDirectory + "/")
     }
 
+    function sharedCacheKey(entry) {
+        return "wallpaper:" + Qt.md5(String(entry.kind || "") + "|"
+            + String(entry.path || ""))
+    }
+
     function executeCleanup() {
         if (scanning || cleaning)
             return false
@@ -287,6 +293,31 @@ Singleton {
         return result
     }
 
+    function registerSharedEntries(items) {
+        const protections = protectedPaths()
+        for (const entry of items || []) {
+            const key = Qt.md5(entry.kind + "|" + entry.path)
+            CacheService.registerArtifact({
+                key: "wallpaper:" + key,
+                sourceHash: Qt.md5(entry.path),
+                kind: entry.kind,
+                path: entry.path,
+                version: 1,
+                generatorVersion: "wallpaper-cache-v1",
+                sizeBytes: entry.size,
+                lastUsedMs: entry.accessedAt,
+                protected: protections[entry.path] !== undefined
+            })
+        }
+    }
+
+    function syncSharedProtection() {
+        const protections = protectedPaths()
+        for (const entry of entries)
+            CacheService.setArtifactProtected(sharedCacheKey(entry),
+                protections[entry.path] !== undefined)
+    }
+
     function snapshot() {
         return {
             scanning: scanning,
@@ -308,7 +339,8 @@ Singleton {
                 reclaimedBytes: reclaimedBytes,
                 cause: cleanupCause,
                 error: cleanupError
-            }
+            },
+            postersRuntime: WallpaperPosterService.snapshot()
         }
     }
 
@@ -319,6 +351,9 @@ Singleton {
         onExited: exitCode => {
             const parsed = root.parse(output)
             root.entries = parsed
+            root.registerSharedEntries(parsed)
+            CacheService.recoverNamespace(root.posterDirectory)
+            CacheService.recoverNamespace(root.optimizedDirectory)
             root.scannedAt = Date.now()
             root.error = exitCode === 0 || parsed.length > 0 ? ""
                 : "Wallpaper cache inventory is unavailable"
@@ -382,6 +417,7 @@ Singleton {
             if (exitCode === 0) {
                 root.deletedCount += 1
                 root.reclaimedBytes += Number(entry.size) || 0
+                CacheService.removeArtifact(root.sharedCacheKey(entry))
             } else {
                 root.skippedCount += 1
                 root.cleanupError = "Some cache files could not be removed"
@@ -394,19 +430,19 @@ Singleton {
 
     Connections {
         target: WallpaperAssignmentService
-        function onGlobalWallpaperChanged() { root.buildPlan() }
-        function onScreenWallpapersChanged() { root.buildPlan() }
+        function onGlobalWallpaperChanged() { root.buildPlan(); root.syncSharedProtection() }
+        function onScreenWallpapersChanged() { root.buildPlan(); root.syncSharedProtection() }
     }
 
     Connections {
         target: WallpaperRenderService
-        function onScreensChanged() { root.buildPlan() }
+        function onScreensChanged() { root.buildPlan(); root.syncSharedProtection() }
     }
 
     Connections {
         target: WallpaperOptimizationService
-        function onActiveOutputChanged() { root.buildPlan() }
-        function onActiveTemporaryOutputChanged() { root.buildPlan() }
+        function onActiveOutputChanged() { root.buildPlan(); root.syncSharedProtection() }
+        function onActiveTemporaryOutputChanged() { root.buildPlan(); root.syncSharedProtection() }
     }
 
     Connections {

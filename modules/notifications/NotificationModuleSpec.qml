@@ -8,7 +8,8 @@ IslandModule {
 
     moduleId: "notification"
     priority: 60
-    active: NotificationService.current !== null
+    active: NotificationService.presentationVisible
+        && NotificationService.current !== null
         && NotificationService.current.screenName === screenName
     attention: active && NotificationService.presentationVisible
     collapsedWidth: Design.scaledWidth(260)

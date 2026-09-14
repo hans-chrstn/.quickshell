@@ -6,6 +6,7 @@ import Quickshell.Io
 import qs.services.config
 import qs.services.jobs
 import qs.services.wallpaper
+import qs.services.cache
 
 Singleton {
     id: root
@@ -225,6 +226,20 @@ Singleton {
         if (!size.available) {
             publish(activeSource, { state: "failed", outputPath: activeOutput,
                 error: size.error })
+            discardTemporaryOutput(activeTemporaryOutput)
+            finish()
+            return
+        }
+        const media = WallpaperProbeService.recordFor(activeSource)
+        const durationSeconds = Math.max(1, Number(media.durationMs || 0) / 1000)
+        const targetBitsPerSecond = activeOptimizeBitRate
+            ? activeBitRateLimit * 1000000
+            : Math.max(1, Number(media.bitRate) || 12000000)
+        const estimatedBytes = Math.ceil(targetBitsPerSecond
+            * durationSeconds / 8 * 1.25)
+        if (!CacheService.hasHeadroom(cacheDirectory, estimatedBytes)) {
+            publish(activeSource, { state: "failed", outputPath: activeOutput,
+                error: "Insufficient cache headroom for optimization" })
             discardTemporaryOutput(activeTemporaryOutput)
             finish()
             return

@@ -22,32 +22,35 @@ Singleton {
     property string saveParentPath: ""
     property string saveFolderName: ""
     readonly property bool importBusy: WallpaperEditorImportService.busy
+    readonly property bool openProjectBusy: WallpaperEditorOpenService.busy
+    readonly property bool savePreflightBusy: WallpaperDraftPublicationService.busy
+    readonly property string savePreflightState: WallpaperDraftPublicationService.state
+    readonly property string savePreflightError: WallpaperDraftPublicationService.error
     readonly property var importReport: WallpaperEditorImportService.report
     readonly property var activeProject: {
-        const revision = WallpaperProjectService.revision
-        const id = WallpaperProjectService.activeProjectId
-        return id.length > 0
-            ? WallpaperProjectService.projectSnapshot(id) : null
+        const revision = WallpaperProjectService.revision;
+        const id = WallpaperProjectService.activeProjectId;
+        return id.length > 0 ? WallpaperProjectService.projectSnapshot(id) : null;
     }
-    readonly property string projectName:
-        activeProject?.project?.name || "Untitled Wallpaper"
+    readonly property string projectName: activeProject?.project?.name || "Untitled Wallpaper"
     readonly property string workspaceId: {
-        const projectId = activeProject?.project?.id || ""
-        return projectId.length > 0
-            ? (WallpaperDraftWorkspaceService.workspaceForProject(projectId)?.id
-                || "") : ""
+        const projectId = activeProject?.project?.id || "";
+        return projectId.length > 0 ? (WallpaperDraftWorkspaceService.workspaceForProject(projectId)?.id || "") : "";
     }
     readonly property var mediaItems: {
-        const project = activeProject?.project
-        const diagnostics = WallpaperProjectAvailabilityService.diagnostics
-        if (!project) return []
-        const byId = ({})
+        const project = activeProject?.project;
+        const diagnostics = WallpaperProjectAvailabilityService.diagnostics;
+        if (!project)
+            return [];
+        const byId = ({});
         if (diagnostics.projectId === project.id) {
             for (const record of diagnostics.assets || [])
-                byId[record.assetId] = record
+                byId[record.assetId] = record;
         }
         return project.assets.map(asset => {
-            const resolved = byId[asset.id] || ({ state: "pending" })
+            const resolved = byId[asset.id] || ({
+                    state: "pending"
+                });
             return {
                 id: asset.id,
                 name: asset.name,
@@ -58,153 +61,166 @@ Singleton {
                 resolvedPath: String(resolved.resolvedPath || ""),
                 media: resolved.media || null,
                 error: String(resolved.error || "")
-            }
-        })
+            };
+        });
     }
-    readonly property var selectedAsset: mediaItems.find(
-        asset => asset.id === selectedAssetId) || null
-    readonly property bool saveFolderNameValid:
-        SavePlan.folderName(saveFolderName).length > 0
+    readonly property var selectedAsset: mediaItems.find(asset => asset.id === selectedAssetId) || null
+    readonly property bool saveFolderNameValid: SavePlan.folderName(saveFolderName).length > 0
     readonly property var savePreview: {
-        const workspaceRevision = WallpaperDraftWorkspaceService.manifests
-        const registryRevision = WallpaperDraftWorkspaceService.workspaces
+        const workspaceRevision = WallpaperDraftWorkspaceService.manifests;
+        const registryRevision = WallpaperDraftWorkspaceService.workspaces;
         if (!saveAsOpened || workspaceId.length === 0)
-            return { accepted: false, error: "Draft workspace is unavailable",
-                plan: null }
-        const snapshot = WallpaperDraftWorkspaceService.workspaceSnapshot(
-            workspaceId)
+            return {
+                accepted: false,
+                error: "Draft workspace is unavailable",
+                plan: null
+            };
+        const snapshot = WallpaperDraftWorkspaceService.workspaceSnapshot(workspaceId);
         return SavePlan.create({
             parentPath: saveParentPath,
             folderName: saveFolderName,
             operationId: "preview"
-        }, snapshot?.entry, snapshot?.manifest, 0)
+        }, snapshot?.entry, snapshot?.manifest, 0);
     }
 
     function inspectActiveProject() {
-        const id = activeProject?.project?.id || ""
+        const id = activeProject?.project?.id || "";
         if (id.length > 0)
-            WallpaperProjectAvailabilityService.inspect(id)
+            WallpaperProjectAvailabilityService.inspect(id);
     }
 
     function reconcileSelection() {
-        if (selectedAssetId.length > 0
-                && mediaItems.some(asset => asset.id === selectedAssetId))
-            return
-        selectedAssetId = mediaItems.length > 0 ? mediaItems[0].id : ""
+        if (selectedAssetId.length > 0 && mediaItems.some(asset => asset.id === selectedAssetId))
+            return;
+        selectedAssetId = mediaItems.length > 0 ? mediaItems[0].id : "";
     }
 
     function selectAsset(assetId) {
-        const id = String(assetId || "")
-        if (!mediaItems.some(asset => asset.id === id)) return false
-        selectedAssetId = id
-        return true
+        const id = String(assetId || "");
+        if (!mediaItems.some(asset => asset.id === id))
+            return false;
+        selectedAssetId = id;
+        return true;
     }
 
     function removeSelectedAsset() {
-        const projectId = activeProject?.project?.id || ""
-        const assetId = selectedAssetId
+        const projectId = activeProject?.project?.id || "";
+        const assetId = selectedAssetId;
         if (projectId.length === 0 || assetId.length === 0 || importBusy)
-            return false
-        const removed = WallpaperProjectService.removeAsset(projectId, assetId)
+            return false;
+        const removed = WallpaperProjectService.removeAsset(projectId, assetId);
         if (removed) {
-            selectedAssetId = ""
-            inspectActiveProject()
-            reconcileSelection()
+            selectedAssetId = "";
+            inspectActiveProject();
+            reconcileSelection();
         }
-        return removed
+        return removed;
     }
 
     function openPicker() {
-        if (importBusy) return false
+        if (importBusy || openProjectBusy)
+            return false;
         if (!activeProject) {
-            const projectId = WallpaperProjectService.createProject(
-                "Untitled Wallpaper")
+            const projectId = WallpaperProjectService.createProject("Untitled Wallpaper");
             if (projectId.length === 0)
-                return WallpaperEditorImportService.reject(
-                    WallpaperProjectService.error
-                        || "A wallpaper project could not be created")
+                return WallpaperEditorImportService.reject(WallpaperProjectService.error || "A wallpaper project could not be created");
         }
-        WallpaperEditorImportService.clearReport()
-        pickerOpened = true
-        return true
+        WallpaperEditorImportService.clearReport();
+        pickerOpened = true;
+        return true;
+    }
+
+    function openProjectPicker() {
+        if (importBusy || saveAsOpened || pickerOpened)
+            return false;
+        return WallpaperEditorOpenService.openPicker(activeProject?.project?.rootPath || "");
     }
 
     function cancelPicker() {
-        pickerOpened = false
-        WallpaperEditorImportService.cancel()
+        pickerOpened = false;
+        WallpaperEditorImportService.cancel();
     }
 
     function requestImport(paths) {
-        const projectId = activeProject?.project?.id || ""
-        return pickerOpened && WallpaperEditorImportService.request(projectId, paths)
+        const projectId = activeProject?.project?.id || "";
+        return pickerOpened && WallpaperEditorImportService.request(projectId, paths);
     }
 
     function openSaveAs() {
         if (!activeProject || workspaceId.length === 0 || importBusy)
-            return false
-        saveParentPath = Quickshell.env("HOME") || "/"
-        saveFolderName = SavePlan.folderName(projectName)
-            || "Wallpaper Project"
-        saveAsChoosingParent = false
-        saveAsOpened = true
-        return true
+            return false;
+        saveParentPath = Quickshell.env("HOME") || "/";
+        saveFolderName = SavePlan.folderName(projectName) || "Wallpaper Project";
+        WallpaperDraftPublicationService.reset();
+        saveAsChoosingParent = false;
+        saveAsOpened = true;
+        return true;
     }
 
     function closeSaveAs() {
-        saveAsOpened = false
-        saveAsChoosingParent = false
+        if (WallpaperDraftPublicationService.busy)
+            return false;
+        saveAsOpened = false;
+        saveAsChoosingParent = false;
+        WallpaperDraftPublicationService.reset();
+        return true;
     }
 
     function beginChoosingSaveParent() {
-        if (!saveAsOpened) return false
-        saveAsChoosingParent = true
-        return true
+        if (!saveAsOpened)
+            return false;
+        saveAsChoosingParent = true;
+        return true;
     }
 
     function finishChoosingSaveParent() {
-        saveAsChoosingParent = false
+        saveAsChoosingParent = false;
     }
 
     function chooseSaveParent(path) {
-        saveParentPath = String(path || "")
-        saveAsChoosingParent = false
+        saveParentPath = String(path || "");
+        WallpaperDraftPublicationService.reset();
+        saveAsChoosingParent = false;
     }
 
     function setSaveFolderName(name) {
-        saveFolderName = String(name || "")
+        saveFolderName = String(name || "");
+        WallpaperDraftPublicationService.reset();
     }
 
     function finishSaveAsReview() {
         if (!savePreview.accepted) {
-            NotificationService.showError("Save destination is invalid",
-                savePreview.error, targetScreenName,
-                "wallpaper-editor-save-destination", "Wallpaper Studio")
-            return false
+            NotificationService.showError("Save destination is invalid", savePreview.error, targetScreenName, "wallpaper-editor-save-destination", "Wallpaper Studio");
+            return false;
         }
-        closeSaveAs()
-        return true
+        return WallpaperDraftPublicationService.request(workspaceId, saveParentPath, saveFolderName);
     }
 
     function open(preferredScreenName) {
-        closeTimer.stop()
-        closing = false
-        targetScreenName = ScreenService.resolve(preferredScreenName || "")
-        opened = true
-        inspectActiveProject()
-        reconcileSelection()
+        closeTimer.stop();
+        closing = false;
+        targetScreenName = ScreenService.resolve(preferredScreenName || "");
+        opened = true;
+        WallpaperPresentationService.setEditorState(true, false)
+        inspectActiveProject();
+        reconcileSelection();
     }
 
     function close() {
-        if (!opened || closing) return
-        cancelPicker()
-        closeSaveAs()
-        closing = true
-        opened = false
-        closeTimer.restart()
+        if (!opened || closing || openProjectBusy)
+            return false;
+        WallpaperEditorOpenService.cancelPicker();
+        cancelPicker();
+        closeSaveAs();
+        closing = true;
+        opened = false;
+        WallpaperPresentationService.setEditorState(false, true)
+        closeTimer.restart();
+        return true;
     }
 
     function toggle(preferredScreenName) {
-        opened ? close() : open(preferredScreenName)
+        opened ? close() : open(preferredScreenName);
     }
 
     function snapshot() {
@@ -222,16 +238,19 @@ Singleton {
             saveParentPath: saveParentPath,
             saveFolderName: saveFolderName,
             savePreview: JsonCopy.value(savePreview),
+            savePreflight: WallpaperDraftPublicationService.snapshot(),
             importBusy: importBusy,
+            openProject: WallpaperEditorOpenService.snapshot(),
             importPhase: WallpaperEditorImportService.phase,
             importWorkspaceId: WallpaperEditorImportService.workspaceId,
             importReport: JsonCopy.value(importReport)
-        }
+        };
     }
 
     onActiveProjectChanged: {
-        reconcileSelection()
-        if (opened) inspectActiveProject()
+        reconcileSelection();
+        if (opened)
+            inspectActiveProject();
     }
     onMediaItemsChanged: reconcileSelection()
 
@@ -239,9 +258,33 @@ Singleton {
         target: WallpaperEditorImportService
         function onFinished(report) {
             if (report.imported?.length > 0) {
-                root.pickerOpened = false
-                root.inspectActiveProject()
-                root.selectedAssetId = report.imported[0].id
+                root.pickerOpened = false;
+                root.inspectActiveProject();
+                root.selectedAssetId = report.imported[0].id;
+            }
+        }
+    }
+
+    Connections {
+        target: WallpaperDraftPublicationService
+        function onFinished(accepted, message) {
+            if (!accepted) {
+                NotificationService.showError("Project cannot be saved here", message, root.targetScreenName, "wallpaper-editor-save-preflight", "Wallpaper Studio");
+            } else if (message.length > 0) {
+                NotificationService.showWarning("Project saved with a warning", message, root.targetScreenName, "wallpaper-editor-save-warning", "Wallpaper Studio");
+            }
+        }
+    }
+
+    Connections {
+        target: WallpaperEditorOpenService
+        function onFinished(accepted, message, projectId) {
+            if (accepted) {
+                root.selectedAssetId = "";
+                root.inspectActiveProject();
+                root.reconcileSelection();
+            } else {
+                NotificationService.showError("Project could not be opened", message, root.targetScreenName, "wallpaper-editor-open-project", "Wallpaper Studio");
             }
         }
     }
@@ -249,6 +292,9 @@ Singleton {
     Timer {
         id: closeTimer
         interval: Design.contentRevealDuration
-        onTriggered: root.closing = false
+        onTriggered: {
+            root.closing = false
+            WallpaperPresentationService.setEditorState(false, false)
+        }
     }
 }

@@ -13,6 +13,14 @@ Item {
     property QtObject context: null
     readonly property bool expanded: context?.expanded ?? false
     readonly property real expansionProgress: context?.expansionProgress ?? 0
+    readonly property int measuredResultRows: Math.min(6,
+        LauncherService.results.length)
+    readonly property real collapsedImplicitWidth: 160
+    readonly property real collapsedImplicitHeight: 22
+    readonly property real expandedImplicitWidth: searchRow.implicitWidth
+    readonly property real expandedImplicitHeight: searchHeader.implicitHeight
+        + contentColumn.spacing + divider.implicitHeight
+        + contentColumn.spacing + Math.max(96, measuredResultRows * 50)
 
     focus: true
 
@@ -25,13 +33,17 @@ Item {
     }
 
     ColumnLayout {
+        id: contentColumn
         anchors.fill: parent
         spacing: 10
         Item {
+            id: searchHeader
             Layout.fillWidth: true
             Layout.preferredHeight: 42
+            implicitHeight: 42
 
             RowLayout {
+                id: searchRow
                 anchors.fill: parent
                 spacing: 12
 
@@ -45,6 +57,8 @@ Item {
                 TextInput {
                     id: searchInput
                     Layout.fillWidth: true
+                    Layout.preferredWidth: Math.max(360,
+                        searchPlaceholder.implicitWidth)
                     color: Design.text
                     selectionColor: Design.blue
                     font.family: Design.fontText
@@ -72,6 +86,7 @@ Item {
                     }
 
                     Text {
+                        id: searchPlaceholder
                         anchors.fill: parent
                         verticalAlignment: Text.AlignVCenter
                         visible: searchInput.text.length === 0
@@ -92,8 +107,10 @@ Item {
         }
 
         Rectangle {
+            id: divider
             Layout.fillWidth: true
             Layout.preferredHeight: 1
+            implicitHeight: 1
             color: Design.separator
         }
 

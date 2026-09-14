@@ -9,6 +9,7 @@ Item {
     id: root
 
     required property string screenName
+    property bool observe: true
 
     readonly property bool occlusionKnown:
         WallpaperOcclusionService.known(screenName)
@@ -20,14 +21,16 @@ Item {
         WallpaperMonitorPowerService.powered(screenName)
     readonly property bool playbackRequested: occlusionKnown
         && monitorPowerKnown && !SessionLockService.locked
+        && !WallpaperPresentationService.editorActive
         && (!ConfigService.pauseWallpaperWhenIdle
             || DisplayActivityService.desktopActive)
         && !PowerStateService.pauseRequested && monitorPowered && !occluded
     property bool playbackAllowed: false
     readonly property bool suspended: !playbackAllowed
     readonly property string suspendedReason: SessionLockService.locked
-        ? "session-locked" : ConfigService.pauseWallpaperWhenIdle
-            && DisplayActivityService.idle ? "user-idle"
+        ? "session-locked" : WallpaperPresentationService.editorActive
+            ? "editor-open" : ConfigService.pauseWallpaperWhenIdle
+                && DisplayActivityService.idle ? "user-idle"
         : PowerStateService.pauseRequested ? "on-battery"
             : !occlusionKnown || !monitorPowerKnown ? "observing-display"
             : !monitorPowered ? "monitor-off"
@@ -45,6 +48,11 @@ Item {
 
     onPlaybackRequestedChanged: reconcile()
 
+    Connections {
+        target: WallpaperPresentationService
+        function onEditorActiveChanged() { root.reconcile() }
+    }
+
     Timer {
         id: resumeTimer
         interval: 250
@@ -56,6 +64,8 @@ Item {
     }
 
     Component.onCompleted: {
+        if (!root.observe)
+            return
         SessionLockService.acquire()
         DisplayActivityService.acquire(screenName)
         WallpaperOcclusionService.acquire(screenName)
@@ -64,6 +74,8 @@ Item {
     }
 
     Component.onDestruction: {
+        if (!root.observe)
+            return
         SessionLockService.release()
         DisplayActivityService.release(screenName)
         WallpaperOcclusionService.release(screenName)

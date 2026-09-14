@@ -27,19 +27,25 @@ Item {
         player.pause()
     }
 
+    function seekTo(positionMs) {
+        player.pause()
+        player.position = Math.max(0, Number(positionMs) || 0)
+        resumeApplied = true
+    }
+
     function syncPlayback() {
         if (player.source == "")
             return
-        if (!playbackAllowed) {
-            captureAndPause()
-            return
-        }
         if ((player.mediaStatus === MediaPlayer.LoadedMedia
                 || player.mediaStatus === MediaPlayer.BufferedMedia)
                 && !resumeApplied) {
             if (resumePositionMs > 0)
                 player.position = resumePositionMs
             resumeApplied = true
+        }
+        if (!playbackAllowed) {
+            captureAndPause()
+            return
         }
         player.play()
     }
@@ -66,8 +72,9 @@ Item {
         }
         onMediaStatusChanged: {
             if (mediaStatus === MediaPlayer.LoadedMedia
-                    || mediaStatus === MediaPlayer.BufferedMedia)
+                    || mediaStatus === MediaPlayer.BufferedMedia) {
                 root.syncPlayback()
+            }
         }
     }
 

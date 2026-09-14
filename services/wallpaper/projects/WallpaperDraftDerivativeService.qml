@@ -6,6 +6,7 @@ import Quickshell.Io
 import "../../../core/JsonCopy.js" as JsonCopy
 import qs.services.jobs
 import qs.services.wallpaper
+import qs.services.cache
 import "WallpaperDraftDerivativePlan.js" as DerivativePlan
 import "WallpaperDraftDerivativeCommand.js" as DerivativeCommand
 import "WallpaperProjectBundleModel.js" as Bundle
@@ -205,6 +206,18 @@ Singleton {
     function publicationVerified(exitCode) {
         if (exitCode !== 0 || Number(processOutput) !== outputSize)
             return fail("Published derivative could not be verified")
+        CacheService.registerArtifact({
+            key: "draft:" + activeJob.workspaceId + ":" + activeJob.fileId,
+            sourceHash: activeJob.sourceIdentity || "",
+            kind: "draft-" + activeJob.role,
+            path: activeJob.outputPath,
+            checksumSha256: outputIdentity,
+            generatorVersion: activeJob.recipe || "draft-derivative-v1",
+            version: 1,
+            sizeBytes: outputSize,
+            lastUsedMs: Date.now(),
+            protected: true
+        })
         persistTerminal("ready", "")
     }
 

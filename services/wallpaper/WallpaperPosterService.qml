@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.wallpaper
+import qs.services.cache
 
 Singleton {
     id: root
@@ -21,6 +22,14 @@ Singleton {
     property var activeItem: ({})
     property int generation: 0
     property bool directoryReady: false
+    property int requestCount: 0
+    property int cacheHitCount: 0
+    property int indexHitCount: 0
+    property int generationCount: 0
+
+    function cacheKey(path) {
+        return "wallpaper:" + Qt.md5("poster|" + String(path || ""))
+    }
 
     function emptyRecord(path, state, error) {
         return {
@@ -77,6 +86,7 @@ Singleton {
         if (path.length === 0 || mediaRecord?.state !== "ready"
                 || (kind !== "animatedImage" && kind !== "video"))
             return false
+        requestCount += 1
         const identity = WallpaperProbeService.identityFor(path)
         if (identity.length === 0)
             return false
@@ -104,6 +114,22 @@ Singleton {
             fallbackPosterPath: existing?.posterPath
                 && existing.posterPath !== output ? existing.posterPath : "",
             durationMs: Number(mediaRecord.durationMs) || 0
+        }
+        if (CacheService.artifactValid(cacheKey(output), "wallpaper-cache-v1")) {
+            indexHitCount += 1
+            cacheHitCount += 1
+            CacheService.touchArtifact(cacheKey(output), Date.now())
+            publish(path, {
+                path: path,
+                state: "ready",
+                identity: identity,
+                posterPath: output,
+                pendingPosterPath: "",
+                cached: true,
+                stale: false,
+                error: ""
+            })
+            return true
         }
         publish(path, workingRecord(item, "queued"))
         queue = queue.concat([item])
@@ -154,6 +180,14 @@ Singleton {
             finishActive()
             return
         }
+        const estimatedBytes = posterWidth * posterHeight * 4
+        if (!CacheService.hasHeadroom(cacheDirectory, estimatedBytes)) {
+            publish(item.path, failedRecord(item,
+                "Insufficient cache headroom for poster"))
+            finishActive()
+            return
+        }
+        generationCount += 1
         const seekSeconds = Math.min(5,
             Math.max(0, item.durationMs / 1000 * 0.1))
         posterProcess.item = item
@@ -177,6 +211,17 @@ Singleton {
         activePath = ""
         activeItem = ({})
         Qt.callLater(startNext)
+    }
+
+    function snapshot() {
+        return ({
+                requestCount: requestCount,
+                cacheHitCount: cacheHitCount,
+                indexHitCount: indexHitCount,
+                generationCount: generationCount,
+                queued: queue.length,
+                active: activePath.length > 0
+            })
     }
 
     Component.onCompleted: {
@@ -221,6 +266,19 @@ Singleton {
             if (itemGeneration !== root.generation
                     || item.path !== root.activePath) return
             if (exitCode === 0 && Number(output) > 0) {
+                root.cacheHitCount += 1
+                CacheService.registerArtifact({
+                    key: root.cacheKey(item.posterPath),
+                    sourceHash: item.identity,
+                    kind: "poster",
+                    path: item.posterPath,
+                    version: 1,
+                    generatorVersion: "wallpaper-cache-v1",
+                    sizeBytes: Number(output),
+                    lastUsedMs: Date.now(),
+                    protected: false
+                })
+                CacheService.touchArtifact(root.cacheKey(item.posterPath), Date.now())
                 root.publish(item.path, {
                     path: item.path,
                     state: "ready",

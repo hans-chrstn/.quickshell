@@ -12,6 +12,11 @@ Item {
     required property string screenName
     property string targetPosterPath: ""
     property real renderScale: 1
+    property bool retainCurrentOnUnavailable: true
+    property bool previewMode: false
+    property bool previewPlaying: false
+    property int previewPositionMs: 0
+    property string lifecycleNamespace: "wallpaper"
 
     property int handoffGeneration: 0
     property int currentIndex: -1
@@ -61,6 +66,8 @@ Item {
         currentMatchesTarget && currentSlot.decoderLoaded
     readonly property bool playbackActive:
         currentMatchesTarget && currentSlot.playbackActive
+    readonly property bool visualReady:
+        currentMatchesTarget && currentSlot.visualReady
 
     function slotFor(index) { return index === 0 ? slotA : slotB }
 
@@ -100,6 +107,12 @@ Item {
         }
         if (!targetSupported) {
             cancelPending()
+            if (!retainCurrentOnUnavailable) {
+                cancelTransition()
+                if (currentIndex >= 0)
+                    slotFor(currentIndex).clear()
+                currentIndex = -1
+            }
             if (targetMedia?.state === "failed"
                     || targetMedia?.state === "unsupported") {
                 transitionDecision = TransitionPolicy.decision({
@@ -259,6 +272,10 @@ Item {
     WallpaperRendererSlot {
         id: slotA
         slotKey: "A"
+        previewMode: root.previewMode
+        previewPlaying: root.previewPlaying
+        previewPositionMs: root.previewPositionMs
+        lifecycleNamespace: root.lifecycleNamespace
         anchors.fill: parent
         z: root.currentIndex === 0 ? 2
             : root.transitionOutgoingIndex === 0 ? 1
@@ -274,6 +291,10 @@ Item {
     WallpaperRendererSlot {
         id: slotB
         slotKey: "B"
+        previewMode: root.previewMode
+        previewPlaying: root.previewPlaying
+        previewPositionMs: root.previewPositionMs
+        lifecycleNamespace: root.lifecycleNamespace
         anchors.fill: parent
         z: root.currentIndex === 1 ? 2
             : root.transitionOutgoingIndex === 1 ? 1

@@ -17,5 +17,25 @@ IslandModule {
     expandedHeight: Design.scaledHeight(430)
     revealWithExpansion: true
 
+    collapsedSize: IslandSizePolicy {
+        source: "intrinsic"
+        minimumWidth: Design.scaledWidth(220)
+        preferredWidth: Design.scaledWidth(220)
+        maximumWidth: Design.scaledWidth(360)
+        minimumHeight: Design.collapsedHeight
+        preferredHeight: Design.collapsedHeight
+        maximumHeight: Design.scaledHeight(56)
+    }
+
+    expandedSize: IslandSizePolicy {
+        source: "intrinsic"
+        minimumWidth: Design.scaledWidth(620)
+        preferredWidth: Design.scaledWidth(750)
+        maximumWidth: Design.scaledWidth(1000)
+        minimumHeight: Design.scaledHeight(360)
+        preferredHeight: Design.scaledHeight(430)
+        maximumHeight: Design.scaledHeight(720)
+    }
+
     view: Component { SettingsModule { } }
 }

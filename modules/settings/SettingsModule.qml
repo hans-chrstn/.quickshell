@@ -11,6 +11,18 @@ Item {
     readonly property string screenName: context?.screenName ?? ""
     readonly property url currentPageSource: pageSource(
         SettingsService.currentPage)
+    readonly property real categoryRailImplicitWidth: 144
+    readonly property real pageViewportImplicitWidth: 512
+    readonly property real pageViewportImplicitHeight: 394
+    readonly property real railDividerGap: 10
+    readonly property real dividerPageGap: 14
+    readonly property real collapsedImplicitWidth: 160
+    readonly property real collapsedImplicitHeight: 22
+    readonly property real expandedImplicitWidth:
+        categoryRailImplicitWidth + railDividerGap + divider.width
+        + dividerPageGap + pageViewportImplicitWidth
+    readonly property real expandedImplicitHeight: Math.max(
+        categoryRail.implicitHeight, pageViewportImplicitHeight)
     focus: true
     enabled: SettingsService.opened
 
@@ -65,13 +77,13 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        width: 144
+        width: root.categoryRailImplicitWidth
     }
 
     Rectangle {
         id: divider
         anchors.left: categoryRail.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: root.railDividerGap
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: 1
@@ -80,7 +92,7 @@ Item {
 
     LifecycleLoader {
         anchors.left: divider.right
-        anchors.leftMargin: 14
+        anchors.leftMargin: root.dividerPageGap
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
