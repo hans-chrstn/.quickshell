@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.core
+import qs.services.config
 import qs.services.settings
 
 SettingPage {
@@ -8,7 +9,9 @@ SettingPage {
         anchors.fill: parent
         spacing: 10
 
-        SettingsHeader { title: "Advanced" }
+        SettingsHeader {
+            title: "Advanced"
+        }
 
         Text {
             Layout.fillWidth: true
@@ -26,10 +29,20 @@ SettingPage {
             dangerous: true
             checked: SettingsService.adaptiveLifecycleEnabled
             onActivated: SettingsService.openPage("developer_lifecycle")
-            onToggled: value => SettingsService.setSetting(
-                "adaptiveLifecycleEnabled", value)
+            onToggled: value => SettingsService.setSetting("adaptiveLifecycleEnabled", value)
         }
 
-        Item { Layout.fillHeight: true }
+        SettingToggle {
+            Layout.fillWidth: true
+            title: "Automatic DPMS on idle · Experimental"
+            description: "Dangerous · power displays off after the idle timeout"
+            dangerous: true
+            checked: ConfigService.experimentalDpmsOnIdle
+            onToggled: value => SettingsService.setSetting("experimentalDpmsOnIdle", value)
+        }
+
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }

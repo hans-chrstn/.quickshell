@@ -14,6 +14,7 @@ Singleton {
 
     property bool opened: false
     property bool closing: false
+    property bool warmRetained: false
     property string targetScreenName: ""
     property string selectedAssetId: ""
     property bool pickerOpened: false
@@ -198,10 +199,12 @@ Singleton {
 
     function open(preferredScreenName) {
         closeTimer.stop();
+        warmTimer.stop();
+        warmRetained = false;
         closing = false;
         targetScreenName = ScreenService.resolve(preferredScreenName || "");
         opened = true;
-        WallpaperPresentationService.setEditorState(true, false)
+        WallpaperPresentationService.setEditorState(true, false);
         inspectActiveProject();
         reconcileSelection();
     }
@@ -212,9 +215,13 @@ Singleton {
         WallpaperEditorOpenService.cancelPicker();
         cancelPicker();
         closeSaveAs();
+        if (WallpaperProjectService.dirty)
+            WallpaperProjectService.save();
         closing = true;
         opened = false;
-        WallpaperPresentationService.setEditorState(false, true)
+        warmRetained = true;
+        warmTimer.restart();
+        WallpaperPresentationService.setEditorState(false, true);
         closeTimer.restart();
         return true;
     }
@@ -223,10 +230,19 @@ Singleton {
         opened ? close() : open(preferredScreenName);
     }
 
+    function evictWarm(reason) {
+        if (opened || closing || !warmRetained)
+            return false;
+        warmTimer.stop();
+        warmRetained = false;
+        return true;
+    }
+
     function snapshot() {
         return {
             opened: opened,
             closing: closing,
+            warmRetained: warmRetained,
             targetScreenName: targetScreenName,
             projectId: activeProject?.project?.id || "",
             projectName: projectName,
@@ -293,8 +309,14 @@ Singleton {
         id: closeTimer
         interval: Design.contentRevealDuration
         onTriggered: {
-            root.closing = false
-            WallpaperPresentationService.setEditorState(false, false)
+            root.closing = false;
+            WallpaperPresentationService.setEditorState(false, false);
         }
+    }
+
+    Timer {
+        id: warmTimer
+        interval: Design.editorWarmRetentionMs
+        onTriggered: root.warmRetained = false
     }
 }

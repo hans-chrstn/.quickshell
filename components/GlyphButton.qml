@@ -52,6 +52,9 @@ Rectangle {
         id: tap
         enabled: root.enabled
         acceptedButtons: Qt.LeftButton
-        onTapped: root.activated()
+        onTapped: {
+            root.forceActiveFocus();
+            root.activated();
+        }
     }
 }

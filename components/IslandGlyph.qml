@@ -133,6 +133,21 @@ Canvas {
             ctx.moveTo(5.0, 11.0);
             ctx.lineTo(7.0, 13.0);
             ctx.stroke();
+        } else if (root.name === "undo" || root.name === "redo") {
+            const reverse = root.name === "redo";
+            const mirror = value => reverse ? 17 - value : value;
+            ctx.beginPath();
+            ctx.moveTo(mirror(3.2), 6.0);
+            ctx.lineTo(mirror(6.0), 6.0);
+            ctx.bezierCurveTo(mirror(11.2), 6.0, mirror(13.8), 7.0, mirror(13.8), 11.2);
+            ctx.bezierCurveTo(mirror(13.8), 13.0, mirror(12.2), 14.0, mirror(10.0), 14.0);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(mirror(3.2), 6.0);
+            ctx.lineTo(mirror(5.8), 3.8);
+            ctx.moveTo(mirror(3.2), 6.0);
+            ctx.lineTo(mirror(5.8), 8.2);
+            ctx.stroke();
         }
     }
 }

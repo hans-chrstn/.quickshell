@@ -31,6 +31,11 @@ QtObject {
         maximumHeight: root.expandedHeight
     }
     property bool revealWithExpansion: false
+    property bool lifecycleAdaptiveEligible: false
+    property bool lifecycleUsageActive: true
+    property real lifecycleEstimatedCostUnits: 0
+    property real lifecycleBasePriority: 0
+    property var lifecycleEvict: null
     property real revealStart: 0.22
     property real revealEnd: 0.72
 

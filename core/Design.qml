@@ -40,6 +40,7 @@ Singleton {
     readonly property int editorPanelRadius: 28
     readonly property int editorSectionRadius: 18
     readonly property int editorGap: 12
+    readonly property int editorWarmRetentionMs: 30000
 
     readonly property int revealDuration: SettingsService.revealDuration
     readonly property int resizeDuration: SettingsService.resizeDuration

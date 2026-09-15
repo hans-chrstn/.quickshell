@@ -104,8 +104,8 @@ Rectangle {
                 Text {
                     id: statusText
                     anchors.centerIn: parent
-                    text: "Foundation"
-                    color: Design.textMuted
+                    text: WallpaperProjectService.dirty ? "Unsaved" : "Saved"
+                    color: WallpaperProjectService.dirty ? Design.yellow : Design.textMuted
                     font.family: Design.fontText
                     font.pixelSize: 10
                     font.weight: Font.Medium
@@ -161,7 +161,13 @@ Rectangle {
                 target: projectPreview
                 function onPreviewPositionMsChanged() {
                     if (projectPreview.playing)
-                        timeline.playheadMs = projectPreview.previewPositionMs
+                        timeline.playheadMs = projectPreview.previewPositionMs;
+                }
+                function onLoopStartMsChanged() {
+                    timeline.loopStartMs = projectPreview.loopStartMs;
+                }
+                function onLoopEndMsChanged() {
+                    timeline.loopEndMs = projectPreview.loopEndMs;
                 }
             }
 
@@ -215,14 +221,19 @@ Rectangle {
             }
         }
 
-            EditorTimeline {
+        EditorTimeline {
             id: timeline
             Layout.fillWidth: true
             Layout.preferredHeight: root.editorLayout.timelineHeight
             previewPlaying: projectPreview.playing
             previewLooping: projectPreview.loopEnabled
+            loopStartMs: projectPreview.loopStartMs
+            loopEndMs: projectPreview.loopEndMs
             onPreviewPlayPauseRequested: projectPreview.togglePlayback()
             onPreviewLoopRequested: projectPreview.toggleLoop()
+            onLoopRegionChanged: (startMs, endMs) => projectPreview.setLoopRegion(startMs, endMs)
+            onUndoRequested: WallpaperTimelineService.undo()
+            onRedoRequested: WallpaperTimelineService.redo()
             onScrubStarted: projectPreview.pausePreview()
         }
     }

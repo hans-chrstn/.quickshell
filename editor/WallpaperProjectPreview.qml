@@ -77,6 +77,16 @@ Rectangle {
         return root.loopEnabled
     }
 
+    function setLoopRegion(startMs, endMs) {
+        const next = WallpaperPreviewState.setLoop(root.previewState(),
+            root.loopEnabled, startMs, endMs)
+        root.loopStartMs = next.loopStartMs
+        root.loopEndMs = next.loopEndMs
+        root.loopEnabled = next.loopEnabled
+        root.previewPositionMs = next.positionMs
+        return root.loopEnabled
+    }
+
     readonly property var frame: WallpaperPreviewState.frameAt(
         root.projectPlan, {
             durationMs: root.projectPlan?.durationMs || 0,

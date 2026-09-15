@@ -13,14 +13,10 @@ Item {
     property string screenName: ""
     property real availableWidth: 0
     property real availableHeight: 0
-    readonly property real collapsedImplicitWidth:
-        Number(moduleLoader.item?.collapsedImplicitWidth) || 0
-    readonly property real collapsedImplicitHeight:
-        Number(moduleLoader.item?.collapsedImplicitHeight) || 0
-    readonly property real expandedImplicitWidth:
-        Number(moduleLoader.item?.expandedImplicitWidth) || 0
-    readonly property real expandedImplicitHeight:
-        Number(moduleLoader.item?.expandedImplicitHeight) || 0
+    readonly property real collapsedImplicitWidth: Number(moduleLoader.item?.collapsedImplicitWidth) || 0
+    readonly property real collapsedImplicitHeight: Number(moduleLoader.item?.collapsedImplicitHeight) || 0
+    readonly property real expandedImplicitWidth: Number(moduleLoader.item?.expandedImplicitWidth) || 0
+    readonly property real expandedImplicitHeight: Number(moduleLoader.item?.expandedImplicitHeight) || 0
 
     readonly property QtObject moduleContext: QtObject {
         readonly property bool presented: root.presented
@@ -36,28 +32,33 @@ Item {
     LifecycleLoader {
         id: moduleLoader
         anchors.fill: parent
-        resourceId: "island.module." + root.screenName + "."
-            + (root.module?.moduleId ?? "none")
+        resourceId: "island.module." + root.screenName + "." + (root.module?.moduleId ?? "none")
         owner: "island.content." + root.screenName
         restorationSource: "ModuleRegistry and feature singleton service"
         classification: "active-only"
         requestedActive: root.module !== null
+        adaptiveEligible: root.module?.lifecycleAdaptiveEligible ?? false
+        usageActive: root.module?.lifecycleUsageActive ?? root.presented
+        estimatedCostUnits: root.module?.lifecycleEstimatedCostUnits ?? 0
+        basePriority: root.module?.lifecycleBasePriority ?? 0
         retentionReason: requestedActive ? "selected-module" : ""
         evictionReason: requestedActive ? "" : "no-active-module"
         sourceComponent: root.module?.view ?? null
         readonly property real revealProgress: {
             if (!root.module?.revealWithExpansion)
-                return 1
-            const span = root.module.revealEnd - root.module.revealStart
+                return 1;
+            const span = root.module.revealEnd - root.module.revealStart;
             if (span <= 0)
-                return root.expansionProgress >= root.module.revealEnd ? 1 : 0
-            return Math.max(0, Math.min(1,
-                (root.expansionProgress - root.module.revealStart) / span))
+                return root.expansionProgress >= root.module.revealEnd ? 1 : 0;
+            return Math.max(0, Math.min(1, (root.expansionProgress - root.module.revealStart) / span));
         }
-        opacity: root.returningToClock
-            ? root.expansionProgress : revealProgress
-        onInstanceLoaded: function(item) {
-            item.context = root.moduleContext
+        opacity: root.returningToClock ? root.expansionProgress : revealProgress
+        onInstanceLoaded: function (item) {
+            item.context = root.moduleContext;
+        }
+        onAdaptiveEvictionRequested: function (reason) {
+            if (root.module?.lifecycleEvict)
+                root.module.lifecycleEvict(reason);
         }
     }
 }

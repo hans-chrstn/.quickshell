@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell
 import "../../../core/JsonCopy.js" as JsonCopy
 import "WallpaperTimelineEdit.js" as TimelineEdit
 import "WallpaperTimelineDrop.js" as TimelineDrop
@@ -10,20 +11,65 @@ import "WallpaperTimelineGestureSession.js" as GestureSession
 import "WallpaperTimelinePlacement.js" as Placement
 import "WallpaperTimelineSelection.js" as TimelineSelection
 import "WallpaperTimelineTrackEdit.js" as TrackEdit
+import "WallpaperCommandHistory.js" as CommandHistory
 
-QtObject {
+Singleton {
     id: root
 
     property var session: GestureSession.idle("")
     property string error: ""
     property int gestureSequence: 0
     property var selection: TimelineSelection.empty("")
+    property var history: CommandHistory.empty(50)
+    property string historyProjectId: ""
     readonly property int projectRevision: WallpaperProjectService.revision
     readonly property bool gestureActive: session.active === true
+    readonly property bool canUndo: history.past.length > 0
+    readonly property bool canRedo: history.future.length > 0
 
     function activeDocument() {
         const id = WallpaperProjectService.activeProjectId;
         return id.length > 0 ? WallpaperProjectService.projectSnapshot(id) : null;
+    }
+
+    function recordHistory(before, after, label) {
+        if (historyProjectId.length === 0)
+            historyProjectId = WallpaperProjectService.activeProjectId;
+        history = CommandHistory.push(history, {
+            id: "timeline-command-" + Date.now().toString(36),
+            label: String(label || "Timeline edit"),
+            before: JsonCopy.value(before),
+            after: JsonCopy.value(after)
+        });
+    }
+
+    function applyHistoryDocument(document) {
+        if (!document || !WallpaperProjectService.upsertJson(JSON.stringify(document)))
+            return reject(WallpaperProjectService.error || "Timeline history could not be applied");
+        error = "";
+        return true;
+    }
+
+    function undo() {
+        const result = CommandHistory.undo(history);
+        if (!result.command)
+            return false;
+        if (!root.applyHistoryDocument(result.command.before))
+            return false;
+        history = result.state;
+        selection = TimelineSelection.normalize(selection, result.command.before.project?.tracks || []);
+        return true;
+    }
+
+    function redo() {
+        const result = CommandHistory.redo(history);
+        if (!result.command)
+            return false;
+        if (!root.applyHistoryDocument(result.command.after))
+            return false;
+        history = result.state;
+        selection = TimelineSelection.normalize(selection, result.command.after.project?.tracks || []);
+        return true;
     }
 
     function locateClip(document, clipId) {
@@ -62,6 +108,7 @@ QtObject {
             return reject(planned.error);
         if (!WallpaperProjectService.upsertJson(JSON.stringify(planned.document)))
             return reject(WallpaperProjectService.error || "Timeline drop could not be saved");
+        root.recordHistory(document, planned.document, "Add media to timeline");
         error = "";
         return true;
     }
@@ -106,6 +153,7 @@ QtObject {
             return reject(applied.error);
         if (!WallpaperProjectService.upsertJson(JSON.stringify(applied.document)))
             return reject(WallpaperProjectService.error || "Timeline clips could not be removed");
+        root.recordHistory(document, applied.document, "Remove timeline media");
         clearSelection();
         error = "";
         return true;
@@ -124,6 +172,7 @@ QtObject {
             return reject(added.error);
         if (!WallpaperProjectService.upsertJson(JSON.stringify(added.document)))
             return reject(WallpaperProjectService.error || "Timeline track could not be added");
+        root.recordHistory(document, added.document, "Add " + trackType + " track");
         selection = TimelineSelection.selectTrack(selection, added.document.project.tracks, trackId);
         error = "";
         return true;
@@ -144,6 +193,7 @@ QtObject {
             return reject(removed.error);
         if (!WallpaperProjectService.upsertJson(JSON.stringify(removed.document)))
             return reject(WallpaperProjectService.error || "Timeline track could not be removed");
+        root.recordHistory(document, removed.document, "Remove timeline track");
         selection = TimelineSelection.normalize(selection, removed.document.project.tracks);
         error = "";
         return true;
@@ -207,6 +257,7 @@ QtObject {
             return reject(applied.error);
         if (!WallpaperProjectService.upsertJson(JSON.stringify(applied.document)))
             return reject(WallpaperProjectService.error || "Timeline edit could not be saved");
+        root.recordHistory(document, applied.document, transition.command.type === "move-clip" ? "Move timeline media" : transition.command.type === "trim-clip-start" ? "Trim timeline media" : "Resize timeline media");
         session = transition.state;
         error = "";
         return true;
@@ -243,12 +294,28 @@ QtObject {
             gestureActive: gestureActive,
             error: error,
             session: session,
-            selection: selection
+            selection: selection,
+            history: {
+                canUndo: canUndo,
+                canRedo: canRedo,
+                depth: history.past.length
+            }
         });
     }
 
     onProjectRevisionChanged: {
         const document = activeDocument();
         selection = document ? TimelineSelection.normalize(selection, document.project.tracks) : TimelineSelection.empty("");
+    }
+
+    Connections {
+        target: WallpaperProjectService
+        function onActiveProjectIdChanged() {
+            const projectId = WallpaperProjectService.activeProjectId;
+            if (projectId !== root.historyProjectId) {
+                root.historyProjectId = projectId;
+                root.history = CommandHistory.empty(50);
+            }
+        }
     }
 }

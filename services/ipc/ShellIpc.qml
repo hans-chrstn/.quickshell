@@ -88,6 +88,9 @@ IpcHandler {
     function displayActivityStatus(): string {
         return JsonFormat.stringify(DisplayActivityService.snapshot());
     }
+    function displayPowerControlStatus(): string {
+        return JsonFormat.stringify(DisplayPowerControlService.snapshot());
+    }
     function displayActivityTestSetIdle(idle: bool): bool {
         return DisplayActivityService.setSyntheticIdle(idle);
     }

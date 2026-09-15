@@ -2,122 +2,73 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
+import qs.components.lifecycle
 import "../../core/JsonCopy.js" as JsonCopy
 
 Singleton {
     id: root
 
     property var consumerScreens: ({})
-    property var poweredScreens: ({})
-    property string error: ""
-
+    readonly property var poweredScreens: observer.item?.screens || ({})
+    readonly property bool available: observer.item?.available === true
+    readonly property string error: observer.status === Loader.Error ? "Display-power provider failed to load" : observer.item?.error || ""
     readonly property int consumers: {
-        let total = 0
+        let total = 0;
         for (const name in consumerScreens)
-            total += Number(consumerScreens[name]) || 0
-        return total
+            total += Number(consumerScreens[name]) || 0;
+        return total;
     }
     readonly property bool observing: consumers > 0
 
     function acquire(screenName) {
-        const name = String(screenName || "").trim()
-        if (name.length === 0)
-            return
-        const updated = Object.assign({}, consumerScreens)
-        updated[name] = (Number(updated[name]) || 0) + 1
-        consumerScreens = updated
-        refresh()
+        const name = String(screenName || "").trim();
+        if (!name.length)
+            return;
+        const updated = Object.assign({}, consumerScreens);
+        updated[name] = (Number(updated[name]) || 0) + 1;
+        consumerScreens = updated;
     }
 
     function release(screenName) {
-        const name = String(screenName || "").trim()
-        const updated = Object.assign({}, consumerScreens)
-        const count = Math.max(0, (Number(updated[name]) || 0) - 1)
-        if (count > 0)
-            updated[name] = count
+        const name = String(screenName || "").trim();
+        const updated = Object.assign({}, consumerScreens);
+        const count = Math.max(0, (Number(updated[name]) || 0) - 1);
+        if (count)
+            updated[name] = count;
         else
-            delete updated[name]
-        consumerScreens = updated
-        if (consumers === 0) {
-            evaluationTimer.stop()
-            poweredScreens = ({})
-            error = ""
-        }
-    }
-
-    function refresh() {
-        if (consumers === 0)
-            return
-        if (typeof Hyprland.refreshMonitors !== "function") {
-            error = "Native Hyprland monitor refresh is unavailable"
-            return
-        }
-        Hyprland.refreshMonitors()
-        evaluationTimer.restart()
-    }
-
-    function evaluate() {
-        const updated = ({})
-        const monitors = Hyprland.monitors?.values || []
-        for (const name in consumerScreens) {
-            let powered = true
-            for (const monitor of monitors) {
-                const data = monitor?.lastIpcObject || ({})
-                if (String(monitor?.name || data.name || "") !== name)
-                    continue
-                powered = data.dpmsStatus !== false && data.disabled !== true
-                break
-            }
-            updated[name] = powered
-        }
-        poweredScreens = updated
-        error = ""
+            delete updated[name];
+        consumerScreens = updated;
     }
 
     function powered(screenName) {
-        const name = String(screenName || "")
-        return poweredScreens[name] !== false
+        return poweredScreens[String(screenName || "")] === true;
     }
 
     function known(screenName) {
-        const name = String(screenName || "")
-        return poweredScreens[name] !== undefined
+        return poweredScreens[String(screenName || "")] !== undefined;
     }
 
-    Timer {
-        interval: 2000
-        repeat: true
-        running: root.observing
-        onTriggered: root.refresh()
-    }
-
-    Timer {
-        id: evaluationTimer
-        interval: 50
-        repeat: false
-        onTriggered: root.evaluate()
-    }
-
-    Connections {
-        target: Hyprland
-        enabled: root.observing
-        function onRawEvent(event) {
-            const name = String(event?.name || "")
-            if (name === "monitoradded" || name === "monitoraddedv2"
-                    || name === "monitorremoved" || name === "monitorremovedv2")
-                root.refresh()
-        }
+    LifecycleLoader {
+        id: observer
+        resourceId: "display.power-observer"
+        owner: "wallpaper-monitor-power-service"
+        restorationSource: "Wayland initial output-power events"
+        classification: "active-only"
+        requestedActive: root.observing
+        retentionReason: requestedActive ? "display-power-consumers" : ""
+        evictionReason: requestedActive ? "" : "no-display-power-consumers"
+        source: Qt.resolvedUrl("../display/DisplayPowerProvider.qml")
     }
 
     function snapshot() {
         return {
             consumers: consumers,
             observing: observing,
-            intervalMs: 2000,
-            backend: "quickshell-native-hyprland",
+            available: available,
+            intervalMs: 0,
+            backend: "wlr-output-power-management-v1",
             screens: JsonCopy.value(poweredScreens),
             error: error
-        }
+        };
     }
 }

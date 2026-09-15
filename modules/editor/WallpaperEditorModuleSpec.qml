@@ -8,10 +8,14 @@ IslandModule {
 
     moduleId: "wallpaper-editor"
     priority: 95
-    active: (WallpaperEditorService.opened || WallpaperEditorService.closing)
-        && WallpaperEditorService.targetScreenName === screenName
+    active: (WallpaperEditorService.opened || WallpaperEditorService.closing || WallpaperEditorService.warmRetained) && WallpaperEditorService.targetScreenName === screenName
     attention: active && !WallpaperEditorService.closing
     wantsKeyboard: WallpaperEditorService.opened
+    lifecycleAdaptiveEligible: WallpaperEditorService.warmRetained
+    lifecycleUsageActive: WallpaperEditorService.opened
+    lifecycleEstimatedCostUnits: 80
+    lifecycleBasePriority: priority
+    lifecycleEvict: reason => WallpaperEditorService.evictWarm(reason)
     collapsedWidth: Design.collapsedWidth
     expandedWidth: Design.editorMaximumWidth
     expandedHeight: Design.editorMaximumHeight
@@ -37,5 +41,7 @@ IslandModule {
         maximumHeight: Design.editorMaximumHeight
     }
 
-    view: Component { WallpaperEditorModule {} }
+    view: Component {
+        WallpaperEditorModule {}
+    }
 }

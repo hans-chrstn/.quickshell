@@ -8,6 +8,7 @@ import qs.components.lifecycle
 import qs.panels
 import qs.services.ipc
 import qs.services.config
+import qs.services.display
 import qs.services.launcher
 import qs.services.notifications
 import qs.services.session
@@ -15,6 +16,10 @@ import qs.services.wallpaper
 import qs.services.wallpaper.projects
 
 ShellRoot {
+    // Instantiate the opt-in controller once at the root. It remains inert
+    // while disabled and owns no polling or display state itself.
+    readonly property var displayPowerControl: DisplayPowerControlService
+
     ShellIpc {}
 
     NotificationDaemon {}
@@ -29,7 +34,9 @@ ShellRoot {
         requestedActive: ConfigService.automaticWallpaperCacheCleanup
         retentionReason: requestedActive ? "automatic-cleanup-enabled" : ""
         evictionReason: requestedActive ? "" : "automatic-cleanup-disabled"
-        sourceComponent: Component { WallpaperCacheCoordinator {} }
+        sourceComponent: Component {
+            WallpaperCacheCoordinator {}
+        }
     }
 
     GlobalShortcut {

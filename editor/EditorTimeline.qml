@@ -17,33 +17,51 @@ Rectangle {
     readonly property real labelRailWidth: Math.min(116, Math.max(86, width * 0.11))
     readonly property real viewportOriginX: 10 + labelRailWidth
     readonly property real viewportWidth: Math.max(1, width - viewportOriginX - 10)
+    readonly property real minimumTimelinePixelsPerSecond: Math.max(1, Math.min(20, viewportWidth * 1000 / Math.max(1000, displayDurationMs)))
     property real pixelsPerSecond: 80
     property real scrollX: 0
     property int playheadMs: 0
     property bool previewPlaying: false
     property bool previewLooping: false
+    property int loopStartMs: 0
+    property int loopEndMs: 0
     property bool scrubbing: false
+    property bool snappingEnabled: true
     property bool dropPreviewVisible: false
     property string dropPreviewTrackId: ""
     property int dropPreviewTimeMs: 0
     property int dropPreviewDurationMs: 5000
     signal previewPlayPauseRequested
     signal previewLoopRequested
+    signal undoRequested
+    signal redoRequested
+    signal loopRegionChanged(int startMs, int endMs)
     signal scrubStarted
     signal scrubFinished
     readonly property var viewport: Viewport.normalize({
         durationMs: displayDurationMs,
         viewportWidth: viewportWidth,
         pixelsPerSecond: pixelsPerSecond,
-        minimumPixelsPerSecond: 20,
+        minimumPixelsPerSecond: minimumTimelinePixelsPerSecond,
         maximumPixelsPerSecond: 800,
         scrollX: scrollX
     })
     readonly property var rulerData: Ruler.ticks(viewport, 40, 10, 62, 256)
     readonly property var playhead: Ruler.playhead(viewport, playheadMs)
+    readonly property real loopStartX: Viewport.timeToViewportX(viewport, loopStartMs)
+    readonly property real loopEndX: Viewport.timeToViewportX(viewport, loopEndMs)
+    readonly property real visibleLoopStartX: Math.max(0, Math.min(viewportWidth, loopStartX))
+    readonly property real visibleLoopEndX: Math.max(0, Math.min(viewportWidth, loopEndX))
 
     function assetFor(assetId) {
         return (project?.assets || []).find(asset => asset.id === assetId) || null;
+    }
+
+    function displayClip(clip) {
+        const preview = WallpaperTimelineService.session?.preview;
+        if (preview?.clipId !== clip.id || !preview.timing)
+            return clip;
+        return Object.assign({}, clip, preview.timing);
     }
 
     function trackAcceptsDrag(track, dragSource) {
@@ -87,12 +105,24 @@ Rectangle {
         scrollX = next.scrollX;
     }
 
+    function scrollFromOverview(localX) {
+        const state = Viewport.normalize(viewport);
+        const thumbWidth = Math.max(24, viewportWidth * viewportWidth / Math.max(viewportWidth, state.contentWidth));
+        const center = Math.max(0, Math.min(viewportWidth, Number(localX) - thumbWidth / 2));
+        const travel = Math.max(1, viewportWidth - thumbWidth);
+        scrollX = state.maximumScrollX * center / travel;
+    }
+
     radius: Design.editorSectionRadius
     color: Qt.rgba(1, 1, 1, 0.025)
     border.width: 1
     border.color: Qt.rgba(1, 1, 1, 0.045)
     clip: true
     focus: true
+
+    Component.onCompleted: forceActiveFocus()
+    onVisibleChanged: if (visible)
+        forceActiveFocus()
 
     Keys.onPressed: event => {
         if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_A) {
@@ -103,6 +133,32 @@ Rectangle {
                 WallpaperTimelineService.removeSelectedClips();
                 event.accepted = true;
             }
+        } else if (event.key === Qt.Key_Home) {
+            root.playheadMs = 0;
+            root.scrollX = 0;
+            event.accepted = true;
+        } else if (event.key === Qt.Key_End) {
+            root.playheadMs = root.projectDurationMs;
+            root.scrollX = root.viewport.maximumScrollX;
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageUp) {
+            root.scrollBy(-root.viewportWidth * 0.8);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_PageDown) {
+            root.scrollBy(root.viewportWidth * 0.8);
+            event.accepted = true;
+        } else if (event.key === Qt.Key_Space) {
+            root.previewPlayPauseRequested();
+            event.accepted = true;
+        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Z) {
+            if (event.modifiers & Qt.ShiftModifier)
+                root.redoRequested();
+            else
+                root.undoRequested();
+            event.accepted = true;
+        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Y) {
+            root.redoRequested();
+            event.accepted = true;
         }
     }
 
@@ -131,24 +187,54 @@ Rectangle {
                 implicitWidth: 25
                 implicitHeight: 25
                 glyph: root.previewPlaying ? "pause" : "play"
-                accessibleName: root.previewPlaying
-                    ? "Pause preview" : "Play preview"
+                accessibleName: root.previewPlaying ? "Pause preview" : "Play preview"
                 toolTip: accessibleName
                 enabled: root.projectDurationMs > 0
                 primary: root.previewPlaying
-                onActivated: root.previewPlayPauseRequested()
+                onActivated: {
+                    root.forceActiveFocus();
+                    root.previewPlayPauseRequested();
+                }
             }
 
             GlyphButton {
                 implicitWidth: 25
                 implicitHeight: 25
                 glyph: "repeat"
-                accessibleName: root.previewLooping
-                    ? "Disable preview loop" : "Enable preview loop"
+                accessibleName: root.previewLooping ? "Disable preview loop" : "Enable preview loop"
                 toolTip: accessibleName
                 primary: root.previewLooping
                 enabled: root.projectDurationMs > 0
-                onActivated: root.previewLoopRequested()
+                onActivated: {
+                    root.forceActiveFocus();
+                    root.previewLoopRequested();
+                }
+            }
+
+            GlyphButton {
+                implicitWidth: 25
+                implicitHeight: 25
+                glyph: "undo"
+                accessibleName: "Undo timeline edit"
+                toolTip: accessibleName
+                enabled: WallpaperTimelineService.canUndo
+                onActivated: {
+                    root.forceActiveFocus();
+                    root.undoRequested();
+                }
+            }
+
+            GlyphButton {
+                implicitWidth: 25
+                implicitHeight: 25
+                glyph: "redo"
+                accessibleName: "Redo timeline edit"
+                toolTip: accessibleName
+                enabled: WallpaperTimelineService.canRedo
+                onActivated: {
+                    root.forceActiveFocus();
+                    root.redoRequested();
+                }
             }
 
             GlyphButton {
@@ -245,20 +331,18 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
                     preventStealing: true
                     onPressed: mouse => {
-                        root.scrubbing = true
-                        root.scrubStarted()
-                        root.playheadMs = Viewport.viewportXToTime(
-                            root.viewport, mouse.x)
+                        root.scrubbing = true;
+                        root.scrubStarted();
+                        root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
                     }
                     onPositionChanged: mouse => {
                         if (root.scrubbing)
-                            root.playheadMs = Viewport.viewportXToTime(
-                                root.viewport, mouse.x)
+                            root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
                     }
                     onReleased: {
                         if (root.scrubbing)
-                            root.scrubFinished()
-                        root.scrubbing = false
+                            root.scrubFinished();
+                        root.scrubbing = false;
                     }
                     onCanceled: root.scrubbing = false
                 }
@@ -346,9 +430,8 @@ Rectangle {
                             acceptedButtons: Qt.LeftButton
                             propagateComposedEvents: true
                             onDoubleClicked: mouse => {
-                                root.forceActiveFocus()
-                                root.playheadMs = Viewport.viewportXToTime(
-                                    root.viewport, mouse.x)
+                                root.forceActiveFocus();
+                                root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
                             }
                         }
 
@@ -371,11 +454,13 @@ Rectangle {
                                 id: clipItem
                                 required property var modelData
                                 readonly property var timelineClip: modelData
+                                readonly property var visibleClip: root.displayClip(timelineClip)
                                 readonly property var timelineAsset: root.assetFor(timelineClip.assetId)
+                                readonly property var timelineRoot: root
 
-                                x: Viewport.timeToViewportX(root.viewport, timelineClip.startMs)
+                                x: Viewport.timeToViewportX(root.viewport, visibleClip.startMs)
                                 y: 4
-                                width: Math.max(12, timelineClip.durationMs * root.viewport.pixelsPerSecond / 1000)
+                                width: Math.max(12, visibleClip.durationMs * root.viewport.pixelsPerSecond / 1000)
                                 height: parent.height - 8
                                 clipData: timelineClip
                                 assetData: timelineAsset
@@ -386,14 +471,34 @@ Rectangle {
                                 }
                                 onDoubleActivated: (localX, modifiers) => {
                                     root.forceActiveFocus();
-                                    root.playheadMs = Viewport.viewportXToTime(
-                                        root.viewport, clipItem.x + localX);
+                                    root.playheadMs = Viewport.viewportXToTime(root.viewport, clipItem.x + localX);
                                 }
                                 onContextRequested: (localX, localY, modifiers) => {
                                     root.forceActiveFocus();
                                     if (WallpaperTimelineService.selection.clipIds.indexOf(timelineClip.id) < 0)
                                         WallpaperTimelineService.selectClip(trackLane.trackData.id, timelineClip.id, root.selectionMode(modifiers));
                                     clipMenu.openFor(clipItem, localX, localY);
+                                }
+                                onGestureStarted: (mode, localX) => {
+                                    root.forceActiveFocus();
+                                    root.scrubbing = true;
+                                    root.scrubStarted();
+                                    const x = clipItem.mapToItem(root, localX, 0).x - root.viewportOriginX;
+                                    WallpaperTimelineService.beginGesture(mode, timelineClip.id, trackLane.trackData.id, x, root.viewport.pixelsPerSecond, 8, timelineAsset?.media?.durationMs || 0);
+                                }
+                                onGestureMoved: localX => {
+                                    const x = clipItem.mapToItem(root, localX, 0).x - root.viewportOriginX;
+                                    WallpaperTimelineService.updateGesture(x, root.snappingEnabled);
+                                }
+                                onGestureFinished: {
+                                    if (WallpaperTimelineService.gestureActive)
+                                        WallpaperTimelineService.finishGesture();
+                                    clipItem.timelineRoot.scrubbing = false;
+                                }
+                                onGestureCanceled: {
+                                    if (WallpaperTimelineService.gestureActive)
+                                        WallpaperTimelineService.cancelGesture();
+                                    clipItem.timelineRoot.scrubbing = false;
                                 }
                             }
                         }
@@ -488,27 +593,81 @@ Rectangle {
             preventStealing: true
             cursorShape: Qt.SizeHorCursor
             onPressed: mouse => {
-                root.forceActiveFocus()
-                root.scrubbing = true
-                root.scrubStarted()
-                root.playheadMs = Viewport.viewportXToTime(root.viewport,
-                    playheadDragArea.mapToItem(root, mouse.x, 0).x
-                        - root.viewportOriginX)
+                root.forceActiveFocus();
+                root.scrubbing = true;
+                root.scrubStarted();
+                root.playheadMs = Viewport.viewportXToTime(root.viewport, playheadDragArea.mapToItem(root, mouse.x, 0).x - root.viewportOriginX);
             }
             onPositionChanged: mouse => {
                 if (root.scrubbing)
-                    root.playheadMs = Viewport.viewportXToTime(root.viewport,
-                        playheadDragArea.mapToItem(root, mouse.x, 0).x
-                            - root.viewportOriginX)
+                    root.playheadMs = Viewport.viewportXToTime(root.viewport, playheadDragArea.mapToItem(root, mouse.x, 0).x - root.viewportOriginX);
             }
             onReleased: {
                 if (root.scrubbing)
-                    root.scrubFinished()
-                root.scrubbing = false
+                    root.scrubFinished();
+                root.scrubbing = false;
             }
             onCanceled: root.scrubbing = false
         }
+    }
 
+    Rectangle {
+        visible: root.previewLooping && root.loopEndMs > root.loopStartMs && root.loopEndX > 0 && root.loopStartX < root.viewportWidth
+        x: root.viewportOriginX + root.visibleLoopStartX
+        y: 42
+        width: Math.max(1, root.visibleLoopEndX - root.visibleLoopStartX)
+        height: 3
+        radius: 1.5
+        color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.48)
+        z: 2
+    }
+
+    Repeater {
+        model: root.previewLooping ? ["start", "end"] : []
+        delegate: Rectangle {
+            required property string modelData
+            readonly property bool startHandle: modelData === "start"
+            readonly property real handleX: startHandle ? root.loopStartX : root.loopEndX
+            x: root.viewportOriginX + (startHandle ? root.loopStartX : root.loopEndX) - width / 2
+            y: 36
+            width: 5
+            height: 15
+            visible: root.previewLooping && handleX >= 0 && handleX <= root.viewportWidth
+            color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.86)
+            radius: 4
+            z: 8
+
+            MouseArea {
+                id: loopHandleDrag
+                anchors.fill: parent
+                anchors.margins: -5
+                acceptedButtons: Qt.LeftButton
+                preventStealing: true
+                cursorShape: Qt.SizeHorCursor
+                onPressed: mouse => {
+                    root.forceActiveFocus();
+                    root.scrubbing = true;
+                    root.scrubStarted();
+                }
+                onPositionChanged: mouse => {
+                    if (!root.scrubbing)
+                        return;
+                    const localX = loopHandleDrag.mapToItem(root, mouse.x, 0).x - root.viewportOriginX;
+                    const time = Viewport.viewportXToTime(root.viewport, localX);
+                    if (startHandle)
+                        root.loopStartMs = Math.min(time, root.loopEndMs - 1);
+                    else
+                        root.loopEndMs = Math.max(time, root.loopStartMs + 1);
+                    root.loopRegionChanged(root.loopStartMs, root.loopEndMs);
+                }
+                onReleased: {
+                    if (root.scrubbing)
+                        root.scrubFinished();
+                    root.scrubbing = false;
+                }
+                onCanceled: root.scrubbing = false
+            }
+        }
     }
 
     Rectangle {
@@ -546,6 +705,41 @@ Rectangle {
                 root.scrollBy(-amount * 0.8);
             }
             wheel.accepted = true;
+        }
+    }
+
+    Item {
+        id: timelineOverview
+        visible: root.viewport.maximumScrollX > 0
+        x: root.viewportOriginX
+        y: root.height - 9
+        width: root.viewportWidth
+        height: 4
+        z: 9
+
+        Rectangle {
+            anchors.fill: parent
+            radius: 2
+            color: Qt.rgba(1, 1, 1, 0.035)
+        }
+
+        Rectangle {
+            id: overviewThumb
+            x: root.viewport.maximumScrollX > 0 ? root.scrollX / root.viewport.maximumScrollX * Math.max(0, parent.width - overviewThumb.width) : 0
+            width: Math.max(28, parent.width * parent.width / Math.max(parent.width, root.viewport.contentWidth))
+            height: parent.height
+            radius: 2
+            color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.58)
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            onPressed: mouse => root.scrollFromOverview(mouse.x)
+            onPositionChanged: mouse => {
+                if (pressed)
+                    root.scrollFromOverview(mouse.x);
+            }
         }
     }
 

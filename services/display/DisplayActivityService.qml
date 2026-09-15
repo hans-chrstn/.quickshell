@@ -11,8 +11,14 @@ Singleton {
     property var consumerScreens: ({})
     property int syntheticIdleState: -1
     property bool observerReady: false
-    readonly property int idleTimeoutSeconds:
-        ConfigService.wallpaperIdleTimeoutSeconds
+    readonly property int idleTimeoutSeconds: {
+        if (Quickshell.env("QS_TEST_MODE") === "1") {
+            const requested = Number(Quickshell.env("QS_IDLE_TIMEOUT_SECONDS"))
+            if (Number.isFinite(requested) && requested >= 1 && requested <= 7200)
+                return Math.round(requested)
+        }
+        return ConfigService.wallpaperIdleTimeoutSeconds
+    }
     readonly property int consumers: {
         let total = 0
         for (const name in consumerScreens)

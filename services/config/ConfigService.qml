@@ -25,6 +25,7 @@ Singleton {
     property alias experimentalFloatingWallpaperSuspension: data.experimentalFloatingWallpaperSuspension
     property alias experimentalPauseWallpaperOnBattery: data.experimentalPauseWallpaperOnBattery
     property alias pauseWallpaperWhenIdle: data.pauseWallpaperWhenIdle
+    property alias experimentalDpmsOnIdle: data.experimentalDpmsOnIdle
     property alias wallpaperIdleTimeoutSeconds: data.wallpaperIdleTimeoutSeconds
     property alias wallpaperTransitionsEnabled: data.wallpaperTransitionsEnabled
     property alias wallpaperTransitionDuration: data.wallpaperTransitionDuration
@@ -124,6 +125,9 @@ Singleton {
                 type: "bool"
             },
             pauseWallpaperWhenIdle: {
+                type: "bool"
+            },
+            experimentalDpmsOnIdle: {
                 type: "bool"
             },
             wallpaperIdleTimeoutSeconds: {
@@ -421,6 +425,7 @@ Singleton {
             property bool experimentalFloatingWallpaperSuspension: false
             property bool experimentalPauseWallpaperOnBattery: false
             property bool pauseWallpaperWhenIdle: true
+            property bool experimentalDpmsOnIdle: false
             property int wallpaperIdleTimeoutSeconds: 300
             property bool wallpaperTransitionsEnabled: true
             property int wallpaperTransitionDuration: 420
