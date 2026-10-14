@@ -11,15 +11,17 @@ Singleton {
     property string initialPath: Quickshell.env("HOME") || "/"
     property string selectedPath: ""
     property string error: ""
-    readonly property bool busy: WallpaperPublishedProjectInspectionService.busy
-    readonly property real progress: WallpaperPublishedProjectInspectionService.progress
+    property int activeInspectionRequestId: 0
+    readonly property bool busy: activeInspectionRequestId > 0 && WallpaperPublishedProjectInspectionService.busy && WallpaperPublishedProjectInspectionService.activeRequestId === activeInspectionRequestId
+    readonly property real progress: busy ? WallpaperPublishedProjectInspectionService.progress : 0
 
     signal finished(bool accepted, string error, string projectId)
 
     function openPicker(path) {
-        if (busy)
+        if (activeInspectionRequestId > 0)
             return false;
-        WallpaperPublishedProjectInspectionService.reset();
+        if (WallpaperPublishedProjectInspectionService.readyForRequest)
+            WallpaperPublishedProjectInspectionService.reset();
         initialPath = String(path || Quickshell.env("HOME") || "/");
         selectedPath = "";
         error = "";
@@ -28,21 +30,30 @@ Singleton {
     }
 
     function cancelPicker() {
-        if (busy)
-            return false;
+        const requestId = activeInspectionRequestId;
+        activeInspectionRequestId = 0;
         pickerOpened = false;
         selectedPath = "";
         error = "";
-        WallpaperPublishedProjectInspectionService.reset();
+        if (requestId > 0)
+            WallpaperPublishedProjectInspectionService.cancel(requestId);
+        else if (WallpaperPublishedProjectInspectionService.readyForRequest)
+            WallpaperPublishedProjectInspectionService.reset();
         return true;
     }
 
     function choose(path) {
-        if (!pickerOpened || busy)
+        if (!pickerOpened || activeInspectionRequestId > 0)
             return false;
         selectedPath = String(path || "");
         error = "";
-        return WallpaperPublishedProjectInspectionService.request(selectedPath);
+        const requestId = WallpaperPublishedProjectInspectionService.request(selectedPath);
+        if (!requestId) {
+            error = WallpaperPublishedProjectInspectionService.error || "Project inspection is not ready";
+            return false;
+        }
+        activeInspectionRequestId = requestId;
+        return true;
     }
 
     function commit(result) {
@@ -54,6 +65,7 @@ Singleton {
             return reject(WallpaperProjectService.error || "Project could not be added to the library");
         if (!WallpaperProjectService.selectProject(projectId))
             return reject(WallpaperProjectService.error || "Opened project could not be selected");
+        activeInspectionRequestId = 0;
         pickerOpened = false;
         error = "";
         finished(true, "", projectId);
@@ -71,6 +83,7 @@ Singleton {
             pickerOpened: pickerOpened,
             initialPath: initialPath,
             selectedPath: selectedPath,
+            activeInspectionRequestId: activeInspectionRequestId,
             busy: busy,
             progress: progress,
             error: error,
@@ -80,7 +93,10 @@ Singleton {
 
     Connections {
         target: WallpaperPublishedProjectInspectionService
-        function onFinished(accepted, inspectionError, result) {
+        function onFinished(accepted, inspectionError, result, requestId) {
+            if (requestId !== root.activeInspectionRequestId)
+                return;
+            root.activeInspectionRequestId = 0;
             if (!accepted)
                 root.reject(inspectionError);
             else

@@ -3,25 +3,21 @@ import QtQuick.Layouts
 import qs.components
 import qs.core
 
-Rectangle {
+HighlightableSurface {
     id: root
 
     required property string title
     required property string description
     required property bool checked
     property bool dangerous: false
-    signal activated()
+    signal activated
     signal toggled(bool newValue)
 
     implicitHeight: 52
-    radius: 10
-    color: navigationHover.hovered ? Design.surfaceRaised : Design.surface
-    border.width: 1
-    border.color: navigationHover.hovered
-        ? Design.glassHighlight : Design.separator
-
-    Behavior on color { ColorAnimation { duration: 110 } }
-    Behavior on border.color { ColorAnimation { duration: 110 } }
+    interactive: false
+    focused: navigationHover.hovered
+    baseColor: Design.surface
+    cornerRadius: 10
 
     RowLayout {
         anchors.fill: parent
@@ -61,15 +57,18 @@ Rectangle {
 
                 IslandGlyph {
                     name: "chevronRight"
-                    glyphColor: navigationHover.hovered
-                        ? Design.text : Design.textMuted
+                    glyphColor: navigationHover.hovered ? Design.text : Design.textMuted
                     Layout.preferredWidth: 17
                     Layout.preferredHeight: 17
                 }
             }
 
-            HoverHandler { id: navigationHover }
-            TapHandler { onTapped: root.activated() }
+            HoverHandler {
+                id: navigationHover
+            }
+            TapHandler {
+                onTapped: root.activated()
+            }
         }
 
         Rectangle {
@@ -80,7 +79,11 @@ Rectangle {
             border.width: 1
             border.color: Design.separator
 
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
+            }
 
             Rectangle {
                 x: root.checked ? parent.width - width - 2 : 2
@@ -97,7 +100,9 @@ Rectangle {
                 }
             }
 
-            TapHandler { onTapped: root.toggled(!root.checked) }
+            TapHandler {
+                onTapped: root.toggled(!root.checked)
+            }
         }
     }
 }

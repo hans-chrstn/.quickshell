@@ -128,6 +128,7 @@
         system:
         let
           pkgs = import nixpkgs { inherit system; };
+          wrappedShell = self.packages.${system}.quickshell;
           qualityTools = [
             pkgs.git
             pkgs.bash
@@ -150,7 +151,12 @@
             root=$(git rev-parse --show-toplevel)
             cd "$root"
             if (($#)); then files=("$@"); else
-              mapfile -t files < <(git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**')
+              mapfile -t files < <(
+                {
+                  git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**'
+                  git ls-files --others --exclude-standard -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**'
+                } | sort -u
+              )
             fi
             status=0
             tmp=$(mktemp -d)
@@ -158,7 +164,7 @@
             for file in "''${files[@]}"; do
               [[ -f "$file" ]] || continue
               case "$file" in
-                *.qml)
+                *.qml|*.js)
                   out="$tmp/$(basename "$file")"
                   if ! qmlformat "$file" > "$out"; then echo "format: qmlformat failed: $file" >&2; status=1
                   elif ! diff -u "$file" "$out" >/dev/null; then echo "format: $file is not qmlformat-clean" >&2; status=1; fi ;;
@@ -171,16 +177,23 @@
           format = ''
             root=$(git rev-parse --show-toplevel)
             cd "$root"
-            if (($#)); then files=("$@"); else mapfile -t files < <(rg --files -g '*.qml' -g '*.cpp' -g '*.h' -g 'flake.nix' -g '!temp/**' -g '!notes/**' -g '!result/**'); fi
+            if (($#)); then files=("$@"); else mapfile -t files < <(rg --files -g '*.qml' -g '*.js' -g '*.cpp' -g '*.h' -g 'flake.nix' -g '!temp/**' -g '!notes/**' -g '!result/**'); fi
             for file in "''${files[@]}"; do
               [[ -f "$file" ]] || continue
-              case "$file" in *.qml) qmlformat -i "$file" ;; *.cpp|*.h) clang-format -i "$file" ;; flake.nix) nixfmt "$file" ;; esac
+              case "$file" in *.qml|*.js) qmlformat -i "$file" ;; *.cpp|*.h) clang-format -i "$file" ;; flake.nix) nixfmt "$file" ;; esac
             done
           '';
           lint = ''
             root=$(git rev-parse --show-toplevel)
             cd "$root"
-            if (($#)); then files=("$@"); else mapfile -t files < <(git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' ':!temp/**' ':!notes/**'); fi
+            if (($#)); then files=("$@"); else
+              mapfile -t files < <(
+                {
+                  git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.js' ':!temp/**' ':!notes/**'
+                  git ls-files --others --exclude-standard -- '*.qml' '*.js' ':!temp/**' ':!notes/**'
+                } | sort -u
+              )
+            fi
             status=0
             lintArgs=(--max-warnings -1 --import disable --missing-property disable --missing-type disable --unresolved-type disable --unqualified disable --access-singleton-via-object disable --signal-handler-parameters disable)
             for file in "''${files[@]}"; do [[ -f "$file" ]] || continue; qmllint "''${lintArgs[@]}" "$file" || status=1; done
@@ -189,7 +202,7 @@
           test = ''
             root=$(git rev-parse --show-toplevel)
             cd "$root"
-            export QML2_IMPORT_PATH="${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${pkgs.kdePackages.qtmultimedia}/lib/qt-6/qml:${pkgs.kdePackages.kirigami.unwrapped}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
+            export QML2_IMPORT_PATH="${wrappedShell}/lib/qt-6/qml:${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${pkgs.kdePackages.qtmultimedia}/lib/qt-6/qml:${pkgs.kdePackages.kirigami.unwrapped}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
             exec qmltestrunner "$@"
           '';
         in

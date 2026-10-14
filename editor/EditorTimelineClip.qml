@@ -1,12 +1,12 @@
 import QtQuick
+import qs.components
 import qs.core
 
-Rectangle {
+HighlightableSurface {
     id: root
 
     required property var clipData
     required property var assetData
-    property bool selected: false
     signal activated(int modifiers)
     signal doubleActivated(real localX, int modifiers)
     signal contextRequested(real localX, real localY, int modifiers)
@@ -20,21 +20,12 @@ Rectangle {
     readonly property color accent: assetKind === "video" ? Design.blue : assetKind === "animated-image" ? Design.yellow : assetKind === "audio" ? Design.green : Design.textMuted
     readonly property real edgeZone: Math.min(18, Math.max(8, width * 0.2))
 
-    radius: 8
-    color: Qt.rgba(accent.r, accent.g, accent.b, selected ? 0.28 : 0.18)
-    border.width: selected ? 1.5 : 1
-    border.color: Qt.rgba(accent.r, accent.g, accent.b, selected ? 0.9 : 0.48)
+    interactive: false
+    accentColor: accent
+    baseColor: Qt.rgba(accent.r, accent.g, accent.b, 0.12)
+    cornerRadius: 8
     opacity: clipData?.enabled === false ? 0.48 : 1
     clip: true
-
-    Rectangle {
-        anchors.left: parent.left
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        width: 3
-        color: root.accent
-        opacity: 0.9
-    }
 
     Rectangle {
         anchors.left: parent.left
@@ -43,7 +34,7 @@ Rectangle {
         width: 2
         radius: 1
         color: root.accent
-        opacity: hover.hovered ? 0.85 : 0
+        opacity: root.highlighted ? 0.9 : 0
     }
 
     Rectangle {
@@ -53,7 +44,7 @@ Rectangle {
         width: 2
         radius: 1
         color: root.accent
-        opacity: hover.hovered ? 0.85 : 0
+        opacity: root.highlighted ? 0.9 : 0
     }
 
     Column {

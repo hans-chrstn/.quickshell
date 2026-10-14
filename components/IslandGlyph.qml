@@ -108,6 +108,13 @@ Canvas {
             ctx.moveTo(3.3, 8.5);
             ctx.lineTo(13.7, 8.5);
             ctx.stroke();
+        } else if (root.name === "close") {
+            ctx.beginPath();
+            ctx.moveTo(4.2, 4.2);
+            ctx.lineTo(12.8, 12.8);
+            ctx.moveTo(12.8, 4.2);
+            ctx.lineTo(4.2, 12.8);
+            ctx.stroke();
         } else if (root.name === "play" || root.name === "pause") {
             if (root.name === "play") {
                 ctx.beginPath();

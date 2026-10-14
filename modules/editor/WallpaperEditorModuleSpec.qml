@@ -9,10 +9,12 @@ IslandModule {
     moduleId: "wallpaper-editor"
     priority: 95
     active: (WallpaperEditorService.opened || WallpaperEditorService.closing || WallpaperEditorService.warmRetained) && WallpaperEditorService.targetScreenName === screenName
+    arbitrationActive: (WallpaperEditorService.opened || WallpaperEditorService.closing) && WallpaperEditorService.targetScreenName === screenName
     attention: active && !WallpaperEditorService.closing
     wantsKeyboard: WallpaperEditorService.opened
-    lifecycleAdaptiveEligible: WallpaperEditorService.warmRetained
-    lifecycleUsageActive: WallpaperEditorService.opened
+    lifecycleClassification: "briefly-warm"
+    lifecycleAdaptiveEligible: WallpaperEditorService.warmRetained && !WallpaperEditorService.closing
+    lifecycleUsageActive: WallpaperEditorService.opened || WallpaperEditorService.closing
     lifecycleEstimatedCostUnits: 80
     lifecycleBasePriority: priority
     lifecycleEvict: reason => WallpaperEditorService.evictWarm(reason)

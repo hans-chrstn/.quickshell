@@ -4,13 +4,16 @@ import qs.core
 Item {
     id: root
 
+    // Tool limitation: this valid alias targets the nested editor.
+    // qmllint disable unresolved-alias
     property alias text: editor.text
+    // qmllint enable unresolved-alias
     property string label: ""
     property string placeholderText: ""
     property string supportingText: ""
     property bool invalid: false
     property int maximumLength: 256
-    signal accepted()
+    signal accepted
 
     implicitWidth: 260
     implicitHeight: label.length > 0 || supportingText.length > 0 ? 67 : 38
@@ -39,10 +42,13 @@ Item {
         radius: 11
         color: Design.surfaceRaised
         border.width: 1
-        border.color: root.invalid ? Design.red
-            : editor.activeFocus ? Design.blue : Design.separator
+        border.color: root.invalid ? Design.red : editor.activeFocus ? Design.blue : Design.separator
 
-        Behavior on border.color { ColorAnimation { duration: 110 } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 110
+            }
+        }
 
         TextInput {
             id: editor
@@ -71,7 +77,9 @@ Item {
             elide: Text.ElideRight
         }
 
-        TapHandler { onTapped: editor.forceActiveFocus() }
+        TapHandler {
+            onTapped: editor.forceActiveFocus()
+        }
     }
 
     Text {

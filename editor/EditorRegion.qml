@@ -7,6 +7,11 @@ Rectangle {
 
     property string title: ""
     property string description: ""
+    property string details: ""
+    property var detailItems: []
+    property Component detailComponent: null
+    property bool detailTakesOver: false
+    property bool topAligned: false
     property string glyph: ""
     property bool quiet: false
 
@@ -16,13 +21,22 @@ Rectangle {
     border.color: Qt.rgba(1, 1, 1, quiet ? 0.045 : 0.075)
 
     ColumnLayout {
-        anchors.centerIn: parent
-        width: Math.min(parent.width - 28, 280)
+        width: root.topAligned ? parent.width - 28 : Math.min(parent.width - 28, 280)
+        x: root.topAligned ? 14 : (parent.width - width) / 2
+        y: root.topAligned ? 14 : (parent.height - height) / 2
+        height: implicitHeight
         spacing: 8
+
+        Loader {
+            Layout.fillWidth: true
+            visible: active
+            active: root.detailComponent !== null && root.topAligned
+            sourceComponent: root.detailComponent
+        }
 
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
-            visible: root.glyph.length > 0
+            visible: root.glyph.length > 0 && !root.detailTakesOver
             implicitWidth: 32
             implicitHeight: 32
             radius: 10
@@ -41,6 +55,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: root.title
+            visible: !root.detailTakesOver
             color: Design.text
             horizontalAlignment: Text.AlignHCenter
             font.family: Design.fontText
@@ -51,7 +66,7 @@ Rectangle {
 
         Text {
             Layout.fillWidth: true
-            visible: root.description.length > 0
+            visible: root.description.length > 0 && !root.detailTakesOver
             text: root.description
             color: Design.textMuted
             horizontalAlignment: Text.AlignHCenter
@@ -59,6 +74,46 @@ Rectangle {
             font.family: Design.fontText
             font.pixelSize: 11
             lineHeight: 1.15
+        }
+
+        Text {
+            Layout.fillWidth: true
+            visible: root.details.length > 0 && !root.detailTakesOver
+            text: root.details
+            color: Design.textMuted
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+            font.family: Design.fontMono
+            font.pixelSize: 9
+            opacity: 0.82
+        }
+
+        ColumnLayout {
+            visible: !root.detailTakesOver
+            Layout.fillWidth: true
+            spacing: 2
+
+            Repeater {
+                model: root.detailItems
+
+                Text {
+                    required property string modelData
+                    Layout.fillWidth: true
+                    text: modelData
+                    color: Design.textMuted
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    font.family: Design.fontText
+                    font.pixelSize: 9
+                }
+            }
+        }
+
+        Loader {
+            Layout.fillWidth: true
+            visible: active && !root.topAligned
+            active: root.detailComponent !== null && !root.topAligned
+            sourceComponent: root.detailComponent
         }
     }
 }

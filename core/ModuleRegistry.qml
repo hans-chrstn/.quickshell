@@ -10,7 +10,7 @@ QtObject {
 
         for (let i = 0; i < modules.length; ++i) {
             const candidate = modules[i];
-            if (!candidate || !candidate.active || (attentionOnly && !candidate.attention))
+            if (!candidate || !candidate.arbitrationActive || (attentionOnly && !candidate.attention))
                 continue;
             if (!winner || candidate.priority > winner.priority || (candidate.priority === winner.priority && candidate.moduleId < winner.moduleId)) {
                 winner = candidate;

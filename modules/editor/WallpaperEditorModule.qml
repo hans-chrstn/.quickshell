@@ -8,7 +8,6 @@ Item {
     id: root
 
     property QtObject context: null
-    property bool escapeHeld: false
     readonly property real availableWidth: Number(context?.availableWidth) || 0
     readonly property real availableHeight: Number(context?.availableHeight) || 0
     readonly property real horizontalAllowance: 2 * (Design.editorOuterMargin + Design.wing + Design.expandedContentPadding)
@@ -30,11 +29,10 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            if (root.escapeHeld || event.isAutoRepeat) {
+            if (event.isAutoRepeat) {
                 event.accepted = true;
                 return;
             }
-            root.escapeHeld = true;
             if (WallpaperEditorOpenService.pickerOpened)
                 WallpaperEditorOpenService.cancelPicker();
             else if (WallpaperEditorService.saveAsOpened)
@@ -43,13 +41,6 @@ Item {
                 WallpaperEditorService.cancelPicker();
             else
                 WallpaperEditorService.close();
-            event.accepted = true;
-        }
-    }
-
-    Keys.onReleased: event => {
-        if (event.key === Qt.Key_Escape) {
-            root.escapeHeld = false;
             event.accepted = true;
         }
     }

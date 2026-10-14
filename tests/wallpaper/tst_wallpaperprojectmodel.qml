@@ -228,4 +228,39 @@ TestCase {
         verify(result.error.indexOf("assets must be an array") >= 0);
         verify(result.error.indexOf("Track clips must be an array") >= 0);
     }
+
+    function test_validatesAndPreservesMarkerActions() {
+        const valid = sample();
+        valid.project.markers[0].actions = [
+            {
+                id: "notify-rain",
+                type: "show-notification",
+                target: "desktop",
+                value: "Rain is starting"
+            }
+        ];
+        const parsed = ProjectModel.parse(valid);
+        verify(parsed.accepted);
+        compare(parsed.document.project.markers[0].actions.length, 1);
+        compare(parsed.document.project.markers[0].actions[0].id, "notify-rain");
+
+        const invalidType = sample();
+        invalidType.project.markers[0].actions = [
+            {
+                id: "unsafe",
+                type: "run-shell"
+            }
+        ];
+        const rejectedType = ProjectModel.parse(invalidType);
+        verify(!rejectedType.accepted);
+        verify(rejectedType.error.indexOf("Unsupported trigger action") >= 0);
+
+        const malformed = sample();
+        malformed.project.markers[0].actions = ({
+                id: "not-an-array"
+            });
+        const rejectedShape = ProjectModel.parse(malformed);
+        verify(!rejectedShape.accepted);
+        verify(rejectedShape.error.indexOf("must be an array") >= 0);
+    }
 }

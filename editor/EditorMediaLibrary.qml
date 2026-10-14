@@ -53,8 +53,7 @@ Rectangle {
 
             PickerButton {
                 label: "Import"
-                enabled: WallpaperProjectService.loaded
-                    && !WallpaperEditorService.importBusy
+                enabled: WallpaperProjectService.loaded && !WallpaperEditorService.importBusy
                 onActivated: WallpaperEditorService.openPicker()
             }
         }
@@ -75,7 +74,9 @@ Rectangle {
                 visible: count > 0
 
                 ScrollBar.vertical: MinimalScrollBar {}
-                SmoothScrollBehavior { target: list }
+                SmoothScrollBehavior {
+                    target: list
+                }
 
                 delegate: EditorAssetRow {
                     id: assetRow
@@ -83,11 +84,11 @@ Rectangle {
                     width: ListView.view.width
                     asset: modelData
                     workspaceId: WallpaperEditorService.workspaceId
-                    selected: WallpaperEditorService.selectedAssetId === asset.id
-                    onActivated: WallpaperEditorService.selectAsset(asset.id)
+                    selected: WallpaperEditorSelectionService.selectedAssetId === asset.id
+                    onActivated: WallpaperEditorSelectionService.selectAsset(asset.id)
                     onContextRequested: (localX, localY) => {
-                        WallpaperEditorService.selectAsset(asset.id)
-                        assetMenu.openFor(assetRow, localX, localY)
+                        WallpaperEditorSelectionService.selectAsset(asset.id);
+                        assetMenu.openFor(assetRow, localX, localY);
                     }
                 }
             }
@@ -100,8 +101,7 @@ Rectangle {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: WallpaperEditorService.activeProject
-                        ? "No media yet" : "Start with an import"
+                    text: WallpaperEditorService.activeProject ? "No media yet" : "Start with an import"
                     color: Design.text
                     font.family: Design.fontText
                     font.pixelSize: 11
@@ -109,9 +109,7 @@ Rectangle {
                 }
                 Text {
                     width: parent.width
-                    text: WallpaperEditorService.activeProject
-                        ? "Import images, animations, or video."
-                        : "Import media to create your first wallpaper project."
+                    text: WallpaperEditorService.activeProject ? "Import images, animations, or video." : "Import media to create your first wallpaper project."
                     color: Design.textMuted
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
@@ -124,16 +122,17 @@ Rectangle {
 
     ContextMenu {
         id: assetMenu
-        actions: [{
-            id: "remove-project",
-            label: "Remove from project",
-            destructive: true,
-            enabled: WallpaperEditorService.selectedAsset !== null
-                && !WallpaperEditorService.importBusy
-        }]
+        actions: [
+            {
+                id: "remove-project",
+                label: "Remove from project",
+                destructive: true,
+                enabled: WallpaperEditorService.selectedAsset !== null && !WallpaperEditorService.importBusy
+            }
+        ]
         onActionTriggered: actionId => {
             if (actionId === "remove-project")
-                WallpaperEditorService.removeSelectedAsset()
+                WallpaperEditorService.removeSelectedAsset();
         }
     }
 }

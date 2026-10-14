@@ -3,25 +3,18 @@ import QtQuick.Layouts
 import qs.components
 import qs.core
 
-Rectangle {
+HighlightableSurface {
     id: root
 
     required property string title
     required property string description
-    signal activated()
+    signal activated
 
     implicitHeight: 52
-    radius: 10
-    color: hover.hovered ? Design.surfaceRaised : Design.surface
-    border.width: 1
-    border.color: hover.hovered ? Design.glassHighlight : Design.separator
-    scale: tap.pressed ? 0.985 : 1
-
-    Behavior on color { ColorAnimation { duration: 110 } }
-    Behavior on border.color { ColorAnimation { duration: 110 } }
-    Behavior on scale {
-        NumberAnimation { duration: 80; easing.type: Easing.OutCubic }
-    }
+    interactive: false
+    focused: hover.hovered
+    baseColor: Design.surface
+    cornerRadius: 10
 
     RowLayout {
         anchors.fill: parent
@@ -58,7 +51,9 @@ Rectangle {
         }
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
     TapHandler {
         id: tap
         acceptedButtons: Qt.LeftButton

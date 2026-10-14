@@ -56,7 +56,7 @@ Item {
         const candidate = expanded && registry.attentive ? registry.attentive : registry.current;
         if (!candidate || candidate === presentedModule)
             return;
-        if (!presentedModule || !presentedModule.active || candidate.priority >= presentedModule.priority || (!expanded && expansionProgress <= 0.001)) {
+        if (!presentedModule || !presentedModule.active || (!presentedModule.lifecycleUsageActive && !presentedModule.attention) || candidate.priority >= presentedModule.priority || (!expanded && expansionProgress <= 0.001)) {
             presentedModule = candidate;
             Qt.callLater(reconsider);
         }
@@ -301,6 +301,7 @@ Item {
             width: Math.max(parent.width, root.expandedWidth - 2 * (Design.wing + Design.expandedContentPadding))
             height: Math.max(parent.height, root.expandedHeight - 2 * Design.expandedContentPadding)
             module: root.presentedModule
+            modules: registry.modules
             presented: !root.hidden
             expanded: root.expanded
             expansionProgress: root.expansionProgress

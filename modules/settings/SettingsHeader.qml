@@ -13,26 +13,21 @@ RowLayout {
     spacing: 10
     Layout.bottomMargin: 4
 
-    Rectangle {
+    HighlightableSurface {
         id: backButton
         width: 24
         height: 24
-        radius: 12
-        color: backHover.hovered ? Design.surfaceRaised : "transparent"
-        scale: backTap.pressed ? 0.94 : 1
         visible: SettingsService.currentPage !== ""
+        interactive: visible
+        focused: hovered
+        baseColor: "transparent"
+        cornerRadius: 12
+        onSurfaceActivated: SettingsService.back()
 
         IslandGlyph {
             anchors.centerIn: parent
             name: "chevronLeft"
-            glyphColor: backHover.hovered ? Design.text : Design.textMuted
-            scale: backTap.pressed ? 0.9 : 1
-        }
-
-        HoverHandler { id: backHover }
-        TapHandler {
-            id: backTap
-            onTapped: SettingsService.back()
+            glyphColor: backButton.hovered ? Design.text : Design.textMuted
         }
     }
 

@@ -11,6 +11,9 @@ import "WallpaperTimelineGestureSession.js" as GestureSession
 import "WallpaperTimelinePlacement.js" as Placement
 import "WallpaperTimelineSelection.js" as TimelineSelection
 import "WallpaperTimelineTrackEdit.js" as TrackEdit
+import "WallpaperTimelineMarker.js" as MarkerEdit
+import "WallpaperTriggerAction.js" as TriggerAction
+import "WallpaperTriggerPolicy.js" as TriggerPolicy
 import "WallpaperCommandHistory.js" as CommandHistory
 
 Singleton {
@@ -19,10 +22,9 @@ Singleton {
     property var session: GestureSession.idle("")
     property string error: ""
     property int gestureSequence: 0
-    property var selection: TimelineSelection.empty("")
+    readonly property var selection: WallpaperEditorSelectionService.timelineSelection
     property var history: CommandHistory.empty(50)
     property string historyProjectId: ""
-    readonly property int projectRevision: WallpaperProjectService.revision
     readonly property bool gestureActive: session.active === true
     readonly property bool canUndo: history.past.length > 0
     readonly property bool canRedo: history.future.length > 0
@@ -57,7 +59,7 @@ Singleton {
         if (!root.applyHistoryDocument(result.command.before))
             return false;
         history = result.state;
-        selection = TimelineSelection.normalize(selection, result.command.before.project?.tracks || []);
+        WallpaperEditorSelectionService.reconcile(result.command.before);
         return true;
     }
 
@@ -68,7 +70,7 @@ Singleton {
         if (!root.applyHistoryDocument(result.command.after))
             return false;
         history = result.state;
-        selection = TimelineSelection.normalize(selection, result.command.after.project?.tracks || []);
+        WallpaperEditorSelectionService.reconcile(result.command.after);
         return true;
     }
 
@@ -114,31 +116,25 @@ Singleton {
     }
 
     function selectClip(trackId, clipId, mode) {
-        const document = activeDocument();
-        if (!document)
-            return false;
-        selection = TimelineSelection.selectClip(selection, document.project.tracks, String(trackId || ""), String(clipId || ""), String(mode || "replace"));
+        const accepted = WallpaperEditorSelectionService.selectClip(trackId, clipId, mode);
         error = "";
-        return true;
+        return accepted;
     }
 
     function selectAllClips() {
-        const document = activeDocument();
-        if (!document)
-            return false;
-        const entries = TimelineSelection.entries(document.project.tracks);
-        selection = TimelineSelection.normalize({
-            trackId: entries[0]?.trackId || "",
-            primaryClipId: entries[0]?.clipId || "",
-            anchorClipId: entries[0]?.clipId || "",
-            clipIds: entries.map(entry => entry.clipId)
-        }, document.project.tracks);
+        const accepted = WallpaperEditorSelectionService.selectAllClips();
         error = "";
-        return entries.length > 0;
+        return accepted;
     }
 
     function clearSelection() {
-        selection = TimelineSelection.empty("");
+        WallpaperEditorSelectionService.clear();
+    }
+
+    function selectTrack(trackId) {
+        const accepted = WallpaperEditorSelectionService.selectTrack(trackId);
+        error = "";
+        return accepted;
     }
 
     function removeSelectedClips() {
@@ -173,9 +169,102 @@ Singleton {
         if (!WallpaperProjectService.upsertJson(JSON.stringify(added.document)))
             return reject(WallpaperProjectService.error || "Timeline track could not be added");
         root.recordHistory(document, added.document, "Add " + trackType + " track");
-        selection = TimelineSelection.selectTrack(selection, added.document.project.tracks, trackId);
+        WallpaperEditorSelectionService.selectTrack(trackId);
         error = "";
         return true;
+    }
+
+    function addMarker(timeMs, triggerType) {
+        const document = activeDocument();
+        if (!document)
+            return reject("Active project is unavailable");
+        const markerId = nextGestureId() + "-marker";
+        const added = MarkerEdit.add(document, markerId, "Marker", timeMs, triggerType || "manual", true);
+        if (!added.accepted)
+            return reject(added.error);
+        if (!WallpaperProjectService.upsertJson(JSON.stringify(added.document)))
+            return reject(WallpaperProjectService.error || "Marker could not be added");
+        root.recordHistory(document, added.document, "Add timeline marker");
+        error = "";
+        return true;
+    }
+
+    function removeMarker(markerId) {
+        const document = activeDocument();
+        if (!document)
+            return reject("Active project is unavailable");
+        const removed = MarkerEdit.remove(document, markerId);
+        if (!removed.accepted)
+            return reject(removed.error);
+        if (!WallpaperProjectService.upsertJson(JSON.stringify(removed.document)))
+            return reject(WallpaperProjectService.error || "Marker could not be removed");
+        root.recordHistory(document, removed.document, "Remove timeline marker");
+        error = "";
+        return true;
+    }
+
+    function moveMarker(markerId, timeMs) {
+        const document = activeDocument();
+        if (!document)
+            return reject("Active project is unavailable");
+        const updated = MarkerEdit.update(document, markerId, {
+            timeMs: timeMs
+        });
+        if (!updated.accepted)
+            return reject(updated.error);
+        if (!WallpaperProjectService.upsertJson(JSON.stringify(updated.document)))
+            return reject(WallpaperProjectService.error || "Marker could not be moved");
+        root.recordHistory(document, updated.document, "Move timeline marker");
+        error = "";
+        return true;
+    }
+
+    function updateMarker(markerId, changes) {
+        const document = activeDocument();
+        if (!document)
+            return reject("Active project is unavailable");
+        const updated = MarkerEdit.update(document, markerId, changes || {});
+        if (!updated.accepted)
+            return reject(updated.error);
+        if (!WallpaperProjectService.upsertJson(JSON.stringify(updated.document)))
+            return reject(WallpaperProjectService.error || "Marker could not be updated");
+        root.recordHistory(document, updated.document, "Update timeline marker");
+        error = "";
+        return true;
+    }
+
+    function markerActionEdit(markerId, actionId, operation, value) {
+        const document = activeDocument();
+        if (!document)
+            return reject("Active project is unavailable");
+        if (["add", "remove", "update"].indexOf(operation) < 0)
+            return reject("Unsupported marker action operation");
+        const marker = (document.project.markers || []).find(entry => entry.id === String(markerId || ""));
+        if (!marker)
+            return reject("Timeline marker was not found");
+        const result = operation === "add" ? TriggerAction.addAction(marker.actions || [], value) : operation === "remove" ? TriggerAction.removeAction(marker.actions || [], actionId) : TriggerAction.updateAction(marker.actions || [], actionId, value);
+        if (!result.accepted)
+            return reject(result.error);
+        return updateMarker(marker.id, {
+            actions: result.actions
+        });
+    }
+
+    function addMarkerAction(markerId, type) {
+        return markerActionEdit(markerId, "", "add", {
+            id: nextGestureId() + "-action",
+            type: String(type || "")
+        });
+    }
+
+    function triggerDecisionTrace(nowMs, lastFired) {
+        const document = activeDocument();
+        return TriggerPolicy.decisionTrace(document?.project?.markers || [], nowMs, lastFired || {});
+    }
+
+    function nextTrigger(playheadMs, durationMs, loop) {
+        const document = activeDocument();
+        return TriggerPolicy.nextTimelineEvent(document?.project?.markers || [], playheadMs, durationMs, loop);
     }
 
     function trackRemovalReview(trackId) {
@@ -194,7 +283,7 @@ Singleton {
         if (!WallpaperProjectService.upsertJson(JSON.stringify(removed.document)))
             return reject(WallpaperProjectService.error || "Timeline track could not be removed");
         root.recordHistory(document, removed.document, "Remove timeline track");
-        selection = TimelineSelection.normalize(selection, removed.document.project.tracks);
+        WallpaperEditorSelectionService.reconcile(removed.document);
         error = "";
         return true;
     }
@@ -301,11 +390,6 @@ Singleton {
                 depth: history.past.length
             }
         });
-    }
-
-    onProjectRevisionChanged: {
-        const document = activeDocument();
-        selection = document ? TimelineSelection.normalize(selection, document.project.tracks) : TimelineSelection.empty("");
     }
 
     Connections {

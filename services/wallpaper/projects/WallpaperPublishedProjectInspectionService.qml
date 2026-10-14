@@ -21,6 +21,14 @@ Singleton {
     property string rootPath: ""
     property string processOutput: ""
     property bool timedOut: false
+    property int generation: 0
+    property int activeRequestId: 0
+    property int workerRequestId: 0
+    property int timeoutRequestId: 0
+    property bool workerDraining: false
+    property int requestCount: 0
+    property int cancelCount: 0
+    property int staleCompletionCount: 0
     property var projectManifest: null
     property var bundleManifest: null
     property string inventoryOutput: ""
@@ -29,10 +37,13 @@ Singleton {
     property var evidence: []
     property var result: null
 
-    signal finished(bool accepted, string error, var result)
+    signal finished(bool accepted, string error, var result, int requestId)
+    signal cancelled(int requestId)
+
+    readonly property bool readyForRequest: !busy && !worker.running && !workerDraining
 
     function reset() {
-        if (busy)
+        if (!readyForRequest)
             return false;
         state = "idle";
         error = "";
@@ -45,30 +56,42 @@ Singleton {
         activeFile = null;
         evidence = [];
         result = null;
+        activeRequestId = 0;
+        workerRequestId = 0;
+        timeoutRequestId = 0;
+        timedOut = false;
         return true;
     }
 
     function request(path) {
-        if (busy)
+        if (!readyForRequest)
             return false;
         reset();
+        generation += 1;
+        activeRequestId = generation;
+        requestCount += 1;
         rootPath = ProjectModel.normalizedSourcePath(path);
         if (!rootPath)
             return reject("Project folder must be absolute");
         busy = true;
         progress = 0.02;
         run("checking-root", ["test", "-d", rootPath, "-a", "-r", rootPath + "/project.json", "-a", "-r", rootPath + "/bundle.json"], 10000);
-        return true;
+        return activeRequestId;
     }
 
     function run(nextState, command, timeoutMs) {
+        if (!busy || activeRequestId <= 0)
+            return false;
         state = nextState;
         processOutput = "";
         timedOut = false;
+        workerRequestId = activeRequestId;
+        timeoutRequestId = activeRequestId;
         worker.command = command;
         worker.running = true;
         operationTimeout.interval = Math.max(1000, Math.min(1800000, Number(timeoutMs) || 10000));
         operationTimeout.restart();
+        return true;
     }
 
     function transferTimeout(sizeBytes) {
@@ -76,12 +99,39 @@ Singleton {
     }
 
     function reject(message) {
+        const requestId = activeRequestId;
         busy = false;
+        activeRequestId = 0;
+        workerRequestId = 0;
         state = "failed";
         error = String(message || "Project inspection failed");
         result = null;
-        finished(false, error, null);
+        finished(false, error, null, requestId);
         return false;
+    }
+
+    function cancel(requestId) {
+        const expectedId = Math.max(0, Number(requestId) || 0);
+        if (!busy || activeRequestId <= 0 || (expectedId > 0 && expectedId !== activeRequestId))
+            return false;
+        const cancelledId = activeRequestId;
+        operationTimeout.stop();
+        timeoutRequestId = 0;
+        busy = false;
+        activeRequestId = 0;
+        state = "cancelled";
+        error = "";
+        progress = 0;
+        verificationQueue = [];
+        activeFile = null;
+        result = null;
+        cancelCount += 1;
+        if (worker.running) {
+            workerDraining = true;
+            worker.running = false;
+        }
+        cancelled(cancelledId);
+        return true;
     }
 
     function parseProjectManifest() {
@@ -164,6 +214,7 @@ Singleton {
     }
 
     function finishValidation() {
+        const requestId = activeRequestId;
         const validation = PublishedProject.validate({
             rootPath: rootPath,
             projectManifest: projectManifest,
@@ -174,11 +225,13 @@ Singleton {
         if (!validation.accepted)
             return reject(validation.error);
         busy = false;
+        activeRequestId = 0;
+        workerRequestId = 0;
         state = "ready";
         error = "";
         progress = 1;
         result = JsonCopy.value(validation);
-        finished(true, "", JsonCopy.value(result));
+        finished(true, "", JsonCopy.value(result), requestId);
     }
 
     function applyAction(action) {
@@ -199,10 +252,14 @@ Singleton {
         reject("Unknown project inspection action: " + action.name);
     }
 
-    function processFinished(exitCode) {
+    function processFinished(requestId, exitCode) {
         operationTimeout.stop();
-        if (!busy)
+        timeoutRequestId = 0;
+        if (!busy || requestId <= 0 || requestId !== activeRequestId) {
+            if (requestId > 0)
+                staleCompletionCount += 1;
             return;
+        }
         if (timedOut) {
             timedOut = false;
             reject("Project inspection timed out during " + state);
@@ -216,10 +273,17 @@ Singleton {
     function snapshot() {
         return JsonCopy.value({
             busy: busy,
+            readyForRequest: readyForRequest,
             state: state,
             error: error,
             progress: progress,
             rootPath: rootPath,
+            activeRequestId: activeRequestId,
+            workerRequestId: workerRequestId,
+            workerDraining: workerDraining,
+            requestCount: requestCount,
+            cancelCount: cancelCount,
+            staleCompletionCount: staleCompletionCount,
             filesTotal: bundleManifest?.workspace?.files?.length || 0,
             filesRemaining: verificationQueue.length,
             accepted: result?.accepted === true,
@@ -230,7 +294,7 @@ Singleton {
     Timer {
         id: operationTimeout
         onTriggered: {
-            if (!worker.running)
+            if (!worker.running || root.timeoutRequestId <= 0 || root.timeoutRequestId !== root.activeRequestId)
                 return;
             root.timedOut = true;
             worker.running = false;
@@ -242,6 +306,13 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: root.processOutput = text
         }
-        onExited: exitCode => root.processFinished(exitCode)
+        onExited: exitCode => {
+            const requestId = root.workerRequestId;
+            root.processFinished(requestId, exitCode);
+            if (root.workerDraining) {
+                root.workerDraining = false;
+                root.workerRequestId = 0;
+            }
+        }
     }
 }

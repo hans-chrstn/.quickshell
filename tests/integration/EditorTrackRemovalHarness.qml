@@ -43,27 +43,51 @@ ShellRoot {
                 projectId = WallpaperProjectService.createProject("Removal harness");
                 verify(projectId.length > 0);
                 const document = WallpaperProjectService.projectSnapshot(projectId);
-                document.project.assets = [{ id: "image", name: "Image", kind: "static",
-                    sourcePath: "/fixture.png", availability: "unresolved" }];
+                document.project.assets = [
+                    {
+                        id: "image",
+                        name: "Image",
+                        kind: "static",
+                        sourcePath: "/fixture.png",
+                        availability: "unresolved"
+                    }
+                ];
                 document.project.durationMs = 10000;
                 document.project.tracks = [
-                    { id: "visual", name: "Visual", type: "media", enabled: true,
-                        locked: false, clips: [
-                            { id: "clip", assetId: "image", startMs: 0,
-                                durationMs: 1000, sourceInMs: 0, loop: false, enabled: true }
-                        ] },
-                    { id: "empty", name: "Audio", type: "audio", enabled: true,
-                        locked: false, clips: [] }
+                    {
+                        id: "visual",
+                        name: "Visual",
+                        type: "media",
+                        enabled: true,
+                        locked: false,
+                        clips: [
+                            {
+                                id: "clip",
+                                assetId: "image",
+                                startMs: 0,
+                                durationMs: 1000,
+                                sourceInMs: 0,
+                                loop: false,
+                                enabled: true
+                            }
+                        ]
+                    },
+                    {
+                        id: "empty",
+                        name: "Audio",
+                        type: "audio",
+                        enabled: true,
+                        locked: false,
+                        clips: []
+                    }
                 ];
-                verify(WallpaperProjectService.upsertJson(JSON.stringify(document)),
-                    WallpaperProjectService.error);
+                verify(WallpaperProjectService.upsertJson(JSON.stringify(document)), WallpaperProjectService.error);
                 owner.escaped = 0;
                 owner.forceActiveFocus();
             }
 
             function cleanup() {
-                console.log("TRACK_REMOVAL_CASE:" + qtest_results.functionName
-                    + ":failed=" + qtest_results.failed);
+                console.log("TRACK_REMOVAL_CASE:" + qtest_results.functionName + ":failed=" + qtest_results.failed);
                 menu.close();
                 dialog.close();
                 tryCompare(menu, "visible", false);
@@ -73,8 +97,7 @@ ShellRoot {
 
             function cleanupTestCase() {
                 tryCompare(WallpaperProjectService, "dirty", false);
-                console.log("TRACK_REMOVAL_RESULT:passed=" + qtest_results.passCount
-                    + ",failed=" + qtest_results.failCount);
+                console.log("TRACK_REMOVAL_RESULT:passed=" + qtest_results.passCount + ",failed=" + qtest_results.failCount);
             }
 
             function openRemoval(trackId) {
@@ -95,6 +118,23 @@ ShellRoot {
                 compare(dialog.visible, false);
                 compare(current().tracks.length, 1);
                 compare(current().tracks[0].clips.length, 1);
+            }
+
+            function test_directEmptyRemovalCommitsImmediately() {
+                verify(trackMenu.requestRemoval("empty"));
+                compare(dialog.visible, false);
+                compare(current().tracks.length, 1);
+                compare(current().tracks[0].id, "visual");
+            }
+
+            function test_directPopulatedRemovalRequiresConfirmation() {
+                const before = JSON.stringify(current());
+                verify(trackMenu.requestRemoval("visual"));
+                tryCompare(dialog, "opened", true);
+                compare(JSON.stringify(current()), before);
+                dialog.reject();
+                tryCompare(dialog, "visible", false);
+                compare(JSON.stringify(current()), before);
             }
 
             function test_cancelButtonRetainsEverything() {
@@ -193,8 +233,7 @@ ShellRoot {
                 wait(650);
                 compare(WallpaperProjectService.activeProjectId, nextId);
                 verify(WallpaperProjectService.projectSnapshot(nextId) !== null);
-                compare(WallpaperProjectService.projectSnapshot(nextId).project.name,
-                    "Newer unsaved project");
+                compare(WallpaperProjectService.projectSnapshot(nextId).project.name, "Newer unsaved project");
                 verify(WallpaperProjectService.removeProject(nextId));
             }
         }
@@ -203,6 +242,9 @@ ShellRoot {
     Timer {
         interval: 20000
         running: true
-        onTriggered: { console.error("TRACK_REMOVAL_HARNESS_TIMEOUT"); Qt.exit(1); }
+        onTriggered: {
+            console.error("TRACK_REMOVAL_HARNESS_TIMEOUT");
+            Qt.exit(1);
+        }
     }
 }

@@ -13,14 +13,11 @@ Item {
     property QtObject context: null
     readonly property bool expanded: context?.expanded ?? false
     readonly property real expansionProgress: context?.expansionProgress ?? 0
-    readonly property int measuredResultRows: Math.min(6,
-        LauncherService.results.length)
+    readonly property int measuredResultRows: Math.min(6, LauncherService.results.length)
     readonly property real collapsedImplicitWidth: 160
     readonly property real collapsedImplicitHeight: 22
     readonly property real expandedImplicitWidth: searchRow.implicitWidth
-    readonly property real expandedImplicitHeight: searchHeader.implicitHeight
-        + contentColumn.spacing + divider.implicitHeight
-        + contentColumn.spacing + Math.max(96, measuredResultRows * 50)
+    readonly property real expandedImplicitHeight: searchHeader.implicitHeight + contentColumn.spacing + divider.implicitHeight + contentColumn.spacing + Math.max(96, measuredResultRows * 50)
 
     focus: true
 
@@ -57,8 +54,7 @@ Item {
                 TextInput {
                     id: searchInput
                     Layout.fillWidth: true
-                    Layout.preferredWidth: Math.max(360,
-                        searchPlaceholder.implicitWidth)
+                    Layout.preferredWidth: Math.max(360, searchPlaceholder.implicitWidth)
                     color: Design.text
                     selectionColor: Design.blue
                     font.family: Design.fontText
@@ -70,18 +66,18 @@ Item {
                     onTextEdited: LauncherService.query = text
                     onAccepted: LauncherService.executeSelected()
 
-                    Keys.onPressed: function(event) {
+                    Keys.onPressed: function (event) {
                         if (event.key === Qt.Key_Down) {
-                            smoothScroll.cancel()
-                            LauncherService.moveSelection(1)
-                            event.accepted = true
+                            smoothScroll.cancel();
+                            LauncherService.moveSelection(1);
+                            event.accepted = true;
                         } else if (event.key === Qt.Key_Up) {
-                            smoothScroll.cancel()
-                            LauncherService.moveSelection(-1)
-                            event.accepted = true
+                            smoothScroll.cancel();
+                            LauncherService.moveSelection(-1);
+                            event.accepted = true;
                         } else if (event.key === Qt.Key_Escape) {
-                            LauncherService.close()
-                            event.accepted = true
+                            LauncherService.close();
+                            event.accepted = true;
                         }
                     }
 
@@ -135,33 +131,33 @@ Item {
                 model: LauncherService.results
                 currentIndex: LauncherService.selectedIndex
                 boundsBehavior: Flickable.StopAtBounds
-                onCurrentIndexChanged: positionViewAtIndex(currentIndex,
-                                                            ListView.Contain)
+                onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
 
                 ScrollBar.vertical: MinimalScrollBar {}
 
-                delegate: Rectangle {
+                delegate: HighlightableSurface {
                     id: row
                     required property var modelData
                     required property int index
 
                     width: Math.max(0, ListView.view.width - 10)
                     height: 48
-                    radius: 11
-                    color: index === LauncherService.selectedIndex
-                        ? Design.surfaceRaised : "transparent"
-
-                    Behavior on color { ColorAnimation { duration: 110 } }
+                    interactive: false
+                    focused: hover.hovered
+                    selected: index === LauncherService.selectedIndex
+                    baseColor: "transparent"
+                    cornerRadius: 11
 
                     HoverHandler {
+                        id: hover
                         onHoveredChanged: if (hovered)
                             LauncherService.selectedIndex = row.index
                     }
 
                     TapHandler {
                         onTapped: {
-                            LauncherService.selectedIndex = row.index
-                            LauncherService.executeSelected()
+                            LauncherService.selectedIndex = row.index;
+                            LauncherService.executeSelected();
                         }
                     }
 

@@ -1,76 +1,83 @@
 import QtQuick
+import qs.components
 import qs.core
 import qs.components.media
 import qs.services.wallpaper
 
-Rectangle {
+HighlightableSurface {
     id: root
 
     required property var record
     readonly property string path: String(record?.path || "")
     readonly property string extension: {
-        const fileName = path.slice(path.lastIndexOf("/") + 1)
-        const dot = fileName.lastIndexOf(".")
-        return dot >= 0 && dot < fileName.length - 1
-            ? fileName.slice(dot + 1).toLowerCase() : "media"
+        const fileName = path.slice(path.lastIndexOf("/") + 1);
+        const dot = fileName.lastIndexOf(".");
+        return dot >= 0 && dot < fileName.length - 1 ? fileName.slice(dot + 1).toLowerCase() : "media";
     }
     readonly property string state: String(record?.state || "unknown")
     readonly property string kind: String(record?.kind || "unsupported")
-    readonly property string rendererBackend:
-        WallpaperRenderSupportService.rendererFor(record)
-    readonly property bool animatedSupported:
-        rendererBackend === "animated-image"
-            || rendererBackend === "animated-media"
-    readonly property bool selectable: state === "ready"
-        && rendererBackend.length > 0
-    property bool selected: false
-    signal activated()
+    readonly property string rendererBackend: WallpaperRenderSupportService.rendererFor(record)
+    readonly property bool animatedSupported: rendererBackend === "animated-image" || rendererBackend === "animated-media"
+    readonly property bool selectable: state === "ready" && rendererBackend.length > 0
+    signal activated
 
-    radius: 12
-    color: Design.surface
-    border.width: selected ? 2 : 1
-    border.color: selected ? Design.blue : Design.separator
+    interactive: false
+    focused: hover.hovered
+    accentColor: Design.blue
+    baseColor: Design.surface
+    cornerRadius: 12
     clip: true
     scale: tap.pressed && selectable ? 0.975 : 1
 
-    Behavior on scale { NumberAnimation { duration: 90; easing.type: Easing.OutCubic } }
-    Behavior on border.color { ColorAnimation { duration: 120 } }
-
+    Behavior on scale {
+        NumberAnimation {
+            duration: 90
+            easing.type: Easing.OutCubic
+        }
+    }
     MediaThumbnail {
         id: preview
         anchors.fill: parent
         anchors.margins: root.selected ? 3 : 2
         record: root.record
-        cornerRadius: Math.max(0, root.radius - anchors.margins)
+        cornerRadius: Math.max(0, root.cornerRadius - anchors.margins)
     }
 
     Rectangle {
         anchors.fill: preview
-        radius: Math.max(0, root.radius - preview.anchors.margins)
+        radius: Math.max(0, root.cornerRadius - preview.anchors.margins)
         color: "#52000000"
         visible: !preview.previewReady || hover.hovered
-        Behavior on opacity { NumberAnimation { duration: 120 } }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 120
+            }
+        }
     }
 
     Column {
         anchors.centerIn: parent
         spacing: 4
-            visible: !preview.previewReady
+        visible: !preview.previewReady
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: {
                 if (root.state === "queued" || root.state === "probing")
-                    return "Inspecting"
-                if (root.state === "failed") return "Unavailable"
-                if (root.state === "unsupported") return "Unsupported"
-                if (preview.poster.state === "queued"
-                        || preview.poster.state === "checking"
-                        || preview.poster.state === "generating") return "Preparing preview"
-                if (preview.poster.state === "failed") return "Preview unavailable"
-                if (root.kind === "animatedImage") return "Animated image"
-                if (root.kind === "video") return "Video"
-                return "Loading"
+                    return "Inspecting";
+                if (root.state === "failed")
+                    return "Unavailable";
+                if (root.state === "unsupported")
+                    return "Unsupported";
+                if (preview.poster.state === "queued" || preview.poster.state === "checking" || preview.poster.state === "generating")
+                    return "Preparing preview";
+                if (preview.poster.state === "failed")
+                    return "Preview unavailable";
+                if (root.kind === "animatedImage")
+                    return "Animated image";
+                if (root.kind === "video")
+                    return "Video";
+                return "Loading";
             }
             color: Design.textMuted
             font.family: Design.fontText
@@ -80,9 +87,7 @@ Rectangle {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.state === "ready" && !root.selectable
-            text: record.width + "×" + record.height
-                + (record.durationMs > 0
-                    ? " · " + (record.durationMs / 1000).toFixed(1) + "s" : "")
+            text: record.width + "×" + record.height + (record.durationMs > 0 ? " · " + (record.durationMs / 1000).toFixed(1) + "s" : "")
             color: Design.textMuted
             opacity: 0.7
             font.family: Design.fontMono
@@ -130,7 +135,9 @@ Rectangle {
         }
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
     TapHandler {
         id: tap
         enabled: root.selectable

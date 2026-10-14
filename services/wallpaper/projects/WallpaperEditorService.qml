@@ -16,7 +16,7 @@ Singleton {
     property bool closing: false
     property bool warmRetained: false
     property string targetScreenName: ""
-    property string selectedAssetId: ""
+    readonly property string selectedAssetId: WallpaperEditorSelectionService.selectedAssetId
     property bool pickerOpened: false
     property bool saveAsOpened: false
     property bool saveAsChoosingParent: false
@@ -91,17 +91,15 @@ Singleton {
     }
 
     function reconcileSelection() {
-        if (selectedAssetId.length > 0 && mediaItems.some(asset => asset.id === selectedAssetId))
-            return;
-        selectedAssetId = mediaItems.length > 0 ? mediaItems[0].id : "";
+        WallpaperEditorSelectionService.reconcile(activeProject);
     }
 
     function selectAsset(assetId) {
-        const id = String(assetId || "");
-        if (!mediaItems.some(asset => asset.id === id))
-            return false;
-        selectedAssetId = id;
-        return true;
+        return WallpaperEditorSelectionService.selectAsset(assetId);
+    }
+
+    function clearAssetSelection() {
+        return WallpaperEditorSelectionService.clearKind("asset");
     }
 
     function removeSelectedAsset() {
@@ -109,13 +107,30 @@ Singleton {
         const assetId = selectedAssetId;
         if (projectId.length === 0 || assetId.length === 0 || importBusy)
             return false;
+        const before = WallpaperProjectService.projectSnapshot(projectId);
         const removed = WallpaperProjectService.removeAsset(projectId, assetId);
         if (removed) {
-            selectedAssetId = "";
+            WallpaperTimelineService.recordHistory(before, WallpaperProjectService.projectSnapshot(projectId), "Remove media from project");
+            WallpaperEditorSelectionService.clearKind("asset");
             inspectActiveProject();
             reconcileSelection();
+        } else if (WallpaperProjectService.error.length > 0) {
+            NotificationService.showError("Media could not be removed", WallpaperProjectService.error, targetScreenName, "wallpaper-editor-remove-media", "Wallpaper Studio");
         }
         return removed;
+    }
+
+    function newProject() {
+        if (!WallpaperProjectService.loaded || importBusy || openProjectBusy || savePreflightBusy || pickerOpened || saveAsOpened)
+            return false;
+        const projectId = WallpaperProjectService.createProject("Untitled Wallpaper");
+        if (projectId.length === 0) {
+            NotificationService.showError("Project could not be created", WallpaperProjectService.error || "Wallpaper Studio is not ready", targetScreenName, "wallpaper-editor-new-project", "Wallpaper Studio");
+            return false;
+        }
+        WallpaperEditorSelectionService.clear();
+        inspectActiveProject();
+        return true;
     }
 
     function openPicker() {
@@ -159,12 +174,12 @@ Singleton {
     }
 
     function closeSaveAs() {
-        if (WallpaperDraftPublicationService.busy)
-            return false;
+        const wasOpened = saveAsOpened || saveAsChoosingParent;
         saveAsOpened = false;
         saveAsChoosingParent = false;
-        WallpaperDraftPublicationService.reset();
-        return true;
+        if (!WallpaperDraftPublicationService.busy)
+            WallpaperDraftPublicationService.reset();
+        return wasOpened;
     }
 
     function beginChoosingSaveParent() {
@@ -200,25 +215,28 @@ Singleton {
     function open(preferredScreenName) {
         closeTimer.stop();
         warmTimer.stop();
-        warmRetained = false;
         closing = false;
         targetScreenName = ScreenService.resolve(preferredScreenName || "");
         opened = true;
+        // Preserve continuous demand when reopening a retained editor. If
+        // retention were cleared first, its loader could unload between the
+        // two assignments and defeat warm reuse.
+        warmRetained = false;
         WallpaperPresentationService.setEditorState(true, false);
         inspectActiveProject();
         reconcileSelection();
     }
 
     function close() {
-        if (!opened || closing || openProjectBusy)
+        if (!opened || closing)
             return false;
+        closing = true;
+        opened = false;
         WallpaperEditorOpenService.cancelPicker();
         cancelPicker();
         closeSaveAs();
         if (WallpaperProjectService.dirty)
             WallpaperProjectService.save();
-        closing = true;
-        opened = false;
         warmRetained = true;
         warmTimer.restart();
         WallpaperPresentationService.setEditorState(false, true);
@@ -276,7 +294,7 @@ Singleton {
             if (report.imported?.length > 0) {
                 root.pickerOpened = false;
                 root.inspectActiveProject();
-                root.selectedAssetId = report.imported[0].id;
+                WallpaperEditorSelectionService.selectAsset(report.imported[0].id);
             }
         }
     }
@@ -296,7 +314,7 @@ Singleton {
         target: WallpaperEditorOpenService
         function onFinished(accepted, message, projectId) {
             if (accepted) {
-                root.selectedAssetId = "";
+                WallpaperEditorSelectionService.clear();
                 root.inspectActiveProject();
                 root.reconcileSelection();
             } else {

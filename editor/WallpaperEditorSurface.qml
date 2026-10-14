@@ -8,6 +8,7 @@ import qs.editor
 import qs.services.config
 import qs.services.wallpaper.projects
 import "WallpaperEditorLayout.js" as EditorLayout
+import "EditorShortcutPolicy.js" as ShortcutPolicy
 
 Rectangle {
     id: root
@@ -22,8 +23,99 @@ Rectangle {
         ConfigService.setEditorLayoutPreferences(horizontalWeights, verticalWeights);
     }
 
+    function removeSelection() {
+        if (WallpaperEditorSelectionService.kind === "asset")
+            return WallpaperEditorService.removeSelectedAsset();
+        return timeline.removeSelection();
+    }
+
+    function handleEditorKey(event) {
+        const action = ShortcutPolicy.action(event.key, event.modifiers);
+        if (action === "select-all") {
+            event.accepted = WallpaperTimelineService.selectAllClips();
+        } else if (action === "remove-selection") {
+            event.accepted = removeSelection();
+        } else if (action === "timeline-start") {
+            timeline.playheadMs = 0;
+            timeline.scrollX = 0;
+            event.accepted = true;
+        } else if (action === "timeline-end") {
+            timeline.playheadMs = timeline.projectDurationMs;
+            timeline.scrollX = timeline.viewport.maximumScrollX;
+            event.accepted = true;
+        } else if (action === "timeline-back") {
+            timeline.scrollBy(-timeline.viewportWidth * 0.8);
+            event.accepted = true;
+        } else if (action === "timeline-forward") {
+            timeline.scrollBy(timeline.viewportWidth * 0.8);
+            event.accepted = true;
+        } else if (action === "toggle-playback") {
+            projectPreview.togglePlayback();
+            event.accepted = true;
+        } else if (action === "undo") {
+            event.accepted = WallpaperTimelineService.undo();
+        } else if (action === "redo") {
+            event.accepted = WallpaperTimelineService.redo();
+        }
+    }
+
+    function selectedMarker() {
+        const markerId = WallpaperEditorSelectionService.selectedMarkerId;
+        return (WallpaperEditorService.activeProject?.project?.markers || []).find(marker => marker.id === markerId) || null;
+    }
+
+    function selectedTimelineTarget() {
+        const selection = WallpaperEditorSelectionService.timelineSelection;
+        const project = WallpaperEditorService.activeProject?.project;
+        if (!project)
+            return null;
+        if ((selection.clipIds || []).length > 0) {
+            for (const track of project.tracks || []) {
+                const clip = (track.clips || []).find(value => value.id === selection.clipIds[0]);
+                if (clip)
+                    return {
+                        kind: "clip",
+                        name: clip.name || clip.id,
+                        trackName: track.name || track.id,
+                        clip: clip
+                    };
+            }
+        }
+        if (selection.trackId) {
+            const track = (project.tracks || []).find(value => value.id === selection.trackId);
+            if (track)
+                return {
+                    kind: "track",
+                    name: track.name || track.id
+                };
+        }
+        return null;
+    }
+
+    function timelineDetails(target) {
+        if (!target)
+            return "";
+        if (target.kind === "track")
+            return "Track selection · " + WallpaperEditorSelectionService.timelineSelection.clipIds.length + " clips selected";
+        return "Start " + Number(target.clip.startMs || 0) + " ms · Duration " + Number(target.clip.durationMs || 0) + " ms";
+    }
+
+    Component {
+        id: markerActionEditorComponent
+        EditorMarkerActionEditor {
+            markerId: root.selectedMarker()?.id || ""
+            actions: root.selectedMarker()?.actions || []
+            triggerType: root.selectedMarker()?.triggerType || "manual"
+            enabled: root.selectedMarker()?.enabled !== false
+            priority: root.selectedMarker()?.priority || 0
+            cooldownMs: root.selectedMarker()?.cooldownMs || 0
+        }
+    }
+
     focus: true
     Component.onCompleted: forceActiveFocus()
+    Keys.priority: Keys.AfterItem
+    Keys.onPressed: event => handleEditorKey(event)
 
     readonly property bool compact: width < 980
     readonly property var editorLayout: EditorLayout.resolve({
@@ -112,6 +204,15 @@ Rectangle {
                 }
             }
 
+            GlyphButton {
+                implicitWidth: 28
+                implicitHeight: 28
+                glyph: "plus"
+                accessibleName: "New Project"
+                enabled: WallpaperProjectService.loaded && !WallpaperEditorService.importBusy && !WallpaperEditorService.openProjectBusy && !WallpaperEditorService.savePreflightBusy
+                onActivated: WallpaperEditorService.newProject()
+            }
+
             PickerButton {
                 label: "Save As"
                 enabled: WallpaperEditorService.workspaceId.length > 0 && !WallpaperEditorService.importBusy
@@ -126,8 +227,9 @@ Rectangle {
             }
 
             EditorIconButton {
+                objectName: "editorCloseButton"
                 accessibleName: "Close editor"
-                enabled: !WallpaperEditorService.openProjectBusy
+                enabled: WallpaperEditorService.opened
                 onClicked: WallpaperEditorService.close()
             }
         }
@@ -175,9 +277,13 @@ Rectangle {
                 x: root.editorLayout.mediaWidth + root.editorLayout.previewWidth + Design.editorGap * 2
                 width: root.editorLayout.inspectorWidth
                 height: parent.height
-                title: WallpaperEditorService.selectedAsset ? WallpaperEditorService.selectedAsset.name : "Inspector"
-                description: WallpaperEditorService.selectedAsset ? (WallpaperEditorService.selectedAsset.state === "available" ? WallpaperEditorService.selectedAsset.declaredKind : WallpaperEditorService.selectedAsset.state) : "Select an asset or timeline item to edit its properties."
-                glyph: "···"
+                title: root.selectedMarker() ? root.selectedMarker().name : root.selectedTimelineTarget() ? root.selectedTimelineTarget().name : WallpaperEditorService.selectedAsset ? WallpaperEditorService.selectedAsset.name : "Inspector"
+                description: root.selectedMarker() ? "Timeline marker" : root.selectedTimelineTarget() ? (root.selectedTimelineTarget().kind === "clip" ? "Clip · " + root.selectedTimelineTarget().trackName : "Track") : WallpaperEditorService.selectedAsset ? (WallpaperEditorService.selectedAsset.state === "available" ? WallpaperEditorService.selectedAsset.declaredKind : WallpaperEditorService.selectedAsset.state) : "Select an asset or timeline item to edit its properties."
+                details: root.selectedMarker() ? "" : root.timelineDetails(root.selectedTimelineTarget())
+                detailComponent: root.selectedMarker() ? markerActionEditorComponent : null
+                detailTakesOver: root.selectedMarker() !== null
+                topAligned: root.selectedMarker() !== null
+                glyph: root.selectedMarker() ? "◇" : root.selectedTimelineTarget() ? "▣" : "···"
             }
 
             SplitHandle {
@@ -223,6 +329,7 @@ Rectangle {
 
         EditorTimeline {
             id: timeline
+            objectName: "editorTimeline"
             Layout.fillWidth: true
             Layout.preferredHeight: root.editorLayout.timelineHeight
             previewPlaying: projectPreview.playing

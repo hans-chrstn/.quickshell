@@ -4,7 +4,10 @@ import qs.core
 Item {
     id: root
 
+    // Tool limitation: this valid default alias targets the child host.
+    // qmllint disable unresolved-alias
     default property alias content: container.data
+    // qmllint enable unresolved-alias
 
     opacity: 0
     transform: Translate {

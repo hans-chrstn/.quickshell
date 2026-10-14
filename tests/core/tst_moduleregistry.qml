@@ -6,23 +6,46 @@ TestCase {
     id: testCase
     name: "ModuleRegistry"
 
+    component TestModule: Core.IslandModule {
+        collapsedWidth: 170
+        collapsedHeight: 34
+        expandedWidth: 440
+        expandedHeight: 154
+        collapsedSize: Core.IslandSizePolicy {
+            minimumWidth: 170
+            preferredWidth: 170
+            maximumWidth: 170
+            minimumHeight: 34
+            preferredHeight: 34
+            maximumHeight: 34
+        }
+        expandedSize: Core.IslandSizePolicy {
+            minimumWidth: 440
+            preferredWidth: 440
+            maximumWidth: 440
+            minimumHeight: 154
+            preferredHeight: 154
+            maximumHeight: 154
+        }
+    }
+
     Core.ModuleRegistry {
         id: registry
         modules: [
-            Core.IslandModule {
+            TestModule {
                 id: clock
                 moduleId: "clock"
                 active: true
                 priority: 0
             },
-            Core.IslandModule {
+            TestModule {
                 id: closingEditor
                 moduleId: "editor"
                 active: true
                 attention: false
                 priority: 95
             },
-            Core.IslandModule {
+            TestModule {
                 id: notification
                 moduleId: "notification"
                 active: true

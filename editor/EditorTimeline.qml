@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components
 import qs.components.menus
@@ -12,6 +13,7 @@ Rectangle {
     id: root
 
     readonly property var project: WallpaperEditorService.activeProject?.project || null
+    readonly property var markers: project?.markers || []
     readonly property int projectDurationMs: project?.durationMs || 0
     readonly property int displayDurationMs: Math.max(10000, projectDurationMs)
     readonly property real labelRailWidth: Math.min(116, Math.max(86, width * 0.11))
@@ -31,6 +33,8 @@ Rectangle {
     property string dropPreviewTrackId: ""
     property int dropPreviewTimeMs: 0
     property int dropPreviewDurationMs: 5000
+    property string contextMarkerId: ""
+    property var contextMarkerSource: null
     signal previewPlayPauseRequested
     signal previewLoopRequested
     signal undoRequested
@@ -47,21 +51,36 @@ Rectangle {
         scrollX: scrollX
     })
     readonly property var rulerData: Ruler.ticks(viewport, 40, 10, 62, 256)
-    readonly property var playhead: Ruler.playhead(viewport, playheadMs)
-    readonly property real loopStartX: Viewport.timeToViewportX(viewport, loopStartMs)
-    readonly property real loopEndX: Viewport.timeToViewportX(viewport, loopEndMs)
-    readonly property real visibleLoopStartX: Math.max(0, Math.min(viewportWidth, loopStartX))
-    readonly property real visibleLoopEndX: Math.max(0, Math.min(viewportWidth, loopEndX))
 
-    function assetFor(assetId) {
-        return (project?.assets || []).find(asset => asset.id === assetId) || null;
+    function contextMarker() {
+        return markers.find(marker => marker.id === contextMarkerId) || null;
     }
 
-    function displayClip(clip) {
-        const preview = WallpaperTimelineService.session?.preview;
-        if (preview?.clipId !== clip.id || !preview.timing)
-            return clip;
-        return Object.assign({}, clip, preview.timing);
+    function triggerLabel(triggerType) {
+        switch (String(triggerType || "manual")) {
+        case "time":
+            return "Time";
+        case "date":
+            return "Date";
+        case "weather":
+            return "Weather";
+        case "battery":
+            return "Battery / power";
+        case "workspace":
+            return "Workspace";
+        case "application":
+            return "Application";
+        case "window":
+            return "Window state";
+        case "media":
+            return "Media state";
+        case "lock":
+            return "Session lock";
+        case "monitor":
+            return "Monitor state";
+        default:
+            return "Manual event";
+        }
     }
 
     function trackAcceptsDrag(track, dragSource) {
@@ -86,14 +105,6 @@ Rectangle {
         return accepted;
     }
 
-    function selectionMode(modifiers) {
-        if (modifiers & Qt.ShiftModifier)
-            return "range";
-        if (modifiers & Qt.ControlModifier)
-            return "toggle";
-        return "replace";
-    }
-
     function scrollBy(deltaX) {
         const next = Viewport.scrollBy(viewport, deltaX);
         scrollX = next.scrollX;
@@ -113,6 +124,17 @@ Rectangle {
         scrollX = state.maximumScrollX * center / travel;
     }
 
+    function removeSelection() {
+        const kind = WallpaperEditorSelectionService.kind;
+        if (kind === "clips")
+            return WallpaperTimelineService.removeSelectedClips();
+        if (kind === "marker")
+            return WallpaperTimelineService.removeMarker(WallpaperEditorSelectionService.selectedMarkerId);
+        if (kind === "track")
+            return trackRemovalMenu.requestRemoval(WallpaperEditorSelectionService.timelineSelection.trackId);
+        return false;
+    }
+
     radius: Design.editorSectionRadius
     color: Qt.rgba(1, 1, 1, 0.025)
     border.width: 1
@@ -124,550 +146,129 @@ Rectangle {
     onVisibleChanged: if (visible)
         forceActiveFocus()
 
-    Keys.onPressed: event => {
-        if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_A) {
-            WallpaperTimelineService.selectAllClips();
-            event.accepted = true;
-        } else if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
-            if (WallpaperTimelineService.selection.clipIds.length > 0) {
-                WallpaperTimelineService.removeSelectedClips();
-                event.accepted = true;
-            }
-        } else if (event.key === Qt.Key_Home) {
-            root.playheadMs = 0;
-            root.scrollX = 0;
-            event.accepted = true;
-        } else if (event.key === Qt.Key_End) {
-            root.playheadMs = root.projectDurationMs;
-            root.scrollX = root.viewport.maximumScrollX;
-            event.accepted = true;
-        } else if (event.key === Qt.Key_PageUp) {
-            root.scrollBy(-root.viewportWidth * 0.8);
-            event.accepted = true;
-        } else if (event.key === Qt.Key_PageDown) {
-            root.scrollBy(root.viewportWidth * 0.8);
-            event.accepted = true;
-        } else if (event.key === Qt.Key_Space) {
-            root.previewPlayPauseRequested();
-            event.accepted = true;
-        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Z) {
-            if (event.modifiers & Qt.ShiftModifier)
-                root.redoRequested();
-            else
-                root.undoRequested();
-            event.accepted = true;
-        } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_Y) {
-            root.redoRequested();
-            event.accepted = true;
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
-        RowLayout {
+        EditorTimelineTransport {
             Layout.fillWidth: true
-            Layout.preferredHeight: 38
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            spacing: 8
-
-            Text {
-                Layout.fillWidth: true
-                text: "Timeline"
-                color: Design.text
-                font.family: Design.fontText
-                font.pixelSize: 12
-                font.weight: Font.DemiBold
-            }
-
-            GlyphButton {
-                id: previewTransportButton
-                implicitWidth: 25
-                implicitHeight: 25
-                glyph: root.previewPlaying ? "pause" : "play"
-                accessibleName: root.previewPlaying ? "Pause preview" : "Play preview"
-                toolTip: accessibleName
-                enabled: root.projectDurationMs > 0
-                primary: root.previewPlaying
-                onActivated: {
-                    root.forceActiveFocus();
-                    root.previewPlayPauseRequested();
-                }
-            }
-
-            GlyphButton {
-                implicitWidth: 25
-                implicitHeight: 25
-                glyph: "repeat"
-                accessibleName: root.previewLooping ? "Disable preview loop" : "Enable preview loop"
-                toolTip: accessibleName
-                primary: root.previewLooping
-                enabled: root.projectDurationMs > 0
-                onActivated: {
-                    root.forceActiveFocus();
-                    root.previewLoopRequested();
-                }
-            }
-
-            GlyphButton {
-                implicitWidth: 25
-                implicitHeight: 25
-                glyph: "undo"
-                accessibleName: "Undo timeline edit"
-                toolTip: accessibleName
-                enabled: WallpaperTimelineService.canUndo
-                onActivated: {
-                    root.forceActiveFocus();
-                    root.undoRequested();
-                }
-            }
-
-            GlyphButton {
-                implicitWidth: 25
-                implicitHeight: 25
-                glyph: "redo"
-                accessibleName: "Redo timeline edit"
-                toolTip: accessibleName
-                enabled: WallpaperTimelineService.canRedo
-                onActivated: {
-                    root.forceActiveFocus();
-                    root.redoRequested();
-                }
-            }
-
-            GlyphButton {
-                id: addTrackButton
-
-                implicitWidth: 25
-                implicitHeight: 25
-                glyph: "plus"
-                accessibleName: "Add timeline track"
-                toolTip: "Add track"
-                onActivated: trackMenu.openFor(addTrackButton, width / 2, height)
-            }
-
-            Text {
-                text: projectDurationMs > 0 ? Ruler.label(playheadMs, 1000) + " / " + Ruler.label(projectDurationMs, 1000) : "Draft span · 0:10"
-                color: Design.textMuted
-                font.family: Design.fontMono
-                font.pixelSize: 9
-            }
-
-            Rectangle {
-                implicitWidth: zoomLabel.implicitWidth + 14
-                implicitHeight: 22
-                radius: 8
-                color: Qt.rgba(1, 1, 1, 0.05)
-
-                Text {
-                    id: zoomLabel
-                    anchors.centerIn: parent
-                    text: Math.round(root.pixelsPerSecond) + " px/s"
-                    color: Design.textMuted
-                    font.family: Design.fontMono
-                    font.pixelSize: 9
-                }
-            }
+            Layout.preferredHeight: implicitHeight
+            projectDurationMs: root.projectDurationMs
+            playheadMs: root.playheadMs
+            pixelsPerSecond: root.pixelsPerSecond
+            previewPlaying: root.previewPlaying
+            previewLooping: root.previewLooping
+            canUndo: WallpaperTimelineService.canUndo
+            canRedo: WallpaperTimelineService.canRedo
+            onFocusRequested: root.forceActiveFocus()
+            onPreviewPlayPauseRequested: root.previewPlayPauseRequested()
+            onPreviewLoopRequested: root.previewLoopRequested()
+            onUndoRequested: root.undoRequested()
+            onRedoRequested: root.redoRequested()
+            onAddTrackRequested: (source, localX, localY) => trackMenu.openFor(source, localX, localY)
         }
 
-        Rectangle {
+        EditorTimelineRuler {
             Layout.fillWidth: true
-            Layout.preferredHeight: 30
-            color: Qt.rgba(1, 1, 1, 0.018)
-            border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.035)
-
-            Text {
-                x: 12
-                anchors.verticalCenter: parent.verticalCenter
-                text: "TRACKS"
-                color: Design.textMuted
-                opacity: 0.68
-                font.family: Design.fontText
-                font.pixelSize: 8
-                font.letterSpacing: 0.8
-                font.weight: Font.DemiBold
-            }
-
-            Item {
-                x: root.viewportOriginX
-                width: root.viewportWidth
-                height: parent.height
-                clip: true
-
-                Repeater {
-                    model: root.rulerData.ticks
-
-                    delegate: Item {
-                        required property var modelData
-                        x: modelData.x
-                        width: 1
-                        height: parent.height
-
-                        Rectangle {
-                            anchors.bottom: parent.bottom
-                            width: 1
-                            height: modelData.major ? 11 : 6
-                            color: modelData.major ? Design.textMuted : Design.separator
-                            opacity: modelData.major ? 0.72 : 0.5
-                        }
-
-                        Text {
-                            visible: modelData.major
-                            x: 4
-                            y: 3
-                            text: modelData.label
-                            color: Design.textMuted
-                            font.family: Design.fontMono
-                            font.pixelSize: 8
-                        }
-                    }
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    preventStealing: true
-                    onPressed: mouse => {
-                        root.scrubbing = true;
-                        root.scrubStarted();
-                        root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
-                    }
-                    onPositionChanged: mouse => {
-                        if (root.scrubbing)
-                            root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
-                    }
-                    onReleased: {
-                        if (root.scrubbing)
-                            root.scrubFinished();
-                        root.scrubbing = false;
-                    }
-                    onCanceled: root.scrubbing = false
-                }
-            }
-        }
-
-        Item {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            ListView {
-                id: trackList
-                anchors.fill: parent
-                clip: true
-                reuseItems: true
-                boundsBehavior: Flickable.StopAtBounds
-                model: root.project?.tracks || []
-                spacing: 3
-
-                delegate: Rectangle {
-                    id: trackLane
-                    required property var modelData
-                    readonly property var trackData: modelData
-                    width: ListView.view.width
-                    height: 42
-                    color: Qt.rgba(1, 1, 1, 0.018)
-
-                    Rectangle {
-                        id: trackHeader
-
-                        width: root.viewportOriginX
-                        height: parent.height
-                        color: Qt.rgba(1, 1, 1, 0.022)
-
-                        Column {
-                            anchors.left: parent.left
-                            anchors.leftMargin: 12
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 20
-                            spacing: 1
-
-                            Text {
-                                width: parent.width
-                                text: trackLane.trackData.name
-                                color: Design.text
-                                elide: Text.ElideRight
-                                font.family: Design.fontText
-                                font.pixelSize: 10
-                                font.weight: Font.Medium
-                            }
-                            Text {
-                                width: parent.width
-                                text: trackLane.trackData.type
-                                color: Design.textMuted
-                                elide: Text.ElideRight
-                                font.family: Design.fontText
-                                font.pixelSize: 8
-                            }
-                        }
-
-                        TapHandler {
-                            acceptedButtons: Qt.LeftButton
-                            onTapped: {
-                                root.forceActiveFocus();
-                                WallpaperTimelineService.clearSelection();
-                            }
-                        }
-                        TapHandler {
-                            acceptedButtons: Qt.RightButton
-                            onTapped: eventPoint => {
-                                root.forceActiveFocus();
-                                trackRemovalMenu.openFor(trackLane.trackData.id, trackHeader, eventPoint.position.x, eventPoint.position.y);
-                            }
-                        }
-                    }
-
-                    Item {
-                        x: root.viewportOriginX
-                        width: root.viewportWidth
-                        height: parent.height
-                        clip: true
-
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.LeftButton
-                            propagateComposedEvents: true
-                            onDoubleClicked: mouse => {
-                                root.forceActiveFocus();
-                                root.playheadMs = Viewport.viewportXToTime(root.viewport, mouse.x);
-                            }
-                        }
-
-                        Repeater {
-                            model: root.rulerData.ticks.filter(tick => tick.major)
-                            delegate: Rectangle {
-                                required property var modelData
-                                x: modelData.x
-                                width: 1
-                                height: parent.height
-                                color: Design.separator
-                                opacity: 0.26
-                            }
-                        }
-
-                        Repeater {
-                            model: Viewport.visibleClips(trackLane.trackData.clips, root.viewport, 80)
-
-                            delegate: EditorTimelineClip {
-                                id: clipItem
-                                required property var modelData
-                                readonly property var timelineClip: modelData
-                                readonly property var visibleClip: root.displayClip(timelineClip)
-                                readonly property var timelineAsset: root.assetFor(timelineClip.assetId)
-                                readonly property var timelineRoot: root
-
-                                x: Viewport.timeToViewportX(root.viewport, visibleClip.startMs)
-                                y: 4
-                                width: Math.max(12, visibleClip.durationMs * root.viewport.pixelsPerSecond / 1000)
-                                height: parent.height - 8
-                                clipData: timelineClip
-                                assetData: timelineAsset
-                                selected: WallpaperTimelineService.selection.clipIds.indexOf(timelineClip.id) >= 0
-                                onActivated: modifiers => {
-                                    root.forceActiveFocus();
-                                    WallpaperTimelineService.selectClip(trackLane.trackData.id, timelineClip.id, root.selectionMode(modifiers));
-                                }
-                                onDoubleActivated: (localX, modifiers) => {
-                                    root.forceActiveFocus();
-                                    root.playheadMs = Viewport.viewportXToTime(root.viewport, clipItem.x + localX);
-                                }
-                                onContextRequested: (localX, localY, modifiers) => {
-                                    root.forceActiveFocus();
-                                    if (WallpaperTimelineService.selection.clipIds.indexOf(timelineClip.id) < 0)
-                                        WallpaperTimelineService.selectClip(trackLane.trackData.id, timelineClip.id, root.selectionMode(modifiers));
-                                    clipMenu.openFor(clipItem, localX, localY);
-                                }
-                                onGestureStarted: (mode, localX) => {
-                                    root.forceActiveFocus();
-                                    root.scrubbing = true;
-                                    root.scrubStarted();
-                                    const x = clipItem.mapToItem(root, localX, 0).x - root.viewportOriginX;
-                                    WallpaperTimelineService.beginGesture(mode, timelineClip.id, trackLane.trackData.id, x, root.viewport.pixelsPerSecond, 8, timelineAsset?.media?.durationMs || 0);
-                                }
-                                onGestureMoved: localX => {
-                                    const x = clipItem.mapToItem(root, localX, 0).x - root.viewportOriginX;
-                                    WallpaperTimelineService.updateGesture(x, root.snappingEnabled);
-                                }
-                                onGestureFinished: {
-                                    if (WallpaperTimelineService.gestureActive)
-                                        WallpaperTimelineService.finishGesture();
-                                    clipItem.timelineRoot.scrubbing = false;
-                                }
-                                onGestureCanceled: {
-                                    if (WallpaperTimelineService.gestureActive)
-                                        WallpaperTimelineService.cancelGesture();
-                                    clipItem.timelineRoot.scrubbing = false;
-                                }
-                            }
-                        }
-
-                        DropArea {
-                            anchors.fill: parent
-                            keys: ["wallpaper-editor-media"]
-                            onEntered: drag => {
-                                drag.accepted = root.trackAcceptsDrag(trackLane.trackData, drag.source);
-                                if (drag.accepted)
-                                    root.updateDropPreview(trackLane.trackData.id, drag.x, drag.source);
-                            }
-                            onPositionChanged: drag => {
-                                if (root.trackAcceptsDrag(trackLane.trackData, drag.source))
-                                    root.updateDropPreview(trackLane.trackData.id, drag.x, drag.source);
-                            }
-                            onExited: root.clearDropPreview()
-                            onDropped: drop => {
-                                if (root.trackAcceptsDrag(trackLane.trackData, drop.source) && root.commitDrop(trackLane.trackData.id, drop.x, drop.source))
-                                    drop.acceptProposedAction();
-                            }
-                        }
-                    }
-                }
-            }
-
-            DropArea {
-                anchors.fill: parent
-                enabled: trackList.count === 0
-                keys: ["wallpaper-editor-media"]
-                onEntered: drag => {
-                    drag.accepted = drag.source?.dragAvailable === true;
-                    if (drag.accepted)
-                        root.updateDropPreview("", drag.x - root.viewportOriginX, drag.source);
-                }
-                onPositionChanged: drag => root.updateDropPreview("", drag.x - root.viewportOriginX, drag.source)
-                onExited: root.clearDropPreview()
-                onDropped: drop => {
-                    if (root.commitDrop("", drop.x - root.viewportOriginX, drop.source))
-                        drop.acceptProposedAction();
-                }
-            }
-
-            Column {
-                anchors.centerIn: parent
-                visible: trackList.count === 0
-                spacing: 4
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "No tracks yet"
-                    color: Design.text
-                    font.family: Design.fontText
-                    font.pixelSize: 11
-                    font.weight: Font.DemiBold
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: "The timeline is ready for your first media track."
-                    color: Design.textMuted
-                    font.family: Design.fontText
-                    font.pixelSize: 9
-                }
-            }
-        }
-    }
-
-    Rectangle {
-        visible: root.playhead.visible
-        x: root.viewportOriginX + root.playhead.x
-        y: 38
-        width: 1
-        height: root.height - 38
-        color: Design.blue
-        z: 5
-
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 7
-            height: 7
-            radius: 3.5
-            color: Design.blue
-        }
-
-        MouseArea {
-            id: playheadDragArea
-            x: -6
-            width: 13
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            acceptedButtons: Qt.LeftButton
-            preventStealing: true
-            cursorShape: Qt.SizeHorCursor
-            onPressed: mouse => {
-                root.forceActiveFocus();
+            Layout.preferredHeight: implicitHeight
+            rulerData: root.rulerData
+            markers: root.markers
+            viewport: root.viewport
+            viewportOriginX: root.viewportOriginX
+            viewportWidth: root.viewportWidth
+            selectedMarkerId: WallpaperEditorSelectionService.selectedMarkerId
+            triggerLabelProvider: root.triggerLabel
+            onFocusRequested: root.forceActiveFocus()
+            onScrubStarted: {
                 root.scrubbing = true;
                 root.scrubStarted();
-                root.playheadMs = Viewport.viewportXToTime(root.viewport, playheadDragArea.mapToItem(root, mouse.x, 0).x - root.viewportOriginX);
             }
-            onPositionChanged: mouse => {
-                if (root.scrubbing)
-                    root.playheadMs = Viewport.viewportXToTime(root.viewport, playheadDragArea.mapToItem(root, mouse.x, 0).x - root.viewportOriginX);
-            }
-            onReleased: {
-                if (root.scrubbing)
-                    root.scrubFinished();
+            onScrubTimeRequested: timeMs => root.playheadMs = timeMs
+            onScrubFinished: {
+                root.scrubFinished();
                 root.scrubbing = false;
             }
-            onCanceled: root.scrubbing = false
+            onScrubCanceled: root.scrubbing = false
+            onMarkerMoveRequested: (markerId, timeMs) => WallpaperTimelineService.moveMarker(markerId, timeMs)
+            onMarkerSelectionRequested: (markerId, toggle) => WallpaperEditorSelectionService.selectMarker(markerId, toggle)
+            onMarkerContextRequested: (markerId, source, localX, localY) => {
+                root.contextMarkerId = markerId;
+                root.contextMarkerSource = source;
+                markerActionMenu.openFor(source, localX, localY);
+            }
+            onRulerContextRequested: (source, localX, localY) => markerMenu.openFor(source, localX, localY)
         }
-    }
 
-    Rectangle {
-        visible: root.previewLooping && root.loopEndMs > root.loopStartMs && root.loopEndX > 0 && root.loopStartX < root.viewportWidth
-        x: root.viewportOriginX + root.visibleLoopStartX
-        y: 42
-        width: Math.max(1, root.visibleLoopEndX - root.visibleLoopStartX)
-        height: 3
-        radius: 1.5
-        color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.48)
-        z: 2
-    }
-
-    Repeater {
-        model: root.previewLooping ? ["start", "end"] : []
-        delegate: Rectangle {
-            required property string modelData
-            readonly property bool startHandle: modelData === "start"
-            readonly property real handleX: startHandle ? root.loopStartX : root.loopEndX
-            x: root.viewportOriginX + (startHandle ? root.loopStartX : root.loopEndX) - width / 2
-            y: 36
-            width: 5
-            height: 15
-            visible: root.previewLooping && handleX >= 0 && handleX <= root.viewportWidth
-            color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.86)
-            radius: 4
-            z: 8
-
-            MouseArea {
-                id: loopHandleDrag
-                anchors.fill: parent
-                anchors.margins: -5
-                acceptedButtons: Qt.LeftButton
-                preventStealing: true
-                cursorShape: Qt.SizeHorCursor
-                onPressed: mouse => {
-                    root.forceActiveFocus();
-                    root.scrubbing = true;
-                    root.scrubStarted();
-                }
-                onPositionChanged: mouse => {
-                    if (!root.scrubbing)
-                        return;
-                    const localX = loopHandleDrag.mapToItem(root, mouse.x, 0).x - root.viewportOriginX;
-                    const time = Viewport.viewportXToTime(root.viewport, localX);
-                    if (startHandle)
-                        root.loopStartMs = Math.min(time, root.loopEndMs - 1);
-                    else
-                        root.loopEndMs = Math.max(time, root.loopStartMs + 1);
-                    root.loopRegionChanged(root.loopStartMs, root.loopEndMs);
-                }
-                onReleased: {
-                    if (root.scrubbing)
-                        root.scrubFinished();
-                    root.scrubbing = false;
-                }
-                onCanceled: root.scrubbing = false
+        EditorTimelineTrackViewport {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            tracks: root.project?.tracks || []
+            assets: root.project?.assets || []
+            viewport: root.viewport
+            majorTicks: root.rulerData.ticks.filter(tick => tick.major)
+            viewportOriginX: root.viewportOriginX
+            viewportWidth: root.viewportWidth
+            selectedTrackId: WallpaperTimelineService.selection.trackId
+            selectedClipIds: WallpaperTimelineService.selection.clipIds
+            gesturePreview: WallpaperTimelineService.session?.preview || null
+            snappingEnabled: root.snappingEnabled
+            trackDragAcceptanceProvider: (track, dragSource) => root.trackAcceptsDrag(track, dragSource)
+            onFocusRequested: root.forceActiveFocus()
+            onPlayheadTimeRequested: timeMs => root.playheadMs = timeMs
+            onTrackSelectionRequested: trackId => WallpaperTimelineService.selectTrack(trackId)
+            onTrackContextRequested: (trackId, source, localX, localY) => trackRemovalMenu.openFor(trackId, source, localX, localY)
+            onClipSelectionRequested: (trackId, clipId, mode) => WallpaperTimelineService.selectClip(trackId, clipId, mode)
+            onClipContextRequested: (trackId, clipId, source, localX, localY, mode) => {
+                if (WallpaperTimelineService.selection.clipIds.indexOf(clipId) < 0)
+                    WallpaperTimelineService.selectClip(trackId, clipId, mode);
+                clipMenu.openFor(source, localX, localY);
+            }
+            onClipGestureStarted: (mode, clipId, trackId, viewportX, pixelsPerSecond, snapTolerancePx, sourceDurationMs) => {
+                root.scrubbing = true;
+                root.scrubStarted();
+                WallpaperTimelineService.beginGesture(mode, clipId, trackId, viewportX, pixelsPerSecond, snapTolerancePx, sourceDurationMs);
+            }
+            onClipGestureMoved: viewportX => WallpaperTimelineService.updateGesture(viewportX, root.snappingEnabled)
+            onClipGestureFinished: {
+                if (WallpaperTimelineService.gestureActive)
+                    WallpaperTimelineService.finishGesture();
+                root.scrubbing = false;
+            }
+            onClipGestureCanceled: {
+                if (WallpaperTimelineService.gestureActive)
+                    WallpaperTimelineService.cancelGesture();
+                root.scrubbing = false;
+            }
+            onDropPreviewRequested: (trackId, viewportX, dragSource) => root.updateDropPreview(trackId, viewportX, dragSource)
+            onDropPreviewCleared: root.clearDropPreview()
+            onDropCommitRequested: (trackId, viewportX, dragSource, dropEvent) => {
+                if ((trackId.length === 0 || root.trackAcceptsDrag((root.project?.tracks || []).find(track => track.id === trackId), dragSource)) && root.commitDrop(trackId, viewportX, dragSource))
+                    dropEvent.acceptProposedAction();
             }
         }
+    }
+
+    EditorTimelinePlayheadLayer {
+        anchors.fill: parent
+        viewport: root.viewport
+        viewportOriginX: root.viewportOriginX
+        viewportWidth: root.viewportWidth
+        playheadMs: root.playheadMs
+        loopEnabled: root.previewLooping
+        loopStartMs: root.loopStartMs
+        loopEndMs: root.loopEndMs
+        onFocusRequested: root.forceActiveFocus()
+        onScrubStarted: {
+            root.scrubbing = true;
+            root.scrubStarted();
+        }
+        onScrubTimeRequested: timeMs => root.playheadMs = timeMs
+        onScrubFinished: {
+            root.scrubFinished();
+            root.scrubbing = false;
+        }
+        onScrubCanceled: root.scrubbing = false
+        onLoopRegionRequested: (startMs, endMs) => root.loopRegionChanged(startMs, endMs)
     }
 
     Rectangle {
@@ -740,6 +341,132 @@ Rectangle {
                 if (pressed)
                     root.scrollFromOverview(mouse.x);
             }
+        }
+    }
+
+    ContextMenu {
+        id: markerMenu
+
+        actions: [
+            {
+                id: "add-marker",
+                label: "Add marker at playhead",
+                enabled: root.projectDurationMs > 0
+            }
+        ]
+
+        onActionTriggered: actionId => {
+            if (actionId === "add-marker")
+                WallpaperTimelineService.addMarker(root.playheadMs, "manual");
+        }
+    }
+
+    ContextMenu {
+        id: markerActionMenu
+
+        actions: [
+            {
+                id: "toggle-marker",
+                label: root.contextMarker()?.enabled === false ? "Enable marker" : "Disable marker",
+                enabled: root.contextMarkerId.length > 0
+            },
+            {
+                id: "set-trigger",
+                label: "Set trigger (" + root.triggerLabel(root.contextMarker()?.triggerType) + ")",
+                enabled: root.contextMarkerId.length > 0
+            },
+            {
+                id: "action-summary",
+                label: "Actions configured: " + (root.contextMarker()?.actions?.length || 0),
+                enabled: false
+            },
+            {
+                id: "remove-marker",
+                label: "Remove marker",
+                destructive: true,
+                enabled: root.contextMarkerId.length > 0
+            }
+        ]
+
+        onActionTriggered: actionId => {
+            const marker = root.contextMarker();
+            if (!marker)
+                return;
+            if (actionId === "toggle-marker")
+                WallpaperTimelineService.updateMarker(marker.id, {
+                    enabled: marker.enabled === false
+                });
+            else if (actionId === "set-trigger") {
+                triggerTypeMenu.openFor(root.contextMarkerSource, 0, root.contextMarkerSource.height);
+                return;
+            } else if (actionId === "remove-marker")
+                WallpaperTimelineService.removeMarker(marker.id);
+            root.contextMarkerId = "";
+        }
+    }
+
+    ContextMenu {
+        id: triggerTypeMenu
+
+        actions: [
+            {
+                id: "manual",
+                label: "Manual event"
+            },
+            {
+                id: "time",
+                label: "Time"
+            },
+            {
+                id: "date",
+                label: "Date"
+            },
+            {
+                id: "weather",
+                label: "Weather"
+            },
+            {
+                id: "battery",
+                label: "Battery / power"
+            },
+            {
+                id: "workspace",
+                label: "Workspace"
+            },
+            {
+                id: "application",
+                label: "Application"
+            },
+            {
+                id: "window",
+                label: "Window state"
+            },
+            {
+                id: "media",
+                label: "Media state"
+            },
+            {
+                id: "lock",
+                label: "Session lock"
+            },
+            {
+                id: "monitor",
+                label: "Monitor state"
+            }
+        ]
+
+        onActionTriggered: actionId => {
+            const marker = root.contextMarker();
+            if (marker)
+                WallpaperTimelineService.updateMarker(marker.id, {
+                    triggerType: actionId
+                });
+            root.contextMarkerId = "";
+            root.contextMarkerSource = null;
+        }
+        onClosed: {
+            if (!markerActionMenu.visible)
+                root.contextMarkerSource = null;
         }
     }
 

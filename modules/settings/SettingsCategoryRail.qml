@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 import qs.services.settings
 
@@ -21,25 +22,7 @@ ColumnLayout {
     Item {
         id: railContainer
         Layout.fillWidth: true
-        Layout.preferredHeight: 38 * SettingsService.categories.length
-            + 6 * (SettingsService.categories.length - 1)
-
-        Rectangle {
-            width: parent.width
-            height: 38
-            y: SettingsService.selectedCategory * 44
-            radius: 10
-            color: Design.surfaceRaised
-            border.width: 1
-            border.color: Design.glassHighlight
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: Design.resizeDuration * 0.5
-                    easing.type: Easing.OutCubic
-                }
-            }
-        }
+        Layout.preferredHeight: 38 * SettingsService.categories.length + 6 * (SettingsService.categories.length - 1)
 
         Column {
             anchors.fill: parent
@@ -48,29 +31,38 @@ ColumnLayout {
             Repeater {
                 model: SettingsService.categories
 
-                delegate: Item {
+                delegate: HighlightableSurface {
                     id: category
                     required property int index
                     required property var modelData
                     width: railContainer.width
                     height: 38
+                    interactive: false
+                    focused: categoryHover.hovered
+                    selected: category.index === SettingsService.selectedCategory
+                    baseColor: "transparent"
+                    cornerRadius: 10
 
                     Text {
                         anchors.left: parent.left
                         anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
                         text: category.modelData.title
-                        color: category.index === SettingsService.selectedCategory
-                            || categoryHover.hovered ? Design.text : Design.textMuted
+                        color: category.highlighted ? Design.text : Design.textMuted
                         font.family: Design.fontText
                         font.pixelSize: 12
-                        font.weight: category.index === SettingsService.selectedCategory
-                            ? Font.Medium : Font.Normal
+                        font.weight: category.index === SettingsService.selectedCategory ? Font.Medium : Font.Normal
 
-                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 120
+                            }
+                        }
                     }
 
-                    HoverHandler { id: categoryHover }
+                    HoverHandler {
+                        id: categoryHover
+                    }
                     TapHandler {
                         acceptedButtons: Qt.LeftButton
                         onTapped: SettingsService.selectedCategory = category.index
@@ -80,5 +72,7 @@ ColumnLayout {
         }
     }
 
-    Item { Layout.fillHeight: true }
+    Item {
+        Layout.fillHeight: true
+    }
 }

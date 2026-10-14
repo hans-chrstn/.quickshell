@@ -16,10 +16,13 @@ Item {
     property bool usageActive: requestedActive
     property string retentionReason: requestedActive ? "active-request" : ""
     property string evictionReason: requestedActive ? "" : "not-requested"
+    // Tool limitation: this valid alias targets the direct child Loader.
+    // qmllint disable unresolved-alias
     property alias sourceComponent: instanceLoader.sourceComponent
     property alias source: instanceLoader.source
     readonly property alias item: instanceLoader.item
     readonly property alias status: instanceLoader.status
+    // qmllint enable unresolved-alias
     readonly property bool loaded: instanceLoader.item !== null
     property bool registered: false
     property string registeredResourceId: ""
@@ -33,52 +36,46 @@ Item {
 
     function syncRequested() {
         if (registered)
-            LifecycleService.setRequested(registeredResourceId, requestedActive,
-                retentionReason, evictionReason)
+            LifecycleService.setRequested(registeredResourceId, requestedActive, retentionReason, evictionReason);
     }
 
     function syncLoaded() {
         if (registered)
-            LifecycleService.setLoaded(registeredResourceId, loaded)
+            LifecycleService.setLoaded(registeredResourceId, loaded);
     }
 
     function syncPolicy() {
         if (registered)
-            LifecycleService.configureResource(registeredResourceId,
-                adaptiveEligible, estimatedCostUnits, basePriority,
-                restorationSource)
+            LifecycleService.configureResource(registeredResourceId, adaptiveEligible, estimatedCostUnits, basePriority, restorationSource);
     }
 
     function syncUsage() {
         if (registered)
-            LifecycleService.setActive(registeredResourceId, usageActive)
+            LifecycleService.setActive(registeredResourceId, usageActive);
     }
 
     function registerCurrentResource() {
         if (!registrationEnabled)
-            return
-        const nextId = String(resourceId || "").trim()
-        registeredResourceId = nextId
-        registered = LifecycleService.registerResource(
-            nextId, owner, classification)
-        syncRequested()
-        syncUsage()
-        syncPolicy()
-        Qt.callLater(syncLoaded)
+            return;
+        const nextId = String(resourceId || "").trim();
+        registeredResourceId = nextId;
+        registered = LifecycleService.registerResource(nextId, owner, classification);
+        syncRequested();
+        syncUsage();
+        syncPolicy();
+        Qt.callLater(syncLoaded);
     }
 
     function rebindResource() {
         if (!componentComplete)
-            return
-        if (registered && registrationEnabled
-                && registeredResourceId === resourceId)
-            return
+            return;
+        if (registered && registrationEnabled && registeredResourceId === resourceId)
+            return;
         if (registered)
-            LifecycleService.unregisterResource(
-                registeredResourceId, "resource-replaced")
-        registered = false
+            LifecycleService.unregisterResource(registeredResourceId, "resource-replaced");
+        registered = false;
         if (registrationEnabled)
-            registerCurrentResource()
+            registerCurrentResource();
     }
 
     onResourceIdChanged: rebindResource()
@@ -104,18 +101,17 @@ Item {
         target: LifecycleService
         function onEvictionRequested(resourceId, reason) {
             if (root.registered && root.registeredResourceId === resourceId)
-                root.adaptiveEvictionRequested(reason)
+                root.adaptiveEvictionRequested(reason);
         }
     }
 
     Component.onCompleted: {
-        componentComplete = true
-        rebindResource()
+        componentComplete = true;
+        rebindResource();
     }
 
     Component.onDestruction: {
         if (registered)
-            LifecycleService.unregisterResource(
-                registeredResourceId, "owner-destroyed")
+            LifecycleService.unregisterResource(registeredResourceId, "owner-destroyed");
     }
 }

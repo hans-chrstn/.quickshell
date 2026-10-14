@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 import qs.services.notifications
 
@@ -10,30 +11,17 @@ Item {
     property string registeredPresentationScreen: ""
     readonly property bool expanded: context?.expanded ?? false
     readonly property var notice: NotificationService.current
-    readonly property color accent: notice?.severity === "error" ? Design.red
-        : notice?.severity === "warning" ? Design.yellow
-        : notice?.severity === "success" ? Design.green : Design.blue
+    readonly property color accent: notice?.severity === "error" ? Design.red : notice?.severity === "warning" ? Design.yellow : notice?.severity === "success" ? Design.green : Design.blue
     readonly property bool hasSource: String(notice?.source || "").length > 0
     readonly property bool hasBody: String(notice?.message || "").length > 0
     readonly property bool hasCount: Number(notice?.occurrenceCount) > 1
 
-    readonly property real collapsedImplicitWidth: 20 + 7
-        + Math.min(232, titleText.implicitWidth)
-        + (hasCount ? 6 + countText.implicitWidth : 0)
-    readonly property real collapsedImplicitHeight:
-        Math.max(20, titleText.implicitHeight)
-    readonly property real expandedHeaderImplicitWidth:
-        Math.min(300, titleText.implicitWidth)
-        + (hasSource ? 6 + Math.min(96, sourceText.implicitWidth) : 0)
-        + (hasCount ? 6 + countText.implicitWidth : 0)
-    readonly property real expandedCopyImplicitWidth: Math.max(
-        expandedHeaderImplicitWidth,
-        hasBody ? Math.min(390, bodyText.implicitWidth) : 0)
-    readonly property real expandedImplicitWidth: 38 + 12
-        + expandedCopyImplicitWidth + 12 + 27
-    readonly property real expandedImplicitHeight: Math.max(38, 27,
-        headerRow.implicitHeight + (hasBody ? 2 + Math.min(30,
-            bodyText.implicitHeight) : 0))
+    readonly property real collapsedImplicitWidth: 20 + 7 + Math.min(232, titleText.implicitWidth) + (hasCount ? 6 + countText.implicitWidth : 0)
+    readonly property real collapsedImplicitHeight: Math.max(20, titleText.implicitHeight)
+    readonly property real expandedHeaderImplicitWidth: Math.min(300, titleText.implicitWidth) + (hasSource ? 6 + Math.min(96, sourceText.implicitWidth) : 0) + (hasCount ? 6 + countText.implicitWidth : 0)
+    readonly property real expandedCopyImplicitWidth: Math.max(expandedHeaderImplicitWidth, hasBody ? Math.min(390, bodyText.implicitWidth) : 0)
+    readonly property real expandedImplicitWidth: 38 + 12 + expandedCopyImplicitWidth + 12 + 27
+    readonly property real expandedImplicitHeight: Math.max(38, 27, headerRow.implicitHeight + (hasBody ? 2 + Math.min(30, bodyText.implicitHeight) : 0))
 
     opacity: NotificationService.presentationVisible ? 1 : 0
 
@@ -54,13 +42,11 @@ Item {
             Layout.preferredHeight: Layout.preferredWidth
             Layout.alignment: Qt.AlignVCenter
             radius: width / 2
-            color: Qt.rgba(root.accent.r, root.accent.g,
-                root.accent.b, root.expanded ? 0.16 : 0.12)
+            color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, root.expanded ? 0.16 : 0.12)
 
             Text {
                 anchors.centerIn: parent
-                text: root.notice?.severity === "success" ? "✓"
-                    : root.notice?.severity === "info" ? "i" : "!"
+                text: root.notice?.severity === "success" ? "✓" : root.notice?.severity === "info" ? "i" : "!"
                 color: root.accent
                 font.family: Design.fontDisplay
                 font.pixelSize: root.expanded ? 16 : 10
@@ -107,8 +93,7 @@ Item {
                 Text {
                     id: countText
                     visible: root.hasCount
-                    text: root.hasCount
-                        ? "×" + Number(root.notice?.occurrenceCount || 1) : ""
+                    text: root.hasCount ? "×" + Number(root.notice?.occurrenceCount || 1) : ""
                     color: Design.textMuted
                     font.family: Design.fontMono
                     font.pixelSize: 9
@@ -131,24 +116,25 @@ Item {
             }
         }
 
-        Rectangle {
+        HighlightableSurface {
             visible: root.expanded
             Layout.preferredWidth: 27
             Layout.preferredHeight: 27
             Layout.alignment: Qt.AlignVCenter
-            radius: 9
-            color: closeHover.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            interactive: visible
+            focused: hovered
+            baseColor: "transparent"
+            cornerRadius: 9
+            accessibleName: "Dismiss notification"
+            onSurfaceActivated: NotificationService.dismiss()
 
             Text {
                 anchors.centerIn: parent
                 text: "×"
-                color: Design.textMuted
+                color: parent.hovered ? Design.text : Design.textMuted
                 font.family: Design.fontText
                 font.pixelSize: 14
             }
-
-            HoverHandler { id: closeHover }
-            TapHandler { onTapped: NotificationService.dismiss() }
         }
     }
 
@@ -158,9 +144,8 @@ Item {
     }
 
     Component.onCompleted: {
-        registeredPresentationScreen = context?.screenName || "view"
-        NotificationService.setPresented(registeredPresentationScreen, true)
+        registeredPresentationScreen = context?.screenName || "view";
+        NotificationService.setPresented(registeredPresentationScreen, true);
     }
-    Component.onDestruction:
-        NotificationService.setPresented(registeredPresentationScreen, false)
+    Component.onDestruction: NotificationService.setPresented(registeredPresentationScreen, false)
 }

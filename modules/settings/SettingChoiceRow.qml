@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 
 Item {
@@ -33,24 +34,26 @@ Item {
             Repeater {
                 model: root.choices
 
-                Rectangle {
+                HighlightableSurface {
                     required property var modelData
-                    readonly property bool selected: modelData === root.value
-                    readonly property bool choiceEnabled:
-                        root.enabledChoices.indexOf(modelData) >= 0
+                    readonly property bool choiceSelected: modelData === root.value
+                    readonly property bool choiceEnabled: root.enabledChoices.indexOf(modelData) >= 0
 
                     Layout.preferredWidth: root.choiceWidth
                     Layout.preferredHeight: 24
-                    radius: 12
-                    color: selected ? Design.blue : Design.surfaceRaised
-                    border.width: 1
-                    border.color: selected ? Design.blue : Design.separator
+                    interactive: choiceEnabled
+                    selected: choiceSelected
+                    focused: hover.hovered
+                    accentColor: Design.blue
+                    baseColor: Design.surfaceRaised
+                    cornerRadius: 12
                     opacity: choiceEnabled ? 1 : 0.32
+                    accessibleName: root.title + ": " + root.formatChoice(modelData)
 
-                    Behavior on color { ColorAnimation { duration: 110 } }
-                    Behavior on border.color {
-                        ColorAnimation { duration: 110 }
+                    HoverHandler {
+                        id: hover
                     }
+                    onSurfaceActivated: root.choiceSelected(modelData)
 
                     Text {
                         anchors.centerIn: parent
@@ -58,13 +61,7 @@ Item {
                         color: Design.text
                         font.family: Design.fontMono
                         font.pixelSize: 10
-                        font.weight: parent.selected
-                            ? Font.DemiBold : Font.Normal
-                    }
-
-                    TapHandler {
-                        enabled: parent.choiceEnabled
-                        onTapped: root.choiceSelected(parent.modelData)
+                        font.weight: parent.choiceSelected ? Font.DemiBold : Font.Normal
                     }
                 }
             }

@@ -7,9 +7,11 @@ QtObject {
 
     property int priority: 0
     property bool active: false
+    property bool arbitrationActive: active
     property bool attention: false
     property bool wantsKeyboard: false
     property int collapsedWidth: Design.collapsedWidth
+    property int collapsedHeight: Design.collapsedHeight
     property int expandedWidth: Design.defaultExpandedWidth
     property int expandedHeight: Design.defaultExpandedHeight
 
@@ -17,9 +19,9 @@ QtObject {
         minimumWidth: root.collapsedWidth
         preferredWidth: root.collapsedWidth
         maximumWidth: root.collapsedWidth
-        minimumHeight: Design.collapsedHeight
-        preferredHeight: Design.collapsedHeight
-        maximumHeight: Design.collapsedHeight
+        minimumHeight: root.collapsedHeight
+        preferredHeight: root.collapsedHeight
+        maximumHeight: root.collapsedHeight
     }
 
     property IslandSizePolicy expandedSize: IslandSizePolicy {
@@ -31,8 +33,10 @@ QtObject {
         maximumHeight: root.expandedHeight
     }
     property bool revealWithExpansion: false
+    property string lifecycleClassification: "active-only"
+    property string lifecycleRestorationSource: "ModuleRegistry and feature singleton service"
     property bool lifecycleAdaptiveEligible: false
-    property bool lifecycleUsageActive: true
+    property bool lifecycleUsageActive: active
     property real lifecycleEstimatedCostUnits: 0
     property real lifecycleBasePriority: 0
     property var lifecycleEvict: null

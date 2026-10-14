@@ -1,14 +1,14 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 import qs.editor
 
-Rectangle {
+HighlightableSurface {
     id: root
 
     required property var asset
     required property string workspaceId
-    property bool selected: false
     readonly property bool dragAvailable: asset.state === "available"
     readonly property int sourceDurationMs: asset.declaredKind === "static" ? 0 : Math.max(0, Math.round(Number(asset.media?.durationMs) || 0))
     signal activated
@@ -23,16 +23,11 @@ Rectangle {
     readonly property color stateColor: asset.state === "available" ? Design.green : asset.state === "pending" ? Design.yellow : Design.red
 
     implicitHeight: 58
-    radius: 13
-    color: selected ? Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.15) : hover.hovered ? Qt.rgba(1, 1, 1, 0.055) : "transparent"
-    border.width: selected ? 1 : 0
-    border.color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.42)
-
-    Behavior on color {
-        ColorAnimation {
-            duration: 100
-        }
-    }
+    interactive: false
+    focused: hover.hovered
+    accentColor: Design.blue
+    baseColor: "transparent"
+    cornerRadius: 13
 
     RowLayout {
         anchors.fill: parent

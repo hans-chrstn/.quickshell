@@ -491,6 +491,42 @@ IpcHandler {
     function wallpaperRenderStatus(): string {
         return JsonFormat.stringify(WallpaperRenderService.snapshot());
     }
+    function wallpaperTriggerTrace(nowMs: int, lastFiredJson: string): string {
+        let lastFired = ({});
+        try {
+            const parsed = JSON.parse(lastFiredJson || "{}");
+            if (parsed && typeof parsed === "object")
+                lastFired = parsed;
+        } catch (exception) {
+            lastFired = ({});
+        }
+        return JsonFormat.stringify(WallpaperTimelineService.triggerDecisionTrace(nowMs, lastFired));
+    }
+    function wallpaperNextTrigger(playheadMs: int, durationMs: int, loop: bool): string {
+        return JsonFormat.stringify(WallpaperTimelineService.nextTrigger(playheadMs, durationMs, loop));
+    }
+    function wallpaperTriggerActions(markerId: string): string {
+        const project = WallpaperProjectService.projectSnapshot(WallpaperProjectService.activeProjectId);
+        const marker = (project?.project?.markers || []).find(entry => entry.id === String(markerId || ""));
+        return JsonFormat.stringify(marker?.actions || []);
+    }
+    function wallpaperMarkerActionAdd(markerId: string, actionJson: string): bool {
+        try {
+            return WallpaperTimelineService.markerActionEdit(markerId, "", "add", JSON.parse(actionJson || "{}"));
+        } catch (exception) {
+            return false;
+        }
+    }
+    function wallpaperMarkerActionUpdate(markerId: string, actionId: string, changesJson: string): bool {
+        try {
+            return WallpaperTimelineService.markerActionEdit(markerId, actionId, "update", JSON.parse(changesJson || "{}"));
+        } catch (exception) {
+            return false;
+        }
+    }
+    function wallpaperMarkerActionRemove(markerId: string, actionId: string): bool {
+        return WallpaperTimelineService.markerActionEdit(markerId, actionId, "remove", null);
+    }
     function wallpaperDiagnostics(): string {
         return JsonFormat.stringify(WallpaperDiagnosticsService.snapshot());
     }
