@@ -12,9 +12,15 @@ Canvas {
 
     onNameChanged: requestPaint()
     onGlyphColorChanged: requestPaint()
+    onWidthChanged: requestPaint()
+    onHeightChanged: requestPaint()
     onPaint: {
         const ctx = getContext("2d");
         ctx.reset();
+        const logicalSize = 17;
+        const glyphScale = Math.max(0, Math.min(root.width, root.height) / logicalSize);
+        ctx.translate((root.width - logicalSize * glyphScale) / 2, (root.height - logicalSize * glyphScale) / 2);
+        ctx.scale(glyphScale, glyphScale);
         ctx.strokeStyle = root.glyphColor;
         ctx.fillStyle = root.glyphColor;
         ctx.lineWidth = 1.45;
@@ -115,6 +121,13 @@ Canvas {
             ctx.moveTo(12.8, 4.2);
             ctx.lineTo(4.2, 12.8);
             ctx.stroke();
+        } else if (root.name === "checkmark") {
+            ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(3.6, 8.8);
+            ctx.lineTo(7.1, 12.0);
+            ctx.lineTo(13.7, 5.0);
+            ctx.stroke();
         } else if (root.name === "play" || root.name === "pause") {
             if (root.name === "play") {
                 ctx.beginPath();
@@ -155,6 +168,60 @@ Canvas {
             ctx.moveTo(mirror(3.2), 6.0);
             ctx.lineTo(mirror(5.8), 8.2);
             ctx.stroke();
+        } else if (root.name === "volumeHigh" || root.name === "volumeLow" || root.name === "volumeMuted") {
+            ctx.beginPath();
+            ctx.moveTo(2.4, 7.0);
+            ctx.lineTo(5.2, 7.0);
+            ctx.lineTo(8.4, 4.2);
+            ctx.lineTo(8.4, 12.8);
+            ctx.lineTo(5.2, 10.0);
+            ctx.lineTo(2.4, 10.0);
+            ctx.closePath();
+            ctx.stroke();
+            if (root.name === "volumeLow" || root.name === "volumeHigh") {
+                ctx.beginPath();
+                ctx.arc(8.7, 8.5, 3.0, -0.72, 0.72);
+                ctx.stroke();
+            }
+            if (root.name === "volumeHigh") {
+                ctx.beginPath();
+                ctx.arc(8.7, 8.5, 5.4, -0.72, 0.72);
+                ctx.stroke();
+            }
+            if (root.name === "volumeMuted") {
+                ctx.beginPath();
+                ctx.moveTo(11.0, 6.1);
+                ctx.lineTo(15.0, 10.1);
+                ctx.moveTo(15.0, 6.1);
+                ctx.lineTo(11.0, 10.1);
+                ctx.stroke();
+            }
+        } else if (root.name === "microphone" || root.name === "microphoneMuted") {
+            ctx.beginPath();
+            ctx.moveTo(8.5, 2.2);
+            ctx.bezierCurveTo(6.9, 2.2, 6.0, 3.2, 6.0, 4.7);
+            ctx.lineTo(6.0, 7.7);
+            ctx.bezierCurveTo(6.0, 9.2, 6.9, 10.2, 8.5, 10.2);
+            ctx.bezierCurveTo(10.1, 10.2, 11.0, 9.2, 11.0, 7.7);
+            ctx.lineTo(11.0, 4.7);
+            ctx.bezierCurveTo(11.0, 3.2, 10.1, 2.2, 8.5, 2.2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(8.5, 8.0, 5.0, 0.08, Math.PI - 0.08);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(8.5, 13.0);
+            ctx.lineTo(8.5, 15.0);
+            ctx.moveTo(5.6, 15.0);
+            ctx.lineTo(11.4, 15.0);
+            ctx.stroke();
+            if (root.name === "microphoneMuted") {
+                ctx.strokeStyle = Design.red;
+                ctx.beginPath();
+                ctx.moveTo(3.0, 3.0);
+                ctx.lineTo(14.0, 14.0);
+                ctx.stroke();
+            }
         }
     }
 }

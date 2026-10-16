@@ -33,6 +33,7 @@ QtObject {
         maximumHeight: root.expandedHeight
     }
     property bool revealWithExpansion: false
+    property bool expandOnAttention: true
     property string lifecycleClassification: "active-only"
     property string lifecycleRestorationSource: "ModuleRegistry and feature singleton service"
     property bool lifecycleAdaptiveEligible: false

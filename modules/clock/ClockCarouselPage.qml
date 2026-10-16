@@ -1,6 +1,7 @@
 import QtQuick
 import qs.core
 import qs.components
+import qs.services.audio
 import qs.services.launcher
 import qs.services.session
 import qs.services.settings
@@ -14,18 +15,10 @@ Item {
     required property string screenName
     property bool expanded: false
     property real expansionProgress: 0
-    readonly property real collapsedImplicitWidth:
-        clockView.collapsedImplicitWidth
-    readonly property real collapsedImplicitHeight:
-        clockView.collapsedImplicitHeight
-    readonly property real expandedImplicitWidth: page === "clock"
-        ? clockView.expandedImplicitWidth
-        : (page === "power" ? powerAction.implicitWidth
-            : utilitiesRow.implicitWidth)
-    readonly property real expandedImplicitHeight: page === "clock"
-        ? clockView.expandedImplicitHeight
-        : (page === "power" ? powerAction.implicitHeight
-            : utilitiesRow.implicitHeight)
+    readonly property real collapsedImplicitWidth: clockView.collapsedImplicitWidth
+    readonly property real collapsedImplicitHeight: clockView.collapsedImplicitHeight
+    readonly property real expandedImplicitWidth: page === "clock" ? clockView.expandedImplicitWidth : (page === "power" ? powerAction.implicitWidth : utilitiesRow.implicitWidth)
+    readonly property real expandedImplicitHeight: page === "clock" ? clockView.expandedImplicitHeight : (page === "power" ? powerAction.implicitHeight : utilitiesRow.implicitHeight)
 
     ClockDateTimeView {
         id: clockView
@@ -50,6 +43,12 @@ Item {
         visible: root.page === "utilities"
         spacing: 8
 
+        CarouselAction {
+            icon: "volumeHigh"
+            label: "Audio"
+            accent: Design.green
+            onActivated: AudioPanelService.open(root.screenName)
+        }
         CarouselAction {
             icon: "apps"
             label: "Launcher"

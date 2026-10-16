@@ -8,6 +8,7 @@ Item {
 
     property bool expanded: false
     property real expansionProgress: 0
+    readonly property real surfaceRadius: Design.bodyRadius + (Design.expandedBodyRadius - Design.bodyRadius) * expansionProgress
 
     layer.enabled: true
     layer.effect: MultiEffect {
@@ -20,15 +21,13 @@ Item {
 
     IslandShape {
         anchors.fill: parent
-        fillColor: Qt.rgba(
-            Design.island.r + (Design.islandExpanded.r - Design.island.r) * root.expansionProgress,
-            Design.island.g + (Design.islandExpanded.g - Design.island.g) * root.expansionProgress,
-            Design.island.b + (Design.islandExpanded.b - Design.island.b) * root.expansionProgress,
-            Design.island.a + (Design.islandExpanded.a - Design.island.a) * root.expansionProgress)
+        bodyRadius: root.surfaceRadius
+        fillColor: Qt.rgba(Design.island.r + (Design.islandExpanded.r - Design.island.r) * root.expansionProgress, Design.island.g + (Design.islandExpanded.g - Design.island.g) * root.expansionProgress, Design.island.b + (Design.islandExpanded.b - Design.island.b) * root.expansionProgress, Design.island.a + (Design.islandExpanded.a - Design.island.a) * root.expansionProgress)
     }
 
     IslandShape {
         anchors.fill: parent
+        bodyRadius: root.surfaceRadius
         fillColor: "transparent"
         strokeColor: Design.glassStroke
         strokeWidth: 1
@@ -39,7 +38,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottomMargin: 1
-        width: Math.max(0, parent.width - (Design.wing + Design.bodyRadius) * 2)
+        width: Math.max(0, parent.width - (Design.wing + root.surfaceRadius) * 2)
         height: 1
         color: Design.glassShade
         opacity: 0.45 + 0.35 * root.expansionProgress

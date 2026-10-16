@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services.analytics
+import qs.services.audio
 import qs.services.cache
 import qs.services.config
 import qs.services.display
@@ -125,6 +126,60 @@ IpcHandler {
     }
     function backgroundJobStatus(): string {
         return JsonFormat.stringify(BackgroundJobTools.snapshot());
+    }
+    function audioStatus(): string {
+        return JsonFormat.stringify(AudioService.snapshot());
+    }
+    function audioPresentationStatus(): string {
+        return JsonFormat.stringify(AudioHudService.snapshot());
+    }
+    function audioPanelStatus(): string {
+        return JsonFormat.stringify(AudioPanelService.snapshot());
+    }
+    function audioOpen(screenName: string): bool {
+        return AudioPanelService.open(screenName);
+    }
+    function audioClose(): bool {
+        return AudioPanelService.close();
+    }
+    function audioPanelSelectPage(pageId: string): bool {
+        return AudioPanelService.selectPage(pageId);
+    }
+    function audioInventorySetConsumer(resourceId: string, enabled: bool): bool {
+        return AudioService.setInventoryConsumer(resourceId, enabled);
+    }
+    function audioSetPreferredDevice(role: string, stableKey: string): string {
+        return JsonFormat.stringify(AudioService.setPreferredDevice(role, stableKey));
+    }
+    function audioSetDeviceAlias(stableKey: string, alias: string): string {
+        return JsonFormat.stringify(AudioService.setDeviceAlias(stableKey, alias));
+    }
+    function audioCycleOutput(direction: int): string {
+        return JsonFormat.stringify(AudioService.cycleOutput(direction));
+    }
+    function audioTestDeviceTransition(role: string, kind: string): bool {
+        return AudioService.testDeviceTransition(role, kind);
+    }
+    function audioSetOutputVolume(volume: real): string {
+        return JsonFormat.stringify(AudioService.setMasterVolume("output", volume));
+    }
+    function audioSetOutputMuted(muted: bool): string {
+        return JsonFormat.stringify(AudioService.setMasterMuted("output", muted));
+    }
+    function audioAdjustOutputVolume(steps: int): string {
+        return JsonFormat.stringify(AudioService.adjustMasterVolume("output", steps));
+    }
+    function audioSetInputGain(gain: real): string {
+        return JsonFormat.stringify(AudioService.setMasterVolume("input", gain));
+    }
+    function audioSetInputMuted(muted: bool): string {
+        return JsonFormat.stringify(AudioService.setMasterMuted("input", muted));
+    }
+    function audioAdjustInputGain(steps: int): string {
+        return JsonFormat.stringify(AudioService.adjustMasterVolume("input", steps));
+    }
+    function audioTestAdjustmentBurst(role: string, count: int, steps: int): string {
+        return JsonFormat.stringify(AudioService.testAdjustmentBurst(role, count, steps));
     }
     function videoCapabilitiesRefresh(): bool {
         return VideoCapabilityService.refresh();

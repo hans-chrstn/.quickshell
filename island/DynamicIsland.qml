@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import qs.core
 import qs.components
+import qs.modules.audio
 import qs.modules.clock
 import qs.modules.editor
 import qs.modules.launcher
@@ -34,6 +35,12 @@ Item {
         id: registry
         modules: [
             ClockModuleSpec {},
+            AudioHudModuleSpec {
+                screenName: root.screenName
+            },
+            AudioControlModuleSpec {
+                screenName: root.screenName
+            },
             NotificationModuleSpec {
                 screenName: root.screenName
             },
@@ -120,7 +127,7 @@ Item {
     Component.onDestruction: IslandSizingService.remove(registeredSizingScreenName)
 
     readonly property int maximumExpandedHeight: {
-        let maximum = Design.defaultExpandedHeight;
+        let maximum = Math.max(Design.defaultExpandedHeight, expandedHeight);
         for (let module of registry.modules) {
             if (module?.moduleId === "wallpaper-editor" && presentedModule?.moduleId !== "wallpaper-editor")
                 continue;
@@ -137,9 +144,12 @@ Item {
                 hideTimer.stop();
                 if (root.expanded) {
                     attentionExpandTimer.stop();
-                } else {
+                } else if (registry.attentive?.expandOnAttention ?? true) {
                     root.reveal(false);
                     attentionExpandTimer.restart();
+                } else {
+                    root.reveal(false);
+                    attentionExpandTimer.stop();
                 }
             } else {
                 attentionExpandTimer.stop();
@@ -154,7 +164,7 @@ Item {
     Timer {
         id: attentionExpandTimer
         interval: Design.attentionExpandDelay
-        onTriggered: if (root.attentionRequested)
+        onTriggered: if (root.attentionRequested && (registry.attentive?.expandOnAttention ?? true))
             root.reveal(true)
     }
 

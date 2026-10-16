@@ -9,6 +9,8 @@ Item {
 
     property QtObject context: null
     property string registeredPresentationScreen: ""
+    readonly property bool presented: context?.presented ?? false
+    readonly property string presentationScreenName: context?.screenName || "view"
     readonly property bool expanded: context?.expanded ?? false
     readonly property var notice: NotificationService.current
     readonly property color accent: notice?.severity === "error" ? Design.red : notice?.severity === "warning" ? Design.yellow : notice?.severity === "success" ? Design.green : Design.blue
@@ -22,6 +24,20 @@ Item {
     readonly property real expandedCopyImplicitWidth: Math.max(expandedHeaderImplicitWidth, hasBody ? Math.min(390, bodyText.implicitWidth) : 0)
     readonly property real expandedImplicitWidth: 38 + 12 + expandedCopyImplicitWidth + 12 + 27
     readonly property real expandedImplicitHeight: Math.max(38, 27, headerRow.implicitHeight + (hasBody ? 2 + Math.min(30, bodyText.implicitHeight) : 0))
+
+    function synchronizePresentation() {
+        const requestedScreen = presented ? presentationScreenName : "";
+        if (requestedScreen === registeredPresentationScreen)
+            return;
+        if (registeredPresentationScreen.length > 0)
+            NotificationService.setPresented(registeredPresentationScreen, false);
+        registeredPresentationScreen = requestedScreen;
+        if (registeredPresentationScreen.length > 0)
+            NotificationService.setPresented(registeredPresentationScreen, true);
+    }
+
+    onPresentedChanged: synchronizePresentation()
+    onPresentationScreenNameChanged: synchronizePresentation()
 
     opacity: NotificationService.presentationVisible ? 1 : 0
 
@@ -143,9 +159,9 @@ Item {
         onHoveredChanged: NotificationService.setHovered(hovered)
     }
 
-    Component.onCompleted: {
-        registeredPresentationScreen = context?.screenName || "view";
-        NotificationService.setPresented(registeredPresentationScreen, true);
+    Component.onCompleted: synchronizePresentation()
+    Component.onDestruction: {
+        if (registeredPresentationScreen.length > 0)
+            NotificationService.setPresented(registeredPresentationScreen, false);
     }
-    Component.onDestruction: NotificationService.setPresented(registeredPresentationScreen, false)
 }

@@ -31,6 +31,7 @@ Singleton {
     readonly property int defaultExpandedHeight: scaledHeight(154)
     readonly property int triggerHeight: 6
     readonly property int bodyRadius: SettingsService.islandBodyRadius
+    readonly property int expandedBodyRadius: Math.max(bodyRadius, scaledHeight(28))
     readonly property int contentHorizontalPadding: 14
     readonly property int contentVerticalPadding: 6
     readonly property int expandedContentPadding: 18
@@ -48,8 +49,7 @@ Singleton {
     readonly property int contentRevealDuration: SettingsService.contentRevealDuration
     readonly property int attentionExpandDelay: SettingsService.attentionExpandDelay
     readonly property int moduleCloseDuration: SettingsService.moduleCloseDuration
-    readonly property int moduleHandoffDuration:
-        SettingsService.moduleHandoffDuration
+    readonly property int moduleHandoffDuration: SettingsService.moduleHandoffDuration
     readonly property int expandDelay: SettingsService.expandDelay
     readonly property int hideDelay: SettingsService.hideDelay
 

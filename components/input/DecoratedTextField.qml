@@ -15,6 +15,14 @@ Item {
     property int maximumLength: 256
     signal accepted
 
+    function forceEditorFocus() {
+        editor.forceActiveFocus();
+    }
+
+    function selectAll() {
+        editor.selectAll();
+    }
+
     implicitWidth: 260
     implicitHeight: label.length > 0 || supportingText.length > 0 ? 67 : 38
 

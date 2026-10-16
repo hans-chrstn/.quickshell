@@ -9,14 +9,16 @@ Rectangle {
     property string accessibleName: ""
     property string toolTip: accessibleName
     property bool primary: false
+    property color accentColor: Design.blue
+    property real glyphSize: 17
     signal activated
 
     implicitWidth: 30
     implicitHeight: 30
     radius: 10
-    color: primary ? Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, tap.pressed ? 0.30 : hover.hovered ? 0.24 : 0.17) : tap.pressed ? Qt.rgba(1, 1, 1, 0.13) : hover.hovered ? Design.surfaceRaised : Design.surface
+    color: primary ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, tap.pressed ? 0.30 : hover.hovered ? 0.24 : 0.17) : tap.pressed ? Qt.rgba(1, 1, 1, 0.13) : hover.hovered ? Design.surfaceRaised : Design.surface
     border.width: primary ? 1 : 0
-    border.color: primary ? Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.45) : "transparent"
+    border.color: primary ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.45) : "transparent"
     scale: tap.pressed ? 0.94 : 1
     opacity: enabled ? 1 : 0.42
 
@@ -41,6 +43,8 @@ Rectangle {
 
     IslandGlyph {
         anchors.centerIn: parent
+        width: root.glyphSize
+        height: root.glyphSize
         name: root.glyph
         glyphColor: root.primary || hover.hovered ? Design.text : Design.textMuted
     }

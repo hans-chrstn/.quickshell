@@ -19,14 +19,16 @@ PanelWindow {
     focusable: island.keyboardRequested
 
     BackgroundEffect.blurRegion: Region {
-        Region { item: blurParkingTarget }
+        Region {
+            item: blurParkingTarget
+        }
 
         Region {
             item: (island.hidden || !SettingsService.enableBlur) ? null : island.blurTarget
             topLeftRadius: 0
             topRightRadius: 0
-            bottomLeftRadius: Design.bodyRadius
-            bottomRightRadius: Design.bodyRadius
+            bottomLeftRadius: Design.bodyRadius + (Design.expandedBodyRadius - Design.bodyRadius) * island.expansionProgress
+            bottomRightRadius: bottomLeftRadius
         }
     }
 
@@ -40,8 +42,12 @@ PanelWindow {
     }
 
     mask: Region {
-        Region { item: island }
-        Region { item: edgeTrigger }
+        Region {
+            item: island
+        }
+        Region {
+            item: edgeTrigger
+        }
     }
 
     Item {

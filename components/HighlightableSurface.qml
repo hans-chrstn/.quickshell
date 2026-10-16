@@ -7,6 +7,7 @@ Item {
     property bool selected: false
     property bool focused: false
     property bool interactive: true
+    property bool contextEnabled: interactive
     property bool hoverEnabled: true
     property color accentColor: Design.blue
     property color baseColor: Qt.rgba(1, 1, 1, 0.035)
@@ -94,7 +95,7 @@ Item {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        enabled: root.interactive
+        enabled: root.contextEnabled
         onTapped: point => root.surfaceContextRequested(point.position.x, point.position.y, point.modifiers)
     }
 }
