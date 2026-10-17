@@ -1,0 +1,48 @@
+import QtQuick
+
+QtObject {
+    id: root
+
+    required property string moduleId
+
+    property int priority: 0
+    property bool active: false
+    property bool arbitrationActive: active
+    property bool attention: false
+    property bool wantsKeyboard: false
+    property int collapsedWidth: Design.collapsedWidth
+    property int collapsedHeight: Design.collapsedHeight
+    property int expandedWidth: Design.defaultExpandedWidth
+    property int expandedHeight: Design.defaultExpandedHeight
+
+    property IslandSizePolicy collapsedSize: IslandSizePolicy {
+        minimumWidth: root.collapsedWidth
+        preferredWidth: root.collapsedWidth
+        maximumWidth: root.collapsedWidth
+        minimumHeight: root.collapsedHeight
+        preferredHeight: root.collapsedHeight
+        maximumHeight: root.collapsedHeight
+    }
+
+    property IslandSizePolicy expandedSize: IslandSizePolicy {
+        minimumWidth: root.expandedWidth
+        preferredWidth: root.expandedWidth
+        maximumWidth: root.expandedWidth
+        minimumHeight: root.expandedHeight
+        preferredHeight: root.expandedHeight
+        maximumHeight: root.expandedHeight
+    }
+    property bool revealWithExpansion: false
+    property bool expandOnAttention: true
+    property string lifecycleClassification: "active-only"
+    property string lifecycleRestorationSource: "ModuleRegistry and feature singleton service"
+    property bool lifecycleAdaptiveEligible: false
+    property bool lifecycleUsageActive: active
+    property real lifecycleEstimatedCostUnits: 0
+    property real lifecycleBasePriority: 0
+    property var lifecycleEvict: null
+    property real revealStart: 0.22
+    property real revealEnd: 0.72
+
+    property Component view
+}
