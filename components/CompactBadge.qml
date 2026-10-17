@@ -5,12 +5,12 @@ Rectangle {
     id: root
 
     required property string text
-    property color accentColor: Design.blue
+    property color accentColor: Theme.accent
 
     implicitWidth: 26
     implicitHeight: 26
     radius: 8
-    color: Qt.rgba(accentColor.r, accentColor.g, accentColor.b, 0.16)
+    color: Theme.tint(accentColor)
 
     Text {
         anchors.centerIn: parent

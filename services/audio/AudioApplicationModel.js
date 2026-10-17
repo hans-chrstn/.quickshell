@@ -86,24 +86,48 @@ function allCapable(streams, capability) {
     return streams.length > 0 && streams.every(stream => stream.ready && stream.capabilities?.[capability] === true);
 }
 
-function groupRecord(role, identity, records) {
+function routeNames(role, streams, records, links) {
+    const streamIds = new Set(streams.map(stream => stream.id));
+    const routeIds = new Set();
+    for (const link of links || []) {
+        const sourceId = Math.max(0, Math.trunc(Number(link?.sourceId) || 0));
+        const targetId = Math.max(0, Math.trunc(Number(link?.targetId) || 0));
+        if (role === "playback-stream" && streamIds.has(sourceId))
+            routeIds.add(targetId);
+        else if (role === "recording-stream" && streamIds.has(targetId))
+            routeIds.add(sourceId);
+    }
+
+    const names = [];
+    for (const record of records || []) {
+        if (!routeIds.has(Math.max(0, Math.trunc(Number(record?.id) || 0))))
+            continue;
+        const name = bounded(record?.displayName || record?.name, 160);
+        if (name.length > 0 && !names.includes(name))
+            names.push(name);
+    }
+    return names.sort((left, right) => left.localeCompare(right));
+}
+
+function groupRecord(role, identity, applicationRecords, allRecords, links) {
     const section = roleSection(role);
-    const streams = records.map(compactStream).sort((left, right) => left.sessionId.localeCompare(right.sessionId) || left.id - right.id);
+    const streams = applicationRecords.map(compactStream).sort((left, right) => left.sessionId.localeCompare(right.sessionId) || left.id - right.id);
     const volumes = streams.map(stream => stream.volume).filter(value => Number.isFinite(value));
     const muteValues = streams.map(stream => stream.muted).filter(value => value !== null);
     const minimumVolume = volumes.length > 0 ? Math.min(...volumes) : null;
     const maximumVolume = volumes.length > 0 ? Math.max(...volumes) : null;
     const allMuted = muteValues.length === streams.length && muteValues.every(Boolean);
     const someMuted = muteValues.some(Boolean);
+    const routes = routeNames(role, streams, allRecords, links);
 
     return {
         key: role + ":" + identity,
         applicationKey: identity.startsWith("unidentified:") ? "" : identity,
-        identityKind: bounded(records[0]?.applicationIdentityKind, 48) || "none",
+        identityKind: bounded(applicationRecords[0]?.applicationIdentityKind, 48) || "none",
         section: section,
         direction: section === "playing" ? "output" : "input",
-        displayName: displayName(records),
-        iconName: iconName(records),
+        displayName: displayName(applicationRecords),
+        iconName: iconName(applicationRecords),
         ready: streams.length > 0 && streams.every(stream => stream.ready),
         active: streams.length > 0,
         streamCount: streams.length,
@@ -113,6 +137,9 @@ function groupRecord(role, identity, records) {
         mixedVolume: volumes.length > 1 && maximumVolume - minimumVolume > 0.005,
         muted: allMuted,
         mixedMute: someMuted && !allMuted,
+        routeNames: routes,
+        routeCount: routes.length,
+        routeSummary: routes.length === 0 ? "Route unavailable" : routes.length === 1 ? routes[0] : routes.length + " routes",
         capabilities: {
             volumeRead: allCapable(streams, "volumeRead"),
             volumeWrite: allCapable(streams, "volumeWrite"),
@@ -125,7 +152,7 @@ function groupRecord(role, identity, records) {
     };
 }
 
-function groupedApplications(records) {
+function groupedApplications(records, links) {
     const buckets = ({});
     for (const record of records || []) {
         const role = text(record?.role);
@@ -144,7 +171,7 @@ function groupedApplications(records) {
         const separator = key.indexOf(":");
         const role = key.slice(0, separator);
         const identity = key.slice(separator + 1);
-        const group = groupRecord(role, identity, buckets[key]);
+        const group = groupRecord(role, identity, buckets[key], records, links);
         if (group.section === "playing")
             playing.push(group);
         else
@@ -161,4 +188,30 @@ function groupedApplications(records) {
         recordingCount: recording.length,
         streamCount: playing.reduce((sum, group) => sum + group.streamCount, 0) + recording.reduce((sum, group) => sum + group.streamCount, 0)
     };
+}
+
+function listRows(applications) {
+    const source = applications || ({});
+    const playing = Array.isArray(source.playing) ? source.playing : [];
+    const recording = Array.isArray(source.recording) ? source.recording : [];
+    const divided = playing.length > 0 && recording.length > 0;
+    const rows = [];
+    const append = (section, label, values) => {
+        if (divided) {
+            rows.push({
+                kind: "section",
+                key: "section:" + section,
+                section: section,
+                label: label,
+                count: values.length
+            });
+        }
+        for (const group of values)
+            rows.push(Object.assign({
+                kind: "application"
+            }, group));
+    };
+    append("playing", "Playing", playing);
+    append("recording", "Recording", recording);
+    return rows;
 }

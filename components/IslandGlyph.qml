@@ -5,7 +5,7 @@ Canvas {
     id: root
 
     property string name: "apps"
-    property color glyphColor: Design.textMuted
+    property color glyphColor: Theme.textSecondary
 
     implicitWidth: 17
     implicitHeight: 17
@@ -216,7 +216,7 @@ Canvas {
             ctx.lineTo(11.4, 15.0);
             ctx.stroke();
             if (root.name === "microphoneMuted") {
-                ctx.strokeStyle = Design.red;
+                ctx.strokeStyle = Theme.danger;
                 ctx.beginPath();
                 ctx.moveTo(3.0, 3.0);
                 ctx.lineTo(14.0, 14.0);

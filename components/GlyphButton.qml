@@ -9,16 +9,16 @@ Rectangle {
     property string accessibleName: ""
     property string toolTip: accessibleName
     property bool primary: false
-    property color accentColor: Design.blue
+    property color accentColor: Theme.accent
     property real glyphSize: 17
     signal activated
 
     implicitWidth: 30
     implicitHeight: 30
     radius: 10
-    color: primary ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, tap.pressed ? 0.30 : hover.hovered ? 0.24 : 0.17) : tap.pressed ? Qt.rgba(1, 1, 1, 0.13) : hover.hovered ? Design.surfaceRaised : Design.surface
+    color: primary ? Theme.alpha(root.accentColor, tap.pressed ? 0.30 : hover.hovered ? 0.23 : 0.16) : tap.pressed ? Theme.controlPressed : hover.hovered ? Theme.controlHover : Theme.controlFill
     border.width: primary ? 1 : 0
-    border.color: primary ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.45) : "transparent"
+    border.color: primary ? Theme.alpha(root.accentColor, 0.36) : "transparent"
     scale: tap.pressed ? 0.94 : 1
     opacity: enabled ? 1 : 0.42
 
@@ -46,7 +46,7 @@ Rectangle {
         width: root.glyphSize
         height: root.glyphSize
         name: root.glyph
-        glyphColor: root.primary || hover.hovered ? Design.text : Design.textMuted
+        glyphColor: root.primary || hover.hovered ? Theme.textPrimary : Theme.textSecondary
     }
 
     HoverHandler {

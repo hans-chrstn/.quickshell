@@ -22,7 +22,7 @@ Singleton {
         restoreOnUnmute: ConfigService.audioRestoreOnUnmute
     })
     readonly property int inventoryConsumerCount: Object.keys(inventoryConsumers).length
-    readonly property bool inventoryRequested: inventoryConsumerCount > 0
+    readonly property bool inventoryRequested: inventoryConsumerCount > 0 || applicationControlCoordinator.busy
     readonly property bool inventoryLoaded: inventoryObserver.loaded
     readonly property bool ready: masterProvider.ready
     readonly property int revision: Number(inventoryObserver.item?.revision) || 0
@@ -47,6 +47,7 @@ Singleton {
     readonly property var deviceAliases: ConfigService.audioDeviceAliases
     readonly property int changeSequence: controlCoordinator.sequence
     readonly property var lastChange: controlCoordinator.lastChange
+    readonly property int applicationControlRevision: applicationControlCoordinator.revision
 
     signal semanticChange(var change)
     signal deviceTransitionOccurred(var transition)
@@ -125,6 +126,22 @@ Singleton {
 
     function adjustMasterVolume(role, steps) {
         return controlCoordinator.adjustVolume(role, steps);
+    }
+
+    function applicationControlState(group) {
+        return applicationControlCoordinator.effectiveGroup(group);
+    }
+
+    function setApplicationVolume(groupKey, value) {
+        return applicationControlCoordinator.setVolume(groupKey, value);
+    }
+
+    function setApplicationMuted(groupKey, muted) {
+        return applicationControlCoordinator.setMuted(groupKey, muted);
+    }
+
+    function adjustApplicationVolume(groupKey, steps) {
+        return applicationControlCoordinator.adjustVolume(groupKey, steps);
     }
 
     function setPreferredDevice(role, stableKey) {
@@ -273,6 +290,7 @@ Singleton {
             nodes: JsonCopy.value(nodes),
             links: JsonCopy.value(links),
             applications: JsonCopy.value(applications),
+            applicationControls: JsonCopy.value(applicationControlCoordinator.diagnostics()),
             capabilities: {
                 nodeEnumeration: "native",
                 linkObservation: "native",
@@ -296,6 +314,13 @@ Singleton {
         onSemanticChange: change => {
             root.semanticChange(change);
         }
+    }
+
+    AudioApplicationControlCoordinator {
+        id: applicationControlCoordinator
+
+        provider: inventoryObserver.item
+        policy: root.controlPolicy
     }
 
     LifecycleLoader {

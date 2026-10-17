@@ -10,7 +10,7 @@ Rectangle {
     implicitWidth: 32
     implicitHeight: 32
     radius: 10
-    color: press.pressed ? Qt.rgba(1, 1, 1, 0.13) : hover.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+    color: press.pressed ? Theme.controlPressed : hover.hovered ? Theme.controlHover : "transparent"
     opacity: enabled ? 1 : 0.42
 
     Behavior on color {
@@ -26,7 +26,7 @@ Rectangle {
         onPaint: {
             const context = getContext("2d");
             context.reset();
-            context.strokeStyle = Design.textMuted;
+            context.strokeStyle = Theme.textSecondary;
             context.lineWidth = 1.5;
             context.lineCap = "round";
             context.beginPath();

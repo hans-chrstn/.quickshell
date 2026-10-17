@@ -6,8 +6,8 @@ ColumnLayout {
     id: root
 
     required property var metrics
-    property color beforeColor: Design.textMuted
-    property color afterColor: Design.blue
+    property color beforeColor: Theme.textSecondary
+    property color afterColor: Theme.accent
     spacing: 4
 
     Repeater {
@@ -24,16 +24,14 @@ ColumnLayout {
                 Text {
                     Layout.fillWidth: true
                     text: modelData.label ?? ""
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 7
                 }
 
                 Text {
-                    text: (modelData.beforeText ?? modelData.before ?? 0)
-                        + " → "
-                        + (modelData.afterText ?? modelData.after ?? 0)
-                    color: Design.textMuted
+                    text: (modelData.beforeText ?? modelData.before ?? 0) + " → " + (modelData.afterText ?? modelData.after ?? 0)
+                    color: Theme.textSecondary
                     font.family: Design.fontMono
                     font.pixelSize: 7
                 }
@@ -43,15 +41,12 @@ ColumnLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 6
 
-                readonly property real maximum: Math.max(1,
-                    Number(modelData.before ?? 0),
-                    Number(modelData.after ?? 0))
+                readonly property real maximum: Math.max(1, Number(modelData.before ?? 0), Number(modelData.after ?? 0))
 
                 Rectangle {
                     anchors.left: parent.left
                     anchors.top: parent.top
-                    width: parent.width * Math.max(0,
-                        Number(modelData.before ?? 0)) / parent.maximum
+                    width: parent.width * Math.max(0, Number(modelData.before ?? 0)) / parent.maximum
                     height: 2
                     radius: 1
                     color: root.beforeColor
@@ -60,8 +55,7 @@ ColumnLayout {
                 Rectangle {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
-                    width: parent.width * Math.max(0,
-                        Number(modelData.after ?? 0)) / parent.maximum
+                    width: parent.width * Math.max(0, Number(modelData.after ?? 0)) / parent.maximum
                     height: 2
                     radius: 1
                     color: root.afterColor

@@ -26,9 +26,9 @@ Dialog {
 
     background: Rectangle {
         radius: 18
-        color: Design.surfaceRaised
+        color: Theme.overlay
         border.width: 1
-        border.color: Design.glassStroke
+        border.color: Theme.separatorStrong
     }
 
     contentItem: Column {
@@ -36,14 +36,14 @@ Dialog {
         focus: true
 
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Left || event.key === Qt.Key_Right
-                    || event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
+            if (event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab) {
                 root.currentIndex = 1 - root.currentIndex;
                 event.accepted = true;
-            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter
-                    || event.key === Qt.Key_Space) {
-                if (root.currentIndex === 1) root.accept();
-                else root.reject();
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                if (root.currentIndex === 1)
+                    root.accept();
+                else
+                    root.reject();
                 event.accepted = true;
             }
         }
@@ -53,7 +53,7 @@ Dialog {
             text: root.title
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 15
             font.weight: Font.DemiBold
@@ -64,7 +64,7 @@ Dialog {
             text: root.message
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 12
         }
@@ -72,7 +72,7 @@ Dialog {
         Rectangle {
             width: parent.width
             height: 1
-            color: Design.separator
+            color: Theme.separator
         }
 
         Row {
@@ -82,7 +82,9 @@ Dialog {
             ContextMenuItem {
                 objectName: "confirmationCancel"
                 width: (parent.width - parent.spacing) / 2
-                action: ({ label: "Cancel" })
+                action: ({
+                        label: "Cancel"
+                    })
                 highlighted: root.currentIndex === 0
                 onHovered: root.currentIndex = 0
                 onTriggered: root.reject()
@@ -91,7 +93,10 @@ Dialog {
             ContextMenuItem {
                 objectName: "confirmationAccept"
                 width: (parent.width - parent.spacing) / 2
-                action: ({ label: root.confirmLabel, destructive: root.destructive })
+                action: ({
+                        label: root.confirmLabel,
+                        destructive: root.destructive
+                    })
                 highlighted: root.currentIndex === 1
                 onHovered: root.currentIndex = 1
                 onTriggered: root.accept()

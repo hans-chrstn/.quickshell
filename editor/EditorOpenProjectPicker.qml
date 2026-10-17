@@ -5,10 +5,10 @@ import qs.core
 import qs.services.wallpaper.projects
 
 Rectangle {
-    color: Design.islandExpanded
+    color: Theme.islandExpanded
     radius: Design.editorSectionRadius
     border.width: 1
-    border.color: Design.glassStroke
+    border.color: Theme.glassStroke
 
     ColumnLayout {
         anchors.fill: parent
@@ -22,7 +22,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: "Open Project"
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontDisplay
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
@@ -32,7 +32,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: "Choose a saved wallpaper project folder."
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
                 elide: Text.ElideRight

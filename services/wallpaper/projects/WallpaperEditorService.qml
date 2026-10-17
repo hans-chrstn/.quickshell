@@ -218,9 +218,6 @@ Singleton {
         closing = false;
         targetScreenName = ScreenService.resolve(preferredScreenName || "");
         opened = true;
-        // Preserve continuous demand when reopening a retained editor. If
-        // retention were cleared first, its loader could unload between the
-        // two assignments and defeat warm reuse.
         warmRetained = false;
         WallpaperPresentationService.setEditorState(true, false);
         inspectActiveProject();

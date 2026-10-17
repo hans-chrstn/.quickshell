@@ -7,7 +7,7 @@ Rectangle {
 
     required property var pages
     required property string currentPage
-    property color accentColor: Design.blue
+    property color accentColor: Theme.accent
     property real controlHeight: 32
     property real cornerRadius: 10
     property real labelPixelSize: 10
@@ -15,7 +15,7 @@ Rectangle {
 
     implicitHeight: controlHeight
     radius: cornerRadius
-    color: Qt.rgba(1, 1, 1, 0.045)
+    color: Theme.fillSubtle
 
     RowLayout {
         anchors.fill: parent
@@ -40,7 +40,7 @@ Rectangle {
                 Text {
                     anchors.centerIn: parent
                     text: modelData.label
-                    color: parent.selected ? Design.text : Design.textMuted
+                    color: parent.selected ? Theme.textPrimary : Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: root.labelPixelSize
                     font.weight: parent.selected ? Font.DemiBold : Font.Normal

@@ -9,118 +9,185 @@ import qs.services.wallpaper
 SettingPage {
     id: root
 
-    property var snapshot: ({ screens: ({}) })
-    property var cacheSnapshot: ({ scannedAt: 0, posters: ({}),
-        optimized: ({}), cleanupPlan: ({}), cleanup: ({}) })
+    property var snapshot: ({
+            screens: ({})
+        })
+    property var cacheSnapshot: ({
+            scannedAt: 0,
+            posters: ({}),
+            optimized: ({}),
+            cleanupPlan: ({}),
+            cleanup: ({})
+        })
 
-    readonly property var rows: Object.keys(snapshot.screens ?? {})
-        .sort().map(name => ({ name: name, record: snapshot.screens[name] }))
+    readonly property var rows: Object.keys(snapshot.screens ?? {}).sort().map(name => ({
+                name: name,
+                record: snapshot.screens[name]
+            }))
 
     readonly property var stateSegments: {
-        let staticCount = 0
-        let playing = 0
-        let paused = 0
-        let evicted = 0
-        let empty = 0
-        let failed = 0
+        let staticCount = 0;
+        let playing = 0;
+        let paused = 0;
+        let evicted = 0;
+        let empty = 0;
+        let failed = 0;
         for (let index = 0; index < rows.length; ++index) {
-            const record = rows[index].record
+            const record = rows[index].record;
             if (!record.path)
-                ++empty
+                ++empty;
             else if (record.error || record.rendererState === "error")
-                ++failed
+                ++failed;
             else if (record.kind === "static")
-                ++staticCount
+                ++staticCount;
             else if (record.playbackActive)
-                ++playing
+                ++playing;
             else if (record.decoderEvicted)
-                ++evicted
+                ++evicted;
             else
-                ++paused
+                ++paused;
         }
         return [
-            { label: "Static", value: staticCount, color: Design.blue },
-            { label: "Playing", value: playing, color: Design.green },
-            { label: "Paused", value: paused, color: Design.yellow },
-            { label: "Evicted", value: evicted, color: Design.textMuted },
-            { label: "Empty", value: empty, color: Design.surfaceRaised },
-            { label: "Error", value: failed, color: Design.red }
-        ]
+            {
+                label: "Static",
+                value: staticCount,
+                color: Theme.accent
+            },
+            {
+                label: "Playing",
+                value: playing,
+                color: Theme.success
+            },
+            {
+                label: "Paused",
+                value: paused,
+                color: Theme.warning
+            },
+            {
+                label: "Evicted",
+                value: evicted,
+                color: Theme.textSecondary
+            },
+            {
+                label: "Empty",
+                value: empty,
+                color: Theme.fillElevated
+            },
+            {
+                label: "Error",
+                value: failed,
+                color: Theme.danger
+            }
+        ];
     }
 
     readonly property string observerMessage: {
-        const messages = []
-        const occlusionError = String(snapshot.occlusionObserver?.error || "")
-        const powerError = String(snapshot.monitorPowerObserver?.error || "")
-        const battery = snapshot.power ?? ({})
-        if (occlusionError) messages.push("Occlusion: " + occlusionError)
-        if (powerError) messages.push("Monitor power: " + powerError)
+        const messages = [];
+        const occlusionError = String(snapshot.occlusionObserver?.error || "");
+        const powerError = String(snapshot.monitorPowerObserver?.error || "");
+        const battery = snapshot.power ?? ({});
+        if (occlusionError)
+            messages.push("Occlusion: " + occlusionError);
+        if (powerError)
+            messages.push("Monitor power: " + powerError);
         if (battery.optionEnabled && !battery.available)
-            messages.push("Battery state unavailable")
-        return messages.join(" · ")
+            messages.push("Battery state unavailable");
+        return messages.join(" · ");
     }
 
     function stateLabel(record) {
-        if (!record.path) return "Empty"
-        if (record.error || record.rendererState === "error") return "Error"
-        if (record.kind === "static") return "Static"
-        if (record.playbackActive) return "Playing"
-        if (record.decoderEvicted) return "Evicted"
-        if (record.suspended) return "Paused"
-        return record.rendererState || "Unknown"
+        if (!record.path)
+            return "Empty";
+        if (record.error || record.rendererState === "error")
+            return "Error";
+        if (record.kind === "static")
+            return "Static";
+        if (record.playbackActive)
+            return "Playing";
+        if (record.decoderEvicted)
+            return "Evicted";
+        if (record.suspended)
+            return "Paused";
+        return record.rendererState || "Unknown";
     }
 
     function stateColor(record) {
-        if (!record.path) return Design.textMuted
-        if (record.error || record.rendererState === "error") return Design.red
-        if (record.kind === "static") return Design.blue
-        if (record.playbackActive) return Design.green
-        if (record.decoderEvicted) return Design.textMuted
-        if (record.suspended) return Design.yellow
-        return record.error ? Design.red : Design.textMuted
+        if (!record.path)
+            return Theme.textSecondary;
+        if (record.error || record.rendererState === "error")
+            return Theme.danger;
+        if (record.kind === "static")
+            return Theme.accent;
+        if (record.playbackActive)
+            return Theme.success;
+        if (record.decoderEvicted)
+            return Theme.textSecondary;
+        if (record.suspended)
+            return Theme.warning;
+        return record.error ? Theme.danger : Theme.textSecondary;
     }
 
     function refresh() {
-        snapshot = WallpaperDiagnosticsService.snapshot()
-        cacheSnapshot = WallpaperCacheService.snapshot()
+        snapshot = WallpaperDiagnosticsService.snapshot();
+        cacheSnapshot = WallpaperCacheService.snapshot();
     }
 
     function refreshCache() {
-        cacheSnapshot = WallpaperCacheService.snapshot()
+        cacheSnapshot = WallpaperCacheService.snapshot();
     }
 
     Component.onCompleted: refresh()
 
     Connections {
         target: WallpaperRenderService
-        function onScreensChanged() { root.refresh() }
+        function onScreensChanged() {
+            root.refresh();
+        }
     }
 
     Connections {
         target: WallpaperProbeService
-        function onRecordsChanged() { root.refresh() }
+        function onRecordsChanged() {
+            root.refresh();
+        }
     }
 
     Connections {
         target: WallpaperOptimizationService
-        function onRecordsChanged() { root.refresh() }
+        function onRecordsChanged() {
+            root.refresh();
+        }
     }
 
     Connections {
         target: WallpaperCacheService
-        function onEntriesChanged() { root.refreshCache() }
-        function onCleanupPlanChanged() { root.refreshCache() }
-        function onScanningChanged() { root.refreshCache() }
-        function onCleanupStateChanged() { root.refreshCache() }
-        function onCleaningChanged() { root.refreshCache() }
-        function onReclaimedBytesChanged() { root.refreshCache() }
+        function onEntriesChanged() {
+            root.refreshCache();
+        }
+        function onCleanupPlanChanged() {
+            root.refreshCache();
+        }
+        function onScanningChanged() {
+            root.refreshCache();
+        }
+        function onCleanupStateChanged() {
+            root.refreshCache();
+        }
+        function onCleaningChanged() {
+            root.refreshCache();
+        }
+        function onReclaimedBytesChanged() {
+            root.refreshCache();
+        }
     }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 8
 
-        SettingsHeader { title: "Wallpaper" }
+        SettingsHeader {
+            title: "Wallpaper"
+        }
 
         DonutChart {
             Layout.fillWidth: true
@@ -133,7 +200,7 @@ SettingPage {
             Layout.fillWidth: true
             visible: root.observerMessage.length > 0
             text: root.observerMessage
-            color: Design.red
+            color: Theme.danger
             font.family: Design.fontText
             font.pixelSize: 8
             wrapMode: Text.Wrap
@@ -142,7 +209,7 @@ SettingPage {
         Text {
             Layout.fillWidth: true
             text: "Live renderer state"
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 8
             font.weight: Font.Medium
@@ -157,8 +224,12 @@ SettingPage {
             model: root.rows
             boundsBehavior: Flickable.StopAtBounds
 
-            SmoothScrollBehavior { target: displayList }
-            ScrollEdgeFeedback { target: displayList }
+            SmoothScrollBehavior {
+                target: displayList
+            }
+            ScrollEdgeFeedback {
+                target: displayList
+            }
             ScrollBar.vertical: MinimalScrollBar {}
 
             footer: Component {

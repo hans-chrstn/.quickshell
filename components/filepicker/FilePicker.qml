@@ -19,68 +19,72 @@ Item {
     property var selectedPaths: []
     property string externalError: ""
     property string internalError: ""
-    readonly property string errorText: externalError.length > 0
-        ? externalError : internalError
+    readonly property string errorText: externalError.length > 0 ? externalError : internalError
     property bool busy: false
     property string busyLabel: "Working…"
     readonly property bool directoryMode: mode === "directory"
     signal accepted(var paths)
-    signal canceled()
+    signal canceled
 
     function normalizedPath(value) {
-        let path = String(value || "").trim()
+        let path = String(value || "").trim();
         if (path.startsWith("file://")) {
-            try { path = decodeURIComponent(path.slice(7)) }
-            catch (exception) { return "/" }
+            try {
+                path = decodeURIComponent(path.slice(7));
+            } catch (exception) {
+                return "/";
+            }
         }
-        path = path.replace(/\/+$/, "")
-        return path.length > 0 ? path : "/"
+        path = path.replace(/\/+$/, "");
+        return path.length > 0 ? path : "/";
     }
 
     function parentPath() {
-        if (currentPath === "/") return "/"
-        const separator = currentPath.lastIndexOf("/")
-        return separator <= 0 ? "/" : currentPath.slice(0, separator)
+        if (currentPath === "/")
+            return "/";
+        const separator = currentPath.lastIndexOf("/");
+        return separator <= 0 ? "/" : currentPath.slice(0, separator);
     }
 
     function enter(path) {
-        currentPath = normalizedPath(path)
-        internalError = ""
+        currentPath = normalizedPath(path);
+        internalError = "";
     }
 
     function selected(path) {
-        return selectedPaths.indexOf(path) >= 0
+        return selectedPaths.indexOf(path) >= 0;
     }
 
     function toggle(path) {
-        const normalized = normalizedPath(path)
-        const index = selectedPaths.indexOf(normalized)
+        const normalized = normalizedPath(path);
+        const index = selectedPaths.indexOf(normalized);
         if (index >= 0) {
-            const next = selectedPaths.slice()
-            next.splice(index, 1)
-            selectedPaths = next
-            internalError = ""
-            return
+            const next = selectedPaths.slice();
+            next.splice(index, 1);
+            selectedPaths = next;
+            internalError = "";
+            return;
         }
         if (selectedPaths.length >= maximumSelection) {
-            internalError = "Select up to " + maximumSelection + " files at once"
-            return
+            internalError = "Select up to " + maximumSelection + " files at once";
+            return;
         }
-        selectedPaths = selectedPaths.concat([normalized])
-        internalError = ""
+        selectedPaths = selectedPaths.concat([normalized]);
+        internalError = "";
     }
 
     function acceptCurrent() {
-        if (busy) return
+        if (busy)
+            return;
         if (directoryMode) {
-            accepted([currentPath])
-            return
+            accepted([currentPath]);
+            return;
         }
         if (selectedPaths.length === 0) {
-            internalError = "Select at least one file"
-            return
+            internalError = "Select at least one file";
+            return;
         }
-        accepted(selectedPaths.slice())
+        accepted(selectedPaths.slice());
     }
 
     FolderListModel {
@@ -106,26 +110,30 @@ Item {
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 30
                 radius: 10
-                color: upHover.hovered ? Design.surfaceRaised : Design.surface
+                color: upHover.hovered ? Theme.fillElevated : Theme.fillSubtle
                 border.width: 1
-                border.color: Design.separator
+                border.color: Theme.separator
                 enabled: root.currentPath !== "/"
                 opacity: enabled ? 1 : 0.4
 
                 IslandGlyph {
                     anchors.centerIn: parent
                     name: "chevronLeft"
-                    glyphColor: Design.textMuted
+                    glyphColor: Theme.textSecondary
                 }
-                HoverHandler { id: upHover }
-                TapHandler { onTapped: root.enter(root.parentPath()) }
+                HoverHandler {
+                    id: upHover
+                }
+                TapHandler {
+                    onTapped: root.enter(root.parentPath())
+                }
             }
 
             Text {
                 Layout.fillWidth: true
                 text: root.currentPath
                 elide: Text.ElideMiddle
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontMono
                 font.pixelSize: 10
             }
@@ -140,8 +148,12 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            SmoothScrollBehavior { target: entryList }
-            ScrollEdgeFeedback { target: entryList }
+            SmoothScrollBehavior {
+                target: entryList
+            }
+            ScrollEdgeFeedback {
+                target: entryList
+            }
 
             ListView {
                 id: entryList
@@ -159,18 +171,13 @@ Item {
                     required property url fileUrl
                     required property bool fileIsDir
                     readonly property string path: root.normalizedPath(fileUrl)
-                    readonly property bool chosen: !fileIsDir
-                        && root.selected(path)
+                    readonly property bool chosen: !fileIsDir && root.selected(path)
                     width: Math.max(0, entryList.width - 10)
                     height: 38
                     radius: 10
-                    color: chosen ? Qt.rgba(
-                        Design.blue.r, Design.blue.g, Design.blue.b, 0.16)
-                        : rowHover.hovered ? Design.surfaceRaised : Design.surface
+                    color: chosen ? Theme.tint(Theme.accent) : rowHover.hovered ? Theme.fillElevated : Theme.fillSubtle
                     border.width: 1
-                    border.color: chosen ? Design.blue
-                        : rowHover.hovered ? Design.glassHighlight
-                        : Design.separator
+                    border.color: chosen ? Theme.accent : rowHover.hovered ? Theme.glassHighlight : Theme.separator
 
                     RowLayout {
                         anchors.fill: parent
@@ -180,46 +187,45 @@ Item {
 
                         IslandGlyph {
                             name: entryRow.fileIsDir ? "folder" : "document"
-                            glyphColor: entryRow.chosen || rowHover.hovered
-                                ? Design.blue : Design.textMuted
+                            glyphColor: entryRow.chosen || rowHover.hovered ? Theme.accent : Theme.textSecondary
                         }
                         Text {
                             Layout.fillWidth: true
                             text: entryRow.fileName
                             elide: Text.ElideRight
-                            color: Design.text
+                            color: Theme.textPrimary
                             font.family: Design.fontText
                             font.pixelSize: 11
                         }
                         IslandGlyph {
                             visible: entryRow.fileIsDir
                             name: "chevronRight"
-                            glyphColor: Design.textMuted
+                            glyphColor: Theme.textSecondary
                             Layout.preferredWidth: 17
                             Layout.preferredHeight: 17
                         }
                         Text {
                             visible: entryRow.chosen
                             text: "✓"
-                            color: Design.blue
+                            color: Theme.accent
                             font.pixelSize: 12
                             font.weight: Font.Bold
                         }
                     }
 
-                    HoverHandler { id: rowHover }
+                    HoverHandler {
+                        id: rowHover
+                    }
                     TapHandler {
-                        onTapped: entryRow.fileIsDir
-                            ? root.enter(entryRow.path) : root.toggle(entryRow.path)
+                        onTapped: entryRow.fileIsDir ? root.enter(entryRow.path) : root.toggle(entryRow.path)
                     }
                 }
 
                 Text {
                     anchors.centerIn: parent
-                    visible: entries.status === FolderListModel.Ready
-                        && entries.count === 0
+                    visible: entries.status === FolderListModel.Ready && entries.count === 0
                     text: root.directoryMode ? "No folders here" : "No files here"
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 11
                 }
@@ -232,20 +238,18 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: root.errorText.length > 0 ? root.errorText
-                    : root.directoryMode ? ""
-                    : root.selectedPaths.length + " selected"
-                color: root.errorText.length > 0 ? Design.red : Design.textMuted
+                text: root.errorText.length > 0 ? root.errorText : root.directoryMode ? "" : root.selectedPaths.length + " selected"
+                color: root.errorText.length > 0 ? Theme.danger : Theme.textSecondary
                 elide: Text.ElideRight
                 font.family: Design.fontText
                 font.pixelSize: 9
             }
-            PickerButton { label: "Cancel"; onActivated: root.canceled() }
             PickerButton {
-                label: root.directoryMode ? "Use This Folder"
-                    : root.busy ? root.busyLabel
-                    : root.selectedPaths.length > 0
-                        ? "Import " + root.selectedPaths.length : "Import"
+                label: "Cancel"
+                onActivated: root.canceled()
+            }
+            PickerButton {
+                label: root.directoryMode ? "Use This Folder" : root.busy ? root.busyLabel : root.selectedPaths.length > 0 ? "Import " + root.selectedPaths.length : "Import"
                 primary: true
                 enabled: !root.busy
                 onActivated: root.acceptCurrent()

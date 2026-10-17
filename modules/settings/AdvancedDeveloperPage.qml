@@ -16,7 +16,7 @@ SettingPage {
         Text {
             Layout.fillWidth: true
             text: "Developer options can change resource lifetime and recovery behavior."
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 9
             wrapMode: Text.Wrap

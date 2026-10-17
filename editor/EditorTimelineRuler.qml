@@ -27,15 +27,15 @@ Rectangle {
     signal rulerContextRequested(Item source, real localX, real localY)
 
     implicitHeight: 30
-    color: Qt.rgba(1, 1, 1, 0.018)
+    color: Theme.fillFaint
     border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.035)
+    border.color: Theme.separatorQuiet
 
     Text {
         x: 12
         anchors.verticalCenter: parent.verticalCenter
         text: "TRACKS"
-        color: Design.textMuted
+        color: Theme.textSecondary
         opacity: 0.68
         font.family: Design.fontText
         font.pixelSize: 8
@@ -64,7 +64,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     width: 1
                     height: modelData.major ? 11 : 6
-                    color: modelData.major ? Design.textMuted : Design.separator
+                    color: modelData.major ? Theme.textSecondary : Theme.separator
                     opacity: modelData.major ? 0.72 : 0.5
                 }
 
@@ -73,7 +73,7 @@ Rectangle {
                     x: 4
                     y: 3
                     text: modelData.label
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontMono
                     font.pixelSize: 8
                 }
@@ -98,7 +98,7 @@ Rectangle {
                 width: 2
                 height: parent.height
                 visible: markerX >= 0 && markerX <= root.viewportWidth
-                accentColor: Design.yellow
+                accentColor: Theme.warning
                 baseColor: "transparent"
                 focused: markerHover.hovered
                 selected: root.selectedMarkerId === modelData.id
@@ -114,7 +114,7 @@ Rectangle {
                     width: 8
                     height: 8
                     radius: 4
-                    color: markerItem.highlighted ? Design.text : markerItem.accentColor
+                    color: markerItem.highlighted ? Theme.textPrimary : markerItem.accentColor
                     scale: markerItem.highlighted ? 1.2 : 1
 
                     Behavior on color {

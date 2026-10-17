@@ -23,8 +23,8 @@ HighlightableSurface {
 
     interactive: false
     focused: hover.hovered
-    accentColor: Design.blue
-    baseColor: Design.surface
+    accentColor: Theme.accent
+    baseColor: Theme.fillSubtle
     cornerRadius: 12
     clip: true
     scale: tap.pressed && selectable ? 0.975 : 1
@@ -46,7 +46,7 @@ HighlightableSurface {
     Rectangle {
         anchors.fill: preview
         radius: Math.max(0, root.cornerRadius - preview.anchors.margins)
-        color: "#52000000"
+        color: Theme.scrim
         visible: !preview.previewReady || hover.hovered
         Behavior on opacity {
             NumberAnimation {
@@ -79,7 +79,7 @@ HighlightableSurface {
                     return "Video";
                 return "Loading";
             }
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 11
         }
@@ -88,7 +88,7 @@ HighlightableSurface {
             anchors.horizontalCenter: parent.horizontalCenter
             visible: root.state === "ready" && !root.selectable
             text: record.width + "×" + record.height + (record.durationMs > 0 ? " · " + (record.durationMs / 1000).toFixed(1) + "s" : "")
-            color: Design.textMuted
+            color: Theme.textSecondary
             opacity: 0.7
             font.family: Design.fontMono
             font.pixelSize: 9
@@ -103,13 +103,13 @@ HighlightableSurface {
         height: 18
         radius: 9
         visible: root.path.length > 0
-        color: root.kind === "video" ? Design.blue : Design.surfaceRaised
+        color: root.kind === "video" ? Theme.accent : Theme.fillElevated
 
         Text {
             id: extensionLabel
             anchors.centerIn: parent
             text: root.extension
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 8
             font.weight: Font.DemiBold
@@ -124,12 +124,12 @@ HighlightableSurface {
         height: 18
         radius: 9
         visible: root.selected
-        color: Design.blue
+        color: Theme.accent
 
         Text {
             anchors.centerIn: parent
             text: "✓"
-            color: Design.text
+            color: Theme.textPrimary
             font.pixelSize: 11
             font.weight: Font.Bold
         }

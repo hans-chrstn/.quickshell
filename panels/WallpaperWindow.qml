@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.core
 import qs.panels.wallpaper
 import qs.services.wallpaper
 
@@ -9,20 +10,15 @@ PanelWindow {
 
     readonly property string screenName: screen?.name ?? ""
     property string retainedScreenName: screenName
-    readonly property string scheduledWallpaperPath:
-        WallpaperScheduledOverlayService.pathForScreen(retainedScreenName)
-    readonly property string manualWallpaperPath:
-        WallpaperAssignmentService.loaded
-            ? WallpaperAssignmentService.wallpaperForScreen(
-                retainedScreenName) : ""
-    readonly property string wallpaperPath: scheduledWallpaperPath.length > 0
-        ? scheduledWallpaperPath : manualWallpaperPath
+    readonly property string scheduledWallpaperPath: WallpaperScheduledOverlayService.pathForScreen(retainedScreenName)
+    readonly property string manualWallpaperPath: WallpaperAssignmentService.loaded ? WallpaperAssignmentService.wallpaperForScreen(retainedScreenName) : ""
+    readonly property string wallpaperPath: scheduledWallpaperPath.length > 0 ? scheduledWallpaperPath : manualWallpaperPath
 
     anchors.top: true
     anchors.bottom: true
     anchors.left: true
     anchors.right: true
-    color: "black"
+    color: Theme.wallpaperFallback
     exclusiveZone: 0
 
     WlrLayershell.namespace: "inspire-wallpaper"
@@ -41,12 +37,12 @@ PanelWindow {
     }
 
     function retainScreenIdentity() {
-        const nextName = String(screenName || "").trim()
+        const nextName = String(screenName || "").trim();
         if (nextName.length === 0 || nextName === retainedScreenName)
-            return
+            return;
         if (retainedScreenName.length > 0)
-            WallpaperRenderService.remove(retainedScreenName)
-        retainedScreenName = nextName
+            WallpaperRenderService.remove(retainedScreenName);
+        retainedScreenName = nextName;
     }
 
     WallpaperSurface {
@@ -57,19 +53,17 @@ PanelWindow {
         renderScale: root.screen?.devicePixelRatio ?? 1
 
         function reportStatus() {
-            WallpaperRenderService.report(
-                root.retainedScreenName, root.wallpaperPath,
-                state, error, kind, {
-                    suspended: suspended,
-                    suspendedReason: suspendedReason,
-                    suspendedPositionMs: suspendedPositionMs,
-                    decoderEvicted: decoderEvicted,
-                    decoderLoaded: decoderLoaded,
-                    playbackActive: playbackActive,
-                    transitionRunning: transitionRunning,
-                    transitionReason: transitionReason,
-                    retainedRendererCount: retainedRendererCount
-                })
+            WallpaperRenderService.report(root.retainedScreenName, root.wallpaperPath, state, error, kind, {
+                suspended: suspended,
+                suspendedReason: suspendedReason,
+                suspendedPositionMs: suspendedPositionMs,
+                decoderEvicted: decoderEvicted,
+                decoderLoaded: decoderLoaded,
+                playbackActive: playbackActive,
+                transitionRunning: transitionRunning,
+                transitionReason: transitionReason,
+                retainedRendererCount: retainedRendererCount
+            });
         }
 
         onStateChanged: reportStatus()
@@ -78,7 +72,8 @@ PanelWindow {
         onPathChanged: reportStatus()
         onSuspendedChanged: reportStatus()
         onSuspendedReasonChanged: reportStatus()
-        onSuspendedPositionMsChanged: if (suspended) reportStatus()
+        onSuspendedPositionMsChanged: if (suspended)
+            reportStatus()
         onDecoderEvictedChanged: reportStatus()
         onDecoderLoadedChanged: reportStatus()
         onPlaybackActiveChanged: reportStatus()
@@ -88,14 +83,13 @@ PanelWindow {
     }
 
     onScreenNameChanged: {
-        retainScreenIdentity()
-        wallpaper.reportStatus()
+        retainScreenIdentity();
+        wallpaper.reportStatus();
     }
     Component.onCompleted: {
-        retainedScreenName = screenName
-        retainScreenIdentity()
-        wallpaper.reportStatus()
+        retainedScreenName = screenName;
+        retainScreenIdentity();
+        wallpaper.reportStatus();
     }
-    Component.onDestruction:
-        WallpaperRenderService.remove(retainedScreenName)
+    Component.onDestruction: WallpaperRenderService.remove(retainedScreenName)
 }

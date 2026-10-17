@@ -25,7 +25,7 @@ ColumnLayout {
         Text {
             Layout.fillWidth: true
             text: "Choose action"
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 10
             font.weight: Font.DemiBold

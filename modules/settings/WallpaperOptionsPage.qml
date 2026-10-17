@@ -14,14 +14,20 @@ SettingPage {
         anchors.fill: parent
         spacing: 10
 
-        SettingsHeader { title: "Wallpaper Options" }
+        SettingsHeader {
+            title: "Wallpaper Options"
+        }
 
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            SmoothScrollBehavior { target: optionsScroller }
-            ScrollEdgeFeedback { target: optionsScroller }
+            SmoothScrollBehavior {
+                target: optionsScroller
+            }
+            ScrollEdgeFeedback {
+                target: optionsScroller
+            }
 
             Flickable {
                 id: optionsScroller
@@ -40,7 +46,7 @@ SettingPage {
 
                     Text {
                         text: "Playback Assessment"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
@@ -52,10 +58,8 @@ SettingPage {
                         description: "Permits explicit transcoding with sustained CPU and disk use"
                         dangerous: true
                         checked: ConfigService.allowWallpaperOptimization
-                        onActivated: SettingsService.openPage(
-                            "wallpaper_optimization")
-                        onToggled: value => SettingsService.setSetting(
-                            "allowWallpaperOptimization", value)
+                        onActivated: SettingsService.openPage("wallpaper_optimization")
+                        onToggled: value => SettingsService.setSetting("allowWallpaperOptimization", value)
                     }
 
                     SettingNavigationTile {
@@ -79,7 +83,7 @@ SettingPage {
                         Layout.fillWidth: true
                         visible: WallpaperGuardrailService.assignedAssessments.length === 0
                         text: "Assign a wallpaper to inspect playback cost"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                     }
@@ -87,12 +91,12 @@ SettingPage {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Design.separator
+                        color: Theme.separator
                     }
 
                     Text {
                         text: "Playback"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
@@ -101,13 +105,9 @@ SettingPage {
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Pause animation while idle"
-                        description: checked
-                            ? "Recommended · pauses decoding after "
-                                + root.idleTimeoutLabel()
-                            : "Higher resource use · animation continues while you are away"
+                        description: checked ? "Recommended · pauses decoding after " + root.idleTimeoutLabel() : "Higher resource use · animation continues while you are away"
                         checked: ConfigService.pauseWallpaperWhenIdle
-                        onToggled: value => SettingsService.setSetting(
-                            "pauseWallpaperWhenIdle", value)
+                        onToggled: value => SettingsService.setSetting("pauseWallpaperWhenIdle", value)
                     }
 
                     RowLayout {
@@ -117,7 +117,7 @@ SettingPage {
                         Text {
                             Layout.fillWidth: true
                             text: "Idle timeout"
-                            color: Design.textMuted
+                            color: Theme.textSecondary
                             font.family: Design.fontText
                             font.pixelSize: 10
                         }
@@ -130,20 +130,19 @@ SettingPage {
                             decimals: 0
                             suffix: "min"
                             accessibleName: "Animated wallpaper idle timeout"
-                            onValueEdited: value => SettingsService.setSetting(
-                                "wallpaperIdleTimeoutSeconds", value * 60)
+                            onValueEdited: value => SettingsService.setSetting("wallpaperIdleTimeoutSeconds", value * 60)
                         }
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Design.separator
+                        color: Theme.separator
                     }
 
                     Text {
                         text: "Transitions"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
@@ -152,18 +151,14 @@ SettingPage {
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Wallpaper transitions"
-                        description: checked
-                            ? "Crossfade between settled wallpaper selections"
-                            : "Switch wallpapers immediately"
+                        description: checked ? "Crossfade between settled wallpaper selections" : "Switch wallpapers immediately"
                         checked: ConfigService.wallpaperTransitionsEnabled
-                        onToggled: value => SettingsService.setSetting(
-                            "wallpaperTransitionsEnabled", value)
+                        onToggled: value => SettingsService.setSetting("wallpaperTransitionsEnabled", value)
                     }
 
                     SettingSlider {
                         Layout.fillWidth: true
-                        enabled: ConfigService.wallpaperTransitionsEnabled
-                            && !ConfigService.reduceWallpaperMotion
+                        enabled: ConfigService.wallpaperTransitionsEnabled && !ConfigService.reduceWallpaperMotion
                         opacity: enabled ? 1 : 0.45
                         title: "Transition duration"
                         description: "Duration of the bounded two-renderer crossfade"
@@ -171,8 +166,7 @@ SettingPage {
                         to: 800
                         stepSize: 20
                         value: ConfigService.wallpaperTransitionDuration
-                        onValueEdited: value => SettingsService.setSetting(
-                            "wallpaperTransitionDuration", value)
+                        onValueEdited: value => SettingsService.setSetting("wallpaperTransitionDuration", value)
                     }
 
                     SettingToggle {
@@ -180,23 +174,20 @@ SettingPage {
                         enabled: ConfigService.wallpaperTransitionsEnabled
                         opacity: enabled ? 1 : 0.45
                         title: "Reduce wallpaper motion"
-                        description: checked
-                            ? "Use immediate swaps without wallpaper motion"
-                            : "Allow the configured crossfade"
+                        description: checked ? "Use immediate swaps without wallpaper motion" : "Allow the configured crossfade"
                         checked: ConfigService.reduceWallpaperMotion
-                        onToggled: value => SettingsService.setSetting(
-                            "reduceWallpaperMotion", value)
+                        onToggled: value => SettingsService.setSetting("reduceWallpaperMotion", value)
                     }
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
-                        color: Design.separator
+                        color: Theme.separator
                     }
 
                     Text {
                         text: "Experimental"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.DemiBold
@@ -207,8 +198,7 @@ SettingPage {
                         title: "Coverage-aware suspension"
                         description: "Keep animation running until floating windows cover 75%"
                         checked: ConfigService.experimentalFloatingWallpaperSuspension
-                        onToggled: value => SettingsService.setSetting(
-                            "experimentalFloatingWallpaperSuspension", value)
+                        onToggled: value => SettingsService.setSetting("experimentalFloatingWallpaperSuspension", value)
                     }
 
                     SettingToggle {
@@ -216,8 +206,7 @@ SettingPage {
                         title: "Pause animation on battery"
                         description: "Use the static poster while the laptop is unplugged"
                         checked: ConfigService.experimentalPauseWallpaperOnBattery
-                        onToggled: value => SettingsService.setSetting(
-                            "experimentalPauseWallpaperOnBattery", value)
+                        onToggled: value => SettingsService.setSetting("experimentalPauseWallpaperOnBattery", value)
                     }
                 }
             }
@@ -225,8 +214,7 @@ SettingPage {
     }
 
     function idleTimeoutLabel() {
-        const minutes = Math.max(1, Math.round(
-            ConfigService.wallpaperIdleTimeoutSeconds / 60))
-        return minutes === 1 ? "1 minute away" : minutes + " minutes away"
+        const minutes = Math.max(1, Math.round(ConfigService.wallpaperIdleTimeoutSeconds / 60));
+        return minutes === 1 ? "1 minute away" : minutes + " minutes away";
     }
 }

@@ -15,23 +15,26 @@ ScrollBar {
     opacity: 1
 
     function reveal() {
-        fadeOut.stop()
+        fadeOut.stop();
         if (displayOpacity < 0.71 && !fadeIn.running)
-            fadeIn.restart()
-        idleTimer.restart()
+            fadeIn.restart();
+        idleTimer.restart();
     }
 
     onPositionChanged: {
-        reveal()
+        reveal();
     }
 
-    onHoveredChanged: if (hovered) reveal()
-    onPressedChanged: if (pressed) reveal()
+    onHoveredChanged: if (hovered)
+        reveal()
+    onPressedChanged: if (pressed)
+        reveal()
 
     Timer {
         id: idleTimer
         interval: 1200
-        onTriggered: if (!root.hovered && !root.pressed) fadeOut.restart()
+        onTriggered: if (!root.hovered && !root.pressed)
+            fadeOut.restart()
     }
 
     background: Item {}
@@ -41,7 +44,7 @@ ScrollBar {
         implicitWidth: 3
         implicitHeight: 28
         radius: width / 2
-        color: Design.text
+        color: Theme.textPrimary
         opacity: root.displayOpacity
     }
 

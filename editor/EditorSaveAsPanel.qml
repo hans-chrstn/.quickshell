@@ -8,10 +8,10 @@ import qs.services.wallpaper.projects
 Rectangle {
     id: root
 
-    color: Design.islandExpanded
+    color: Theme.islandExpanded
     radius: Design.editorSectionRadius
     border.width: 1
-    border.color: Design.glassStroke
+    border.color: Theme.glassStroke
 
     ColumnLayout {
         anchors.fill: parent
@@ -29,7 +29,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: WallpaperEditorService.saveAsChoosingParent ? "Choose Parent Folder" : "Save Project As"
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontDisplay
                     font.pixelSize: 15
                     font.weight: Font.DemiBold
@@ -38,7 +38,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: WallpaperEditorService.saveAsChoosingParent ? "The project folder will be created inside this location." : "Choose a parent and a separate folder name."
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 10
                     elide: Text.ElideRight
@@ -72,7 +72,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: "Parent folder"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
                 font.weight: Font.Medium
@@ -86,9 +86,9 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
                     radius: 11
-                    color: Design.surfaceRaised
+                    color: Theme.fillElevated
                     border.width: 1
-                    border.color: Design.separator
+                    border.color: Theme.separator
 
                     Text {
                         anchors.fill: parent
@@ -96,7 +96,7 @@ Rectangle {
                         anchors.rightMargin: 12
                         verticalAlignment: Text.AlignVCenter
                         text: WallpaperEditorService.saveParentPath
-                        color: Design.text
+                        color: Theme.textPrimary
                         font.family: Design.fontMono
                         font.pixelSize: 10
                         elide: Text.ElideMiddle
@@ -126,9 +126,9 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 64
                 radius: 13
-                color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.10)
+                color: Theme.tintSubtle(Theme.accent)
                 border.width: 1
-                border.color: WallpaperEditorService.savePreview.accepted ? Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.42) : Design.separator
+                border.color: WallpaperEditorService.savePreview.accepted ? Theme.tintBorder(Theme.accent) : Theme.separator
 
                 Column {
                     anchors.fill: parent
@@ -138,14 +138,14 @@ Rectangle {
                     Text {
                         width: parent.width
                         text: "Final project location"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 9
                     }
                     Text {
                         width: parent.width
                         text: WallpaperEditorService.savePreview.accepted ? WallpaperEditorService.savePreview.plan.destinationPath : "Choose a valid destination"
-                        color: WallpaperEditorService.savePreview.accepted ? Design.text : Design.textMuted
+                        color: WallpaperEditorService.savePreview.accepted ? Theme.textPrimary : Theme.textSecondary
                         font.family: Design.fontMono
                         font.pixelSize: 10
                         elide: Text.ElideMiddle
@@ -157,7 +157,7 @@ Rectangle {
                 Layout.fillWidth: true
                 visible: WallpaperEditorService.savePreflightState === "saved" || WallpaperEditorService.savePreflightState === "published-with-warning" || WallpaperEditorService.savePreflightState === "failed"
                 text: WallpaperEditorService.savePreflightState === "saved" ? "Project saved successfully." : WallpaperEditorService.savePreflightState === "published-with-warning" ? WallpaperEditorService.savePreflightError : WallpaperEditorService.savePreflightError
-                color: WallpaperEditorService.savePreflightState === "saved" ? Design.green : Design.red
+                color: WallpaperEditorService.savePreflightState === "saved" ? Theme.success : Theme.danger
                 font.family: Design.fontText
                 font.pixelSize: 10
                 wrapMode: Text.Wrap

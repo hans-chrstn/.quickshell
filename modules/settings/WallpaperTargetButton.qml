@@ -10,8 +10,8 @@ HighlightableSurface {
 
     implicitWidth: labelText.implicitWidth + 24
     implicitHeight: 32
-    accentColor: Design.blue
-    baseColor: Design.surface
+    accentColor: Theme.accent
+    baseColor: Theme.fillSubtle
     cornerRadius: 10
     onSurfaceActivated: root.activated()
 
@@ -19,7 +19,7 @@ HighlightableSurface {
         id: labelText
         anchors.centerIn: parent
         text: root.label
-        color: root.selected ? Design.text : Design.textMuted
+        color: root.selected ? Theme.textPrimary : Theme.textSecondary
         font.family: Design.fontText
         font.pixelSize: 11
         font.weight: Font.Medium

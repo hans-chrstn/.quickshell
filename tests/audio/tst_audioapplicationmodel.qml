@@ -131,4 +131,63 @@ TestCase {
         group.streams[0].capabilities.volumeWrite = false;
         verify(source.capabilities.volumeWrite);
     }
+
+    function test_derivesRouteSummaryFromObservedLinks() {
+        const records = [stream(70, "playback-stream", "application-id:player", {
+                applicationName: "Player"
+            }),
+            {
+                id: 90,
+                role: "output-device",
+                displayName: "Studio Output"
+            }
+        ];
+        const groups = AudioApplicationModel.groupedApplications(records, [
+            {
+                sourceId: 70,
+                targetId: 90
+            }
+        ]);
+
+        compare(groups.playing[0].routeCount, 1);
+        compare(groups.playing[0].routeSummary, "Studio Output");
+        compare(groups.playing[0].routeNames.join(","), "Studio Output");
+    }
+
+    function test_routeSummaryFailsClosedWithoutAnObservedLink() {
+        const groups = AudioApplicationModel.groupedApplications([stream(80, "recording-stream", "binary:recorder")], []);
+
+        compare(groups.recording[0].routeCount, 0);
+        compare(groups.recording[0].routeSummary, "Route unavailable");
+    }
+
+    function test_listRowsOmitsEmptySectionsAndRedundantSingleSectionHeading() {
+        const groups = AudioApplicationModel.groupedApplications([stream(90, "playback-stream", "binary:music", {
+                applicationName: "Music"
+            })]);
+        const rows = AudioApplicationModel.listRows(groups);
+
+        compare(rows.length, 1);
+        compare(rows[0].kind, "application");
+        compare(rows[0].displayName, "Music");
+    }
+
+    function test_listRowsAddsHeadingsOnlyWhenBothDirectionsAreActive() {
+        const groups = AudioApplicationModel.groupedApplications([stream(100, "playback-stream", "binary:meeting", {
+                applicationName: "Meeting"
+            }), stream(101, "recording-stream", "binary:meeting", {
+                applicationName: "Meeting"
+            })]);
+        const rows = AudioApplicationModel.listRows(groups);
+
+        compare(rows.length, 4);
+        compare(rows[0].key, "section:playing");
+        compare(rows[1].section, "playing");
+        compare(rows[2].key, "section:recording");
+        compare(rows[3].section, "recording");
+    }
+
+    function test_listRowsIsEmptyWhenNoApplicationsAreActive() {
+        compare(AudioApplicationModel.listRows(AudioApplicationModel.groupedApplications([])).length, 0);
+    }
 }

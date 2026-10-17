@@ -13,14 +13,13 @@ Item {
     property int segmentSpacing: 2
 
     readonly property real totalValue: {
-        let total = 0
+        let total = 0;
         for (let index = 0; index < segments.length; ++index)
-            total += Math.max(0, Number(segments[index].value ?? 0))
-        return total
+            total += Math.max(0, Number(segments[index].value ?? 0));
+        return total;
     }
 
-    implicitHeight: header.implicitHeight + 5 + barHeight
-        + (showLegend ? 5 + legend.implicitHeight : 0)
+    implicitHeight: header.implicitHeight + 5 + barHeight + (showLegend ? 5 + legend.implicitHeight : 0)
 
     ColumnLayout {
         anchors.fill: parent
@@ -34,7 +33,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.title
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 8
                 font.weight: Font.Medium
@@ -44,7 +43,7 @@ Item {
             Text {
                 text: root.valueText
                 visible: text.length > 0
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 8
             }
@@ -55,7 +54,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: root.barHeight
             radius: height / 2
-            color: Design.surfaceRaised
+            color: Theme.fillElevated
 
             Row {
                 anchors.fill: parent
@@ -66,17 +65,11 @@ Item {
 
                     Rectangle {
                         required property var modelData
-                        readonly property real normalizedValue:
-                            Math.max(0, Number(modelData.value ?? 0))
-                        width: root.totalValue > 0
-                            ? Math.max(0, (track.width
-                                - root.segmentSpacing
-                                    * Math.max(0, root.segments.length - 1))
-                                * normalizedValue / root.totalValue)
-                            : 0
+                        readonly property real normalizedValue: Math.max(0, Number(modelData.value ?? 0))
+                        width: root.totalValue > 0 ? Math.max(0, (track.width - root.segmentSpacing * Math.max(0, root.segments.length - 1)) * normalizedValue / root.totalValue) : 0
                         height: track.height
                         radius: height / 2
-                        color: modelData.color ?? Design.textMuted
+                        color: modelData.color ?? Theme.textSecondary
                         visible: normalizedValue > 0
                     }
                 }
@@ -100,20 +93,21 @@ Item {
                         Layout.preferredWidth: 5
                         Layout.preferredHeight: 5
                         radius: 3
-                        color: modelData.color ?? Design.textMuted
+                        color: modelData.color ?? Theme.textSecondary
                     }
 
                     Text {
-                        text: (modelData.label ?? "") + " "
-                            + (modelData.value ?? 0)
-                        color: Design.textMuted
+                        text: (modelData.label ?? "") + " " + (modelData.value ?? 0)
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 7
                     }
                 }
             }
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
         }
     }
 }

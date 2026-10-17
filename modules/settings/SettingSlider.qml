@@ -30,14 +30,14 @@ Item {
 
                 Text {
                     text: root.title
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontText
                     font.pixelSize: 12
                     font.weight: Font.DemiBold
                 }
                 Text {
                     text: root.description
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 9
                 }
@@ -45,7 +45,7 @@ Item {
 
             Text {
                 text: Math.round(root.value) + " " + root.unit
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 10
             }
@@ -67,31 +67,35 @@ Item {
                 width: control.availableWidth
                 height: 3
                 radius: 2
-                color: Design.separator
+                color: Theme.separator
 
                 Rectangle {
                     width: control.visualPosition * parent.width
                     height: parent.height
                     radius: parent.radius
-                    color: Design.blue
+                    color: Theme.accent
                 }
             }
 
             handle: Rectangle {
-                x: control.leftPadding + control.visualPosition
-                    * (control.availableWidth - width)
+                x: control.leftPadding + control.visualPosition * (control.availableWidth - width)
                 y: control.topPadding + control.availableHeight / 2 - height / 2
                 implicitWidth: 12
                 implicitHeight: 12
                 radius: 6
-                color: Design.text
+                color: Theme.textPrimary
                 scale: control.pressed ? 1.25 : (sliderHover.hovered ? 1.12 : 1)
 
                 Behavior on scale {
-                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: 90
+                        easing.type: Easing.OutCubic
+                    }
                 }
 
-                HoverHandler { id: sliderHover }
+                HoverHandler {
+                    id: sliderHover
+                }
             }
         }
     }

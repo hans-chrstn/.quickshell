@@ -4,11 +4,6 @@ import qs.core
 Item {
     id: root
 
-    // Tool limitation: this valid default alias targets the child host.
-    // qmllint disable unresolved-alias
-    default property alias content: container.data
-    // qmllint enable unresolved-alias
-
     opacity: 0
     transform: Translate {
         id: translate
@@ -35,10 +30,5 @@ Item {
             duration: Design.contentRevealDuration
             easing.type: Easing.OutCubic
         }
-    }
-
-    Item {
-        id: container
-        anchors.fill: parent
     }
 }

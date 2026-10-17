@@ -12,7 +12,7 @@ HighlightableSurface {
 
     implicitHeight: 44
     interactive: false
-    baseColor: Qt.rgba(1, 1, 1, 0.035)
+    baseColor: Theme.fillQuiet
     cornerRadius: 11
 
     CompactBadge {
@@ -34,7 +34,7 @@ HighlightableSurface {
         Text {
             width: parent.width
             text: root.descriptor.label
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 10
             font.weight: Font.Medium
@@ -44,7 +44,7 @@ HighlightableSurface {
         Text {
             width: parent.width
             text: root.action.target ? root.action.target : "Not configured"
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 8
             elide: Text.ElideRight

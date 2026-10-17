@@ -136,9 +136,9 @@ Rectangle {
     }
 
     radius: Design.editorSectionRadius
-    color: Qt.rgba(1, 1, 1, 0.025)
+    color: Theme.fillFaint
     border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.045)
+    border.color: Theme.separatorQuiet
     clip: true
     focus: true
 
@@ -278,9 +278,9 @@ Rectangle {
         width: Math.max(14, Math.min(root.viewportWidth, root.dropPreviewDurationMs * root.viewport.pixelsPerSecond / 1000))
         height: 34
         radius: 8
-        color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.2)
+        color: Theme.tintActive(Theme.accent)
         border.width: 1
-        border.color: Design.blue
+        border.color: Theme.accent
         opacity: 0.78
         z: 6
 
@@ -290,7 +290,7 @@ Rectangle {
             anchors.bottom: parent.bottom
             width: 3
             radius: 1.5
-            color: Design.blue
+            color: Theme.accent
         }
     }
 
@@ -321,7 +321,7 @@ Rectangle {
         Rectangle {
             anchors.fill: parent
             radius: 2
-            color: Qt.rgba(1, 1, 1, 0.035)
+            color: Theme.fillQuiet
         }
 
         Rectangle {
@@ -330,7 +330,7 @@ Rectangle {
             width: Math.max(28, parent.width * parent.width / Math.max(parent.width, root.viewport.contentWidth))
             height: parent.height
             radius: 2
-            color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.58)
+            color: Theme.tintLine(Theme.accent)
         }
 
         MouseArea {

@@ -27,13 +27,13 @@ RowLayout {
         IslandGlyph {
             anchors.centerIn: parent
             name: "chevronLeft"
-            glyphColor: backButton.hovered ? Design.text : Design.textMuted
+            glyphColor: backButton.hovered ? Theme.textPrimary : Theme.textSecondary
         }
     }
 
     Text {
         text: root.title
-        color: Design.text
+        color: Theme.textPrimary
         font.family: Design.fontDisplay
         font.pixelSize: 20
         font.weight: Font.DemiBold

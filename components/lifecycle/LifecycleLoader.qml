@@ -16,13 +16,10 @@ Item {
     property bool usageActive: requestedActive
     property string retentionReason: requestedActive ? "active-request" : ""
     property string evictionReason: requestedActive ? "" : "not-requested"
-    // Tool limitation: this valid alias targets the direct child Loader.
-    // qmllint disable unresolved-alias
-    property alias sourceComponent: instanceLoader.sourceComponent
-    property alias source: instanceLoader.source
-    readonly property alias item: instanceLoader.item
-    readonly property alias status: instanceLoader.status
-    // qmllint enable unresolved-alias
+    property Component sourceComponent: null
+    property url source: ""
+    readonly property var item: instanceLoader.item
+    readonly property int status: instanceLoader.status
     readonly property bool loaded: instanceLoader.item !== null
     property bool registered: false
     property string registeredResourceId: ""
@@ -52,6 +49,18 @@ Item {
     function syncUsage() {
         if (registered)
             LifecycleService.setActive(registeredResourceId, usageActive);
+    }
+
+    function syncInstanceSource() {
+        if (!componentComplete)
+            return;
+        if (String(source).length > 0) {
+            instanceLoader.sourceComponent = null;
+            instanceLoader.setSource(source);
+        } else {
+            instanceLoader.source = "";
+            instanceLoader.sourceComponent = sourceComponent;
+        }
     }
 
     function registerCurrentResource() {
@@ -89,6 +98,8 @@ Item {
     onRetentionReasonChanged: syncRequested()
     onEvictionReasonChanged: syncRequested()
     onLoadedChanged: syncLoaded()
+    onSourceChanged: syncInstanceSource()
+    onSourceComponentChanged: syncInstanceSource()
 
     Loader {
         id: instanceLoader
@@ -107,6 +118,7 @@ Item {
 
     Component.onCompleted: {
         componentComplete = true;
+        syncInstanceSource();
         rebindResource();
     }
 

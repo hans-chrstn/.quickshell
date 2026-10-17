@@ -68,9 +68,9 @@ Dialog {
 
     background: Rectangle {
         radius: 18
-        color: Design.surfaceRaised
+        color: Theme.overlay
         border.width: 1
-        border.color: Design.glassStroke
+        border.color: Theme.separatorStrong
     }
 
     contentItem: Column {
@@ -81,7 +81,7 @@ Dialog {
             text: root.title
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 15
             font.weight: Font.DemiBold
@@ -93,7 +93,7 @@ Dialog {
             text: root.message
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 12
         }
@@ -112,7 +112,7 @@ Dialog {
         Rectangle {
             width: parent.width
             height: 1
-            color: Design.separator
+            color: Theme.separator
         }
 
         Row {

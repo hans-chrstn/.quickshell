@@ -9,21 +9,6 @@ Singleton {
     readonly property string fontText: "SF Pro Text"
     readonly property string fontMono: "SF Mono"
 
-    readonly property color island: "#e6101116"
-    readonly property color islandExpanded: "#ed111319"
-    readonly property color glassStroke: "#38ffffff"
-    readonly property color glassHighlight: "#24ffffff"
-    readonly property color glassShade: "#24000000"
-    readonly property color surface: "#1c1c1e"
-    readonly property color surfaceRaised: "#2c2c2e"
-    readonly property color text: "#ffffff"
-    readonly property color textMuted: "#8e8e93"
-    readonly property color separator: "#38383a"
-    readonly property color blue: "#0a84ff"
-    readonly property color green: "#30d158"
-    readonly property color yellow: "#ffd60a"
-    readonly property color red: "#ff453a"
-
     readonly property int wing: SettingsService.islandWing
     readonly property int collapsedWidth: SettingsService.islandCollapsedWidth
     readonly property int collapsedHeight: 34

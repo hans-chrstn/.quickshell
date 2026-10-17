@@ -38,7 +38,7 @@ Item {
 
             Text {
                 text: Qt.formatDateTime(ClockService.now, "dddd")
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 11
                 font.capitalization: Font.Capitalize
@@ -46,7 +46,7 @@ Item {
 
             Text {
                 text: Qt.formatDateTime(ClockService.now, "d MMMM")
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontDisplay
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
@@ -62,7 +62,7 @@ Item {
             x: dateColumn.implicitWidth + contentStage.contentGap
             width: 1
             height: 28
-            color: Design.separator
+            color: Theme.separator
             opacity: root.dateRevealProgress
         }
 
@@ -73,7 +73,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             x: contentStage.collapsedTimeX + (contentStage.expandedTimeX - contentStage.collapsedTimeX) * root.progress
             text: Qt.formatDateTime(ClockService.now, "hh:mm")
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontDisplay
             font.pixelSize: 30
             font.weight: Font.Light

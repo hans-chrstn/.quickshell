@@ -1,6 +1,7 @@
 import QtQuick
 import QtQml.Models
 import Quickshell.Services.Pipewire
+import "AudioApplicationControlModel.js" as AudioApplicationControlModel
 import "AudioApplicationModel.js" as AudioApplicationModel
 import "AudioNodeModel.js" as AudioNodeModel
 
@@ -37,6 +38,53 @@ Item {
 
     function setPreferredDefault(role, stableKey) {
         return defaultCoordinator.request(role, stableKey);
+    }
+
+    function applicationControlResult(accepted, code, message, request, streamCount) {
+        return {
+            accepted: accepted,
+            code: code,
+            message: message,
+            groupKey: String(request?.groupKey || ""),
+            operation: String(request?.operation || ""),
+            streamCount: Math.max(0, Number(streamCount) || 0),
+            revision: revision
+        };
+    }
+
+    function applyApplicationState(request) {
+        if (!ready)
+            return applicationControlResult(false, "backend-unavailable", "PipeWire is not ready.", request, 0);
+        const target = AudioApplicationControlModel.controlTarget(applications, request?.groupKey, request?.operation);
+        if (!target.accepted)
+            return applicationControlResult(false, target.code, target.message, request, 0);
+        if (target.role !== String(request?.role || ""))
+            return applicationControlResult(false, "application-changed", "The application stream direction changed before the control was applied.", request, 0);
+
+        const volume = Number(request?.volume);
+        const muted = request?.muted;
+        if (!Number.isFinite(volume) || typeof muted !== "boolean")
+            return applicationControlResult(false, "invalid-state", "The requested application sound state is invalid.", request, 0);
+
+        const nativeById = ({});
+        for (const node of audioNodes || [])
+            nativeById[Number(node?.id)] = node;
+        const targets = [];
+        for (const nodeId of target.nodeIds) {
+            const node = nativeById[nodeId];
+            if (!node?.ready || !node?.audio)
+                return applicationControlResult(false, "stream-changed", "An application stream changed before the control was applied.", request, 0);
+            targets.push(node);
+        }
+
+        for (const node of targets) {
+            if (Math.abs(Number(node.audio.volume) - volume) > 0.0001)
+                node.audio.volume = volume;
+            if (!!node.audio.muted !== muted)
+                node.audio.muted = muted;
+        }
+        schedulePublish();
+        return applicationControlResult(true, "accepted", "", request, targets.length);
     }
 
     function showTestDeviceTransition(role, kind) {
@@ -112,7 +160,7 @@ Item {
                     }));
         }
         links = linkRecords();
-        applications = AudioApplicationModel.groupedApplications(nodes);
+        applications = AudioApplicationModel.groupedApplications(nodes, links);
         roleCounts = AudioNodeModel.roleCounts(normalized);
         defaults = {
             output: compactNode(Pipewire.defaultAudioSink, normalized),

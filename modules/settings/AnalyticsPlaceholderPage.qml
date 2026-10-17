@@ -12,17 +12,21 @@ SettingPage {
         anchors.fill: parent
         spacing: 10
 
-        SettingsHeader { title: root.title }
+        SettingsHeader {
+            title: root.title
+        }
 
         Text {
             Layout.fillWidth: true
             text: root.description
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 12
             wrapMode: Text.Wrap
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }

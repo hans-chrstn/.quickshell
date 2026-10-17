@@ -10,14 +10,26 @@ RowLayout {
 
     Repeater {
         model: [
-            { label: "Active", value: root.summary.active ?? 0,
-              color: Design.green },
-            { label: "Retained", value: root.summary.retained ?? 0,
-              color: Design.blue },
-            { label: "Eligible", value: root.summary.eligible ?? 0,
-              color: Design.yellow },
-            { label: "Unloaded", value: root.summary.unloaded ?? 0,
-              color: Design.textMuted }
+            {
+                label: "Active",
+                value: root.summary.active ?? 0,
+                color: Theme.success
+            },
+            {
+                label: "Retained",
+                value: root.summary.retained ?? 0,
+                color: Theme.accent
+            },
+            {
+                label: "Eligible",
+                value: root.summary.eligible ?? 0,
+                color: Theme.warning
+            },
+            {
+                label: "Unloaded",
+                value: root.summary.unloaded ?? 0,
+                color: Theme.textSecondary
+            }
         ]
 
         Rectangle {
@@ -25,9 +37,9 @@ RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 36
             radius: 9
-            color: Design.surface
+            color: Theme.fillSubtle
             border.width: 1
-            border.color: Design.separator
+            border.color: Theme.separator
 
             Column {
                 anchors.centerIn: parent
@@ -45,7 +57,7 @@ RowLayout {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: modelData.label
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 8
                 }

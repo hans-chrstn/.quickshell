@@ -84,14 +84,14 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: "Trigger: " + root.triggerType + " · " + (root.enabled ? "Enabled" : "Disabled")
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
             }
             Text {
                 Layout.fillWidth: true
                 text: "Priority " + root.priority + " · Cooldown " + root.cooldownMs + " ms"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 8
             }
@@ -129,13 +129,13 @@ Item {
                     IslandGlyph {
                         anchors.verticalCenter: parent.verticalCenter
                         name: "plus"
-                        glyphColor: Design.textMuted
+                        glyphColor: Theme.textSecondary
                     }
 
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "Add action"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 10
                         font.weight: Font.Medium

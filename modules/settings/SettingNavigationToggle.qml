@@ -16,7 +16,7 @@ HighlightableSurface {
     implicitHeight: 52
     interactive: false
     focused: navigationHover.hovered
-    baseColor: Design.surface
+    baseColor: Theme.fillSubtle
     cornerRadius: 10
 
     RowLayout {
@@ -40,7 +40,7 @@ HighlightableSurface {
 
                     Text {
                         text: root.title
-                        color: root.dangerous ? Design.red : Design.text
+                        color: root.dangerous ? Theme.danger : Theme.textPrimary
                         font.family: Design.fontText
                         font.pixelSize: 12
                         font.weight: Font.DemiBold
@@ -48,7 +48,7 @@ HighlightableSurface {
 
                     Text {
                         text: root.description
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 9
                         elide: Text.ElideRight
@@ -57,7 +57,7 @@ HighlightableSurface {
 
                 IslandGlyph {
                     name: "chevronRight"
-                    glyphColor: navigationHover.hovered ? Design.text : Design.textMuted
+                    glyphColor: navigationHover.hovered ? Theme.textPrimary : Theme.textSecondary
                     Layout.preferredWidth: 17
                     Layout.preferredHeight: 17
                 }
@@ -75,9 +75,9 @@ HighlightableSurface {
             Layout.preferredWidth: 36
             Layout.preferredHeight: 20
             radius: 10
-            color: root.checked ? Design.blue : Design.surfaceRaised
+            color: root.checked ? Theme.accent : Theme.fillElevated
             border.width: 1
-            border.color: Design.separator
+            border.color: Theme.separator
 
             Behavior on color {
                 ColorAnimation {
@@ -91,7 +91,7 @@ HighlightableSurface {
                 width: 16
                 height: 16
                 radius: 8
-                color: Design.text
+                color: Theme.textPrimary
                 Behavior on x {
                     NumberAnimation {
                         duration: 120

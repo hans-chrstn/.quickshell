@@ -10,14 +10,19 @@ Item {
     property QtObject context: null
     readonly property real collapsedImplicitWidth: 180
     readonly property real collapsedImplicitHeight: 22
-    readonly property real expandedImplicitWidth: 640
+    readonly property real expandedImplicitWidth: 600
     readonly property real expandedImplicitHeight: contentColumn.implicitHeight + 8
+    readonly property real pageViewportHeight: 300
 
     focus: true
     Component.onCompleted: focusRetrier.startFocus()
 
     function pageSource(pageId) {
-        return pageId === "output" || pageId === "input" ? Qt.resolvedUrl("AudioDevicesPage.qml") : Qt.resolvedUrl("AudioMasterPage.qml");
+        if (pageId === "output" || pageId === "input")
+            return Qt.resolvedUrl("AudioDevicesPage.qml");
+        if (pageId === "apps")
+            return Qt.resolvedUrl("AudioApplicationsPage.qml");
+        return Qt.resolvedUrl("AudioMasterPage.qml");
     }
 
     FocusRetrier {
@@ -39,51 +44,41 @@ Item {
     ColumnLayout {
         id: contentColumn
         anchors.fill: parent
-        spacing: 14
+        spacing: 10
 
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: 50
-
-            IslandGlyph {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                width: 30
-                height: 30
-                name: "volumeHigh"
-                glyphColor: Design.blue
-            }
+            Layout.preferredHeight: 42
 
             Text {
                 anchors.left: parent.left
-                anchors.leftMargin: 44
                 anchors.verticalCenter: parent.verticalCenter
                 text: "Sound"
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontDisplay
-                font.pixelSize: 23
+                font.pixelSize: 22
                 font.weight: Font.DemiBold
             }
 
             GlyphButton {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                width: 36
-                height: 36
+                width: 32
+                height: 32
                 glyph: "close"
-                glyphSize: 19
-                accessibleName: "Close audio controls"
+                glyphSize: 16
+                accessibleName: "Close Sound"
                 onActivated: AudioPanelService.close()
             }
         }
 
         SegmentedPageBar {
-            Layout.preferredWidth: 440
+            Layout.preferredWidth: 360
             Layout.alignment: Qt.AlignHCenter
-            controlHeight: 44
-            cornerRadius: 14
-            labelPixelSize: 12
-            accentColor: Design.textMuted
+            controlHeight: 36
+            cornerRadius: 12
+            labelPixelSize: 11
+            accentColor: Theme.textSecondary
             pages: [
                 {
                     id: "levels",
@@ -96,6 +91,10 @@ Item {
                 {
                     id: "input",
                     label: "Input"
+                },
+                {
+                    id: "apps",
+                    label: "Apps"
                 }
             ]
             currentPage: AudioPanelService.currentPage
@@ -105,7 +104,9 @@ Item {
         Loader {
             id: pageLoader
             Layout.fillWidth: true
-            Layout.preferredHeight: 356
+            Layout.minimumHeight: root.pageViewportHeight
+            Layout.preferredHeight: root.pageViewportHeight
+            Layout.maximumHeight: root.pageViewportHeight
             source: root.pageSource(AudioPanelService.currentPage)
         }
     }

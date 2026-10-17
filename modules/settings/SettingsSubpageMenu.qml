@@ -12,7 +12,7 @@ Item {
 
         Text {
             text: SettingsService.categories[SettingsService.selectedCategory]?.title ?? ""
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontDisplay
             font.pixelSize: 20
             font.weight: Font.DemiBold

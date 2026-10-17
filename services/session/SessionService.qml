@@ -16,62 +16,78 @@ Singleton {
     property int confirmingIndex: -1
 
     readonly property var actions: [
-        { id: "logout", title: "Log Out", symbol: "↪",
-          color: Design.textMuted, destructive: true },
-        { id: "restart", title: "Restart", symbol: "↻",
-          color: Design.yellow, destructive: true },
-        { id: "poweroff", title: "Shut Down", symbol: "⏻",
-          color: Design.red, destructive: true }
+        {
+            id: "logout",
+            title: "Log Out",
+            symbol: "↪",
+            color: Theme.textSecondary,
+            destructive: true
+        },
+        {
+            id: "restart",
+            title: "Restart",
+            symbol: "↻",
+            color: Theme.warning,
+            destructive: true
+        },
+        {
+            id: "poweroff",
+            title: "Shut Down",
+            symbol: "⏻",
+            color: Theme.danger,
+            destructive: true
+        }
     ]
 
     function open(preferredScreenName) {
-        closeTimer.stop()
-        closing = false
-        targetScreenName = ScreenService.resolve(preferredScreenName || "")
-        selectedIndex = 0
-        confirmingIndex = -1
-        opened = true
+        closeTimer.stop();
+        closing = false;
+        targetScreenName = ScreenService.resolve(preferredScreenName || "");
+        selectedIndex = 0;
+        confirmingIndex = -1;
+        opened = true;
     }
 
     function close() {
         if (!opened || closing)
-            return
-        closing = true
-        opened = false
-        confirmingIndex = -1
-        closeTimer.restart()
+            return;
+        closing = true;
+        opened = false;
+        confirmingIndex = -1;
+        closeTimer.restart();
     }
 
-    function toggle() { opened ? close() : open() }
+    function toggle() {
+        opened ? close() : open();
+    }
 
     function moveSelection(delta) {
-        selectedIndex = Math.max(0, Math.min(actions.length - 1,
-                                             selectedIndex + delta))
-        confirmingIndex = -1
+        selectedIndex = Math.max(0, Math.min(actions.length - 1, selectedIndex + delta));
+        confirmingIndex = -1;
     }
 
     function choose(index) {
         if (index < 0 || index >= actions.length)
-            return
-        selectedIndex = index
-        const action = actions[index]
+            return;
+        selectedIndex = index;
+        const action = actions[index];
         if (action.destructive && confirmingIndex !== index) {
-            confirmingIndex = index
-            return
+            confirmingIndex = index;
+            return;
         }
 
-        close()
-        actionDelay.actionId = action.id
-        actionDelay.restart()
+        close();
+        actionDelay.actionId = action.id;
+        actionDelay.restart();
     }
 
     function execute(actionId) {
         if (actionId === "logout")
-            Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit")
+            Hyprland.dispatch(Hyprland.usingLua ? "hl.dsp.exit()" : "exit");
         else if (actionId === "restart")
-            Quickshell.execDetached(["systemctl", "reboot"])
+            Quickshell.execDetached(["systemctl", "reboot"]);
         else if (actionId === "poweroff")
-            Quickshell.execDetached(["systemctl", "poweroff"])
+            Quickshell.execDetached(["systemctl", "poweroff"]);
     }
 
     Timer {

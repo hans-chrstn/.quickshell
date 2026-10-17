@@ -9,41 +9,46 @@ import qs.services.lifecycle
 SettingPage {
     id: root
 
-    property var snapshot: ({ resources: ({}), adaptivePolicy: {
-        enabled: false, plan: { usedUnits: 0, budgetUnits: 0 }
-    } })
+    property var snapshot: ({
+            resources: ({}),
+            adaptivePolicy: {
+                enabled: false,
+                plan: {
+                    usedUnits: 0,
+                    budgetUnits: 0
+                }
+            }
+        })
 
     readonly property var rows: {
-        const values = Object.keys(snapshot.resources ?? {})
-            .map(id => snapshot.resources[id])
-        values.sort(function(left, right) {
-            const leftRank = root.stateRank(left)
-            const rightRank = root.stateRank(right)
+        const values = Object.keys(snapshot.resources ?? {}).map(id => snapshot.resources[id]);
+        values.sort(function (left, right) {
+            const leftRank = root.stateRank(left);
+            const rightRank = root.stateRank(right);
             if (leftRank !== rightRank)
-                return leftRank - rightRank
-            return String(left.resourceId).localeCompare(
-                String(right.resourceId))
-        })
-        return values
+                return leftRank - rightRank;
+            return String(left.resourceId).localeCompare(String(right.resourceId));
+        });
+        return values;
     }
 
     readonly property var summary: {
-        let active = 0
-        let retained = 0
-        let eligible = 0
-        let unloaded = 0
+        let active = 0;
+        let retained = 0;
+        let eligible = 0;
+        let unloaded = 0;
         for (let index = 0; index < rows.length; ++index) {
-            const record = rows[index]
+            const record = rows[index];
             if (record.active)
-                ++active
+                ++active;
             else if (record.adaptiveCandidate)
-                ++eligible
+                ++eligible;
             else if (record.loaded)
-                ++retained
+                ++retained;
             else if (!record.loaded)
-                ++unloaded
+                ++unloaded;
         }
-        const plan = snapshot.adaptivePolicy?.plan ?? {}
+        const plan = snapshot.adaptivePolicy?.plan ?? {};
         return {
             active: active,
             retained: retained,
@@ -51,73 +56,102 @@ SettingPage {
             unloaded: unloaded,
             used: plan.usedUnits ?? 0,
             budget: plan.budgetUnits ?? 0
-        }
+        };
     }
 
     readonly property var stateSegments: [
-        { label: "Active", value: summary.active, color: Design.green },
-        { label: "Retained", value: summary.retained, color: Design.blue },
-        { label: "Eligible", value: summary.eligible, color: Design.yellow },
-        { label: "Unloaded", value: summary.unloaded,
-          color: Design.textMuted }
+        {
+            label: "Active",
+            value: summary.active,
+            color: Theme.success
+        },
+        {
+            label: "Retained",
+            value: summary.retained,
+            color: Theme.accent
+        },
+        {
+            label: "Eligible",
+            value: summary.eligible,
+            color: Theme.warning
+        },
+        {
+            label: "Unloaded",
+            value: summary.unloaded,
+            color: Theme.textSecondary
+        }
     ]
 
     readonly property var budgetSegments: {
-        const used = Math.max(0, Number(summary.used ?? 0))
-        const budget = Math.max(0, Number(summary.budget ?? 0))
+        const used = Math.max(0, Number(summary.used ?? 0));
+        const budget = Math.max(0, Number(summary.budget ?? 0));
         return [
-            { label: "Used", value: Math.min(used, budget),
-              color: Design.yellow },
-            { label: "Available", value: Math.max(0, budget - used),
-              color: Design.surfaceRaised }
-        ]
+            {
+                label: "Used",
+                value: Math.min(used, budget),
+                color: Theme.warning
+            },
+            {
+                label: "Available",
+                value: Math.max(0, budget - used),
+                color: Theme.fillElevated
+            }
+        ];
     }
 
     function stateRank(record) {
         if (record.active)
-            return 0
+            return 0;
         if (record.adaptiveCandidate)
-            return 1
+            return 1;
         if (record.loaded)
-            return 2
-        return 3
+            return 2;
+        return 3;
     }
 
     function stateLabel(record) {
         if (record.active)
-            return "Active"
+            return "Active";
         if (record.adaptiveCandidate)
-            return "Eligible"
+            return "Eligible";
         if (record.loaded)
-            return "Retained"
-        return "Unloaded"
+            return "Retained";
+        return "Unloaded";
     }
 
     function stateColor(record) {
         if (record.active)
-            return Design.green
+            return Theme.success;
         if (record.adaptiveCandidate)
-            return Design.yellow
+            return Theme.warning;
         if (record.loaded)
-            return Design.blue
-        return Design.textMuted
+            return Theme.accent;
+        return Theme.textSecondary;
     }
 
-    function refresh() { snapshot = LifecycleService.snapshot() }
+    function refresh() {
+        snapshot = LifecycleService.snapshot();
+    }
 
     Component.onCompleted: refresh()
 
     Connections {
         target: LifecycleService
-        function onResourcesChanged() { root.refresh() }
-        function onAdaptiveEnabledChanged() { root.refresh() }
+        function onResourcesChanged() {
+            root.refresh();
+        }
+        function onAdaptiveEnabledChanged() {
+            root.refresh();
+        }
     }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 8
 
-        SettingsHeader { title: "Lifecycle" }
+        SettingsHeader {
+            title: "Lifecycle"
+        }
 
         LifecycleSummaryStrip {
             Layout.fillWidth: true
@@ -135,10 +169,7 @@ SettingPage {
             Layout.fillWidth: true
             segments: root.budgetSegments
             title: "Inactive resource budget"
-            valueText: root.summary.used + "/" + root.summary.budget
-                + " · "
-                + (root.snapshot.adaptivePolicy?.plan?.candidateCount ?? 0)
-                + " candidates"
+            valueText: root.summary.used + "/" + root.summary.budget + " · " + (root.snapshot.adaptivePolicy?.plan?.candidateCount ?? 0) + " candidates"
             showLegend: false
         }
 
@@ -148,19 +179,14 @@ SettingPage {
             Text {
                 Layout.fillWidth: true
                 text: root.rows.length + " session resources"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
             }
 
             Text {
-                text: (root.snapshot.adaptivePolicy?.enabled
-                    ? "Adaptive on" : "Adaptive off") + " · retain "
-                    + (root.snapshot.adaptivePolicy?.plan?.retained?.length ?? 0)
-                    + " · evict "
-                    + (root.snapshot.adaptivePolicy?.plan?.evicted?.length ?? 0)
-                color: root.snapshot.adaptivePolicy?.enabled
-                    ? Design.green : Design.textMuted
+                text: (root.snapshot.adaptivePolicy?.enabled ? "Adaptive on" : "Adaptive off") + " · retain " + (root.snapshot.adaptivePolicy?.plan?.retained?.length ?? 0) + " · evict " + (root.snapshot.adaptivePolicy?.plan?.evicted?.length ?? 0)
+                color: root.snapshot.adaptivePolicy?.enabled ? Theme.success : Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 8
             }
@@ -175,8 +201,12 @@ SettingPage {
             model: root.rows
             boundsBehavior: Flickable.StopAtBounds
 
-            SmoothScrollBehavior { target: resourceList }
-            ScrollEdgeFeedback { target: resourceList }
+            SmoothScrollBehavior {
+                target: resourceList
+            }
+            ScrollEdgeFeedback {
+                target: resourceList
+            }
             ScrollBar.vertical: MinimalScrollBar {}
 
             delegate: LifecycleResourceRow {

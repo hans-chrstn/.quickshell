@@ -16,9 +16,9 @@ Rectangle {
 
     implicitHeight: showComparison ? 138 : 86
     radius: 10
-    color: Design.surface
+    color: Theme.fillSubtle
     border.width: 1
-    border.color: Design.separator
+    border.color: Theme.separator
 
     ColumnLayout {
         anchors.fill: parent
@@ -32,7 +32,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: root.screenName
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 10
                 font.weight: Font.DemiBold
@@ -42,11 +42,9 @@ Rectangle {
                 Layout.preferredWidth: stateText.implicitWidth + 10
                 Layout.preferredHeight: 16
                 radius: 8
-                color: Qt.rgba(root.stateColor.r, root.stateColor.g,
-                    root.stateColor.b, 0.14)
+                color: Theme.tint(root.stateColor)
                 border.width: 1
-                border.color: Qt.rgba(root.stateColor.r, root.stateColor.g,
-                    root.stateColor.b, 0.42)
+                border.color: Theme.tintBorder(root.stateColor)
 
                 Text {
                     id: stateText
@@ -63,7 +61,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: root.mediaSummary()
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontMono
             font.pixelSize: 8
             elide: Text.ElideRight
@@ -72,7 +70,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: root.record.path || "No wallpaper assigned"
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 8
             elide: Text.ElideMiddle
@@ -81,7 +79,7 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: root.runtimeSummary()
-            color: root.record.error ? Design.red : Design.textMuted
+            color: root.record.error ? Theme.danger : Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 8
             elide: Text.ElideRight
@@ -95,12 +93,9 @@ Rectangle {
 
         Text {
             Layout.fillWidth: true
-            visible: !root.showComparison
-                && root.optimization.applied
-            text: root.optimization.mappingKnown
-                ? "Optimized metadata is unavailable"
-                : "Original mapping unavailable after restart"
-            color: Design.textMuted
+            visible: !root.showComparison && root.optimization.applied
+            text: root.optimization.mappingKnown ? "Optimized metadata is unavailable" : "Original mapping unavailable after restart"
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 7
             elide: Text.ElideRight
@@ -108,40 +103,33 @@ Rectangle {
     }
 
     function mediaSummary() {
-        const media = record.media ?? ({})
-        const geometry = media.width > 0 && media.height > 0
-            ? media.width + "×" + media.height : "size unknown"
-        const fps = media.frameRate > 0
-            ? " · " + Number(media.frameRate).toFixed(0) + " fps" : ""
-        const codec = media.codec ? " · " + String(media.codec).toUpperCase() : ""
-        return geometry + fps + codec
+        const media = record.media ?? ({});
+        const geometry = media.width > 0 && media.height > 0 ? media.width + "×" + media.height : "size unknown";
+        const fps = media.frameRate > 0 ? " · " + Number(media.frameRate).toFixed(0) + " fps" : "";
+        const codec = media.codec ? " · " + String(media.codec).toUpperCase() : "";
+        return geometry + fps + codec;
     }
 
     function runtimeSummary() {
         if (record.error)
-            return record.error
+            return record.error;
         if (record.kind === "static")
-            return "Direct image · monitor "
-                + (record.monitorPowered ? "powered" : "off")
-        let decoder = record.decoderEvicted ? "Decoder evicted"
-            : record.decoderLoaded ? "Decoder loaded" : "Decoder idle"
-        const reason = record.suspendedReason
-            ? " · " + record.suspendedReason : ""
-        return decoder + reason + " · active "
-            + formatDuration(record.activeDurationMs)
+            return "Direct image · monitor " + (record.monitorPowered ? "powered" : "off");
+        let decoder = record.decoderEvicted ? "Decoder evicted" : record.decoderLoaded ? "Decoder loaded" : "Decoder idle";
+        const reason = record.suspendedReason ? " · " + record.suspendedReason : "";
+        return decoder + reason + " · active " + formatDuration(record.activeDurationMs);
     }
 
     function formatDuration(milliseconds) {
-        const seconds = Math.max(0, Number(milliseconds) || 0) / 1000
+        const seconds = Math.max(0, Number(milliseconds) || 0) / 1000;
         if (seconds < 60)
-            return seconds.toFixed(seconds < 10 ? 1 : 0) + "s"
-        return Math.floor(seconds / 60) + "m "
-            + Math.floor(seconds % 60) + "s"
+            return seconds.toFixed(seconds < 10 ? 1 : 0) + "s";
+        return Math.floor(seconds / 60) + "m " + Math.floor(seconds % 60) + "s";
     }
 
     function comparisonMetrics() {
-        const source = optimization.sourceMedia ?? ({})
-        const output = optimization.outputMedia ?? ({})
+        const source = optimization.sourceMedia ?? ({});
+        const output = optimization.outputMedia ?? ({});
         return [
             {
                 label: "Pixels",
@@ -164,20 +152,18 @@ Rectangle {
                 beforeText: megabits(source.bitRate),
                 afterText: megabits(output.bitRate)
             }
-        ]
+        ];
     }
 
     function dimensions(media) {
-        return Number(media.width) > 0 && Number(media.height) > 0
-            ? media.width + "×" + media.height : "unknown"
+        return Number(media.width) > 0 && Number(media.height) > 0 ? media.width + "×" + media.height : "unknown";
     }
 
     function rounded(value) {
-        return Number(value) > 0 ? Number(value).toFixed(0) : "?"
+        return Number(value) > 0 ? Number(value).toFixed(0) : "?";
     }
 
     function megabits(value) {
-        return Number(value) > 0
-            ? (Number(value) / 1000000).toFixed(1) + "M" : "unknown"
+        return Number(value) > 0 ? (Number(value) / 1000000).toFixed(1) + "M" : "unknown";
     }
 }

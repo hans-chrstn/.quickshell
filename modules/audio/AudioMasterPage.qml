@@ -11,18 +11,18 @@ Item {
     readonly property var input: AudioService.input
     readonly property var policy: AudioService.controlPolicy
 
-    implicitWidth: 640
-    implicitHeight: 356
+    implicitWidth: 600
+    implicitHeight: 300
 
     Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         height: controlRows.implicitHeight + 24
-        radius: 24
-        color: Design.surface
+        radius: 22
+        color: Theme.fillSubtle
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: Theme.separatorQuiet
 
         ColumnLayout {
             id: controlRows
@@ -39,7 +39,7 @@ Item {
                 maximumValue: Number(root.policy?.outputCeiling) || 1
                 muted: root.output?.muted ?? false
                 available: root.output?.available ?? false
-                accentColor: Design.blue
+                accentColor: Theme.textPrimary
                 onValueEdited: value => AudioService.setMasterVolume("output", value)
                 onMuteRequested: muted => AudioService.setMasterMuted("output", muted)
                 onStepRequested: steps => AudioService.adjustMasterVolume("output", steps)
@@ -50,7 +50,7 @@ Item {
                 Layout.leftMargin: 10
                 Layout.rightMargin: 10
                 Layout.preferredHeight: 1
-                color: Design.separator
+                color: Theme.separator
                 opacity: 0.72
             }
 
@@ -63,7 +63,7 @@ Item {
                 maximumValue: Number(root.policy?.inputCeiling) || 1
                 muted: root.input?.muted ?? false
                 available: root.input?.available ?? false
-                accentColor: Design.blue
+                accentColor: Theme.textPrimary
                 onValueEdited: value => AudioService.setMasterVolume("input", value)
                 onMuteRequested: muted => AudioService.setMasterMuted("input", muted)
                 onStepRequested: steps => AudioService.adjustMasterVolume("input", steps)

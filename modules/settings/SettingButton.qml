@@ -6,17 +6,22 @@ Text {
 
     required property string label
     property bool dangerous: false
-    signal clicked()
+    signal clicked
 
     text: label
-    color: root.dangerous ? Design.red
-        : hover.hovered ? Design.text : Design.textMuted
+    color: root.dangerous ? Theme.danger : hover.hovered ? Theme.textPrimary : Theme.textSecondary
     font.family: Design.fontText
     font.pixelSize: 11
 
-    Behavior on color { ColorAnimation { duration: 110 } }
+    Behavior on color {
+        ColorAnimation {
+            duration: 110
+        }
+    }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
     TapHandler {
         onTapped: root.clicked()
     }

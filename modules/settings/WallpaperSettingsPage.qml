@@ -14,27 +14,24 @@ SettingPage {
     id: root
 
     property string targetScreenName: ""
-    readonly property string effectiveWallpaper:
-        WallpaperAssignmentService.wallpaperForScreen(targetScreenName)
+    readonly property string effectiveWallpaper: WallpaperAssignmentService.wallpaperForScreen(targetScreenName)
 
     function assign(path) {
         if (targetScreenName.length > 0)
-            WallpaperAssignmentService.setForScreen(targetScreenName, path)
+            WallpaperAssignmentService.setForScreen(targetScreenName, path);
         else
-            WallpaperAssignmentService.setGlobal(path)
+            WallpaperAssignmentService.setGlobal(path);
     }
 
     function openEditor() {
-        const screenName = SettingsService.targetScreenName
-        WallpaperEditorService.open(screenName)
-        SettingsService.close()
+        const screenName = SettingsService.targetScreenName;
+        WallpaperEditorService.open(screenName);
+        SettingsService.close();
     }
 
     Component.onCompleted: {
-        if (WallpaperCatalogService.configured
-                && WallpaperCatalogService.wallpapers.length === 0
-                && !WallpaperCatalogService.scanning)
-            WallpaperCatalogService.rescan()
+        if (WallpaperCatalogService.configured && WallpaperCatalogService.wallpapers.length === 0 && !WallpaperCatalogService.scanning)
+            WallpaperCatalogService.rescan();
     }
 
     ColumnLayout {
@@ -44,22 +41,20 @@ SettingPage {
         SettingsHeader {
             title: "Wallpaper"
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
 
             Text {
-                text: WallpaperCatalogService.scanning
-                    ? "Scanning…" : WallpaperCatalogService.classifying
-                        ? "Inspecting…"
-                        : WallpaperCatalogService.wallpapers.length + " media"
-                color: Design.textMuted
+                text: WallpaperCatalogService.scanning ? "Scanning…" : WallpaperCatalogService.classifying ? "Inspecting…" : WallpaperCatalogService.wallpapers.length + " media"
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
 
             PickerButton {
                 visible: WallpaperCatalogService.configured
-                label: WallpaperCatalogService.configured
-                    ? "Change Library" : "Choose Folder"
+                label: WallpaperCatalogService.configured ? "Change Library" : "Choose Folder"
                 onActivated: SettingsService.openPage("wallpaper_directory")
             }
 
@@ -136,7 +131,7 @@ SettingPage {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: Design.separator
+                    color: Theme.separator
                 }
 
                 Item {
@@ -168,31 +163,26 @@ SettingPage {
                             height: grid.cellHeight - 8
                             record: modelData
                             selected: path === root.effectiveWallpaper
-                            onActivated: if (selectable) root.assign(path)
+                            onActivated: if (selectable)
+                                root.assign(path)
                         }
 
                         Column {
                             anchors.centerIn: parent
                             spacing: 8
-                            visible: !WallpaperCatalogService.scanning
-                                && WallpaperCatalogService.wallpapers.length === 0
+                            visible: !WallpaperCatalogService.scanning && WallpaperCatalogService.wallpapers.length === 0
 
                             Text {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                text: !WallpaperCatalogService.configured
-                                    ? "Choose a wallpaper folder to begin"
-                                    : WallpaperCatalogService.error.length > 0
-                                        ? WallpaperCatalogService.error
-                                        : "No wallpapers found in this folder"
-                                color: Design.textMuted
+                                text: !WallpaperCatalogService.configured ? "Choose a wallpaper folder to begin" : WallpaperCatalogService.error.length > 0 ? WallpaperCatalogService.error : "No wallpapers found in this folder"
+                                color: Theme.textSecondary
                                 font.family: Design.fontText
                                 font.pixelSize: 12
                             }
 
                             PickerButton {
                                 anchors.horizontalCenter: parent.horizontalCenter
-                                label: WallpaperCatalogService.configured
-                                    ? "Change Library" : "Choose Folder"
+                                label: WallpaperCatalogService.configured ? "Change Library" : "Choose Folder"
                                 primary: true
                                 onActivated: SettingsService.openPage("wallpaper_directory")
                             }
@@ -201,7 +191,5 @@ SettingPage {
                 }
             }
         }
-
     }
-
 }

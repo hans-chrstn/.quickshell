@@ -6,7 +6,7 @@ Item {
 
     required property Flickable target
     property int orientation: Qt.Vertical
-    property color edgeColor: Design.islandExpanded
+    property color edgeColor: Theme.islandExpanded
     property real fadeHeight: 14
 
     anchors.fill: parent
@@ -24,12 +24,21 @@ Item {
 
         gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0; color: root.edgeColor }
-            GradientStop { position: 1; color: "transparent" }
+            GradientStop {
+                position: 0
+                color: root.edgeColor
+            }
+            GradientStop {
+                position: 1
+                color: "transparent"
+            }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutCubic
+            }
         }
     }
 
@@ -43,12 +52,21 @@ Item {
 
         gradient: Gradient {
             orientation: Gradient.Vertical
-            GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 1; color: root.edgeColor }
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 1
+                color: root.edgeColor
+            }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutCubic
+            }
         }
     }
 
@@ -62,12 +80,21 @@ Item {
 
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: root.edgeColor }
-            GradientStop { position: 1; color: "transparent" }
+            GradientStop {
+                position: 0
+                color: root.edgeColor
+            }
+            GradientStop {
+                position: 1
+                color: "transparent"
+            }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutCubic
+            }
         }
     }
 
@@ -81,12 +108,21 @@ Item {
 
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: "transparent" }
-            GradientStop { position: 1; color: root.edgeColor }
+            GradientStop {
+                position: 0
+                color: "transparent"
+            }
+            GradientStop {
+                position: 1
+                color: root.edgeColor
+            }
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 140; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                duration: 140
+                easing.type: Easing.OutCubic
+            }
         }
     }
 }

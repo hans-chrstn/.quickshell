@@ -33,7 +33,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: "Timeline"
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 12
             font.weight: Font.DemiBold
@@ -114,7 +114,7 @@ Item {
 
         Text {
             text: root.projectDurationMs > 0 ? Ruler.label(root.playheadMs, 1000) + " / " + Ruler.label(root.projectDurationMs, 1000) : "Draft span · 0:10"
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontMono
             font.pixelSize: 9
         }
@@ -123,14 +123,14 @@ Item {
             implicitWidth: zoomLabel.implicitWidth + 14
             implicitHeight: 22
             radius: 8
-            color: Qt.rgba(1, 1, 1, 0.05)
+            color: Theme.fillSubtle
 
             Text {
                 id: zoomLabel
 
                 anchors.centerIn: parent
                 text: Math.round(root.pixelsPerSecond) + " px/s"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 9
             }

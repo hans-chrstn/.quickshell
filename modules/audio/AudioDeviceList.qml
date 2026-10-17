@@ -85,7 +85,7 @@ Item {
             Text {
                 Layout.fillWidth: true
                 text: root.title
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 15
                 font.weight: Font.DemiBold
@@ -93,7 +93,7 @@ Item {
 
             Text {
                 text: root.devices.length + (root.devices.length === 1 ? " device" : " devices")
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 11
             }
@@ -119,7 +119,7 @@ Item {
                 anchors.centerIn: parent
                 visible: root.devices.length === 0
                 text: AudioService.inventoryLoaded ? "No " + root.title.toLowerCase() : "Discovering…"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 12
             }
@@ -162,7 +162,7 @@ Item {
                         interactive: row.selectable
                         contextEnabled: row.modelData.ready
                         hoverEnabled: row.selectable
-                        accentColor: Design.textMuted
+                        accentColor: Theme.textSecondary
                         baseColor: "transparent"
                         cornerRadius: 15
                         accessibleName: row.displayName + ", " + (row.statusText.length > 0 ? row.statusText : AudioDeviceModel.statusLabel(row.modelData))
@@ -177,14 +177,14 @@ Item {
                         width: 44
                         height: 44
                         radius: 13
-                        color: Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, row.modelData.isDefault || row.requested ? 0.22 : 0.11)
+                        color: row.modelData.isDefault || row.requested ? Theme.tintStrong(root.accentColor) : Theme.tintSubtle(root.accentColor)
 
                         IslandGlyph {
                             anchors.centerIn: parent
                             width: 24
                             height: 24
                             name: root.glyph
-                            glyphColor: row.modelData.isDefault || row.requested ? root.accentColor : Design.textMuted
+                            glyphColor: row.modelData.isDefault || row.requested ? root.accentColor : Theme.textSecondary
                         }
                     }
 
@@ -199,7 +199,7 @@ Item {
                         Text {
                             width: parent.width
                             text: row.displayName
-                            color: row.modelData.ready ? Design.text : Design.textMuted
+                            color: row.modelData.ready ? Theme.textPrimary : Theme.textSecondary
                             font.family: Design.fontText
                             font.pixelSize: 14
                             font.weight: row.modelData.isDefault ? Font.DemiBold : Font.Normal
@@ -209,7 +209,7 @@ Item {
                         Text {
                             width: parent.width
                             text: row.alias.length > 0 ? row.modelData.displayName : (row.modelData.deviceApi.length > 0 ? row.modelData.deviceApi.toUpperCase() : "Audio device") + (row.channelCount > 0 ? " · " + row.channelCount + (row.channelCount === 1 ? " channel" : " channels") : "")
-                            color: Design.textMuted
+                            color: Theme.textSecondary
                             font.family: Design.fontText
                             font.pixelSize: 11
                             elide: Text.ElideRight
@@ -223,7 +223,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: !row.modelData.isDefault && row.statusText.length > 0
                         text: row.statusText
-                        color: row.statusText === "Failed" ? Design.red : row.requested ? root.accentColor : Design.textMuted
+                        color: row.statusText === "Failed" ? Theme.danger : row.requested ? root.accentColor : Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 11
                     }
@@ -246,7 +246,7 @@ Item {
                         anchors.bottom: parent.bottom
                         height: 1
                         visible: !row.modelData.isDefault && row.index < root.devices.length - 1
-                        color: Design.separator
+                        color: Theme.separator
                         opacity: 0.56
                     }
                 }

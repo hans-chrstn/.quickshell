@@ -28,7 +28,7 @@ IslandModule {
         minimumWidth: Design.scaledWidth(680)
         preferredWidth: Design.scaledWidth(720)
         maximumWidth: Design.scaledWidth(860)
-        minimumHeight: Design.scaledHeight(480)
+        minimumHeight: Design.scaledHeight(190)
         preferredHeight: Design.scaledHeight(520)
         maximumHeight: Design.scaledHeight(600)
     }

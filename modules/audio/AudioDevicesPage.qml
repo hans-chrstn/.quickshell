@@ -7,15 +7,15 @@ Item {
     id: root
 
     readonly property bool showingInput: AudioPanelService.currentPage === "input"
-    implicitWidth: 640
-    implicitHeight: 356
+    implicitWidth: 600
+    implicitHeight: 300
 
     Rectangle {
         anchors.fill: parent
         radius: 24
-        color: Design.surface
+        color: Theme.fillSubtle
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.06)
+        border.color: Theme.separatorQuiet
 
         ColumnLayout {
             anchors.fill: parent
@@ -28,7 +28,7 @@ Item {
                 role: root.showingInput ? "input-device" : "output-device"
                 title: root.showingInput ? "Input devices" : "Output devices"
                 glyph: root.showingInput ? "microphone" : "volumeHigh"
-                accentColor: Design.blue
+                accentColor: Theme.textPrimary
             }
         }
     }

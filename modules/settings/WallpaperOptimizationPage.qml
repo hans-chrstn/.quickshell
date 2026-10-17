@@ -10,12 +10,14 @@ SettingPage {
         anchors.fill: parent
         spacing: 12
 
-        SettingsHeader { title: "Media Optimization" }
+        SettingsHeader {
+            title: "Media Optimization"
+        }
 
         Text {
             Layout.fillWidth: true
             text: "Each enabled step becomes part of the cache recipe. Changing one creates a separate optimized copy the next time you choose Optimize & Use."
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 10
             wrapMode: Text.Wrap
@@ -28,10 +30,8 @@ SettingPage {
             enabledChoices: WallpaperOptimizationPolicyService.settingsResolutionModes()
             value: WallpaperOptimizationPolicyService.resolutionMode()
             choiceWidth: 54
-            formatChoice: value => value === 0 ? "Native"
-                : value === -1 ? "Custom" : value + "×"
-            onChoiceSelected: value =>
-                WallpaperOptimizationPolicyService.setResolutionMode(value)
+            formatChoice: value => value === 0 ? "Native" : value === -1 ? "Custom" : value + "×"
+            onChoiceSelected: value => WallpaperOptimizationPolicyService.setResolutionMode(value)
         }
 
         RowLayout {
@@ -41,7 +41,7 @@ SettingPage {
             Text {
                 Layout.fillWidth: true
                 text: "Custom scale"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
@@ -49,14 +49,12 @@ SettingPage {
             SettingNumericStepper {
                 value: ConfigService.optimizeWallpaperResolutionCustomScale
                 from: 0.5
-                to: Math.max(0.5,
-                    WallpaperOptimizationPolicyService.settingsMaximumResolutionScale())
+                to: Math.max(0.5, WallpaperOptimizationPolicyService.settingsMaximumResolutionScale())
                 stepSize: WallpaperOptimizationPolicyService.resolutionCustomStep
                 decimals: 2
                 suffix: "×"
                 accessibleName: "Custom wallpaper resolution scale"
-                onValueEdited: value =>
-                    WallpaperOptimizationPolicyService.setCustomResolutionScale(value)
+                onValueEdited: value => WallpaperOptimizationPolicyService.setCustomResolutionScale(value)
             }
         }
 
@@ -68,8 +66,7 @@ SettingPage {
             value: WallpaperOptimizationPolicyService.frameRateMode()
             choiceWidth: 54
             formatChoice: value => value === -1 ? "Custom" : String(value)
-            onChoiceSelected: value =>
-                WallpaperOptimizationPolicyService.setFrameRateMode(value)
+            onChoiceSelected: value => WallpaperOptimizationPolicyService.setFrameRateMode(value)
         }
 
         RowLayout {
@@ -79,7 +76,7 @@ SettingPage {
             Text {
                 Layout.fillWidth: true
                 text: "Custom frame rate"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
@@ -87,14 +84,12 @@ SettingPage {
             SettingNumericStepper {
                 value: ConfigService.optimizeWallpaperFrameRateCustomLimit
                 from: 1
-                to: Math.max(1,
-                    WallpaperOptimizationPolicyService.settingsMaximumFrameRate())
+                to: Math.max(1, WallpaperOptimizationPolicyService.settingsMaximumFrameRate())
                 stepSize: WallpaperOptimizationPolicyService.frameRateCustomStep
                 decimals: 2
                 suffix: "FPS"
                 accessibleName: "Custom wallpaper frame rate"
-                onValueEdited: value =>
-                    WallpaperOptimizationPolicyService.setCustomFrameRate(value)
+                onValueEdited: value => WallpaperOptimizationPolicyService.setCustomFrameRate(value)
             }
         }
 
@@ -106,8 +101,7 @@ SettingPage {
             value: WallpaperOptimizationPolicyService.bitRateMode()
             choiceWidth: 54
             formatChoice: value => value === -1 ? "Custom" : String(value)
-            onChoiceSelected: value =>
-                WallpaperOptimizationPolicyService.setBitRateMode(value)
+            onChoiceSelected: value => WallpaperOptimizationPolicyService.setBitRateMode(value)
         }
 
         RowLayout {
@@ -117,7 +111,7 @@ SettingPage {
             Text {
                 Layout.fillWidth: true
                 text: "Custom bitrate"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
@@ -125,17 +119,17 @@ SettingPage {
             SettingNumericStepper {
                 value: ConfigService.optimizeWallpaperBitRateCustomLimit
                 from: 0.5
-                to: Math.max(0.5,
-                    WallpaperOptimizationPolicyService.settingsMaximumBitRate())
+                to: Math.max(0.5, WallpaperOptimizationPolicyService.settingsMaximumBitRate())
                 stepSize: WallpaperOptimizationPolicyService.bitRateCustomStep
                 decimals: 1
                 suffix: "Mbps"
                 accessibleName: "Custom wallpaper bitrate"
-                onValueEdited: value =>
-                    WallpaperOptimizationPolicyService.setCustomBitRate(value)
+                onValueEdited: value => WallpaperOptimizationPolicyService.setCustomBitRate(value)
             }
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }

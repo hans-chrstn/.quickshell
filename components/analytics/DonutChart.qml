@@ -13,10 +13,10 @@ RowLayout {
     spacing: 14
 
     readonly property real totalValue: {
-        let total = 0
+        let total = 0;
         for (let index = 0; index < segments.length; ++index)
-            total += Math.max(0, Number(segments[index].value ?? 0))
-        return total
+            total += Math.max(0, Number(segments[index].value ?? 0));
+        return total;
     }
 
     implicitHeight: Math.max(diameter, legend.implicitHeight)
@@ -30,43 +30,45 @@ RowLayout {
             anchors.fill: parent
 
             onPaint: {
-                const context = getContext("2d")
-                context.reset()
-                const center = width / 2
-                const radius = Math.max(0,
-                    (Math.min(width, height) - root.strokeWidth) / 2)
-                context.lineWidth = root.strokeWidth
-                context.lineCap = "round"
+                const context = getContext("2d");
+                context.reset();
+                const center = width / 2;
+                const radius = Math.max(0, (Math.min(width, height) - root.strokeWidth) / 2);
+                context.lineWidth = root.strokeWidth;
+                context.lineCap = "round";
 
                 if (root.totalValue <= 0) {
-                    context.strokeStyle = Design.surfaceRaised
-                    context.beginPath()
-                    context.arc(center, center, radius, 0, Math.PI * 2)
-                    context.stroke()
-                    return
+                    context.strokeStyle = Theme.fillElevated;
+                    context.beginPath();
+                    context.arc(center, center, radius, 0, Math.PI * 2);
+                    context.stroke();
+                    return;
                 }
 
-                const gap = root.segments.length > 1 ? 0.045 : 0
-                let angle = -Math.PI / 2
+                const gap = root.segments.length > 1 ? 0.045 : 0;
+                let angle = -Math.PI / 2;
                 for (let index = 0; index < root.segments.length; ++index) {
-                    const segment = root.segments[index]
-                    const value = Math.max(0, Number(segment.value ?? 0))
+                    const segment = root.segments[index];
+                    const value = Math.max(0, Number(segment.value ?? 0));
                     if (value <= 0)
-                        continue
-                    const sweep = Math.PI * 2 * value / root.totalValue
-                    context.strokeStyle = segment.color ?? Design.textMuted
-                    context.beginPath()
-                    context.arc(center, center, radius, angle + gap,
-                        angle + sweep - gap)
-                    context.stroke()
-                    angle += sweep
+                        continue;
+                    const sweep = Math.PI * 2 * value / root.totalValue;
+                    context.strokeStyle = segment.color ?? Theme.textSecondary;
+                    context.beginPath();
+                    context.arc(center, center, radius, angle + gap, angle + sweep - gap);
+                    context.stroke();
+                    angle += sweep;
                 }
             }
 
             Connections {
                 target: root
-                function onSegmentsChanged() { canvas.requestPaint() }
-                function onTotalValueChanged() { canvas.requestPaint() }
+                function onSegmentsChanged() {
+                    canvas.requestPaint();
+                }
+                function onTotalValueChanged() {
+                    canvas.requestPaint();
+                }
             }
 
             onWidthChanged: requestPaint()
@@ -81,7 +83,7 @@ RowLayout {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.centerValue
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontMono
                 font.pixelSize: 13
                 font.weight: Font.DemiBold
@@ -90,7 +92,7 @@ RowLayout {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.centerLabel
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 7
             }
@@ -112,9 +114,9 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 27
                 radius: 8
-                color: Design.surface
+                color: Theme.fillSubtle
                 border.width: 1
-                border.color: Design.separator
+                border.color: Theme.separator
 
                 RowLayout {
                     anchors.fill: parent
@@ -126,13 +128,13 @@ RowLayout {
                         Layout.preferredWidth: 6
                         Layout.preferredHeight: 6
                         radius: 3
-                        color: modelData.color ?? Design.textMuted
+                        color: modelData.color ?? Theme.textSecondary
                     }
 
                     Text {
                         Layout.fillWidth: true
                         text: modelData.label ?? ""
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 8
                         elide: Text.ElideRight
@@ -140,7 +142,7 @@ RowLayout {
 
                     Text {
                         text: modelData.value ?? 0
-                        color: Design.text
+                        color: Theme.textPrimary
                         font.family: Design.fontMono
                         font.pixelSize: 9
                         font.weight: Font.DemiBold

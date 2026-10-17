@@ -17,12 +17,12 @@ HighlightableSurface {
     property double lastTapMs: 0
 
     readonly property string assetKind: String(assetData?.kind || "unknown")
-    readonly property color accent: assetKind === "video" ? Design.blue : assetKind === "animated-image" ? Design.yellow : assetKind === "audio" ? Design.green : Design.textMuted
+    readonly property color accent: assetKind === "video" ? Theme.accent : assetKind === "animated-image" ? Theme.warning : assetKind === "audio" ? Theme.success : Theme.textSecondary
     readonly property real edgeZone: Math.min(18, Math.max(8, width * 0.2))
 
     interactive: false
     accentColor: accent
-    baseColor: Qt.rgba(accent.r, accent.g, accent.b, 0.12)
+    baseColor: Theme.tintSubtle(accent)
     cornerRadius: 8
     opacity: clipData?.enabled === false ? 0.48 : 1
     clip: true
@@ -58,7 +58,7 @@ HighlightableSurface {
         Text {
             width: parent.width
             text: root.assetData?.name || root.clipData?.assetId || "Missing media"
-            color: Design.text
+            color: Theme.textPrimary
             elide: Text.ElideRight
             font.family: Design.fontText
             font.pixelSize: 9
@@ -68,7 +68,7 @@ HighlightableSurface {
         Text {
             width: parent.width
             text: root.clipData?.loop ? root.assetKind + " · loop" : root.assetKind
-            color: Design.textMuted
+            color: Theme.textSecondary
             elide: Text.ElideRight
             font.family: Design.fontText
             font.pixelSize: 7

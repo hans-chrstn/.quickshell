@@ -6,8 +6,8 @@ Item {
 
     required property var action
     property bool highlighted: false
-    signal hovered()
-    signal triggered()
+    signal hovered
+    signal triggered
 
     readonly property bool actionEnabled: action?.enabled !== false
     readonly property bool destructive: action?.destructive === true
@@ -19,7 +19,7 @@ Item {
         anchors.top: parent.top
         height: 1
         visible: root.action?.separatorBefore === true
-        color: Design.separator
+        color: Theme.separator
     }
 
     Rectangle {
@@ -28,17 +28,15 @@ Item {
         anchors.bottom: parent.bottom
         height: 32
         radius: 9
-        color: root.highlighted && root.actionEnabled
-            ? (root.destructive
-                ? Qt.rgba(Design.red.r, Design.red.g, Design.red.b, 0.13)
-                : Qt.rgba(1, 1, 1, 0.09))
-            : "transparent"
+        color: root.highlighted && root.actionEnabled ? (root.destructive ? Theme.tint(Theme.danger) : Theme.fillElevated) : "transparent"
         border.width: root.highlighted && root.actionEnabled ? 1 : 0
-        border.color: root.destructive
-            ? Qt.rgba(Design.red.r, Design.red.g, Design.red.b, 0.26)
-            : Design.glassHighlight
+        border.color: root.destructive ? Theme.tintStrong(Theme.danger) : Theme.glassHighlight
 
-        Behavior on color { ColorAnimation { duration: 90 } }
+        Behavior on color {
+            ColorAnimation {
+                duration: 90
+            }
+        }
 
         Text {
             anchors.left: parent.left
@@ -47,8 +45,7 @@ Item {
             anchors.leftMargin: 10
             anchors.rightMargin: 10
             text: String(root.action?.label || "")
-            color: !root.actionEnabled ? Design.textMuted
-                : root.destructive ? Design.red : Design.text
+            color: !root.actionEnabled ? Theme.textSecondary : root.destructive ? Theme.danger : Theme.textPrimary
             opacity: root.actionEnabled ? 1 : 0.48
             elide: Text.ElideRight
             font.family: Design.fontText
@@ -59,7 +56,8 @@ Item {
 
     HoverHandler {
         enabled: root.actionEnabled
-        onHoveredChanged: if (hovered) root.hovered()
+        onHoveredChanged: if (hovered)
+            root.hovered()
     }
     TapHandler {
         enabled: root.actionEnabled

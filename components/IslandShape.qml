@@ -7,7 +7,7 @@ Shape {
 
     property real wing: Design.wing
     property real bodyRadius: Design.bodyRadius
-    property color fillColor: Design.island
+    property color fillColor: Theme.islandCollapsed
     property color strokeColor: "transparent"
     property real strokeWidth: 0
 
@@ -26,8 +26,7 @@ Shape {
         readonly property real w: root.width
         readonly property real h: root.height
         readonly property real g: Math.max(0, Math.min(root.wing, h / 2, w / 6))
-        readonly property real r: Math.max(0, Math.min(root.bodyRadius, h / 2,
-                                                       w / 3 - g))
+        readonly property real r: Math.max(0, Math.min(root.bodyRadius, h / 2, w / 3 - g))
 
         startX: 0
         startY: 0
@@ -39,7 +38,10 @@ Shape {
             radiusY: path.g
             direction: PathArc.Clockwise
         }
-        PathLine { x: path.g; y: path.h - path.r }
+        PathLine {
+            x: path.g
+            y: path.h - path.r
+        }
         PathArc {
             x: path.g + path.r
             y: path.h
@@ -47,7 +49,10 @@ Shape {
             radiusY: path.r
             direction: PathArc.Counterclockwise
         }
-        PathLine { x: path.w - path.g - path.r; y: path.h }
+        PathLine {
+            x: path.w - path.g - path.r
+            y: path.h
+        }
         PathArc {
             x: path.w - path.g
             y: path.h - path.r
@@ -55,7 +60,10 @@ Shape {
             radiusY: path.r
             direction: PathArc.Counterclockwise
         }
-        PathLine { x: path.w - path.g; y: path.g }
+        PathLine {
+            x: path.w - path.g
+            y: path.g
+        }
         PathArc {
             x: path.w
             y: 0
@@ -63,6 +71,9 @@ Shape {
             radiusY: path.g
             direction: PathArc.Clockwise
         }
-        PathLine { x: 0; y: 0 }
+        PathLine {
+            x: 0
+            y: 0
+        }
     }
 }

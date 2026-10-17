@@ -23,7 +23,7 @@ Item {
         Text {
             Layout.fillWidth: true
             text: root.title
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 10
         }
@@ -44,8 +44,8 @@ Item {
                     interactive: choiceEnabled
                     selected: choiceSelected
                     focused: hover.hovered
-                    accentColor: Design.blue
-                    baseColor: Design.surfaceRaised
+                    accentColor: Theme.accent
+                    baseColor: Theme.fillElevated
                     cornerRadius: 12
                     opacity: choiceEnabled ? 1 : 0.32
                     accessibleName: root.title + ": " + root.formatChoice(modelData)
@@ -58,7 +58,7 @@ Item {
                     Text {
                         anchors.centerIn: parent
                         text: root.formatChoice(parent.modelData)
-                        color: Design.text
+                        color: Theme.textPrimary
                         font.family: Design.fontMono
                         font.pixelSize: 10
                         font.weight: parent.choiceSelected ? Font.DemiBold : Font.Normal

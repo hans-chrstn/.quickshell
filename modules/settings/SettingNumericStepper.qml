@@ -18,32 +18,32 @@ Item {
     implicitWidth: 142
     implicitHeight: 30
 
-    readonly property real normalizedValue: NumericRange.quantize(
-        value, from, to, stepSize, from)
-    readonly property string formattedValue:
-        normalizedValue.toFixed(Math.max(0, decimals))
+    readonly property real normalizedValue: NumericRange.quantize(value, from, to, stepSize, from)
+    readonly property string formattedValue: normalizedValue.toFixed(Math.max(0, decimals))
 
     function commitText(text) {
-        const parsed = Number(String(text).trim())
-        const next = NumericRange.quantize(parsed, from, to, stepSize,
-            normalizedValue)
-        editor.text = next.toFixed(Math.max(0, decimals))
-        valueEdited(next)
+        const parsed = Number(String(text).trim());
+        const next = NumericRange.quantize(parsed, from, to, stepSize, normalizedValue);
+        editor.text = next.toFixed(Math.max(0, decimals));
+        valueEdited(next);
     }
 
     function step(direction) {
-        valueEdited(NumericRange.stepped(normalizedValue, direction,
-            from, to, stepSize))
+        valueEdited(NumericRange.stepped(normalizedValue, direction, from, to, stepSize));
     }
 
     Rectangle {
         anchors.fill: parent
         radius: height / 2
-        color: Design.surfaceRaised
+        color: Theme.fillElevated
         border.width: 1
-        border.color: editor.activeFocus ? Design.blue : Design.separator
+        border.color: editor.activeFocus ? Theme.accent : Theme.separator
 
-        Behavior on border.color { ColorAnimation { duration: 110 } }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 110
+            }
+        }
 
         RowLayout {
             anchors.fill: parent
@@ -57,7 +57,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     text: "−"
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontText
                     font.pixelSize: 15
                 }
@@ -71,7 +71,7 @@ Item {
             Rectangle {
                 Layout.preferredWidth: 1
                 Layout.preferredHeight: 16
-                color: Design.separator
+                color: Theme.separator
             }
 
             Item {
@@ -86,9 +86,9 @@ Item {
                         id: editor
                         width: Math.max(28, contentWidth)
                         text: root.formattedValue
-                        color: Design.text
-                        selectionColor: Design.blue
-                        selectedTextColor: Design.text
+                        color: Theme.textPrimary
+                        selectionColor: Theme.accent
+                        selectedTextColor: Theme.textPrimary
                         horizontalAlignment: TextInput.AlignHCenter
                         verticalAlignment: TextInput.AlignVCenter
                         font.family: Design.fontMono
@@ -110,7 +110,7 @@ Item {
                     Text {
                         visible: root.suffix.length > 0
                         text: root.suffix
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         font.family: Design.fontMono
                         font.pixelSize: 9
                     }
@@ -120,7 +120,7 @@ Item {
             Rectangle {
                 Layout.preferredWidth: 1
                 Layout.preferredHeight: 16
-                color: Design.separator
+                color: Theme.separator
             }
 
             Item {
@@ -131,7 +131,7 @@ Item {
                 Text {
                     anchors.centerIn: parent
                     text: "+"
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontText
                     font.pixelSize: 14
                 }

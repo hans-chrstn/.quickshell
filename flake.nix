@@ -196,14 +196,33 @@
             fi
             status=0
             lintArgs=(--max-warnings -1 --import disable --missing-property disable --missing-type disable --unresolved-type disable --unqualified disable --access-singleton-via-object disable --signal-handler-parameters disable)
-            for file in "''${files[@]}"; do [[ -f "$file" ]] || continue; qmllint "''${lintArgs[@]}" "$file" || status=1; done
+            for file in "''${files[@]}"; do
+              [[ -f "$file" ]] || continue
+              qmllint "''${lintArgs[@]}" "$file" || status=1
+              if [[ "$file" == *.qml ]] && rg -q '^Singleton[[:space:]]*\{' "$file" && ! rg -q '^import Quickshell([[:space:]]|$)' "$file"; then
+                echo "lint: Quickshell Singleton without Quickshell import: $file" >&2
+                status=1
+              fi
+              if [[ "$file" == *.qml ]] && rg -q 'Theme\.' "$file" && [[ "$file" != core/Theme.qml ]] && ! rg -q '^import qs\.core([[:space:]]|$)' "$file"; then
+                echo "lint: Theme consumer without qs.core import: $file" >&2
+                status=1
+              fi
+            done
             exit "$status"
           '';
           test = ''
             root=$(git rev-parse --show-toplevel)
             cd "$root"
             export QML2_IMPORT_PATH="${wrappedShell}/lib/qt-6/qml:${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${pkgs.kdePackages.qtmultimedia}/lib/qt-6/qml:${pkgs.kdePackages.kirigami.unwrapped}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
-            exec qmltestrunner "$@"
+            hasInput=0
+            for argument in "$@"; do
+              if [[ "$argument" == "-input" ]]; then hasInput=1; fi
+            done
+            if ((hasInput)); then
+              exec qmltestrunner "$@"
+            else
+              exec qmltestrunner -input tests "$@"
+            fi
           '';
         in
         {

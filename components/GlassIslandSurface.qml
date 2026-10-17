@@ -13,25 +13,25 @@ Item {
     layer.enabled: true
     layer.effect: MultiEffect {
         shadowEnabled: root.expanded
-        shadowColor: "#a8000000"
-        shadowBlur: 0.55
-        shadowVerticalOffset: 2
-        saturation: 0.92
+        shadowColor: Theme.shadow
+        shadowBlur: 0.48
+        shadowVerticalOffset: 3
+        saturation: 0
     }
 
     IslandShape {
         anchors.fill: parent
         bodyRadius: root.surfaceRadius
-        fillColor: Qt.rgba(Design.island.r + (Design.islandExpanded.r - Design.island.r) * root.expansionProgress, Design.island.g + (Design.islandExpanded.g - Design.island.g) * root.expansionProgress, Design.island.b + (Design.islandExpanded.b - Design.island.b) * root.expansionProgress, Design.island.a + (Design.islandExpanded.a - Design.island.a) * root.expansionProgress)
+        fillColor: Theme.mix(Theme.islandCollapsed, Theme.islandExpanded, root.expansionProgress)
     }
 
     IslandShape {
         anchors.fill: parent
         bodyRadius: root.surfaceRadius
         fillColor: "transparent"
-        strokeColor: Design.glassStroke
+        strokeColor: Theme.glassStroke
         strokeWidth: 1
-        opacity: 0.72 + 0.28 * root.expansionProgress
+        opacity: 0.78 + 0.22 * root.expansionProgress
     }
 
     Rectangle {
@@ -40,7 +40,7 @@ Item {
         anchors.bottomMargin: 1
         width: Math.max(0, parent.width - (Design.wing + root.surfaceRadius) * 2)
         height: 1
-        color: Design.glassShade
-        opacity: 0.45 + 0.35 * root.expansionProgress
+        color: Theme.glassShade
+        opacity: 0.36 + 0.28 * root.expansionProgress
     }
 }

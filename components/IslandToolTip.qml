@@ -13,15 +13,15 @@ ToolTip {
 
     contentItem: Text {
         text: root.text
-        color: Design.text
+        color: Theme.textPrimary
         font.family: Design.fontText
         font.pixelSize: 10
     }
 
     background: Rectangle {
         radius: 9
-        color: Design.islandExpanded
+        color: Theme.islandExpanded
         border.width: 1
-        border.color: Design.glassStroke
+        border.color: Theme.glassStroke
     }
 }

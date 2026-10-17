@@ -72,7 +72,7 @@ Item {
             objectName: "timelineTrackLane-" + String(trackData.id || "")
             width: ListView.view.width
             height: 42
-            color: Qt.rgba(1, 1, 1, 0.018)
+            color: Theme.fillFaint
 
             HighlightableSurface {
                 id: trackHeader
@@ -82,7 +82,7 @@ Item {
                 height: parent.height
                 interactive: false
                 selected: root.selectedTrackId === trackLane.trackData.id && root.selectedClipIds.length === 0
-                baseColor: Qt.rgba(1, 1, 1, 0.022)
+                baseColor: Theme.fillFaint
                 cornerRadius: 0
 
                 Column {
@@ -95,7 +95,7 @@ Item {
                     Text {
                         width: parent.width
                         text: trackLane.trackData.name
-                        color: Design.text
+                        color: Theme.textPrimary
                         elide: Text.ElideRight
                         font.family: Design.fontText
                         font.pixelSize: 10
@@ -105,7 +105,7 @@ Item {
                     Text {
                         width: parent.width
                         text: trackLane.trackData.type
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         elide: Text.ElideRight
                         font.family: Design.fontText
                         font.pixelSize: 8
@@ -157,7 +157,7 @@ Item {
                         x: modelData.x
                         width: 1
                         height: parent.height
-                        color: Design.separator
+                        color: Theme.separator
                         opacity: 0.26
                     }
                 }
@@ -248,7 +248,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "No tracks yet"
-            color: Design.text
+            color: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 11
             font.weight: Font.DemiBold
@@ -257,7 +257,7 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "The timeline is ready for your first media track."
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 9
         }

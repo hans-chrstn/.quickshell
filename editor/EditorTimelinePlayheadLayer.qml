@@ -41,7 +41,7 @@ Item {
         y: 38
         width: 1
         height: root.height - 38
-        color: Design.blue
+        color: Theme.accent
         z: 5
 
         Rectangle {
@@ -49,7 +49,7 @@ Item {
             width: 7
             height: 7
             radius: 3.5
-            color: Design.blue
+            color: Theme.accent
         }
 
         MouseArea {
@@ -95,7 +95,7 @@ Item {
         width: Math.max(1, root.visibleLoopEndX - root.visibleLoopStartX)
         height: 3
         radius: 1.5
-        color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.48)
+        color: Theme.tintGuide(Theme.accent)
         z: 2
     }
 
@@ -115,7 +115,7 @@ Item {
             width: 5
             height: 15
             visible: root.loopEnabled && handleX >= 0 && handleX <= root.viewportWidth
-            color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.86)
+            color: Theme.tintOpaque(Theme.accent)
             radius: 4
             z: 8
 

@@ -12,10 +12,10 @@ Singleton {
     property bool closing: false
     property string targetScreenName: ""
     property string currentPage: "levels"
-    readonly property var pages: ["levels", "output", "input"]
+    readonly property var pages: ["levels", "output", "input", "apps"]
 
     function syncInventoryDemand() {
-        AudioService.setInventoryConsumer("audio-panel.devices", (opened || closing) && (currentPage === "output" || currentPage === "input"));
+        AudioService.setInventoryConsumer("audio-panel.inventory", (opened || closing) && currentPage !== "levels");
     }
 
     onOpenedChanged: syncInventoryDemand()

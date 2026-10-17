@@ -17,12 +17,8 @@ import qs.services.wallpaper
 import qs.services.wallpaper.projects
 
 ShellRoot {
-    // Keep the shared service identity stable. Its full PipeWire inventory is
-    // created only while a named consumer requests it.
     readonly property var audioService: AudioService
 
-    // Instantiate the opt-in controller once at the root. It remains inert
-    // while disabled and owns no polling or display state itself.
     readonly property var displayPowerControl: DisplayPowerControlService
 
     ShellIpc {}

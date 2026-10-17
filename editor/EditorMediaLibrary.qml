@@ -12,9 +12,9 @@ Rectangle {
     id: root
 
     radius: Design.editorSectionRadius
-    color: Qt.rgba(1, 1, 1, 0.045)
+    color: Theme.fillQuiet
     border.width: 1
-    border.color: Qt.rgba(1, 1, 1, 0.075)
+    border.color: Theme.separator
     clip: true
 
     ColumnLayout {
@@ -30,7 +30,7 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: "Media"
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
@@ -40,12 +40,12 @@ Rectangle {
                 implicitWidth: countLabel.implicitWidth + 12
                 implicitHeight: 20
                 radius: 7
-                color: Qt.rgba(1, 1, 1, 0.06)
+                color: Theme.fillSubtle
                 Text {
                     id: countLabel
                     anchors.centerIn: parent
                     text: WallpaperEditorService.mediaItems.length
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontMono
                     font.pixelSize: 9
                 }
@@ -102,7 +102,7 @@ Rectangle {
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: WallpaperEditorService.activeProject ? "No media yet" : "Start with an import"
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontText
                     font.pixelSize: 11
                     font.weight: Font.DemiBold
@@ -110,7 +110,7 @@ Rectangle {
                 Text {
                     width: parent.width
                     text: WallpaperEditorService.activeProject ? "Import images, animations, or video." : "Import media to create your first wallpaper project."
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.Wrap
                     font.family: Design.fontText

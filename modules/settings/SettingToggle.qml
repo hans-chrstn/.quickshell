@@ -23,14 +23,14 @@ Item {
 
             Text {
                 text: root.title
-                color: root.dangerous ? Design.red : Design.text
+                color: root.dangerous ? Theme.danger : Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
             }
             Text {
                 text: root.description
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
             }
@@ -41,11 +41,15 @@ Item {
             Layout.preferredWidth: 36
             Layout.preferredHeight: 20
             radius: 10
-            color: root.checked ? Design.blue : Design.surfaceRaised
+            color: root.checked ? Theme.accent : Theme.fillElevated
             border.width: 1
-            border.color: Design.separator
+            border.color: Theme.separator
 
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
+            }
 
             Rectangle {
                 x: root.checked ? parent.width - width - 2 : 2
@@ -53,8 +57,13 @@ Item {
                 width: 16
                 height: 16
                 radius: 8
-                color: Design.text
-                Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                color: Theme.textPrimary
+                Behavior on x {
+                    NumberAnimation {
+                        duration: 120
+                        easing.type: Easing.OutCubic
+                    }
+                }
             }
 
             TapHandler {

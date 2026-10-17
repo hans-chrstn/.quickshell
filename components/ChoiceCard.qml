@@ -12,7 +12,7 @@ HighlightableSurface {
 
     implicitHeight: description.length > 0 ? 48 : 38
     interactive: true
-    baseColor: Qt.rgba(1, 1, 1, 0.035)
+    baseColor: Theme.fillSubtle
     cornerRadius: 11
     accessibleName: title
     onSurfaceActivated: root.activated()
@@ -35,7 +35,7 @@ HighlightableSurface {
             Text {
                 Layout.fillWidth: true
                 text: root.title
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 10
                 font.weight: Font.Medium
@@ -46,7 +46,7 @@ HighlightableSurface {
                 visible: root.description.length > 0
                 Layout.fillWidth: true
                 text: root.description
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 8
                 elide: Text.ElideRight
@@ -55,7 +55,7 @@ HighlightableSurface {
 
         IslandGlyph {
             name: "chevronRight"
-            glyphColor: Design.textMuted
+            glyphColor: Theme.textSecondary
         }
     }
 }

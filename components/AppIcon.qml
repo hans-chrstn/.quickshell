@@ -14,27 +14,27 @@ Item {
     implicitHeight: iconSize
 
     function resolveIcon(value) {
-        const name = String(value || "")
+        const name = String(value || "");
         if (name.startsWith("file:") || name.startsWith("image:"))
-            return name
+            return name;
         if (name.startsWith("/"))
-            return LocalUrl.fromPath(name)
+            return LocalUrl.fromPath(name);
 
-        const resolved = name.length > 0 ? Quickshell.iconPath(name, true) : ""
+        const resolved = name.length > 0 ? Quickshell.iconPath(name, true) : "";
         if (String(resolved || "").length > 0)
-            return resolved
-        return Quickshell.iconPath("application-x-executable", true)
+            return resolved;
+        return Quickshell.iconPath("application-x-executable", true);
     }
 
     Rectangle {
         anchors.fill: parent
         radius: 7
-        color: Design.surfaceRaised
+        color: Theme.fillElevated
 
         Text {
             anchors.centerIn: parent
             text: root.name.length > 0 ? root.name[0].toUpperCase() : "?"
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontDisplay
             font.pixelSize: Math.round(root.iconSize * 0.48)
             font.weight: Font.Bold
@@ -52,6 +52,10 @@ Item {
         mipmap: false
         opacity: status === Image.Ready ? 1 : 0
 
-        Behavior on opacity { NumberAnimation { duration: 140 } }
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 140
+            }
+        }
     }
 }

@@ -10,21 +10,15 @@ Rectangle {
     required property var assessment
     readonly property int severity: Number(assessment?.severity) || 0
     readonly property var issues: assessment?.issues || []
-    readonly property var optimization:
-        WallpaperOptimizationService.recordFor(assessment?.path || "")
-    readonly property bool optimizedCopyAvailable:
-        WallpaperOptimizationService.currentCopyAvailable(
-            assessment?.target || "", assessment?.path || "")
-    readonly property bool optimizedCopyApplied:
-        WallpaperOptimizationService.currentCopyApplied(
-            assessment?.target || "", assessment?.path || "")
+    readonly property var optimization: WallpaperOptimizationService.recordFor(assessment?.path || "")
+    readonly property bool optimizedCopyAvailable: WallpaperOptimizationService.currentCopyAvailable(assessment?.target || "", assessment?.path || "")
+    readonly property bool optimizedCopyApplied: WallpaperOptimizationService.currentCopyApplied(assessment?.target || "", assessment?.path || "")
 
     implicitHeight: content.implicitHeight + 20
     radius: 10
-    color: Design.surface
+    color: Theme.fillSubtle
     border.width: 1
-    border.color: severity >= 2 ? Design.red
-        : severity === 1 ? Design.yellow : Design.separator
+    border.color: severity >= 2 ? Theme.danger : severity === 1 ? Theme.warning : Theme.separator
 
     ColumnLayout {
         id: content
@@ -39,21 +33,19 @@ Rectangle {
 
             Text {
                 text: String(root.assessment?.target || "Wallpaper")
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 11
                 font.weight: Font.DemiBold
             }
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
 
             Text {
-                text: root.assessment?.state !== "ready" ? "Unavailable"
-                    : root.severity >= 2 ? "High demand"
-                    : root.severity === 1 ? "Review" : "Recommended"
-                color: root.assessment?.state !== "ready" ? Design.textMuted
-                    : root.severity >= 2 ? Design.red
-                    : root.severity === 1 ? Design.yellow : Design.green
+                text: root.assessment?.state !== "ready" ? "Unavailable" : root.severity >= 2 ? "High demand" : root.severity === 1 ? "Review" : "Recommended"
+                color: root.assessment?.state !== "ready" ? Theme.textSecondary : root.severity >= 2 ? Theme.danger : root.severity === 1 ? Theme.warning : Theme.success
                 font.family: Design.fontText
                 font.pixelSize: 9
                 font.weight: Font.DemiBold
@@ -63,19 +55,18 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             text: {
-                const value = root.assessment || ({})
+                const value = root.assessment || ({});
                 if (["unknown", "queued", "probing"].indexOf(value.state) >= 0)
-                    return "Inspecting media metadata…"
-                if (value.state !== "ready") return "Media metadata is unavailable"
-                if (value.kind !== "video") return "Static media · no decoder cost"
-                const rate = value.frameRate > 0
-                    ? " · " + value.frameRate.toFixed(1) + " FPS" : ""
-                const bitrate = value.bitRate > 0
-                    ? " · " + (value.bitRate / 1000000).toFixed(1) + " Mbps" : ""
-                return value.width + "×" + value.height + rate + bitrate
-                    + (value.codec ? " · " + value.codec.toUpperCase() : "")
+                    return "Inspecting media metadata…";
+                if (value.state !== "ready")
+                    return "Media metadata is unavailable";
+                if (value.kind !== "video")
+                    return "Static media · no decoder cost";
+                const rate = value.frameRate > 0 ? " · " + value.frameRate.toFixed(1) + " FPS" : "";
+                const bitrate = value.bitRate > 0 ? " · " + (value.bitRate / 1000000).toFixed(1) + " Mbps" : "";
+                return value.width + "×" + value.height + rate + bitrate + (value.codec ? " · " + value.codec.toUpperCase() : "");
             }
-            color: Design.textMuted
+            color: Theme.textSecondary
             font.family: Design.fontMono
             font.pixelSize: 9
             elide: Text.ElideRight
@@ -88,7 +79,7 @@ Rectangle {
                 required property string modelData
                 Layout.fillWidth: true
                 text: "• " + modelData
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
                 wrapMode: Text.Wrap
@@ -102,50 +93,37 @@ Rectangle {
             Text {
                 Layout.fillWidth: true
                 text: {
-                    const state = String(root.optimization?.state || "idle")
-                    if (WallpaperOptimizationPolicyService.isOptimizedPath(
-                            root.assessment?.path || ""))
-                        return "Using a performance-optimized cache copy"
+                    const state = String(root.optimization?.state || "idle");
+                    if (WallpaperOptimizationPolicyService.isOptimizedPath(root.assessment?.path || ""))
+                        return "Using a performance-optimized cache copy";
                     if (!ConfigService.allowWallpaperOptimization)
-                        return "Optimization is disabled in Wallpaper Options"
-                    if (state === "optimizing") return "Creating optimized copy…"
-                    if (state === "preparing" || state === "checking"
-                            || state === "inspecting")
-                        return "Checking optimized copy…"
+                        return "Optimization is disabled in Wallpaper Options";
+                    if (state === "optimizing")
+                        return "Creating optimized copy…";
+                    if (state === "preparing" || state === "checking" || state === "inspecting")
+                        return "Checking optimized copy…";
                     if (root.optimizedCopyApplied)
-                        return "Optimized copy applied"
+                        return "Optimized copy applied";
                     if (root.optimizedCopyAvailable)
-                        return "Optimized copy available"
+                        return "Optimized copy available";
                     if (state === "failed" || state === "cancelled")
-                        return String(root.optimization?.error || "Optimization failed")
-                    return WallpaperOptimizationPolicyService.recipeDescription(
-                        String(root.assessment?.target || ""),
-                        String(root.assessment?.path || ""))
+                        return String(root.optimization?.error || "Optimization failed");
+                    return WallpaperOptimizationPolicyService.recipeDescription(String(root.assessment?.target || ""), String(root.assessment?.path || ""));
                 }
-                color: root.optimization?.state === "failed"
-                    ? Design.red : Design.textMuted
+                color: root.optimization?.state === "failed" ? Theme.danger : Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
                 wrapMode: Text.Wrap
             }
 
             SettingButton {
-                visible: !WallpaperOptimizationService.busy
-                    && ConfigService.allowWallpaperOptimization
-                    && !root.optimizedCopyApplied
-                    && !WallpaperOptimizationPolicyService.isOptimizedPath(
-                        root.assessment?.path || "")
-                label: root.optimizedCopyAvailable
-                    ? "Use Optimized" : "Optimize & Use"
-                onClicked: WallpaperOptimizationService.request(
-                    String(root.assessment?.target || ""),
-                    String(root.assessment?.path || ""))
+                visible: !WallpaperOptimizationService.busy && ConfigService.allowWallpaperOptimization && !root.optimizedCopyApplied && !WallpaperOptimizationPolicyService.isOptimizedPath(root.assessment?.path || "")
+                label: root.optimizedCopyAvailable ? "Use Optimized" : "Optimize & Use"
+                onClicked: WallpaperOptimizationService.request(String(root.assessment?.target || ""), String(root.assessment?.path || ""))
             }
 
             SettingButton {
-                visible: WallpaperOptimizationService.busy
-                    && WallpaperOptimizationService.activeSource
-                        === String(root.assessment?.path || "")
+                visible: WallpaperOptimizationService.busy && WallpaperOptimizationService.activeSource === String(root.assessment?.path || "")
                 label: "Cancel"
                 onClicked: WallpaperOptimizationService.cancel()
             }

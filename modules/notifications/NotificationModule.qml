@@ -13,7 +13,7 @@ Item {
     readonly property string presentationScreenName: context?.screenName || "view"
     readonly property bool expanded: context?.expanded ?? false
     readonly property var notice: NotificationService.current
-    readonly property color accent: notice?.severity === "error" ? Design.red : notice?.severity === "warning" ? Design.yellow : notice?.severity === "success" ? Design.green : Design.blue
+    readonly property color accent: notice?.severity === "error" ? Theme.danger : notice?.severity === "warning" ? Theme.warning : notice?.severity === "success" ? Theme.success : Theme.accent
     readonly property bool hasSource: String(notice?.source || "").length > 0
     readonly property bool hasBody: String(notice?.message || "").length > 0
     readonly property bool hasCount: Number(notice?.occurrenceCount) > 1
@@ -58,7 +58,7 @@ Item {
             Layout.preferredHeight: Layout.preferredWidth
             Layout.alignment: Qt.AlignVCenter
             radius: width / 2
-            color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, root.expanded ? 0.16 : 0.12)
+            color: root.expanded ? Theme.tint(root.accent) : Theme.tintSubtle(root.accent)
 
             Text {
                 anchors.centerIn: parent
@@ -84,7 +84,7 @@ Item {
                     id: titleText
                     Layout.fillWidth: true
                     text: root.notice?.title || ""
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontDisplay
                     font.pixelSize: root.expanded ? 13 : 10
                     font.weight: Font.DemiBold
@@ -97,7 +97,7 @@ Item {
                     id: sourceText
                     visible: root.expanded && root.hasSource
                     text: root.notice?.source || ""
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 9
                     font.weight: Font.Medium
@@ -110,7 +110,7 @@ Item {
                     id: countText
                     visible: root.hasCount
                     text: root.hasCount ? "×" + Number(root.notice?.occurrenceCount || 1) : ""
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontMono
                     font.pixelSize: 9
                 }
@@ -122,7 +122,7 @@ Item {
                 Layout.maximumHeight: root.expanded ? 30 : 0
                 visible: root.expanded && root.hasBody
                 text: root.notice?.message || ""
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 11
                 maximumLineCount: 2
@@ -147,7 +147,7 @@ Item {
             Text {
                 anchors.centerIn: parent
                 text: "×"
-                color: parent.hovered ? Design.text : Design.textMuted
+                color: parent.hovered ? Theme.textPrimary : Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 14
             }

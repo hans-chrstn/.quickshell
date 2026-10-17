@@ -132,9 +132,9 @@ Rectangle {
     })
 
     radius: embeddedInIsland ? 0 : Design.editorPanelRadius
-    color: embeddedInIsland ? "transparent" : Design.islandExpanded
+    color: embeddedInIsland ? "transparent" : Theme.islandExpanded
     border.width: embeddedInIsland ? 0 : 1
-    border.color: embeddedInIsland ? "transparent" : Design.glassStroke
+    border.color: embeddedInIsland ? "transparent" : Theme.glassStroke
     clip: true
 
     ColumnLayout {
@@ -153,12 +153,12 @@ Rectangle {
                 implicitWidth: 25
                 implicitHeight: 25
                 radius: 8
-                color: Qt.rgba(Design.blue.r, Design.blue.g, Design.blue.b, 0.18)
+                color: Theme.tint(Theme.accent)
 
                 Text {
                     anchors.centerIn: parent
                     text: "W"
-                    color: Design.blue
+                    color: Theme.accent
                     font.family: Design.fontDisplay
                     font.pixelSize: 12
                     font.weight: Font.Bold
@@ -172,7 +172,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: WallpaperEditorService.projectName
-                    color: Design.text
+                    color: Theme.textPrimary
                     font.family: Design.fontDisplay
                     font.pixelSize: 14
                     font.weight: Font.DemiBold
@@ -181,7 +181,7 @@ Rectangle {
                 Text {
                     Layout.fillWidth: true
                     text: "Wallpaper Studio"
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 10
                     elide: Text.ElideRight
@@ -192,12 +192,12 @@ Rectangle {
                 implicitWidth: statusText.implicitWidth + 18
                 implicitHeight: 25
                 radius: 9
-                color: Qt.rgba(1, 1, 1, 0.045)
+                color: Theme.fillQuiet
                 Text {
                     id: statusText
                     anchors.centerIn: parent
                     text: WallpaperProjectService.dirty ? "Unsaved" : "Saved"
-                    color: WallpaperProjectService.dirty ? Design.yellow : Design.textMuted
+                    color: WallpaperProjectService.dirty ? Theme.warning : Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 10
                     font.weight: Font.Medium

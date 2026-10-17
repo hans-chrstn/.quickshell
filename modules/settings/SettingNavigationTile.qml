@@ -13,7 +13,7 @@ HighlightableSurface {
     implicitHeight: 52
     interactive: false
     focused: hover.hovered
-    baseColor: Design.surface
+    baseColor: Theme.fillSubtle
     cornerRadius: 10
 
     RowLayout {
@@ -28,7 +28,7 @@ HighlightableSurface {
 
             Text {
                 text: root.title
-                color: Design.text
+                color: Theme.textPrimary
                 font.family: Design.fontText
                 font.pixelSize: 12
                 font.weight: Font.DemiBold
@@ -36,7 +36,7 @@ HighlightableSurface {
 
             Text {
                 text: root.description
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 9
             }
@@ -44,7 +44,7 @@ HighlightableSurface {
 
         IslandGlyph {
             name: "chevronRight"
-            glyphColor: hover.hovered ? Design.text : Design.textMuted
+            glyphColor: hover.hovered ? Theme.textPrimary : Theme.textSecondary
             Layout.preferredWidth: 17
             Layout.preferredHeight: 17
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight

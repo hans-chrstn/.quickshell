@@ -51,7 +51,7 @@ Item {
 
             Text {
                 text: "Session"
-                color: Design.textMuted
+                color: Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 11
             }
@@ -62,7 +62,7 @@ Item {
 
             Text {
                 text: SessionService.confirmingIndex >= 0 ? "Select again to confirm" : "Esc to cancel"
-                color: SessionService.confirmingIndex >= 0 ? Design.red : Design.textMuted
+                color: SessionService.confirmingIndex >= 0 ? Theme.danger : Theme.textSecondary
                 font.family: Design.fontText
                 font.pixelSize: 10
             }
@@ -92,8 +92,9 @@ Item {
                     interactive: true
                     focused: hover.hovered
                     selected: tile.keyboardSelected || tile.confirming
-                    accentColor: tile.confirming ? Design.red : Design.blue
-                    baseColor: Design.surface
+                    accentColor: tile.confirming ? Theme.danger : Theme.accent
+                    accentSelectedBorder: tile.confirming
+                    baseColor: Theme.fillSubtle
                     cornerRadius: 14
                     accessibleName: tile.modelData.title
 
@@ -117,7 +118,7 @@ Item {
                         Text {
                             Layout.alignment: Qt.AlignHCenter
                             text: tile.modelData.symbol
-                            color: tile.confirming ? Design.red : tile.modelData.color
+                            color: tile.confirming ? Theme.danger : tile.modelData.color
                             font.family: Design.fontDisplay
                             font.pixelSize: 30
                         }
@@ -126,7 +127,7 @@ Item {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
                             text: tile.confirming ? "Are you sure?" : tile.modelData.title
-                            color: tile.confirming ? Design.red : Design.text
+                            color: tile.confirming ? Theme.danger : Theme.textPrimary
                             font.family: Design.fontText
                             font.pixelSize: 12
                             font.weight: tile.keyboardSelected ? Font.DemiBold : Font.Normal

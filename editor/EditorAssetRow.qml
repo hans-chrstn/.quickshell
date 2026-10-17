@@ -20,12 +20,12 @@ HighlightableSurface {
         const dot = name.lastIndexOf(".");
         return dot >= 0 ? name.slice(dot + 1).toUpperCase() : "MEDIA";
     }
-    readonly property color stateColor: asset.state === "available" ? Design.green : asset.state === "pending" ? Design.yellow : Design.red
+    readonly property color stateColor: asset.state === "available" ? Theme.success : asset.state === "pending" ? Theme.warning : Theme.danger
 
     implicitHeight: 58
     interactive: false
     focused: hover.hovered
-    accentColor: Design.blue
+    accentColor: Theme.accent
     baseColor: "transparent"
     cornerRadius: 13
 
@@ -39,7 +39,7 @@ HighlightableSurface {
             implicitWidth: 40
             implicitHeight: 40
             radius: 11
-            color: Qt.rgba(1, 1, 1, 0.065)
+            color: Theme.fillSubtle
 
             EditorAssetThumbnail {
                 id: thumbnail
@@ -54,7 +54,7 @@ HighlightableSurface {
                 anchors.centerIn: parent
                 width: parent.width - 6
                 text: root.extension
-                color: Design.textMuted
+                color: Theme.textSecondary
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 font.family: Design.fontText
@@ -81,7 +81,7 @@ HighlightableSurface {
             Text {
                 Layout.fillWidth: true
                 text: root.asset.name
-                color: Design.text
+                color: Theme.textPrimary
                 elide: Text.ElideRight
                 font.family: Design.fontText
                 font.pixelSize: 11
@@ -90,7 +90,7 @@ HighlightableSurface {
             Text {
                 Layout.fillWidth: true
                 text: root.asset.state === "available" ? root.asset.declaredKind.replace("-", " ") : root.asset.state
-                color: Design.textMuted
+                color: Theme.textSecondary
                 elide: Text.ElideRight
                 font.family: Design.fontText
                 font.pixelSize: 9

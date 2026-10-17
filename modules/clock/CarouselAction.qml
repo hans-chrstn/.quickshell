@@ -7,8 +7,8 @@ Item {
 
     required property string icon
     required property string label
-    property color accent: Design.textMuted
-    signal activated()
+    property color accent: Theme.textSecondary
+    signal activated
 
     implicitWidth: 94
     implicitHeight: 32
@@ -16,19 +16,29 @@ Item {
     scale: tap.pressed ? 0.96 : (hover.hovered ? 1.015 : 1)
 
     Behavior on scale {
-        NumberAnimation { duration: 110; easing.type: Easing.OutCubic }
+        NumberAnimation {
+            duration: 110
+            easing.type: Easing.OutCubic
+        }
     }
 
     Rectangle {
         anchors.fill: parent
         radius: 11
-        color: tap.pressed ? "#101116"
-            : (hover.hovered ? "#24262c" : "#17191e")
+        color: tap.pressed ? Theme.controlPressed : (hover.hovered ? Theme.controlHover : Theme.controlFill)
         border.width: 1
-        border.color: hover.hovered ? "#3d4149" : "#2b2e35"
+        border.color: hover.hovered ? Theme.separatorStrong : Theme.separator
 
-        Behavior on color { ColorAnimation { duration: 120 } }
-        Behavior on border.color { ColorAnimation { duration: 120 } }
+        Behavior on color {
+            ColorAnimation {
+                duration: 120
+            }
+        }
+        Behavior on border.color {
+            ColorAnimation {
+                duration: 120
+            }
+        }
     }
 
     Row {
@@ -40,33 +50,41 @@ Item {
             width: 23
             height: 23
             radius: 8
-            color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b,
-                tap.pressed ? 0.34 : (hover.hovered ? 0.28 : 0.20))
+            color: tap.pressed ? Theme.tintPressed(root.accent) : (hover.hovered ? Theme.tintHover(root.accent) : Theme.tintActive(root.accent))
 
-            Behavior on color { ColorAnimation { duration: 120 } }
+            Behavior on color {
+                ColorAnimation {
+                    duration: 120
+                }
+            }
 
             IslandGlyph {
                 anchors.centerIn: parent
                 name: root.icon
-                glyphColor: hover.hovered ? Design.text : root.accent
+                glyphColor: hover.hovered ? Theme.textPrimary : root.accent
                 scale: tap.pressed ? 0.9 : 1
 
                 Behavior on scale {
-                    NumberAnimation { duration: 90; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: 90
+                        easing.type: Easing.OutCubic
+                    }
                 }
             }
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: root.label
-            color: hover.hovered ? Design.text : Design.textMuted
+            color: hover.hovered ? Theme.textPrimary : Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: 11
             font.weight: Font.DemiBold
         }
     }
 
-    HoverHandler { id: hover }
+    HoverHandler {
+        id: hover
+    }
     TapHandler {
         id: tap
         acceptedButtons: Qt.LeftButton

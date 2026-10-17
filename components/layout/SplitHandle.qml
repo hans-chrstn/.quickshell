@@ -18,7 +18,7 @@ Item {
         width: root.vertical ? 28 : 3
         height: root.vertical ? 3 : 28
         radius: 2
-        color: root.highlighted ? Design.blue : Design.separator
+        color: root.highlighted ? Theme.accent : Theme.separator
         opacity: root.highlighted ? 0.9 : 0.55
 
         Behavior on color {

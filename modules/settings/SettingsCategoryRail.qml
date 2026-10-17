@@ -11,7 +11,7 @@ ColumnLayout {
 
     Text {
         text: "Settings"
-        color: Design.text
+        color: Theme.textPrimary
         font.family: Design.fontDisplay
         font.pixelSize: 20
         font.weight: Font.DemiBold
@@ -48,7 +48,7 @@ ColumnLayout {
                         anchors.leftMargin: 12
                         anchors.verticalCenter: parent.verticalCenter
                         text: category.modelData.title
-                        color: category.highlighted ? Design.text : Design.textMuted
+                        color: category.highlighted ? Theme.textPrimary : Theme.textSecondary
                         font.family: Design.fontText
                         font.pixelSize: 12
                         font.weight: category.index === SettingsService.selectedCategory ? Font.Medium : Font.Normal

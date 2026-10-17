@@ -33,7 +33,7 @@ Item {
         visible: root.page === "power"
         icon: "power"
         label: "Power"
-        accent: Design.red
+        accent: Theme.danger
         onActivated: SessionService.open(root.screenName)
     }
 
@@ -45,20 +45,20 @@ Item {
 
         CarouselAction {
             icon: "volumeHigh"
-            label: "Audio"
-            accent: Design.green
+            label: "Sound"
+            accent: Theme.success
             onActivated: AudioPanelService.open(root.screenName)
         }
         CarouselAction {
             icon: "apps"
             label: "Launcher"
-            accent: Design.blue
+            accent: Theme.accent
             onActivated: LauncherService.open("", root.screenName)
         }
         CarouselAction {
             icon: "settings"
             label: "Settings"
-            accent: Design.textMuted
+            accent: Theme.textSecondary
             onActivated: SettingsService.open(root.screenName)
         }
     }

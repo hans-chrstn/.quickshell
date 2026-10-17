@@ -9,14 +9,15 @@ Item {
     property bool interactive: true
     property bool contextEnabled: interactive
     property bool hoverEnabled: true
-    property color accentColor: Design.blue
-    property color baseColor: Qt.rgba(1, 1, 1, 0.035)
+    property color accentColor: Theme.accent
+    property bool accentSelectedBorder: false
+    property color baseColor: Theme.fillSubtle
     property real cornerRadius: 10
     property string accessibleName: ""
     property string labelText: ""
     property bool labelVisible: false
-    property color labelColor: Design.text
-    property color labelBackground: Design.islandExpanded
+    property color labelColor: Theme.textPrimary
+    property color labelBackground: Theme.overlay
     readonly property bool hovered: hover.hovered
     readonly property bool highlighted: selected || focused || hovered
     signal surfaceActivated(var modifiers)
@@ -39,9 +40,9 @@ Item {
         id: surface
         anchors.fill: parent
         radius: root.cornerRadius
-        color: root.selected ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.30) : root.baseColor
-        border.width: root.selected ? 1.5 : root.highlighted ? 1 : 0
-        border.color: root.selected ? Qt.rgba(root.accentColor.r, root.accentColor.g, root.accentColor.b, 0.62) : Qt.rgba(1, 1, 1, 0.12)
+        color: primaryTap.pressed ? Theme.controlPressed : root.selected ? Theme.fillSelected : root.hovered || root.focused ? Theme.controlHover : root.baseColor
+        border.width: root.highlighted ? 1 : 0
+        border.color: root.selected && root.accentSelectedBorder ? Theme.alpha(root.accentColor, 0.42) : Theme.separatorStrong
 
         Behavior on color {
             ColorAnimation {
@@ -64,7 +65,7 @@ Item {
         radius: height / 2
         color: root.labelBackground
         border.width: 1
-        border.color: Qt.rgba(1, 1, 1, 0.12)
+        border.color: Theme.separatorStrong
         z: 20
 
         Text {
@@ -85,6 +86,7 @@ Item {
     }
 
     TapHandler {
+        id: primaryTap
         acceptedButtons: Qt.LeftButton
         enabled: root.interactive
         onTapped: point => {

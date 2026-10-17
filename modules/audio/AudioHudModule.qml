@@ -13,7 +13,7 @@ Item {
     readonly property bool muted: change?.muted ?? false
     readonly property bool inputRole: change?.role === "input"
     readonly property bool amplified: !muted && (Number(change?.volume) || 0) > 1.0001
-    readonly property color accent: muted ? Design.textMuted : amplified ? Design.yellow : inputRole ? Design.green : Design.text
+    readonly property color accent: muted ? Theme.textSecondary : amplified ? Theme.warning : inputRole ? Theme.success : Theme.textPrimary
     readonly property real displayMaximum: Math.max(1, Number(change?.volume) || 0)
     readonly property real collapsedImplicitWidth: contentRow.implicitWidth
     readonly property real collapsedImplicitHeight: 24
@@ -31,7 +31,7 @@ Item {
             Layout.preferredHeight: 24
             Layout.alignment: Qt.AlignVCenter
             radius: 8
-            color: Qt.rgba(root.accent.r, root.accent.g, root.accent.b, root.muted ? 0.08 : 0.13)
+            color: root.muted ? Theme.tintSubtle(root.accent) : Theme.tint(root.accent)
 
             IslandGlyph {
                 anchors.centerIn: parent
@@ -54,7 +54,7 @@ Item {
             Layout.preferredWidth: 42
             Layout.alignment: Qt.AlignVCenter
             text: AudioPresentationModel.valueText(root.change)
-            color: root.muted ? Design.textMuted : Design.text
+            color: root.muted ? Theme.textSecondary : Theme.textPrimary
             font.family: Design.fontMono
             font.pixelSize: 10
             font.weight: Font.Medium

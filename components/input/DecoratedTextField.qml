@@ -4,10 +4,7 @@ import qs.core
 Item {
     id: root
 
-    // Tool limitation: this valid alias targets the nested editor.
-    // qmllint disable unresolved-alias
-    property alias text: editor.text
-    // qmllint enable unresolved-alias
+    property string text: ""
     property string label: ""
     property string placeholderText: ""
     property string supportingText: ""
@@ -33,7 +30,7 @@ Item {
         anchors.top: parent.top
         visible: root.label.length > 0
         text: root.label
-        color: Design.textMuted
+        color: Theme.textSecondary
         font.family: Design.fontText
         font.pixelSize: 10
         font.weight: Font.Medium
@@ -48,9 +45,9 @@ Item {
         anchors.topMargin: labelText.visible ? 6 : 0
         height: 36
         radius: 11
-        color: Design.surfaceRaised
+        color: editor.activeFocus ? Theme.controlHover : Theme.controlFill
         border.width: 1
-        border.color: root.invalid ? Design.red : editor.activeFocus ? Design.blue : Design.separator
+        border.color: root.invalid ? Theme.danger : editor.activeFocus ? Theme.alpha(Theme.accent, 0.72) : Theme.separator
 
         Behavior on border.color {
             ColorAnimation {
@@ -64,14 +61,16 @@ Item {
             anchors.leftMargin: 12
             anchors.rightMargin: 12
             verticalAlignment: TextInput.AlignVCenter
-            color: Design.text
-            selectionColor: Design.blue
-            selectedTextColor: Design.text
+            color: Theme.textPrimary
+            selectionColor: Theme.accent
+            selectedTextColor: Theme.textPrimary
             font.family: Design.fontText
             font.pixelSize: 11
             maximumLength: root.maximumLength
             selectByMouse: true
             clip: true
+            text: root.text
+            onTextEdited: root.text = text
             onAccepted: root.accepted()
         }
 
@@ -80,7 +79,7 @@ Item {
             verticalAlignment: Text.AlignVCenter
             visible: editor.text.length === 0 && !editor.activeFocus
             text: root.placeholderText
-            color: Design.textMuted
+            color: Theme.textSecondary
             font: editor.font
             elide: Text.ElideRight
         }
@@ -97,7 +96,7 @@ Item {
         anchors.topMargin: 5
         visible: root.supportingText.length > 0
         text: root.supportingText
-        color: root.invalid ? Design.red : Design.textMuted
+        color: root.invalid ? Theme.danger : Theme.textSecondary
         font.family: Design.fontText
         font.pixelSize: 9
         elide: Text.ElideRight

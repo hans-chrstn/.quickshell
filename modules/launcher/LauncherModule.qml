@@ -46,7 +46,7 @@ Item {
 
                 Text {
                     text: "⌕"
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontDisplay
                     font.pixelSize: 24
                 }
@@ -55,8 +55,8 @@ Item {
                     id: searchInput
                     Layout.fillWidth: true
                     Layout.preferredWidth: Math.max(360, searchPlaceholder.implicitWidth)
-                    color: Design.text
-                    selectionColor: Design.blue
+                    color: Theme.textPrimary
+                    selectionColor: Theme.accent
                     font.family: Design.fontText
                     font.pixelSize: 19
                     clip: true
@@ -87,7 +87,7 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         visible: searchInput.text.length === 0
                         text: "Search applications"
-                        color: Design.textMuted
+                        color: Theme.textSecondary
                         opacity: 0.62
                         font: searchInput.font
                     }
@@ -95,7 +95,7 @@ Item {
 
                 Text {
                     text: LauncherService.results.length + " apps"
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 11
                 }
@@ -107,7 +107,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             implicitHeight: 1
-            color: Design.separator
+            color: Theme.separator
         }
 
         Item {
@@ -182,7 +182,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
                                 text: row.modelData.title
-                                color: Design.text
+                                color: Theme.textPrimary
                                 font.family: Design.fontText
                                 font.pixelSize: 13
                                 font.weight: Font.DemiBold
@@ -192,7 +192,7 @@ Item {
                             Text {
                                 Layout.fillWidth: true
                                 text: row.modelData.subtitle
-                                color: Design.textMuted
+                                color: Theme.textSecondary
                                 font.family: Design.fontText
                                 font.pixelSize: 10
                                 elide: Text.ElideRight
@@ -202,7 +202,7 @@ Item {
                         Text {
                             visible: row.index === LauncherService.selectedIndex
                             text: "↵"
-                            color: Design.textMuted
+                            color: Theme.textSecondary
                             font.family: Design.fontText
                             font.pixelSize: 13
                         }
@@ -213,7 +213,7 @@ Item {
                     anchors.centerIn: parent
                     visible: LauncherService.results.length === 0
                     text: "No applications found"
-                    color: Design.textMuted
+                    color: Theme.textSecondary
                     font.family: Design.fontText
                     font.pixelSize: 13
                 }
