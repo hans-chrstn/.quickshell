@@ -46,6 +46,7 @@ Item {
             code: code,
             message: message,
             groupKey: String(request?.groupKey || ""),
+            sessionId: String(request?.sessionId || ""),
             operation: String(request?.operation || ""),
             streamCount: Math.max(0, Number(streamCount) || 0),
             revision: revision
@@ -58,8 +59,9 @@ Item {
         const target = AudioApplicationControlModel.controlTarget(applications, request?.groupKey, request?.operation);
         if (!target.accepted)
             return applicationControlResult(false, target.code, target.message, request, 0);
-        if (target.role !== String(request?.role || ""))
-            return applicationControlResult(false, "application-changed", "The application stream direction changed before the control was applied.", request, 0);
+        const continuity = AudioApplicationControlModel.targetContinuity(target.group, request);
+        if (!continuity.accepted)
+            return applicationControlResult(false, continuity.code, continuity.message, request, 0);
 
         const volume = Number(request?.volume);
         const muted = request?.muted;
@@ -85,6 +87,34 @@ Item {
         }
         schedulePublish();
         return applicationControlResult(true, "accepted", "", request, targets.length);
+    }
+
+    function applyApplicationStreamState(request) {
+        if (!ready)
+            return applicationControlResult(false, "backend-unavailable", "PipeWire is not ready.", request, 0);
+        const target = AudioApplicationControlModel.streamControlTarget(applications, request?.groupKey, request?.sessionId, request?.operation);
+        if (!target.accepted)
+            return applicationControlResult(false, target.code, target.message, request, 0);
+        const continuity = AudioApplicationControlModel.targetContinuity(target.group, request);
+        if (!continuity.accepted)
+            return applicationControlResult(false, continuity.code, continuity.message, request, 0);
+
+        const volume = Number(request?.volume);
+        const muted = request?.muted;
+        if (!Number.isFinite(volume) || typeof muted !== "boolean")
+            return applicationControlResult(false, "invalid-state", "The requested stream sound state is invalid.", request, 0);
+
+        const nodeId = Number(target.nodeIds[0]);
+        const node = (audioNodes || []).find(candidate => Number(candidate?.id) === nodeId);
+        if (!node?.ready || !node?.audio)
+            return applicationControlResult(false, "stream-changed", "The audio stream changed before the control was applied.", request, 0);
+
+        if (Math.abs(Number(node.audio.volume) - volume) > 0.0001)
+            node.audio.volume = volume;
+        if (!!node.audio.muted !== muted)
+            node.audio.muted = muted;
+        schedulePublish();
+        return applicationControlResult(true, "accepted", "", request, 1);
     }
 
     function showTestDeviceTransition(role, kind) {

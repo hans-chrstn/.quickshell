@@ -190,6 +190,35 @@ function groupedApplications(records, links) {
     };
 }
 
+function applicationByKey(applications, groupKey) {
+    const key = text(groupKey);
+    if (key.length === 0)
+        return null;
+    const source = applications || ({});
+    const playing = Array.isArray(source.playing) ? source.playing : [];
+    const recording = Array.isArray(source.recording) ? source.recording : [];
+    return playing.concat(recording).find(group => text(group?.key) === key) || null;
+}
+
+function applicationSelectionKey(rows, currentKey, command) {
+    const keys = (rows || []).filter(row => row?.kind === "application").map(row => text(row.key)).filter(key => key.length > 0);
+    if (keys.length === 0)
+        return "";
+
+    const currentIndex = keys.indexOf(text(currentKey));
+    if (command === "first")
+        return keys[0];
+    if (command === "last")
+        return keys[keys.length - 1];
+    if (currentIndex < 0)
+        return command === "previous" ? keys[keys.length - 1] : keys[0];
+    if (command === "previous")
+        return keys[Math.max(0, currentIndex - 1)];
+    if (command === "next")
+        return keys[Math.min(keys.length - 1, currentIndex + 1)];
+    return keys[currentIndex];
+}
+
 function listRows(applications) {
     const source = applications || ({});
     const playing = Array.isArray(source.playing) ? source.playing : [];

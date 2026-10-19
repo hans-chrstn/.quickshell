@@ -144,6 +144,22 @@ Singleton {
         return applicationControlCoordinator.adjustVolume(groupKey, steps);
     }
 
+    function applicationStreamControlState(groupKey, stream) {
+        return applicationControlCoordinator.effectiveStream(groupKey, stream);
+    }
+
+    function setApplicationStreamVolume(groupKey, sessionId, value) {
+        return applicationControlCoordinator.setStreamVolume(groupKey, sessionId, value);
+    }
+
+    function setApplicationStreamMuted(groupKey, sessionId, muted) {
+        return applicationControlCoordinator.setStreamMuted(groupKey, sessionId, muted);
+    }
+
+    function adjustApplicationStreamVolume(groupKey, sessionId, steps) {
+        return applicationControlCoordinator.adjustStreamVolume(groupKey, sessionId, steps);
+    }
+
     function setPreferredDevice(role, stableKey) {
         if (!inventoryLoaded || !inventoryObserver.item?.setPreferredDefault)
             return {

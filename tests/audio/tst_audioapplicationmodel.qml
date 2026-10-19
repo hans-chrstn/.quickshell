@@ -190,4 +190,37 @@ TestCase {
     function test_listRowsIsEmptyWhenNoApplicationsAreActive() {
         compare(AudioApplicationModel.listRows(AudioApplicationModel.groupedApplications([])).length, 0);
     }
+
+    function test_applicationLookupCoversPlaybackAndRecording() {
+        const groups = AudioApplicationModel.groupedApplications([stream(110, "playback-stream", "binary:player"), stream(111, "recording-stream", "binary:recorder")]);
+
+        compare(AudioApplicationModel.applicationByKey(groups, groups.playing[0].key).section, "playing");
+        compare(AudioApplicationModel.applicationByKey(groups, groups.recording[0].key).section, "recording");
+        compare(AudioApplicationModel.applicationByKey(groups, "missing"), null);
+    }
+
+    function test_applicationSelectionSkipsHeadingsAndRetainsStableIdentity() {
+        const groups = AudioApplicationModel.groupedApplications([stream(120, "playback-stream", "binary:alpha", {
+                applicationName: "Alpha"
+            }), stream(121, "playback-stream", "binary:beta", {
+                applicationName: "Beta"
+            }), stream(122, "recording-stream", "binary:recorder", {
+                applicationName: "Recorder"
+            })]);
+        const rows = AudioApplicationModel.listRows(groups);
+        const alphaKey = groups.playing[0].key;
+        const betaKey = groups.playing[1].key;
+        const recorderKey = groups.recording[0].key;
+
+        compare(AudioApplicationModel.applicationSelectionKey(rows, "", "retain"), alphaKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, alphaKey, "next"), betaKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, betaKey, "next"), recorderKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, recorderKey, "next"), recorderKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, recorderKey, "previous"), betaKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, betaKey, "retain"), betaKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, "missing", "previous"), recorderKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, betaKey, "first"), alphaKey);
+        compare(AudioApplicationModel.applicationSelectionKey(rows, betaKey, "last"), recorderKey);
+        compare(AudioApplicationModel.applicationSelectionKey([], betaKey, "retain"), "");
+    }
 }

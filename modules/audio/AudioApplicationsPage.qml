@@ -6,10 +6,30 @@ import "../../services/audio/AudioApplicationModel.js" as AudioApplicationModel
 Item {
     id: root
 
+    property string selectedGroupKey: ""
     readonly property var rows: AudioApplicationModel.listRows(AudioService.applications)
+    readonly property var selectedApplication: AudioApplicationModel.applicationByKey(AudioService.applications, selectedGroupKey)
 
     implicitWidth: 600
     implicitHeight: 300
+
+    function handleEscape() {
+        if (selectedGroupKey.length === 0)
+            return false;
+        selectedGroupKey = "";
+        return true;
+    }
+
+    function handleNavigation(key, modifiers) {
+        if (selectedGroupKey.length > 0)
+            return false;
+        return applicationList.handleNavigation(key, modifiers);
+    }
+
+    onSelectedApplicationChanged: {
+        if (!selectedApplication && selectedGroupKey.length > 0)
+            selectedGroupKey = "";
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -28,10 +48,38 @@ Item {
         }
 
         AudioApplicationList {
+            id: applicationList
+
             anchors.fill: parent
             anchors.margins: 12
-            visible: root.rows.length > 0
+            visible: opacity > 0
+            enabled: root.selectedGroupKey.length === 0
+            opacity: root.selectedGroupKey.length === 0 && root.rows.length > 0 ? 1 : 0
             rows: root.rows
+            onApplicationSelected: groupKey => root.selectedGroupKey = groupKey
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Design.contentRevealDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
+
+        AudioApplicationDetail {
+            anchors.fill: parent
+            visible: opacity > 0
+            enabled: root.selectedApplication !== null
+            opacity: root.selectedApplication !== null ? 1 : 0
+            application: root.selectedApplication || ({})
+            onBackRequested: root.selectedGroupKey = ""
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Design.contentRevealDuration
+                    easing.type: Easing.OutCubic
+                }
+            }
         }
     }
 }

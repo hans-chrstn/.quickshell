@@ -2,44 +2,83 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components
+import qs.components.menus
 import qs.components.scrolling
 import qs.core
 import qs.services.audio
+import "../../components/models/KeyedListReconciler.js" as KeyedListReconciler
+import "../../services/audio/AudioApplicationModel.js" as AudioApplicationModel
 
 Item {
     id: root
 
     required property var rows
     readonly property real applicationRowHeight: 68
-
-    function rowIndex(key) {
-        for (let index = 0; index < stableRows.count; index++) {
-            if (stableRows.get(index).key === key)
-                return index;
-        }
-        return -1;
-    }
+    readonly property int selectedIndex: KeyedListReconciler.indexOf(stableRows, selectedKey)
+    property string selectedKey: ""
+    property var contextApplication: null
+    signal applicationSelected(string groupKey)
 
     function reconcileRows() {
-        const source = Array.isArray(rows) ? rows : [];
-        for (let targetIndex = 0; targetIndex < source.length; targetIndex++) {
-            const record = source[targetIndex];
-            const key = String(record?.key || "row:" + targetIndex);
-            let currentIndex = rowIndex(key);
-            if (currentIndex < 0) {
-                stableRows.insert(targetIndex, {
-                    key: key,
-                    record: record
-                });
-                currentIndex = targetIndex;
-            } else if (currentIndex !== targetIndex) {
-                stableRows.move(currentIndex, targetIndex, 1);
-                currentIndex = targetIndex;
+        KeyedListReconciler.reconcile(stableRows, rows, "key", "row:");
+        selectedKey = AudioApplicationModel.applicationSelectionKey(rows, selectedKey, "retain");
+    }
+
+    function moveSelection(command) {
+        selectedKey = AudioApplicationModel.applicationSelectionKey(rows, selectedKey, command);
+        if (selectedIndex >= 0)
+            applicationList.positionViewAtIndex(selectedIndex, ListView.Contain);
+        return selectedKey.length > 0;
+    }
+
+    function activateSelection() {
+        if (selectedKey.length === 0)
+            return false;
+        applicationSelected(selectedKey);
+        return true;
+    }
+
+    function openApplicationMenu(application, sourceItem, x, y) {
+        if (!application || !sourceItem)
+            return false;
+        selectedKey = String(application.key || "");
+        contextApplication = application;
+        const state = AudioService.applicationControlState(application);
+        applicationMenu.actions = [
+            {
+                id: "details",
+                label: "Show stream details"
+            },
+            {
+                id: "toggle-mute",
+                label: state?.muted ? "Unmute all streams" : "Mute all streams",
+                enabled: state?.ready === true && state?.capabilities?.muteWrite === true
             }
-            stableRows.setProperty(currentIndex, "record", record);
-        }
-        while (stableRows.count > source.length)
-            stableRows.remove(stableRows.count - 1);
+        ];
+        return applicationMenu.openFor(sourceItem, x, y);
+    }
+
+    function openSelectionMenu() {
+        if (selectedIndex < 0)
+            return false;
+        const delegate = applicationList.itemAtIndex(selectedIndex);
+        return delegate?.openContextMenu?.() === true;
+    }
+
+    function handleNavigation(key, modifiers) {
+        if (key === Qt.Key_Down)
+            return moveSelection("next");
+        if (key === Qt.Key_Up)
+            return moveSelection("previous");
+        if (key === Qt.Key_Home)
+            return moveSelection("first");
+        if (key === Qt.Key_End)
+            return moveSelection("last");
+        if (key === Qt.Key_Return || key === Qt.Key_Enter || key === Qt.Key_Space)
+            return activateSelection();
+        if (key === Qt.Key_Menu || key === Qt.Key_F10 && (modifiers & Qt.ShiftModifier))
+            return openSelectionMenu();
+        return false;
     }
 
     onRowsChanged: reconcileRows()
@@ -57,8 +96,11 @@ Item {
         anchors.rightMargin: 9
         clip: true
         model: stableRows
+        currentIndex: root.selectedIndex
         boundsBehavior: Flickable.StopAtBounds
         reuseItems: true
+        Accessible.name: "Active audio applications"
+        Accessible.role: Accessible.List
         ScrollBar.vertical: MinimalScrollBar {}
 
         SmoothScrollBehavior {
@@ -79,6 +121,12 @@ Item {
             readonly property string iconName: String(record.iconName ?? "")
             readonly property var applicationState: application ? AudioService.applicationControlState(record) : record
             readonly property bool controllable: applicationState?.ready === true && applicationState?.capabilities?.volumeWrite === true && applicationState?.capabilities?.muteWrite === true
+
+            function openContextMenu() {
+                if (!application)
+                    return false;
+                return root.openApplicationMenu(record, identitySurface, identitySurface.width / 2, identitySurface.height / 2);
+            }
 
             width: applicationList.width
             height: section ? 30 : root.applicationRowHeight
@@ -115,26 +163,59 @@ Item {
                 visible: row.application
                 spacing: 12
 
-                AppIcon {
-                    Layout.preferredWidth: 38
-                    Layout.preferredHeight: 38
-                    Layout.alignment: Qt.AlignVCenter
-                    name: row.displayName
-                    icon: row.iconName
-                    iconSize: 38
-                }
+                HighlightableSurface {
+                    id: identitySurface
 
-                Text {
-                    Layout.preferredWidth: 142
-                    Layout.maximumWidth: 142
+                    Layout.preferredWidth: 192
+                    Layout.preferredHeight: 52
                     Layout.alignment: Qt.AlignVCenter
-                    text: row.displayName
-                    color: Theme.textPrimary
-                    font.family: Design.fontText
-                    font.pixelSize: 14
-                    font.weight: Font.Medium
-                    elide: Text.ElideRight
-                    maximumLineCount: 1
+                    baseColor: "transparent"
+                    cornerRadius: 12
+                    selected: root.selectedKey === row.key
+                    accessibleName: row.displayName + ", " + (row.record.section === "recording" ? "recording" : "playing") + ", " + (row.applicationState?.muted ? "muted" : Math.round(Number(row.applicationState?.volume) * 100) + " percent")
+                    onActiveFocusChanged: if (activeFocus)
+                        root.selectedKey = row.key
+                    onSurfaceActivated: {
+                        root.selectedKey = row.key;
+                        root.applicationSelected(row.key);
+                    }
+                    onSurfaceContextRequested: (x, y) => root.openApplicationMenu(row.record, identitySurface, x, y)
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 6
+                        anchors.rightMargin: 8
+                        spacing: 10
+
+                        AppIcon {
+                            Layout.preferredWidth: 38
+                            Layout.preferredHeight: 38
+                            Layout.alignment: Qt.AlignVCenter
+                            name: row.displayName
+                            icon: row.iconName
+                            iconSize: 38
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            text: row.displayName
+                            color: Theme.textPrimary
+                            font.family: Design.fontText
+                            font.pixelSize: 14
+                            font.weight: Font.Medium
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                        }
+
+                        IslandGlyph {
+                            Layout.preferredWidth: 14
+                            Layout.preferredHeight: 14
+                            Layout.alignment: Qt.AlignVCenter
+                            name: "chevronRight"
+                            glyphColor: Theme.textTertiary
+                        }
+                    }
                 }
 
                 AudioLevelSlider {
@@ -174,6 +255,22 @@ Item {
                 height: 1
                 visible: row.application && row.index < stableRows.count - 1 && stableRows.get(row.index + 1).record?.kind === "application"
                 color: Theme.separator
+            }
+        }
+    }
+
+    ContextMenu {
+        id: applicationMenu
+
+        onActionTriggered: actionId => {
+            if (!root.contextApplication)
+                return;
+            const key = String(root.contextApplication.key || "");
+            if (actionId === "details")
+                root.applicationSelected(key);
+            else if (actionId === "toggle-mute") {
+                const state = AudioService.applicationControlState(root.contextApplication);
+                AudioService.setApplicationMuted(key, !state?.muted);
             }
         }
     }

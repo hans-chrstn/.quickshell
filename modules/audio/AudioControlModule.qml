@@ -33,13 +33,20 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
+            if (AudioPanelService.currentPage === "apps" && pageLoader.item?.handleEscape?.()) {
+                event.accepted = true;
+                return;
+            }
             if (AudioPanelService.currentPage !== "levels")
                 AudioPanelService.selectPage("levels");
             else
                 AudioPanelService.close();
             event.accepted = true;
+        } else if (AudioPanelService.currentPage === "apps" && pageLoader.item?.handleNavigation?.(event.key, event.modifiers)) {
+            event.accepted = true;
         }
     }
+    Keys.priority: Keys.AfterItem
 
     ColumnLayout {
         id: contentColumn
