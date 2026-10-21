@@ -13,6 +13,7 @@ Item {
     property var retainedOrder: []
     property var links: []
     property var defaults: ({})
+    property var routePolicies: ({})
     property var applications: AudioApplicationModel.groupedApplications([])
     property var roleCounts: AudioNodeModel.roleCounts([])
     property int revision: 0
@@ -26,7 +27,12 @@ Item {
     readonly property var inputSelection: defaultCoordinator.inputState
     readonly property var outputTransition: hotplugCoordinator.outputTransition
     readonly property var inputTransition: hotplugCoordinator.inputTransition
+    readonly property bool routeBusy: routeProvider.busy
+    readonly property var routeTargets: routeProvider.targets
+    readonly property var routeDiagnostics: routeProvider.diagnostics()
+    readonly property var routePolicyDiagnostics: routePolicyCoordinator.diagnostics()
     signal deviceTransitionOccurred(var transition)
+    signal applicationRouteResultOccurred(var result)
 
     visible: false
     width: 0
@@ -38,6 +44,10 @@ Item {
 
     function setPreferredDefault(role, stableKey) {
         return defaultCoordinator.request(role, stableKey);
+    }
+
+    function setApplicationRoute(groupKey, targetStableKey) {
+        return routeProvider.request(groupKey, targetStableKey);
     }
 
     function applicationControlResult(accepted, code, message, request, streamCount) {
@@ -274,6 +284,34 @@ Item {
         defaults: root.defaults
 
         onTransitionOccurred: transition => root.deviceTransitionOccurred(transition)
+    }
+
+    AudioRouteProvider {
+        id: routeProvider
+
+        records: root.nodes
+        applications: root.applications
+        links: root.links
+        defaultOutputId: Number(root.defaults?.output?.id) || 0
+        graphRevision: root.revision
+        commandExecutor: routeCommandRunner
+
+        onResultOccurred: result => root.applicationRouteResultOccurred(result)
+    }
+
+    AudioRouteCommandRunner {
+        id: routeCommandRunner
+    }
+
+    AudioRoutePolicyCoordinator {
+        id: routePolicyCoordinator
+
+        policies: root.routePolicies
+        applications: root.applications
+        targets: routeProvider.targets
+        defaultOutputId: Number(root.defaults?.output?.id) || 0
+        graphRevision: root.revision
+        provider: routeProvider
     }
 
     Instantiator {

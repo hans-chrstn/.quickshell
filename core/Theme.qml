@@ -39,6 +39,7 @@ Singleton {
     readonly property color accent: "#0a84ff"
     readonly property color success: "#30d158"
     readonly property color warning: "#ffd60a"
+    readonly property color privacy: "#ff9f0a"
     readonly property color danger: "#ff453a"
 
     function alpha(color, opacity) {

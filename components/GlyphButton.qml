@@ -9,6 +9,7 @@ Rectangle {
     property string accessibleName: ""
     property string toolTip: accessibleName
     property bool primary: false
+    property bool focusOnActivate: true
     property color accentColor: Theme.accent
     property real glyphSize: 17
     signal activated
@@ -57,7 +58,8 @@ Rectangle {
         enabled: root.enabled
         acceptedButtons: Qt.LeftButton
         onTapped: {
-            root.forceActiveFocus();
+            if (root.focusOnActivate)
+                root.forceActiveFocus();
             root.activated();
         }
     }

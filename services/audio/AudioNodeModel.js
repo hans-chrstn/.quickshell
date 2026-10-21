@@ -80,11 +80,13 @@ function classification(node) {
     const type = Number(node?.type || 0);
     const properties = node?.properties || ({});
     const name = text(node?.name);
-    const audio = hasFlag(type, AUDIO) || !!node?.hasAudio;
-    const stream = hasFlag(type, STREAM) || !!node?.isStream;
-    const sink = hasFlag(type, SINK) || (!!node?.isSink && !hasFlag(type, SOURCE));
-    const source = hasFlag(type, SOURCE);
     const mediaClass = propertyText(properties, "media.class");
+    const normalizedMediaClass = mediaClass.toLowerCase();
+    const mediaClassAudio = normalizedMediaClass.startsWith("audio/") || normalizedMediaClass.endsWith("/audio");
+    const audio = hasFlag(type, AUDIO) || !!node?.hasAudio || mediaClassAudio;
+    const stream = hasFlag(type, STREAM) || !!node?.isStream;
+    const source = hasFlag(type, SOURCE) || normalizedMediaClass.startsWith("audio/source");
+    const sink = hasFlag(type, SINK) || !!node?.isSink && !hasFlag(type, SOURCE) || normalizedMediaClass.startsWith("audio/sink");
     const deviceApi = propertyText(properties, "device.api");
     const monitor = audio && !stream && source && (propertyText(properties, "device.class").toLowerCase() === "monitor" || propertyTrue(properties, "monitor.channel-volumes") || endsWithMonitor(name));
     const virtual = audio && !stream && virtualEvidence(properties, name);
@@ -163,6 +165,7 @@ function normalize(node) {
 
     return {
         id: nodeId,
+        objectSerial: objectSerial,
         sessionId: sessionId,
         stableKey: nodeStableKey(classified, properties, name, sessionId),
         role: classified.role,

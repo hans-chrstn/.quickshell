@@ -8,12 +8,16 @@ import "../../core/JsonCopy.js" as JsonCopy
 import "AudioAliasModel.js" as AudioAliasModel
 import "AudioControlPolicy.js" as AudioControlPolicy
 import "AudioDeviceModel.js" as AudioDeviceModel
+import "AudioPrivacyMuteModel.js" as AudioPrivacyMuteModel
+import "AudioRoutePolicyModel.js" as AudioRoutePolicyModel
 import "AudioStatusModel.js" as AudioStatusModel
 
 Singleton {
     id: root
 
     property var inventoryConsumers: ({})
+    property bool applicationRouteLease: false
+    property var lastApplicationRoutePolicyResult: null
     readonly property var controlPolicy: AudioControlPolicy.normalizedPolicy({
         step: ConfigService.audioVolumeStepPercent / 100,
         outputCeiling: ConfigService.audioOutputMaximumPercent / 100,
@@ -22,7 +26,8 @@ Singleton {
         restoreOnUnmute: ConfigService.audioRestoreOnUnmute
     })
     readonly property int inventoryConsumerCount: Object.keys(inventoryConsumers).length
-    readonly property bool inventoryRequested: inventoryConsumerCount > 0 || applicationControlCoordinator.busy
+    readonly property int rememberedApplicationRouteCount: Object.keys(rememberedApplicationRoutes || ({})).length
+    readonly property bool inventoryRequested: inventoryConsumerCount > 0 || applicationControlCoordinator.busy || applicationRouteLease || rememberedApplicationRouteCount > 0
     readonly property bool inventoryLoaded: inventoryObserver.loaded
     readonly property bool ready: masterProvider.ready
     readonly property int revision: Number(inventoryObserver.item?.revision) || 0
@@ -45,9 +50,26 @@ Singleton {
     readonly property var outputDeviceTransition: inventoryObserver.item?.outputTransition || emptyDeviceTransition("output")
     readonly property var inputDeviceTransition: inventoryObserver.item?.inputTransition || emptyDeviceTransition("input")
     readonly property var deviceAliases: ConfigService.audioDeviceAliases
+    readonly property var rememberedApplicationRoutes: ConfigService.audioRoutePolicies
     readonly property int changeSequence: controlCoordinator.sequence
     readonly property var lastChange: controlCoordinator.lastChange
     readonly property int applicationControlRevision: applicationControlCoordinator.revision
+    readonly property bool applicationRouteBusy: inventoryObserver.item?.routeBusy === true
+    readonly property var applicationRouteTargets: inventoryObserver.item?.routeTargets || []
+    readonly property var applicationRouteState: inventoryObserver.item?.routeDiagnostics || {
+        busy: false,
+        phase: "unloaded",
+        targets: []
+    }
+    readonly property var applicationRoutePolicyState: inventoryObserver.item?.routePolicyDiagnostics || {
+        policyCount: rememberedApplicationRouteCount,
+        requestCount: 0,
+        acceptedCount: 0,
+        rejectedCount: 0,
+        plans: []
+    }
+    readonly property var privacy: privacyProvider.state
+    readonly property var privacyControl: AudioPrivacyMuteModel.controlState(privacy, input, controlCoordinator.inputPending)
 
     signal semanticChange(var change)
     signal deviceTransitionOccurred(var transition)
@@ -170,6 +192,59 @@ Singleton {
                 stableKey: String(stableKey || "")
             };
         return inventoryObserver.item.setPreferredDefault(role, stableKey);
+    }
+
+    function setApplicationRoute(groupKey, targetStableKey) {
+        if (!inventoryLoaded || !inventoryObserver.item?.setApplicationRoute)
+            return {
+                accepted: false,
+                code: "inventory-unavailable",
+                message: "Open the application mixer before changing an application route.",
+                groupKey: String(groupKey || ""),
+                targetStableKey: String(targetStableKey || "")
+            };
+        const result = inventoryObserver.item.setApplicationRoute(groupKey, targetStableKey);
+        if (result.accepted && inventoryObserver.item?.routeBusy === true)
+            applicationRouteLease = true;
+        return result;
+    }
+
+    function applicationRouteStatus() {
+        return JsonCopy.value(applicationRouteState);
+    }
+
+    function privacyStatus() {
+        const value = privacyProvider.snapshot();
+        value.control = JsonCopy.value(privacyControl);
+        return JsonCopy.value(value);
+    }
+
+    function setPrivacyMuted(muted) {
+        const plan = AudioPrivacyMuteModel.requestPlan(privacy, input, muted);
+        if (!plan.accepted)
+            return plan;
+        const result = controlCoordinator.setMuted("input", muted);
+        return Object.assign({}, result, {
+            scope: plan.scope,
+            targetName: plan.targetName
+        });
+    }
+
+    function applicationRoutePolicy(applicationKey) {
+        return AudioRoutePolicyModel.policyFor(rememberedApplicationRoutes, applicationKey);
+    }
+
+    function rememberApplicationRoute(applicationKey, targetStableKey) {
+        const result = AudioRoutePolicyModel.update(rememberedApplicationRoutes, applicationKey, targetStableKey);
+        if (result.accepted)
+            ConfigService.setAudioRoutePolicies(result.policies);
+        return result;
+    }
+
+    function clearRememberedApplicationRoutes() {
+        const result = AudioRoutePolicyModel.clear(rememberedApplicationRoutes);
+        ConfigService.setAudioRoutePolicies(result.policies);
+        return result;
     }
 
     function deviceAlias(stableKey) {
@@ -307,18 +382,28 @@ Singleton {
             links: JsonCopy.value(links),
             applications: JsonCopy.value(applications),
             applicationControls: JsonCopy.value(applicationControlCoordinator.diagnostics()),
+            applicationRouting: applicationRouteStatus(),
+            rememberedApplicationRoutes: JsonCopy.value(rememberedApplicationRoutes),
+            applicationRoutePolicy: JsonCopy.value(applicationRoutePolicyState),
+            lastApplicationRoutePolicyResult: JsonCopy.value(lastApplicationRoutePolicyResult),
+            privacy: privacyStatus(),
             capabilities: {
                 nodeEnumeration: "native",
                 linkObservation: "native",
                 defaultObservation: "native",
                 preferredDefaultWrite: inventoryLoaded ? "native" : "demand-loaded",
-                masterVolumeMute: "native"
+                masterVolumeMute: "native",
+                applicationRouting: inventoryLoaded ? "bounded-helper" : "demand-loaded"
             }
         };
     }
 
     AudioMasterProvider {
         id: masterProvider
+    }
+
+    AudioPrivacyProvider {
+        id: privacyProvider
     }
 
     AudioControlCoordinator {
@@ -348,9 +433,13 @@ Singleton {
         classification: "active-only"
         requestedActive: root.inventoryRequested
         usageActive: root.inventoryRequested
-        retentionReason: requestedActive ? "audio-inventory-consumers" : ""
+        retentionReason: root.rememberedApplicationRouteCount > 0 ? "remembered-application-routes" : requestedActive ? "audio-inventory-consumers" : ""
         evictionReason: requestedActive ? "" : "no-audio-inventory-consumers"
-        source: Qt.resolvedUrl("AudioInventoryProvider.qml")
+        sourceComponent: Component {
+            AudioInventoryProvider {
+                routePolicies: root.rememberedApplicationRoutes
+            }
+        }
     }
 
     property Connections inventoryConnections: Connections {
@@ -359,6 +448,17 @@ Singleton {
 
         function onDeviceTransitionOccurred(transition) {
             root.deviceTransitionOccurred(transition);
+        }
+
+        function onRouteBusyChanged() {
+            if (target?.routeBusy !== true)
+                root.applicationRouteLease = false;
+        }
+
+        function onApplicationRouteResultOccurred(result) {
+            if (result?.origin !== "manual" || result?.accepted !== true)
+                return;
+            root.lastApplicationRoutePolicyResult = root.rememberApplicationRoute(result.applicationKey, result.targetStableKey);
         }
     }
 }

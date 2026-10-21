@@ -151,6 +151,7 @@ TestCase {
 
         compare(groups.playing[0].routeCount, 1);
         compare(groups.playing[0].routeSummary, "Studio Output");
+        compare(groups.playing[0].routeTargetIds.join(","), "90");
         compare(groups.playing[0].routeNames.join(","), "Studio Output");
     }
 
@@ -158,6 +159,7 @@ TestCase {
         const groups = AudioApplicationModel.groupedApplications([stream(80, "recording-stream", "binary:recorder")], []);
 
         compare(groups.recording[0].routeCount, 0);
+        compare(groups.recording[0].routeTargetIds.length, 0);
         compare(groups.recording[0].routeSummary, "Route unavailable");
     }
 

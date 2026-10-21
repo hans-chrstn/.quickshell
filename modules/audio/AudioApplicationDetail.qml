@@ -12,18 +12,49 @@ Item {
 
     required property var application
     signal backRequested
+    property string currentPage: "streams"
 
     readonly property var streams: Array.isArray(application?.streams) ? application.streams : []
     readonly property string displayName: String(application?.displayName || "Application")
     readonly property string directionLabel: application?.section === "recording" ? "Recording" : "Playing"
     readonly property string streamLabel: streams.length + (streams.length === 1 ? " stream" : " streams")
+    readonly property bool routeAvailable: application?.direction === "output"
+    readonly property string applicationKey: String(application?.key || "")
+    property string activeApplicationKey: ""
+
+    function handleEscape() {
+        if (currentPage === "streams")
+            return false;
+        currentPage = "streams";
+        return true;
+    }
+
+    function handleNavigation(key, modifiers) {
+        if (currentPage !== "output")
+            return false;
+        return routeList.handleNavigation(key, modifiers);
+    }
 
     function reconcileStreams() {
         KeyedListReconciler.reconcile(stableStreams, streams, "sessionId", "stream:");
     }
 
+    function reconcileApplication() {
+        if (activeApplicationKey !== applicationKey) {
+            activeApplicationKey = applicationKey;
+            currentPage = "streams";
+        } else if (!routeAvailable) {
+            currentPage = "streams";
+        }
+    }
+
     onStreamsChanged: reconcileStreams()
-    Component.onCompleted: reconcileStreams()
+    onApplicationKeyChanged: reconcileApplication()
+    onRouteAvailableChanged: reconcileApplication()
+    Component.onCompleted: {
+        reconcileStreams();
+        reconcileApplication();
+    }
 
     ListModel {
         id: stableStreams
@@ -92,15 +123,27 @@ Item {
                     }
                 }
 
-                Text {
-                    Layout.preferredWidth: 180
+                SegmentedPageBar {
+                    visible: root.routeAvailable
+                    Layout.preferredWidth: 184
+                    Layout.preferredHeight: 32
                     Layout.alignment: Qt.AlignVCenter
-                    horizontalAlignment: Text.AlignRight
-                    text: String(root.application?.routeSummary || "Route unavailable")
-                    color: Theme.textSecondary
-                    font.family: Design.fontText
-                    font.pixelSize: 10
-                    elide: Text.ElideMiddle
+                    controlHeight: 32
+                    cornerRadius: 11
+                    labelPixelSize: 10
+                    accentColor: Theme.textSecondary
+                    pages: [
+                        {
+                            id: "streams",
+                            label: "Streams"
+                        },
+                        {
+                            id: "output",
+                            label: "Output"
+                        }
+                    ]
+                    currentPage: root.currentPage
+                    onPageSelected: pageId => root.currentPage = pageId
                 }
             }
 
@@ -119,6 +162,7 @@ Item {
 
                     anchors.fill: parent
                     anchors.rightMargin: 9
+                    visible: root.currentPage === "streams"
                     clip: true
                     model: stableStreams
                     reuseItems: true
@@ -211,6 +255,15 @@ Item {
                             color: Theme.separator
                         }
                     }
+                }
+
+                AudioApplicationRouteList {
+                    id: routeList
+
+                    anchors.fill: parent
+                    visible: root.currentPage === "output"
+                    enabled: visible
+                    application: root.application
                 }
             }
         }

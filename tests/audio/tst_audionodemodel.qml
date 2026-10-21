@@ -62,6 +62,27 @@ TestCase {
         verify(effect.capabilities.preferredDefaultWrite);
     }
 
+    function test_mediaClassRecoversVirtualSourceWithoutAudioTypeFlag() {
+        const effectSource = AudioNodeModel.normalize({
+            id: 13,
+            type: 0,
+            name: "easyeffects_source",
+            description: "Easy Effects Source",
+            properties: {
+                "media.class": "Audio/Source/Virtual",
+                "node.virtual": "true",
+                "object.serial": "120"
+            },
+            ready: true,
+            hasAudio: false
+        });
+
+        compare(effectSource.role, "specialized-node");
+        compare(effectSource.specialization, "virtual-input");
+        compare(effectSource.stableKey, "specialized-node:easyeffects_source");
+        verify(!effectSource.capabilities.volumeRead);
+    }
+
     function test_internalAndNonAudioNodesCannotMasqueradeAsDevices() {
         const internalNode = node(20, 17, "Dummy-Driver", {
             "media.class": "Audio/Sink"
@@ -168,6 +189,7 @@ TestCase {
 
         compare(record.applicationIdentityKind, "display-fallback");
         compare(record.applicationKey.length, "display-fallback:".length + 160);
+        compare(record.objectSerial, "9981");
         compare(record.sessionId, "pipewire-serial:9981");
         verify(!serialized.includes("private title"));
         verify(!serialized.includes("/private/path"));

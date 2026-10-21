@@ -136,6 +136,18 @@ IpcHandler {
     function audioPanelStatus(): string {
         return JsonFormat.stringify(AudioPanelService.snapshot());
     }
+    function audioRouteStatus(): string {
+        return JsonFormat.stringify(AudioService.applicationRouteStatus());
+    }
+    function audioPrivacyStatus(): string {
+        return JsonFormat.stringify(AudioService.privacyStatus());
+    }
+    function audioPrivacySetMuted(muted: bool): string {
+        return JsonFormat.stringify(AudioService.setPrivacyMuted(muted));
+    }
+    function audioPrivacyPresentationStatus(): string {
+        return JsonFormat.stringify(AudioPrivacyPresentationService.snapshot());
+    }
     function audioOpen(screenName: string): bool {
         return AudioPanelService.open(screenName);
     }
@@ -153,6 +165,9 @@ IpcHandler {
     }
     function audioSetDeviceAlias(stableKey: string, alias: string): string {
         return JsonFormat.stringify(AudioService.setDeviceAlias(stableKey, alias));
+    }
+    function audioSetApplicationRoute(groupKey: string, targetStableKey: string): string {
+        return JsonFormat.stringify(AudioService.setApplicationRoute(groupKey, targetStableKey));
     }
     function audioCycleOutput(direction: int): string {
         return JsonFormat.stringify(AudioService.cycleOutput(direction));

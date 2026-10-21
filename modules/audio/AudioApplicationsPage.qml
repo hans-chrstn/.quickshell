@@ -16,19 +16,28 @@ Item {
     function handleEscape() {
         if (selectedGroupKey.length === 0)
             return false;
+        if (applicationDetail.handleEscape())
+            return true;
         selectedGroupKey = "";
         return true;
     }
 
     function handleNavigation(key, modifiers) {
         if (selectedGroupKey.length > 0)
-            return false;
+            return applicationDetail.handleNavigation(key, modifiers);
         return applicationList.handleNavigation(key, modifiers);
     }
 
-    onSelectedApplicationChanged: {
-        if (!selectedApplication && selectedGroupKey.length > 0)
-            selectedGroupKey = "";
+    onRowsChanged: selectionReconcile.restart()
+
+    Timer {
+        id: selectionReconcile
+
+        interval: 0
+        onTriggered: {
+            if (!root.selectedApplication && root.selectedGroupKey.length > 0)
+                root.selectedGroupKey = "";
+        }
     }
 
     Rectangle {
@@ -67,6 +76,7 @@ Item {
         }
 
         AudioApplicationDetail {
+            id: applicationDetail
             anchors.fill: parent
             visible: opacity > 0
             enabled: root.selectedApplication !== null

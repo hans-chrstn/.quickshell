@@ -86,7 +86,7 @@ function allCapable(streams, capability) {
     return streams.length > 0 && streams.every(stream => stream.ready && stream.capabilities?.[capability] === true);
 }
 
-function routeNames(role, streams, records, links) {
+function routeTargetIds(role, streams, links) {
     const streamIds = new Set(streams.map(stream => stream.id));
     const routeIds = new Set();
     for (const link of links || []) {
@@ -98,9 +98,14 @@ function routeNames(role, streams, records, links) {
             routeIds.add(sourceId);
     }
 
+    return Array.from(routeIds).sort((left, right) => left - right);
+}
+
+function routeNames(routeIds, records) {
+    const targetIds = new Set(routeIds || []);
     const names = [];
     for (const record of records || []) {
-        if (!routeIds.has(Math.max(0, Math.trunc(Number(record?.id) || 0))))
+        if (!targetIds.has(Math.max(0, Math.trunc(Number(record?.id) || 0))))
             continue;
         const name = bounded(record?.displayName || record?.name, 160);
         if (name.length > 0 && !names.includes(name))
@@ -118,7 +123,8 @@ function groupRecord(role, identity, applicationRecords, allRecords, links) {
     const maximumVolume = volumes.length > 0 ? Math.max(...volumes) : null;
     const allMuted = muteValues.length === streams.length && muteValues.every(Boolean);
     const someMuted = muteValues.some(Boolean);
-    const routes = routeNames(role, streams, allRecords, links);
+    const routeIds = routeTargetIds(role, streams, links);
+    const routes = routeNames(routeIds, allRecords);
 
     return {
         key: role + ":" + identity,
@@ -137,6 +143,7 @@ function groupRecord(role, identity, applicationRecords, allRecords, links) {
         mixedVolume: volumes.length > 1 && maximumVolume - minimumVolume > 0.005,
         muted: allMuted,
         mixedMute: someMuted && !allMuted,
+        routeTargetIds: routeIds,
         routeNames: routes,
         routeCount: routes.length,
         routeSummary: routes.length === 0 ? "Route unavailable" : routes.length === 1 ? routes[0] : routes.length + " routes",

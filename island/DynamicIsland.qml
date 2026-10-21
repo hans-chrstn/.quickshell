@@ -11,6 +11,7 @@ import qs.modules.session
 import qs.modules.settings
 import qs.services.island
 import "../core/IslandSizing.js" as IslandSizing
+import "IslandInteraction.js" as IslandInteraction
 
 Item {
     id: root
@@ -35,6 +36,9 @@ Item {
         id: registry
         modules: [
             ClockModuleSpec {},
+            AudioPrivacyModuleSpec {
+                screenName: root.screenName
+            },
             AudioHudModuleSpec {
                 screenName: root.screenName
             },
@@ -239,17 +243,25 @@ Item {
             presentationState = collapsedState;
             return;
         }
-        if (pointerPresent || attentionRequested) {
+        if (pointerPresent) {
             hideTimer.stop();
             if (hidden)
                 presentationState = collapsedState;
-            if (pointerPresent)
-                expandTimer.restart();
-        } else {
-            expandTimer.stop();
-            presentationState = collapsedState;
-            hideTimer.restart();
+            expandTimer.restart();
+            return;
         }
+        expandTimer.stop();
+        if (IslandInteraction.retainExpandedWithoutPointer(attentionRequested, registry.attentive?.expandOnAttention ?? true)) {
+            hideTimer.stop();
+            if (hidden)
+                presentationState = collapsedState;
+            return;
+        }
+        presentationState = collapsedState;
+        if (attentionRequested)
+            hideTimer.stop();
+        else
+            hideTimer.restart();
     }
 
     onPointerPresentChanged: reconsider()
