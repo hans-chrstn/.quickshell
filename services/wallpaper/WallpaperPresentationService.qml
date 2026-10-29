@@ -11,7 +11,7 @@ Singleton {
     property bool editorClosing: false
 
     function setEditorState(opened, closing) {
-        editorOpen = Boolean(opened)
-        editorClosing = Boolean(closing)
+        editorOpen = Boolean(opened);
+        editorClosing = Boolean(closing);
     }
 }

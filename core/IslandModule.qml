@@ -9,6 +9,7 @@ QtObject {
     property bool active: false
     property bool arbitrationActive: active
     property bool attention: false
+    property bool unsolicited: false
     property bool wantsKeyboard: false
     property int collapsedWidth: Design.collapsedWidth
     property int collapsedHeight: Design.collapsedHeight

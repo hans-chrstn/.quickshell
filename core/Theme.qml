@@ -4,6 +4,33 @@ import QtQuick
 import Quickshell
 
 Singleton {
+    readonly property color envelopeCompact: "#fa08080a"
+    readonly property color envelopeExpanded: "#d908080c"
+    readonly property color envelopeOpaque: "#fc0c0c10"
+    readonly property color surfaceBase: "#ed101014"
+    readonly property color surfaceRaised: "#f217171c"
+    readonly property color surfaceGrouped: "#0dffffff"
+    readonly property color surfaceSheen: "#0affffff"
+    readonly property color surfaceEdgeLight: "#2effffff"
+    readonly property color surfaceDepthEdge: "#72000000"
+
+    readonly property color interactionRest: "transparent"
+    readonly property color interactionHover: "#0dffffff"
+    readonly property color interactionPressed: "#1cffffff"
+    readonly property color interactionSelected: "#14ffffff"
+    readonly property color interactionDisabled: "#61f5f5f7"
+    readonly property color focusRing: "#78ffffff"
+    readonly property color valueTrack: "#18ffffff"
+    readonly property color valueThumb: "#f7f7f8"
+    readonly property color valueThumbBorder: "#24000000"
+
+    readonly property color projectAccent: "#ff9f0a"
+    readonly property color selection: projectAccent
+    readonly property color statusSuccess: "#30d158"
+    readonly property color statusWarning: "#ffd60a"
+    readonly property color statusPrivacy: "#ff9f0a"
+    readonly property color statusDanger: "#ff453a"
+
     readonly property color islandCollapsed: "#f2050505"
     readonly property color islandExpanded: islandCollapsed
     readonly property color overlay: "#f01c1c1c"

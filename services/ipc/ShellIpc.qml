@@ -104,6 +104,18 @@ IpcHandler {
     function islandSizingStatus(): string {
         return JsonFormat.stringify(IslandSizingService.snapshot());
     }
+    function islandZenStatus(): string {
+        return JsonFormat.stringify(IslandPresentationService.snapshot());
+    }
+    function islandZenSet(screenName: string, enabled: bool): bool {
+        return IslandPresentationService.setZenEnabled(screenName, enabled);
+    }
+    function islandZenToggle(screenName: string): bool {
+        return IslandPresentationService.toggleZen(screenName);
+    }
+    function islandZenToggleFocused(): bool {
+        return IslandPresentationService.toggleZen("");
+    }
     function notificationStatus(): string {
         return JsonFormat.stringify(NotificationService.snapshot());
     }
@@ -147,6 +159,33 @@ IpcHandler {
     }
     function audioPrivacyPresentationStatus(): string {
         return JsonFormat.stringify(AudioPrivacyPresentationService.snapshot());
+    }
+    function audioEffectsStatus(): string {
+        return JsonFormat.stringify(AudioService.effectsStatus());
+    }
+    function audioEffectsSetConsumer(resourceId: string, enabled: bool): bool {
+        return AudioService.setEffectsConsumer(resourceId, enabled);
+    }
+    function audioEffectsRefresh(): bool {
+        return AudioService.refreshEffects();
+    }
+    function audioScenesStatus(): string {
+        return JsonFormat.stringify(AudioService.audioScenesStatus());
+    }
+    function audioSceneCapture(name: string): string {
+        return JsonFormat.stringify(AudioService.captureAudioScene(name));
+    }
+    function audioSceneRemove(sceneId: string): string {
+        return JsonFormat.stringify(AudioService.removeAudioScene(sceneId));
+    }
+    function audioScenePlan(sceneId: string): string {
+        return JsonFormat.stringify(AudioService.audioScenePlan(sceneId));
+    }
+    function audioSceneActivate(sceneId: string): string {
+        return JsonFormat.stringify(AudioService.activateAudioScene(sceneId));
+    }
+    function audioSceneActivationStatus(): string {
+        return JsonFormat.stringify(AudioService.audioSceneActivationStatus());
     }
     function audioOpen(screenName: string): bool {
         return AudioPanelService.open(screenName);

@@ -1,44 +1,43 @@
 import QtQuick
-import QtQuick.Controls
 import qs.core
 
-Rectangle {
+InteractionFrame {
     id: root
 
     required property string glyph
     property string accessibleName: ""
     property string toolTip: accessibleName
     property bool primary: false
-    property bool focusOnActivate: true
-    property color accentColor: Theme.accent
     property real glyphSize: 17
     signal activated
 
-    implicitWidth: 30
-    implicitHeight: 30
-    radius: 10
-    color: primary ? Theme.alpha(root.accentColor, tap.pressed ? 0.30 : hover.hovered ? 0.23 : 0.16) : tap.pressed ? Theme.controlPressed : hover.hovered ? Theme.controlHover : Theme.controlFill
-    border.width: primary ? 1 : 0
-    border.color: primary ? Theme.alpha(root.accentColor, 0.36) : "transparent"
-    scale: tap.pressed ? 0.94 : 1
-    opacity: enabled ? 1 : 0.42
+    implicitWidth: 40
+    implicitHeight: 40
+    selected: primary
+    selectionFillEnabled: false
+    cornerRadius: 12
+    controlInset: 2
+    onTriggered: root.activated()
 
     Accessible.name: accessibleName
     Accessible.role: Accessible.Button
     IslandToolTip {
-        visible: hover.hovered && root.toolTip.length > 0
+        visible: root.hovered && root.toolTip.length > 0
         text: root.toolTip
     }
 
-    Behavior on color {
-        ColorAnimation {
-            duration: 110
-        }
-    }
-    Behavior on scale {
-        NumberAnimation {
-            duration: 80
-            easing.type: Easing.OutCubic
+    Rectangle {
+        anchors.centerIn: parent
+        width: 30
+        height: 30
+        radius: 11
+        color: root.primary ? Theme.alpha(root.accentColor, 0.12) : Theme.fillQuiet
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Design.motionStateDuration
+                easing.type: Design.motionStandardEasing
+            }
         }
     }
 
@@ -47,20 +46,6 @@ Rectangle {
         width: root.glyphSize
         height: root.glyphSize
         name: root.glyph
-        glyphColor: root.primary || hover.hovered ? Theme.textPrimary : Theme.textSecondary
-    }
-
-    HoverHandler {
-        id: hover
-    }
-    TapHandler {
-        id: tap
-        enabled: root.enabled
-        acceptedButtons: Qt.LeftButton
-        onTapped: {
-            if (root.focusOnActivate)
-                root.forceActiveFocus();
-            root.activated();
-        }
+        glyphColor: root.primary ? Theme.tintOpaque(root.accentColor) : root.hovered ? Theme.textPrimary : Theme.textSecondary
     }
 }

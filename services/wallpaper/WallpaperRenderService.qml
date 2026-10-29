@@ -9,25 +9,24 @@ Singleton {
     property var screens: ({})
 
     function report(screenName, path, state, error, kind, details) {
-        const name = String(screenName || "").trim()
+        const name = String(screenName || "").trim();
         if (name.length === 0)
-            return
-
-        const updated = ({})
+            return;
+        const updated = ({});
         for (const key in screens)
-            updated[key] = screens[key]
-        const previous = screens[name] || ({})
-        const now = Date.now()
-        const wasActive = Boolean(previous.playbackActive)
-        const isActive = Boolean(details?.playbackActive)
-        let activeDurationMs = Number(previous.activeDurationMs) || 0
-        let activeSinceMs = Number(previous.activeSinceMs) || 0
+            updated[key] = screens[key];
+        const previous = screens[name] || ({});
+        const now = Date.now();
+        const wasActive = Boolean(previous.playbackActive);
+        const isActive = Boolean(details?.playbackActive);
+        let activeDurationMs = Number(previous.activeDurationMs) || 0;
+        let activeSinceMs = Number(previous.activeSinceMs) || 0;
         if (wasActive && !isActive && activeSinceMs > 0)
-            activeDurationMs += Math.max(0, now - activeSinceMs)
+            activeDurationMs += Math.max(0, now - activeSinceMs);
         if (!wasActive && isActive)
-            activeSinceMs = now
+            activeSinceMs = now;
         else if (!isActive)
-            activeSinceMs = 0
+            activeSinceMs = 0;
 
         updated[name] = {
             path: String(path || ""),
@@ -42,37 +41,36 @@ Singleton {
             playbackActive: isActive,
             transitionRunning: Boolean(details?.transitionRunning),
             transitionReason: String(details?.transitionReason || ""),
-            retainedRendererCount: Math.max(0,
-                Math.min(2, Number(details?.retainedRendererCount) || 0)),
+            retainedRendererCount: Math.max(0, Math.min(2, Number(details?.retainedRendererCount) || 0)),
             activeDurationMs: activeDurationMs,
             activeSinceMs: activeSinceMs
-        }
-        screens = updated
+        };
+        screens = updated;
     }
 
     function remove(screenName) {
-        const name = String(screenName || "").trim()
-        const updated = ({})
+        const name = String(screenName || "").trim();
+        const updated = ({});
         for (const key in screens) {
             if (key !== name)
-                updated[key] = screens[key]
+                updated[key] = screens[key];
         }
-        screens = updated
+        screens = updated;
     }
 
     function snapshot() {
-        const result = ({})
+        const result = ({});
         for (const screenName in screens)
-            result[screenName] = Object.assign({}, screens[screenName])
-        return result
+            result[screenName] = Object.assign({}, screens[screenName]);
+        return result;
     }
 
     function activeDuration(screenName, nowMs) {
-        const record = screens[String(screenName || "")] || ({})
-        let duration = Number(record.activeDurationMs) || 0
-        const since = Number(record.activeSinceMs) || 0
+        const record = screens[String(screenName || "")] || ({});
+        let duration = Number(record.activeDurationMs) || 0;
+        const since = Number(record.activeSinceMs) || 0;
         if (record.playbackActive && since > 0)
-            duration += Math.max(0, Number(nowMs) - since)
-        return duration
+            duration += Math.max(0, Number(nowMs) - since);
+        return duration;
     }
 }

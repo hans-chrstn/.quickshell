@@ -3,10 +3,17 @@ import Quickshell
 import Quickshell.Wayland
 import qs.island
 import qs.core
+import qs.services.island
 import qs.services.settings
 
 PanelWindow {
     id: root
+
+    readonly property string screenName: root.screen?.name ?? ""
+    readonly property bool zenMode: {
+        const revision = IslandPresentationService.revision;
+        return revision >= 0 && IslandPresentationService.isZenEnabled(screenName);
+    }
 
     anchors.top: true
     anchors.left: true
@@ -69,8 +76,10 @@ PanelWindow {
 
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
+        backdropAvailable: SettingsService.enableBlur
+        zenMode: root.zenMode
         edgeHovered: edgeHover.hovered
-        screenName: root.screen?.name ?? ""
+        screenName: root.screenName
         availableWidth: root.screen?.width ?? root.width
         availableHeight: root.screen?.height ?? root.height
     }

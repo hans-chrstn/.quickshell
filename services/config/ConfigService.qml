@@ -7,6 +7,7 @@ import "../../components/layout/BoundedSplitModel.js" as SplitModel
 import "../../core/JsonCopy.js" as JsonCopy
 import "../audio/AudioAliasModel.js" as AudioAliasModel
 import "../audio/AudioRoutePolicyModel.js" as AudioRoutePolicyModel
+import "../audio/AudioSceneModel.js" as AudioSceneModel
 
 Singleton {
     id: root
@@ -55,13 +56,14 @@ Singleton {
     property alias audioRestoreOnUnmute: data.audioRestoreOnUnmute
     property alias audioDeviceAliases: data.audioDeviceAliases
     property alias audioRoutePolicies: data.audioRoutePolicies
+    property alias audioScenes: data.audioScenes
     property alias wallpaperDirectories: data.wallpaperDirectories
     property alias editorHorizontalSplitWeights: data.editorHorizontalSplitWeights
     property alias editorVerticalSplitWeights: data.editorVerticalSplitWeights
 
     property bool loaded: false
     property string error: ""
-    readonly property int currentSchemaVersion: 6
+    readonly property int currentSchemaVersion: 7
 
     readonly property var settingSchema: ({
             revealDuration: {
@@ -347,6 +349,15 @@ Singleton {
         return true;
     }
 
+    function setAudioScenes(values) {
+        const normalized = AudioSceneModel.normalizedScenes(values);
+        if (JSON.stringify(normalized) === JSON.stringify(audioScenes))
+            return true;
+        audioScenes = normalized;
+        markDirty();
+        return true;
+    }
+
     function snapshot() {
         const settings = ({});
         for (const key in settingSchema)
@@ -362,6 +373,7 @@ Singleton {
             },
             audioDeviceAliases: JsonCopy.value(audioDeviceAliases),
             audioRoutePolicies: JsonCopy.value(audioRoutePolicies),
+            audioScenes: JsonCopy.value(audioScenes),
             error: error
         };
     }
@@ -404,6 +416,10 @@ Singleton {
             data.schemaVersion = 6;
             changed = true;
         }
+        if (loadedVersion < 7) {
+            data.schemaVersion = 7;
+            changed = true;
+        }
         for (const key in settingSchema) {
             const normalized = normalizedSetting(key, data[key]);
             if (data[key] !== normalized) {
@@ -434,6 +450,11 @@ Singleton {
         const routePolicies = AudioRoutePolicyModel.normalizedPolicies(audioRoutePolicies);
         if (JSON.stringify(routePolicies) !== JSON.stringify(audioRoutePolicies)) {
             audioRoutePolicies = routePolicies;
+            changed = true;
+        }
+        const scenes = AudioSceneModel.normalizedScenes(audioScenes);
+        if (JSON.stringify(scenes) !== JSON.stringify(audioScenes)) {
+            audioScenes = scenes;
             changed = true;
         }
         if (changed)
@@ -480,7 +501,7 @@ Singleton {
 
         JsonAdapter {
             id: data
-            property int schemaVersion: 6
+            property int schemaVersion: 7
             property int revealDuration: 300
             property int resizeDuration: 520
             property int contentRevealDuration: 180
@@ -525,6 +546,7 @@ Singleton {
             property bool audioRestoreOnUnmute: true
             property var audioDeviceAliases: ({})
             property var audioRoutePolicies: ({})
+            property var audioScenes: []
             property var wallpaperDirectories: []
             property var editorHorizontalSplitWeights: [0.7 / 7.5, 6 / 7.5, 0.8 / 7.5]
             property var editorVerticalSplitWeights: [0.8, 0.2]

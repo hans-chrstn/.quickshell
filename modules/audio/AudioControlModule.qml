@@ -22,6 +22,10 @@ Item {
             return Qt.resolvedUrl("AudioDevicesPage.qml");
         if (pageId === "apps")
             return Qt.resolvedUrl("AudioApplicationsPage.qml");
+        if (pageId === "scenes")
+            return Qt.resolvedUrl("AudioScenesPage.qml");
+        if (pageId === "effects")
+            return Qt.resolvedUrl("AudioEffectsPage.qml");
         return Qt.resolvedUrl("AudioMasterPage.qml");
     }
 
@@ -33,7 +37,7 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            if (AudioPanelService.currentPage === "apps" && pageLoader.item?.handleEscape?.()) {
+            if (pageLoader.item?.handleEscape?.()) {
                 event.accepted = true;
                 return;
             }
@@ -42,7 +46,7 @@ Item {
             else
                 AudioPanelService.close();
             event.accepted = true;
-        } else if (AudioPanelService.currentPage === "apps" && pageLoader.item?.handleNavigation?.(event.key, event.modifiers)) {
+        } else if (pageLoader.item?.handleNavigation?.(event.key, event.modifiers)) {
             event.accepted = true;
         }
     }
@@ -80,7 +84,7 @@ Item {
         }
 
         SegmentedPageBar {
-            Layout.preferredWidth: 360
+            Layout.preferredWidth: 450
             Layout.alignment: Qt.AlignHCenter
             controlHeight: 36
             cornerRadius: 12
@@ -102,6 +106,14 @@ Item {
                 {
                     id: "apps",
                     label: "Apps"
+                },
+                {
+                    id: "scenes",
+                    label: "Scenes"
+                },
+                {
+                    id: "effects",
+                    label: "Effects"
                 }
             ]
             currentPage: AudioPanelService.currentPage

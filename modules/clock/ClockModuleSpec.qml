@@ -30,6 +30,6 @@ IslandModule {
     }
 
     view: Component {
-        ClockModule { }
+        ClockModule {}
     }
 }

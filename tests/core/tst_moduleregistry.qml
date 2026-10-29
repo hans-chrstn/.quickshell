@@ -50,6 +50,7 @@ TestCase {
                 moduleId: "notification"
                 active: true
                 attention: true
+                unsolicited: true
                 priority: 60
             }
         ]
@@ -74,5 +75,16 @@ TestCase {
         compare(registry.attentive, null);
         verify(!registry.attentionRequested);
         notification.attention = true;
+    }
+
+    function test_zenSuppressesOnlyUnsolicitedModules() {
+        closingEditor.active = false;
+        registry.suppressUnsolicited = true;
+        compare(registry.current, clock);
+        compare(registry.attentive, null);
+        verify(!registry.attentionRequested);
+        closingEditor.active = true;
+        compare(registry.current, closingEditor);
+        registry.suppressUnsolicited = false;
     }
 }

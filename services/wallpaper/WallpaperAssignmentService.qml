@@ -12,91 +12,87 @@ Singleton {
     property alias screenWallpapers: data.screenWallpapers
     property bool loaded: false
     property string error: ""
-    readonly property bool automationOverridesLoaded:
-        WallpaperAutomationOverrideService.loaded
+    readonly property bool automationOverridesLoaded: WallpaperAutomationOverrideService.loaded
 
     function normalizePath(path) {
-        return String(path || "").trim()
+        return String(path || "").trim();
     }
 
     function validWallpaper(path) {
-        const normalized = normalizePath(path)
-        if (normalized.length === 0
-                || WallpaperCatalogService.isExcluded(normalized))
-            return false
-        const media = WallpaperProbeService.recordFor(normalized)
+        const normalized = normalizePath(path);
+        if (normalized.length === 0 || WallpaperCatalogService.isExcluded(normalized))
+            return false;
+        const media = WallpaperProbeService.recordFor(normalized);
         if (media.state === "ready")
-            return WallpaperRenderSupportService.supported(media)
-        return WallpaperCatalogService.isSupported(normalized)
+            return WallpaperRenderSupportService.supported(media);
+        return WallpaperCatalogService.isSupported(normalized);
     }
 
     function wallpaperForScreen(screenName) {
-        const name = String(screenName || "")
-        const assigned = screenWallpapers[name]
-        return assigned && String(assigned).length > 0
-            ? String(assigned) : globalWallpaper
+        const name = String(screenName || "");
+        const assigned = screenWallpapers[name];
+        return assigned && String(assigned).length > 0 ? String(assigned) : globalWallpaper;
     }
 
     function setGlobal(path, suppressAutomation) {
-        const manual = suppressAutomation !== false
+        const manual = suppressAutomation !== false;
         if (manual && !automationOverridesLoaded) {
-            error = "Wallpaper automation overrides are still loading"
-            return false
+            error = "Wallpaper automation overrides are still loading";
+            return false;
         }
-        const normalized = normalizePath(path)
+        const normalized = normalizePath(path);
         if (!validWallpaper(normalized)) {
-            error = "Unsupported wallpaper path"
-            return false
+            error = "Unsupported wallpaper path";
+            return false;
         }
-        error = ""
-        screenWallpapers = ({})
-        globalWallpaper = normalized
+        error = "";
+        screenWallpapers = ({});
+        globalWallpaper = normalized;
         if (manual)
-            WallpaperAutomationOverrideService.suppressGlobal()
-        return true
+            WallpaperAutomationOverrideService.suppressGlobal();
+        return true;
     }
 
     function clearGlobal() {
-        error = ""
-        globalWallpaper = ""
+        error = "";
+        globalWallpaper = "";
     }
 
     function setForScreen(screenName, path, suppressAutomation) {
-        const name = String(screenName || "").trim()
-        const manual = suppressAutomation !== false
+        const name = String(screenName || "").trim();
+        const manual = suppressAutomation !== false;
         if (manual && !automationOverridesLoaded) {
-            error = "Wallpaper automation overrides are still loading"
-            return false
+            error = "Wallpaper automation overrides are still loading";
+            return false;
         }
-        const normalized = normalizePath(path)
+        const normalized = normalizePath(path);
         if (name.length === 0 || !validWallpaper(normalized)) {
-            error = name.length === 0
-                ? "A screen name is required" : "Unsupported wallpaper path"
-            return false
+            error = name.length === 0 ? "A screen name is required" : "Unsupported wallpaper path";
+            return false;
         }
 
-        const updated = ({})
+        const updated = ({});
         for (const key in screenWallpapers)
-            updated[key] = screenWallpapers[key]
-        updated[name] = normalized
-        error = ""
-        screenWallpapers = updated
+            updated[key] = screenWallpapers[key];
+        updated[name] = normalized;
+        error = "";
+        screenWallpapers = updated;
         if (manual)
-            WallpaperAutomationOverrideService.suppressScreen(name)
-        return true
+            WallpaperAutomationOverrideService.suppressScreen(name);
+        return true;
     }
 
     function clearScreen(screenName) {
-        const name = String(screenName || "").trim()
+        const name = String(screenName || "").trim();
         if (name.length === 0)
-            return
-        const updated = ({})
+            return;
+        const updated = ({});
         for (const key in screenWallpapers) {
             if (key !== name)
-                updated[key] = screenWallpapers[key]
+                updated[key] = screenWallpapers[key];
         }
-        error = ""
-        screenWallpapers = updated
+        error = "";
+        screenWallpapers = updated;
     }
 
     function snapshot() {
@@ -105,7 +101,7 @@ Singleton {
             global: globalWallpaper,
             screens: Object.assign({}, screenWallpapers),
             error: error
-        }
+        };
     }
 
     Timer {
@@ -119,17 +115,18 @@ Singleton {
         path: Quickshell.statePath("wallpaper-assignments.json")
         watchChanges: true
         printErrors: false
-        onAdapterUpdated: if (root.loaded) saveTimer.restart()
+        onAdapterUpdated: if (root.loaded)
+            saveTimer.restart()
         onFileChanged: reload()
         onLoaded: {
-            root.loaded = true
-            root.error = ""
+            root.loaded = true;
+            root.error = "";
         }
         onLoadFailed: failure => {
             if (failure === FileViewError.FileNotFound) {
-                root.loaded = true
+                root.loaded = true;
             } else {
-                root.error = "Wallpaper assignments could not be loaded"
+                root.error = "Wallpaper assignments could not be loaded";
             }
         }
 

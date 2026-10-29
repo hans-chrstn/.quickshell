@@ -1,4 +1,5 @@
 import QtQuick
+
 Item {
     id: root
 
@@ -7,14 +8,10 @@ Item {
     readonly property bool presented: context?.presented ?? false
     readonly property bool expanded: context?.expanded ?? false
     readonly property real expansionProgress: context?.expansionProgress ?? 0
-    readonly property real collapsedImplicitWidth:
-        carousel.collapsedImplicitWidth
-    readonly property real collapsedImplicitHeight:
-        carousel.collapsedImplicitHeight
-    readonly property real expandedImplicitWidth:
-        carousel.expandedImplicitWidth
-    readonly property real expandedImplicitHeight:
-        carousel.expandedImplicitHeight
+    readonly property real collapsedImplicitWidth: carousel.collapsedImplicitWidth
+    readonly property real collapsedImplicitHeight: carousel.collapsedImplicitHeight
+    readonly property real expandedImplicitWidth: carousel.expandedImplicitWidth
+    readonly property real expandedImplicitHeight: carousel.expandedImplicitHeight
 
     ClockCarousel {
         id: carousel

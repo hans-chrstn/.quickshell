@@ -17,94 +17,93 @@ Singleton {
 
     function readyToMutate() {
         if (loaded)
-            return true
-        error = "Wallpaper hooks are still loading"
-        return false
+            return true;
+        error = "Wallpaper hooks are still loading";
+        return false;
     }
 
     function parseArguments(value) {
         if (Array.isArray(value))
-            return value
-        let text = String(value || "").trim()
+            return value;
+        let text = String(value || "").trim();
         if (text.length === 0)
-            return []
+            return [];
         try {
             if (text.startsWith("b64_"))
-                text = Base64.decode(text.slice(4))
+                text = Base64.decode(text.slice(4));
             else if (text.startsWith("base64:"))
-                text = Base64.decode(text.slice(7))
+                text = Base64.decode(text.slice(7));
             if (text === null)
-                throw new Error("Invalid Base64")
-            const parsed = JSON.parse(text)
+                throw new Error("Invalid Base64");
+            const parsed = JSON.parse(text);
             if (Array.isArray(parsed))
-                return parsed
-        } catch (exception) {
-        }
-        error = "Wallpaper hook arguments must be a JSON array"
-        return null
+                return parsed;
+        } catch (exception) {}
+        error = "Wallpaper hook arguments must be a JSON array";
+        return null;
     }
 
     function commit(values) {
-        const normalized = HookModel.normalizeDocument({ hooks: values })
-        data.schemaVersion = normalized.schemaVersion
-        hooks = normalized.hooks
-        error = ""
-        markDirty()
-        return true
+        const normalized = HookModel.normalizeDocument({
+            hooks: values
+        });
+        data.schemaVersion = normalized.schemaVersion;
+        hooks = normalized.hooks;
+        error = "";
+        markDirty();
+        return true;
     }
 
     function replaceDocument(value) {
         if (!readyToMutate())
-            return false
-        if (!value || typeof value !== "object"
-                || !Array.isArray(value.hooks)) {
-            error = "Wallpaper hook document must contain a hooks array"
-            return false
+            return false;
+        if (!value || typeof value !== "object" || !Array.isArray(value.hooks)) {
+            error = "Wallpaper hook document must contain a hooks array";
+            return false;
         }
-        const version = Math.floor(Number(value.schemaVersion)
-            || HookModel.schemaVersion)
+        const version = Math.floor(Number(value.schemaVersion) || HookModel.schemaVersion);
         if (version > HookModel.schemaVersion) {
-            error = "Wallpaper hook document uses a newer schema"
-            return false
+            error = "Wallpaper hook document uses a newer schema";
+            return false;
         }
-        return commit(value.hooks)
+        return commit(value.hooks);
     }
 
     function replaceJson(value) {
         try {
-            let text = String(value || "").trim()
+            let text = String(value || "").trim();
             if (text.startsWith("b64_"))
-                text = Base64.decode(text.slice(4))
+                text = Base64.decode(text.slice(4));
             else if (text.startsWith("base64:"))
-                text = Base64.decode(text.slice(7))
+                text = Base64.decode(text.slice(7));
             if (text === null)
-                throw new Error("Invalid Base64")
-            return replaceDocument(JSON.parse(text))
+                throw new Error("Invalid Base64");
+            return replaceDocument(JSON.parse(text));
         } catch (exception) {
-            error = "Wallpaper hook JSON is invalid"
-            return false
+            error = "Wallpaper hook JSON is invalid";
+            return false;
         }
     }
 
     function normalizedCandidate(value) {
-        const normalized = HookModel.normalizeDocument({ hooks: [value] })
-        return normalized.hooks.length === 1 ? normalized.hooks[0] : null
+        const normalized = HookModel.normalizeDocument({
+            hooks: [value]
+        });
+        return normalized.hooks.length === 1 ? normalized.hooks[0] : null;
     }
 
-    function createHook(name, phase, executable, argumentJson, screenName,
-            timeoutMs, priority) {
+    function createHook(name, phase, executable, argumentJson, screenName, timeoutMs, priority) {
         if (!readyToMutate())
-            return ""
+            return "";
         if (hooks.length >= maximumHooks) {
-            error = "Wallpaper hook limit reached"
-            return ""
+            error = "Wallpaper hook limit reached";
+            return "";
         }
-        const values = parseArguments(argumentJson)
+        const values = parseArguments(argumentJson);
         if (values === null)
-            return ""
-        idSequence += 1
-        const id = "hook-" + Date.now().toString(36)
-            + "-" + idSequence.toString(36)
+            return "";
+        idSequence += 1;
+        const id = "hook-" + Date.now().toString(36) + "-" + idSequence.toString(36);
         const candidate = normalizedCandidate({
             id: id,
             name: name,
@@ -115,29 +114,28 @@ Singleton {
             screenName: screenName,
             timeoutMs: timeoutMs,
             priority: priority
-        })
+        });
         if (!candidate) {
-            error = "Wallpaper hook requires a valid phase and absolute executable"
-            return ""
+            error = "Wallpaper hook requires a valid phase and absolute executable";
+            return "";
         }
-        const updated = hooks.slice()
-        updated.push(candidate)
-        return commit(updated) ? candidate.id : ""
+        const updated = hooks.slice();
+        updated.push(candidate);
+        return commit(updated) ? candidate.id : "";
     }
 
-    function updateHook(hookId, name, phase, executable, argumentJson,
-            screenName, timeoutMs, priority, enabled) {
+    function updateHook(hookId, name, phase, executable, argumentJson, screenName, timeoutMs, priority, enabled) {
         if (!readyToMutate())
-            return false
-        const id = String(hookId || "").trim()
-        const index = hooks.findIndex(hook => hook.id === id)
+            return false;
+        const id = String(hookId || "").trim();
+        const index = hooks.findIndex(hook => hook.id === id);
         if (index < 0) {
-            error = "Wallpaper hook does not exist"
-            return false
+            error = "Wallpaper hook does not exist";
+            return false;
         }
-        const values = parseArguments(argumentJson)
+        const values = parseArguments(argumentJson);
         if (values === null)
-            return false
+            return false;
         const candidate = normalizedCandidate({
             id: id,
             name: name,
@@ -148,44 +146,42 @@ Singleton {
             screenName: screenName,
             timeoutMs: timeoutMs,
             priority: priority
-        })
+        });
         if (!candidate) {
-            error = "Wallpaper hook requires a valid phase and absolute executable"
-            return false
+            error = "Wallpaper hook requires a valid phase and absolute executable";
+            return false;
         }
-        const updated = hooks.slice()
-        updated[index] = candidate
-        return commit(updated)
+        const updated = hooks.slice();
+        updated[index] = candidate;
+        return commit(updated);
     }
 
     function setEnabled(hookId, enabled) {
         if (!readyToMutate())
-            return false
-        const id = String(hookId || "").trim()
-        const hook = hooks.find(item => item.id === id)
+            return false;
+        const id = String(hookId || "").trim();
+        const hook = hooks.find(item => item.id === id);
         if (!hook) {
-            error = "Wallpaper hook does not exist"
-            return false
+            error = "Wallpaper hook does not exist";
+            return false;
         }
-        return updateHook(id, hook.name, hook.phase, hook.executable,
-            JSON.stringify(hook.arguments), hook.screenName,
-            hook.timeoutMs, hook.priority, enabled)
+        return updateHook(id, hook.name, hook.phase, hook.executable, JSON.stringify(hook.arguments), hook.screenName, hook.timeoutMs, hook.priority, enabled);
     }
 
     function removeHook(hookId) {
         if (!readyToMutate())
-            return false
-        const id = String(hookId || "").trim()
-        const updated = hooks.filter(hook => hook.id !== id)
+            return false;
+        const id = String(hookId || "").trim();
+        const updated = hooks.filter(hook => hook.id !== id);
         if (updated.length === hooks.length) {
-            error = "Wallpaper hook does not exist"
-            return false
+            error = "Wallpaper hook does not exist";
+            return false;
         }
-        return commit(updated)
+        return commit(updated);
     }
 
     function clear() {
-        return readyToMutate() && commit([])
+        return readyToMutate() && commit([]);
     }
 
     function snapshot() {
@@ -194,15 +190,15 @@ Singleton {
             schemaVersion: data.schemaVersion,
             maximumHooks: maximumHooks,
             hooks: hooks.map(hook => Object.assign({}, hook, {
-                arguments: (hook.arguments || []).slice()
-            })),
+                    arguments: (hook.arguments || []).slice()
+                })),
             error: error
-        }
+        };
     }
 
     function markDirty() {
         if (loaded)
-            saveTimer.restart()
+            saveTimer.restart();
     }
 
     Timer {
@@ -222,30 +218,28 @@ Singleton {
         path: Quickshell.statePath("wallpaper-hooks.json")
         watchChanges: true
         printErrors: false
-        onAdapterUpdated: if (root.loaded) saveTimer.restart()
+        onAdapterUpdated: if (root.loaded)
+            saveTimer.restart()
         onFileChanged: reloadTimer.restart()
         onLoaded: {
-            root.loaded = true
+            root.loaded = true;
             try {
-                const document = JSON.parse(text())
+                const document = JSON.parse(text());
                 if (Number(document.schemaVersion) > HookModel.schemaVersion) {
-                    root.error = "Wallpaper hook document uses a newer schema"
-                    return
+                    root.error = "Wallpaper hook document uses a newer schema";
+                    return;
                 }
-                const normalized = HookModel.normalizeDocument(document)
-                root.error = ""
-                if (data.schemaVersion !== normalized.schemaVersion
-                        || JSON.stringify(root.hooks)
-                            !== JSON.stringify(normalized.hooks))
-                    root.commit(normalized.hooks)
+                const normalized = HookModel.normalizeDocument(document);
+                root.error = "";
+                if (data.schemaVersion !== normalized.schemaVersion || JSON.stringify(root.hooks) !== JSON.stringify(normalized.hooks))
+                    root.commit(normalized.hooks);
             } catch (exception) {
-                root.error = "Wallpaper hook JSON is invalid"
+                root.error = "Wallpaper hook JSON is invalid";
             }
         }
         onLoadFailed: failure => {
-            root.loaded = true
-            root.error = failure === FileViewError.FileNotFound ? ""
-                : "Wallpaper hooks could not be loaded"
+            root.loaded = true;
+            root.error = failure === FileViewError.FileNotFound ? "" : "Wallpaper hooks could not be loaded";
         }
 
         JsonAdapter {

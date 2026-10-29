@@ -11,18 +11,18 @@ SettingPage {
         anchors.fill: parent
         spacing: 10
 
-        SettingsHeader { title: "Choose Folder" }
+        SettingsHeader {
+            title: "Choose Folder"
+        }
 
         DirectoryPicker {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            initialPath: ConfigService.wallpaperDirectories.length > 0
-                ? ConfigService.wallpaperDirectories[0]
-                : (Quickshell.env("HOME") || "/")
+            initialPath: ConfigService.wallpaperDirectories.length > 0 ? ConfigService.wallpaperDirectories[0] : (Quickshell.env("HOME") || "/")
             onAccepted: path => {
-                ConfigService.setWallpaperDirectories([path])
-                WallpaperCatalogService.rescan()
-                SettingsService.back()
+                ConfigService.setWallpaperDirectories([path]);
+                WallpaperCatalogService.rescan();
+                SettingsService.back();
             }
             onCanceled: SettingsService.back()
         }

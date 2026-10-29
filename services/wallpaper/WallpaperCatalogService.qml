@@ -9,22 +9,15 @@ import qs.services.wallpaper
 Singleton {
     id: root
 
-    readonly property var supportedExtensions: [
-        "jpg", "jpeg", "png", "avif"
-    ]
-    readonly property var candidateExtensions: supportedExtensions.concat([
-        "webp", "gif", "apng", "mp4", "webm", "mkv", "mov"
-    ])
-    readonly property var excludedDirectoryNames: [
-        "screenshots", "captures", ".thumbnails"
-    ]
+    readonly property var supportedExtensions: ["jpg", "jpeg", "png", "avif"]
+    readonly property var candidateExtensions: supportedExtensions.concat(["webp", "gif", "apng", "mp4", "webm", "mkv", "mov"])
+    readonly property var excludedDirectoryNames: ["screenshots", "captures", ".thumbnails"]
     readonly property var directories: ConfigService.wallpaperDirectories
     readonly property bool configured: directories.length > 0
     property var wallpapers: []
     property var candidatePaths: []
     property bool scanning: false
-    readonly property bool classifying: wallpapers.some(record =>
-        record.state === "queued" || record.state === "probing")
+    readonly property bool classifying: wallpapers.some(record => record.state === "queued" || record.state === "probing")
     property string error: ""
     property var warnings: []
 
@@ -33,116 +26,111 @@ Singleton {
     property bool scanPending: false
 
     function normalizedDirectories(input) {
-        const unique = []
-        const seen = ({})
+        const unique = [];
+        const seen = ({});
         for (let value of input || []) {
-            const path = String(value || "").trim().replace(/\/+$/, "")
+            const path = String(value || "").trim().replace(/\/+$/, "");
             if (path.length === 0 || seen[path])
-                continue
-            seen[path] = true
-            unique.push(path)
+                continue;
+            seen[path] = true;
+            unique.push(path);
         }
-        return unique
+        return unique;
     }
 
     function isSupported(path) {
-        const lower = String(path || "").toLowerCase()
+        const lower = String(path || "").toLowerCase();
         for (let extension of supportedExtensions) {
             if (lower.endsWith("." + extension))
-                return true
+                return true;
         }
-        return false
+        return false;
     }
 
     function isCandidate(path) {
-        const lower = String(path || "").toLowerCase()
+        const lower = String(path || "").toLowerCase();
         for (let extension of candidateExtensions) {
             if (lower.endsWith("." + extension))
-                return true
+                return true;
         }
-        return false
+        return false;
     }
 
     function isExcluded(path) {
-        const segments = String(path || "").toLowerCase().split("/")
+        const segments = String(path || "").toLowerCase().split("/");
         for (let segment of segments) {
             if (excludedDirectoryNames.indexOf(segment) >= 0)
-                return true
+                return true;
         }
-        return false
+        return false;
     }
 
     function parseOutput(output) {
-        const unique = []
-        const seen = ({})
+        const unique = [];
+        const seen = ({});
         for (let line of String(output || "").split("\n")) {
-            const path = line.trim()
-            if (path.length === 0 || seen[path]
-                    || !isCandidate(path) || isExcluded(path))
-                continue
-            seen[path] = true
-            unique.push(path)
+            const path = line.trim();
+            if (path.length === 0 || seen[path] || !isCandidate(path) || isExcluded(path))
+                continue;
+            seen[path] = true;
+            unique.push(path);
         }
-        unique.sort((a, b) => a.localeCompare(b))
-        return unique
+        unique.sort((a, b) => a.localeCompare(b));
+        return unique;
     }
 
     function refreshRecords() {
-        const refreshed = candidatePaths.map(path =>
-            WallpaperProbeService.recordFor(path))
-        if (refreshed.length === wallpapers.length
-                && refreshed.every((record, index) =>
-                    record === wallpapers[index]))
-            return
-        wallpapers = refreshed
+        const refreshed = candidatePaths.map(path => WallpaperProbeService.recordFor(path));
+        if (refreshed.length === wallpapers.length && refreshed.every((record, index) => record === wallpapers[index]))
+            return;
+        wallpapers = refreshed;
     }
 
     function classify(paths) {
-        WallpaperProbeService.cancelAll()
-        candidatePaths = paths
-        refreshRecords()
+        WallpaperProbeService.cancelAll();
+        candidatePaths = paths;
+        refreshRecords();
         for (const path of paths)
-            WallpaperProbeService.enqueue(path)
+            WallpaperProbeService.enqueue(path);
     }
 
     function rescan(requestedDirectories) {
         if (requestedDirectories !== undefined)
-            ConfigService.setWallpaperDirectories(
-                normalizedDirectories(requestedDirectories))
+            ConfigService.setWallpaperDirectories(normalizedDirectories(requestedDirectories));
 
-        requestedGeneration += 1
-        WallpaperProbeService.cancelAll()
+        requestedGeneration += 1;
+        WallpaperProbeService.cancelAll();
         if (scanProcess.running) {
-            scanPending = true
-            return
+            scanPending = true;
+            return;
         }
-        startScan()
+        startScan();
     }
 
     function startScan() {
-        const roots = normalizedDirectories(directories)
-        scanPending = false
-        activeGeneration = requestedGeneration
-        error = ""
-        warnings = []
+        const roots = normalizedDirectories(directories);
+        scanPending = false;
+        activeGeneration = requestedGeneration;
+        error = "";
+        warnings = [];
 
         if (roots.length === 0) {
-            candidatePaths = []
-            wallpapers = []
-            scanning = false
-            return
+            candidatePaths = [];
+            wallpapers = [];
+            scanning = false;
+            return;
         }
 
-        scanProcess.command = ["find"].concat(roots, [
-            "-maxdepth", "3", "-type", "f", "-print"
-        ])
-        scanning = true
-        scanProcess.running = true
+        scanProcess.command = ["find"].concat(roots, ["-maxdepth", "3", "-type", "f", "-print"]);
+        scanning = true;
+        scanProcess.running = true;
     }
 
     Connections {
         target: WallpaperProbeService
-        function onRecordsChanged() { root.refreshRecords() }
+        function onRecordsChanged() {
+            root.refreshRecords();
+        }
     }
 
     Process {
@@ -151,28 +139,24 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 if (root.activeGeneration === root.requestedGeneration)
-                    root.classify(root.parseOutput(text))
+                    root.classify(root.parseOutput(text));
             }
         }
 
         stderr: StdioCollector {
             onStreamFinished: {
                 if (root.activeGeneration !== root.requestedGeneration)
-                    return
-                root.warnings = String(text || "").split("\n")
-                    .map(line => line.trim())
-                    .filter(line => line.length > 0)
+                    return;
+                root.warnings = String(text || "").split("\n").map(line => line.trim()).filter(line => line.length > 0);
             }
         }
 
         onExited: exitCode => {
-            root.scanning = false
-            if (root.activeGeneration === root.requestedGeneration
-                    && exitCode !== 0 && root.wallpapers.length === 0)
-                root.error = "Wallpaper discovery failed"
-            if (root.scanPending
-                    || root.activeGeneration !== root.requestedGeneration)
-                root.startScan()
+            root.scanning = false;
+            if (root.activeGeneration === root.requestedGeneration && exitCode !== 0 && root.wallpapers.length === 0)
+                root.error = "Wallpaper discovery failed";
+            if (root.scanPending || root.activeGeneration !== root.requestedGeneration)
+                root.startScan();
         }
     }
 }

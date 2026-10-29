@@ -8,7 +8,7 @@ Singleton {
     id: root
 
     function mediaSnapshot(path) {
-        const media = WallpaperProbeService.recordFor(path)
+        const media = WallpaperProbeService.recordFor(path);
         return {
             state: String(media?.state || "unknown"),
             codec: String(media?.codec || ""),
@@ -18,33 +18,31 @@ Singleton {
             durationMs: Number(media?.durationMs) || 0,
             frameRate: Number(media?.frameRate) || 0,
             bitRate: Number(media?.bitRate) || 0
-        }
+        };
     }
 
     function optimizationSnapshot(path) {
-        const currentPath = String(path || "")
-        const records = WallpaperOptimizationService.records
-        let sourcePath = currentPath
-        let record = WallpaperOptimizationService.recordFor(currentPath)
+        const currentPath = String(path || "");
+        const records = WallpaperOptimizationService.records;
+        let sourcePath = currentPath;
+        let record = WallpaperOptimizationService.recordFor(currentPath);
 
         if (WallpaperOptimizationPolicyService.isOptimizedPath(currentPath)) {
-            sourcePath = ""
-            record = null
+            sourcePath = "";
+            record = null;
             for (const candidateSource in records) {
-                const candidate = records[candidateSource]
+                const candidate = records[candidateSource];
                 if (String(candidate.outputPath || "") === currentPath) {
-                    sourcePath = candidateSource
-                    record = candidate
-                    break
+                    sourcePath = candidateSource;
+                    record = candidate;
+                    break;
                 }
             }
         }
 
-        const outputPath = String(record?.outputPath || "")
-        const applied = WallpaperOptimizationPolicyService.isOptimizedPath(
-            currentPath)
-        const available = sourcePath.length > 0 && outputPath.length > 0
-            && WallpaperProbeService.recordFor(outputPath).state === "ready"
+        const outputPath = String(record?.outputPath || "");
+        const applied = WallpaperOptimizationPolicyService.isOptimizedPath(currentPath);
+        const available = sourcePath.length > 0 && outputPath.length > 0 && WallpaperProbeService.recordFor(outputPath).state === "ready";
         return {
             applied: applied,
             available: available,
@@ -53,21 +51,20 @@ Singleton {
             outputPath: outputPath,
             state: String(record?.state || (applied ? "unknown" : "idle")),
             error: String(record?.error || ""),
-            sourceMedia: sourcePath.length > 0
-                ? mediaSnapshot(sourcePath) : null,
+            sourceMedia: sourcePath.length > 0 ? mediaSnapshot(sourcePath) : null,
             outputMedia: available ? mediaSnapshot(outputPath) : null
-        }
+        };
     }
 
     function snapshot() {
-        const now = Date.now()
-        const renderers = WallpaperRenderService.snapshot()
-        const occlusion = WallpaperOcclusionService.snapshot()
-        const monitorPower = WallpaperMonitorPowerService.snapshot()
-        const screens = ({})
+        const now = Date.now();
+        const renderers = WallpaperRenderService.snapshot();
+        const occlusion = WallpaperOcclusionService.snapshot();
+        const monitorPower = WallpaperMonitorPowerService.snapshot();
+        const screens = ({});
 
         for (const screenName in renderers) {
-            const renderer = renderers[screenName]
+            const renderer = renderers[screenName];
             screens[screenName] = {
                 path: renderer.path,
                 kind: renderer.kind,
@@ -78,13 +75,12 @@ Singleton {
                 playbackActive: renderer.playbackActive,
                 suspended: renderer.suspended,
                 suspendedReason: renderer.suspendedReason,
-                activeDurationMs: WallpaperRenderService.activeDuration(
-                    screenName, now),
+                activeDurationMs: WallpaperRenderService.activeDuration(screenName, now),
                 media: mediaSnapshot(renderer.path),
                 optimization: optimizationSnapshot(renderer.path),
                 occlusion: occlusion.screens?.[screenName] || null,
                 monitorPowered: monitorPower.screens?.[screenName] !== false
-            }
+            };
         }
 
         return {
@@ -105,6 +101,6 @@ Singleton {
                 error: monitorPower.error
             },
             power: PowerStateService.snapshot()
-        }
+        };
     }
 }

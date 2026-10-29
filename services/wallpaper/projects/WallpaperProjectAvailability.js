@@ -1,31 +1,33 @@
 .pragma library
-
 .import "WallpaperProjectModel.js" as ProjectModel
 
 function portableCandidate(rootPath, portablePath) {
-    const root = ProjectModel.normalizedSourcePath(rootPath)
-        .replace(/\/+$/, "")
-    const relative = ProjectModel.normalizedPortablePath(portablePath)
-    return root.length > 0 && relative.length > 0
-        ? root + "/" + relative : ""
+    const root = ProjectModel.normalizedSourcePath(rootPath).replace(/\/+$/, "");
+    const relative = ProjectModel.normalizedPortablePath(portablePath);
+    return root.length > 0 && relative.length > 0 ? root + "/" + relative : "";
 }
 
 function candidates(asset, rootPath) {
-    const result = []
-    const source = ProjectModel.normalizedSourcePath(asset?.sourcePath)
-    const portable = portableCandidate(rootPath, asset?.portablePath)
-    if (source.length > 0) result.push(source)
-    if (portable.length > 0 && portable !== source) result.push(portable)
-    return result
+    const result = [];
+    const source = ProjectModel.normalizedSourcePath(asset?.sourcePath);
+    const portable = portableCandidate(rootPath, asset?.portablePath);
+    if (source.length > 0)
+        result.push(source);
+    if (portable.length > 0 && portable !== source)
+        result.push(portable);
+    return result;
 }
 
 function probeRecord(records, path) {
-    return records?.[path] || { state: "unknown", kind: "unsupported", error: "" }
+    return records?.[path] || {
+        state: "unknown",
+        kind: "unsupported",
+        error: ""
+    };
 }
 
 function resolvedKind(record) {
-    return record.kind === "animatedImage" ? "animated-image"
-        : String(record.kind || "unknown")
+    return record.kind === "animatedImage" ? "animated-image" : String(record.kind || "unknown");
 }
 
 function mediaSnapshot(record, path) {
@@ -39,16 +41,16 @@ function mediaSnapshot(record, path) {
         durationMs: Number(record?.durationMs || 0),
         frameRate: Number(record?.frameRate || 0),
         error: String(record?.error || "")
-    }
+    };
 }
 
 function resolveAsset(asset, rootPath, records) {
-    const paths = candidates(asset, rootPath)
-    const pending = []
-    let unsupported = null
-    let failure = null
+    const paths = candidates(asset, rootPath);
+    const pending = [];
+    let unsupported = null;
+    let failure = null;
     for (const path of paths) {
-        const record = probeRecord(records, path)
+        const record = probeRecord(records, path);
         if (record.state === "ready") {
             return {
                 assetId: asset.id,
@@ -60,24 +62,29 @@ function resolveAsset(asset, rootPath, records) {
                 candidates: paths,
                 enqueuePaths: [],
                 error: ""
-            }
+            };
         }
         if (["unknown", "queued", "probing"].indexOf(record.state) >= 0)
-            pending.push(path)
+            pending.push(path);
         else if (record.state === "unsupported")
-            unsupported = record
+            unsupported = record;
         else if (record.state === "failed")
-            failure = record
+            failure = record;
     }
     if (pending.length > 0) {
         return {
-            assetId: asset.id, state: "pending", resolvedPath: "",
-            resolvedKind: "unknown", relinkSuggested: false,
+            assetId: asset.id,
+            state: "pending",
+            resolvedPath: "",
+            resolvedKind: "unknown",
+            relinkSuggested: false,
             media: null,
-            candidates: paths, enqueuePaths: pending, error: ""
-        }
+            candidates: paths,
+            enqueuePaths: pending,
+            error: ""
+        };
     }
-    const result = unsupported || failure
+    const result = unsupported || failure;
     return {
         assetId: asset.id,
         state: unsupported ? "unsupported" : "missing",
@@ -87,27 +94,38 @@ function resolveAsset(asset, rootPath, records) {
         relinkSuggested: false,
         candidates: paths,
         enqueuePaths: [],
-        error: String(result?.error || (paths.length === 0
-            ? "Asset has no resolvable source path"
-            : "Wallpaper source is unavailable"))
-    }
+        error: String(result?.error || (paths.length === 0 ? "Asset has no resolvable source path" : "Wallpaper source is unavailable"))
+    };
 }
 
 function plan(document, records) {
-    const parsed = ProjectModel.parse(document)
+    const parsed = ProjectModel.parse(document);
     if (!parsed.accepted)
-        return { state: "failed", error: parsed.error, projectId: "",
-            complete: true, assets: [], enqueuePaths: [], counts: ({}) }
-    const project = parsed.document.project
-    const assets = project.assets.map(asset =>
-        resolveAsset(asset, project.rootPath, records))
-    const enqueuePaths = []
+        return {
+            state: "failed",
+            error: parsed.error,
+            projectId: "",
+            complete: true,
+            assets: [],
+            enqueuePaths: [],
+            counts: ({})
+        };
+    const project = parsed.document.project;
+    const assets = project.assets.map(asset => resolveAsset(asset, project.rootPath, records));
+    const enqueuePaths = [];
     for (const asset of assets) {
         for (const path of asset.enqueuePaths)
-            if (enqueuePaths.indexOf(path) < 0) enqueuePaths.push(path)
+            if (enqueuePaths.indexOf(path) < 0)
+                enqueuePaths.push(path);
     }
-    const counts = { available: 0, pending: 0, missing: 0, unsupported: 0 }
-    for (const asset of assets) counts[asset.state] += 1
+    const counts = {
+        available: 0,
+        pending: 0,
+        missing: 0,
+        unsupported: 0
+    };
+    for (const asset of assets)
+        counts[asset.state] += 1;
     return {
         state: counts.pending > 0 ? "resolving" : "ready",
         error: "",
@@ -116,5 +134,5 @@ function plan(document, records) {
         assets: assets,
         enqueuePaths: enqueuePaths,
         counts: counts
-    }
+    };
 }

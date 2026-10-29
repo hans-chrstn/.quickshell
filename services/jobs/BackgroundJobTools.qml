@@ -21,18 +21,17 @@ Singleton {
     readonly property bool ioPriorityAvailable: ionicePath.length > 0
 
     function wrap(command) {
-        const base = Array.from(command || [])
+        const base = Array.from(command || []);
         if (base.length === 0)
-            return base
-        let wrapped = base
+            return base;
+        let wrapped = base;
         if (ioPriorityAvailable) {
-            wrapped = [ionicePath, "-c", String(ioPriorityClass),
-                "-n", String(ioPriorityLevel)].concat(wrapped)
+            wrapped = [ionicePath, "-c", String(ioPriorityClass), "-n", String(ioPriorityLevel)].concat(wrapped);
         }
         if (cpuPriorityAvailable) {
-            wrapped = [nicePath, "-n", String(cpuNiceLevel)].concat(wrapped)
+            wrapped = [nicePath, "-n", String(cpuNiceLevel)].concat(wrapped);
         }
-        return wrapped
+        return wrapped;
     }
 
     function snapshot() {
@@ -49,33 +48,37 @@ Singleton {
                 priorityClass: ioPriorityAvailable ? ioPriorityClass : 0,
                 priorityLevel: ioPriorityAvailable ? ioPriorityLevel : 0
             }
-        }
+        };
     }
 
     Component.onCompleted: {
-        niceCheck.command = ["/bin/sh", "-c", "command -v nice"]
-        ioniceCheck.command = ["/bin/sh", "-c", "command -v ionice"]
-        niceCheck.running = true
-        ioniceCheck.running = true
+        niceCheck.command = ["/bin/sh", "-c", "command -v nice"];
+        ioniceCheck.command = ["/bin/sh", "-c", "command -v ionice"];
+        niceCheck.running = true;
+        ioniceCheck.running = true;
     }
 
     Process {
         id: niceCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: niceCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: niceCheck.output = text
+        }
         onExited: exitCode => {
-            root.nicePath = exitCode === 0 ? output.trim() : ""
-            root.niceChecked = true
+            root.nicePath = exitCode === 0 ? output.trim() : "";
+            root.niceChecked = true;
         }
     }
 
     Process {
         id: ioniceCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: ioniceCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: ioniceCheck.output = text
+        }
         onExited: exitCode => {
-            root.ionicePath = exitCode === 0 ? output.trim() : ""
-            root.ioniceChecked = true
+            root.ionicePath = exitCode === 0 ? output.trim() : "";
+            root.ioniceChecked = true;
         }
     }
 }

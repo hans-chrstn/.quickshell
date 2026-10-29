@@ -23,6 +23,8 @@ Item {
     readonly property int expandedState: 2
 
     property int presentationState: hiddenState
+    property bool backdropAvailable: true
+    property bool zenMode: false
     property bool edgeHovered: false
     property bool attentionRequested: false
     property string screenName: ""
@@ -34,6 +36,7 @@ Item {
 
     ModuleRegistry {
         id: registry
+        suppressUnsolicited: root.zenMode
         modules: [
             ClockModuleSpec {},
             AudioPrivacyModuleSpec {
@@ -67,7 +70,7 @@ Item {
         const candidate = expanded && registry.attentive ? registry.attentive : registry.current;
         if (!candidate || candidate === presentedModule)
             return;
-        if (!presentedModule || !presentedModule.active || (!presentedModule.lifecycleUsageActive && !presentedModule.attention) || candidate.priority >= presentedModule.priority || (!expanded && expansionProgress <= 0.001)) {
+        if (!presentedModule || !registry.isEligible(presentedModule, false) || (!presentedModule.lifecycleUsageActive && !presentedModule.attention) || candidate.priority >= presentedModule.priority || (!expanded && expansionProgress <= 0.001)) {
             presentedModule = candidate;
             Qt.callLater(reconsider);
         }
@@ -300,6 +303,7 @@ Item {
 
     GlassIslandSurface {
         anchors.fill: parent
+        backdropAvailable: root.backdropAvailable
         expanded: root.expanded
         expansionProgress: root.expansionProgress
     }

@@ -140,6 +140,18 @@ Canvas {
                 ctx.fillRect(5.0, 3.4, 2.5, 10.2);
                 ctx.fillRect(10.0, 3.4, 2.5, 10.2);
             }
+        } else if (root.name === "effects") {
+            const levels = [5.0, 8.5, 12.0];
+            const knobs = [7.0, 11.0, 5.5];
+            for (let index = 0; index < levels.length; ++index) {
+                ctx.beginPath();
+                ctx.moveTo(2.8, levels[index]);
+                ctx.lineTo(14.2, levels[index]);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(knobs[index], levels[index], 1.45, 0, Math.PI * 2);
+                ctx.fill();
+            }
         } else if (root.name === "repeat") {
             ctx.beginPath();
             ctx.moveTo(3.0, 6.0);

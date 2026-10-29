@@ -8,8 +8,7 @@ IslandModule {
 
     moduleId: "settings"
     priority: 85
-    active: (SettingsService.opened || SettingsService.closing)
-        && SettingsService.targetScreenName === screenName
+    active: (SettingsService.opened || SettingsService.closing) && SettingsService.targetScreenName === screenName
     attention: active && !SettingsService.closing
     wantsKeyboard: SettingsService.opened
     collapsedWidth: Design.collapsedWidth
@@ -37,5 +36,7 @@ IslandModule {
         maximumHeight: Design.scaledHeight(720)
     }
 
-    view: Component { SettingsModule { } }
+    view: Component {
+        SettingsModule {}
+    }
 }

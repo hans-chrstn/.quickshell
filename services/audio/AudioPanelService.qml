@@ -12,10 +12,12 @@ Singleton {
     property bool closing: false
     property string targetScreenName: ""
     property string currentPage: "levels"
-    readonly property var pages: ["levels", "output", "input", "apps"]
+    readonly property var pages: ["levels", "output", "input", "apps", "scenes", "effects"]
 
     function syncInventoryDemand() {
-        AudioService.setInventoryConsumer("audio-panel.inventory", (opened || closing) && currentPage !== "levels");
+        const active = opened || closing;
+        AudioService.setInventoryConsumer("audio-panel.inventory", active && ["output", "input", "apps", "scenes"].includes(currentPage));
+        EasyEffectsService.setConsumer("audio-panel.effects", active && ["scenes", "effects"].includes(currentPage));
     }
 
     onOpenedChanged: syncInventoryDemand()

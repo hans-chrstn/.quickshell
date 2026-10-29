@@ -12,37 +12,29 @@ Item {
     property real renderScale: 1
     property bool previewMode: false
 
-    readonly property string backend:
-        WallpaperRenderSupportService.animatedBackendFor(media)
-    readonly property string state: backend.length === 0 ? "error"
-        : renderer.item ? renderer.item.state : "loading"
-    readonly property string error: backend.length === 0
-        ? "Animated wallpaper format is unavailable on this Qt stack"
-        : renderer.item ? renderer.item.error : ""
-    readonly property bool firstFrameReady:
-        Boolean(renderer.item?.firstFrameReady)
+    readonly property string backend: WallpaperRenderSupportService.animatedBackendFor(media)
+    readonly property string state: backend.length === 0 ? "error" : renderer.item ? renderer.item.state : "loading"
+    readonly property string error: backend.length === 0 ? "Animated wallpaper format is unavailable on this Qt stack" : renderer.item ? renderer.item.error : ""
+    readonly property bool firstFrameReady: Boolean(renderer.item?.firstFrameReady)
     readonly property bool posterReady: posterImage.status === Image.Ready
     readonly property bool visualReady: firstFrameReady || posterReady
-    readonly property bool playbackActive:
-        Boolean(renderer.item?.playbackActive
-            ?? renderer.item?.actuallyPlaying)
+    readonly property bool playbackActive: Boolean(renderer.item?.playbackActive ?? renderer.item?.actuallyPlaying)
     readonly property bool suspended: playbackPolicy.suspended
-    readonly property string suspendedReason:
-        playbackPolicy.suspendedReason
+    readonly property string suspendedReason: playbackPolicy.suspendedReason
 
     function rendererSource() {
         if (backend === "image")
-            return Qt.resolvedUrl("AnimatedImageWallpaper.qml")
+            return Qt.resolvedUrl("AnimatedImageWallpaper.qml");
         if (backend === "media")
-            return Qt.resolvedUrl("VideoDecoder.qml")
-        return ""
+            return Qt.resolvedUrl("VideoDecoder.qml");
+        return "";
     }
 
     function loadRenderer() {
-        const source = rendererSource()
+        const source = rendererSource();
         if (String(source).length === 0) {
-            renderer.source = ""
-            return
+            renderer.source = "";
+            return;
         }
         const properties = backend === "image" ? {
             path: root.path,
@@ -51,17 +43,17 @@ Item {
         } : {
             path: root.path,
             playbackAllowed: root.previewMode || playbackPolicy.playbackAllowed
-        }
-        renderer.setSource(source, properties)
+        };
+        renderer.setSource(source, properties);
     }
 
     function syncRenderer() {
         if (!renderer.item)
-            return
-        renderer.item.path = path
-        renderer.item.playbackAllowed = playbackPolicy.playbackAllowed
+            return;
+        renderer.item.path = path;
+        renderer.item.playbackAllowed = playbackPolicy.playbackAllowed;
         if (backend === "image")
-            renderer.item.renderScale = renderScale
+            renderer.item.renderScale = renderScale;
     }
 
     onBackendChanged: loadRenderer()
@@ -94,6 +86,8 @@ Item {
 
     Connections {
         target: playbackPolicy
-        function onPlaybackAllowedChanged() { root.syncRenderer() }
+        function onPlaybackAllowedChanged() {
+            root.syncRenderer();
+        }
     }
 }

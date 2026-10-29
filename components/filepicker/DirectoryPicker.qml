@@ -8,7 +8,7 @@ Item {
     property alias currentPath: picker.currentPath
     property alias showHidden: picker.showHidden
     signal accepted(string path)
-    signal canceled()
+    signal canceled
 
     FilePicker {
         id: picker

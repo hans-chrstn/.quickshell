@@ -224,7 +224,7 @@ Item {
                                 from: 0
                                 to: 1
                                 value: Math.max(0, Math.min(1, Number(streamRow.controlState?.volume) || 0))
-                                accentColor: streamRow.controlState?.muted ? Theme.textTertiary : Theme.textPrimary
+                                accentColor: streamRow.controlState?.muted ? Theme.textTertiary : Theme.selection
                                 Accessible.name: root.displayName + " stream " + (streamRow.index + 1) + " sound level"
                                 onLevelEdited: value => AudioService.setApplicationStreamVolume(root.application.key, streamRow.key, value)
                                 onStepRequested: steps => AudioService.adjustApplicationStreamVolume(root.application.key, streamRow.key, steps)

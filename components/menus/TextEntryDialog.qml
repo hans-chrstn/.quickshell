@@ -1,10 +1,9 @@
 import QtQuick
-import QtQuick.Controls
 import qs.components.input
 import qs.components.menus
 import qs.core
 
-Dialog {
+ModalDialog {
     id: root
 
     property string message: ""
@@ -47,16 +46,7 @@ Dialog {
         return true;
     }
 
-    parent: Overlay.overlay
-    width: Math.min(380, Math.max(0, (parent?.width ?? 396) - 16))
-    x: parent ? (parent.width - width) / 2 : 0
-    y: parent ? Math.max(8, (parent.height - implicitHeight) / 2) : 0
-    padding: 16
-    modal: true
-    focus: true
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    header: null
-    footer: null
+    preferredWidth: 380
     onAboutToShow: {
         currentIndex = 1;
         validationMessage = "";
@@ -65,13 +55,6 @@ Dialog {
         entry.forceEditorFocus();
         entry.selectAll();
     })
-
-    background: Rectangle {
-        radius: 18
-        color: Theme.overlay
-        border.width: 1
-        border.color: Theme.separatorStrong
-    }
 
     contentItem: Column {
         spacing: 12

@@ -24,141 +24,128 @@ Singleton {
     readonly property bool observing: consumers > 0 && monitor.running
 
     function acquire() {
-        consumers += 1
+        consumers += 1;
         if (consumers === 1)
-            ensureObservation()
+            ensureObservation();
     }
 
     function release() {
-        consumers = Math.max(0, consumers - 1)
+        consumers = Math.max(0, consumers - 1);
         if (consumers > 0)
-            return
-        retryTimer.stop()
-        refreshPending = false
-        if (monitor.running) monitor.running = false
-        if (refreshProcess.running) refreshProcess.running = false
-        available = false
-        locked = false
-        preparingForSleep = false
-        synthetic = false
-        awaitingSleepValue = false
+            return;
+        retryTimer.stop();
+        refreshPending = false;
+        if (monitor.running)
+            monitor.running = false;
+        if (refreshProcess.running)
+            refreshProcess.running = false;
+        available = false;
+        locked = false;
+        preparingForSleep = false;
+        synthetic = false;
+        awaitingSleepValue = false;
     }
 
     function ensureObservation() {
         if (toolsChecked) {
-            startObservation()
-            return
+            startObservation();
+            return;
         }
         if (!resolver.running) {
-            resolver.output = ""
-            resolver.command = [
-                "/bin/sh", "-c",
-                "printf 'loginctl='; command -v loginctl || true; "
-                    + "printf 'dbus-monitor='; command -v dbus-monitor || true"
-            ]
-            resolver.running = true
+            resolver.output = "";
+            resolver.command = ["/bin/sh", "-c", "printf 'loginctl='; command -v loginctl || true; " + "printf 'dbus-monitor='; command -v dbus-monitor || true"];
+            resolver.running = true;
         }
     }
 
     function startObservation() {
         if (consumers === 0)
-            return
-        if (sessionId.length === 0 || loginctlPath.length === 0
-                || dbusMonitorPath.length === 0) {
-            available = false
-            error = sessionId.length === 0
-                ? "The logind session ID is unavailable"
-                : "Session lock tools are unavailable"
-            return
+            return;
+        if (sessionId.length === 0 || loginctlPath.length === 0 || dbusMonitorPath.length === 0) {
+            available = false;
+            error = sessionId.length === 0 ? "The logind session ID is unavailable" : "Session lock tools are unavailable";
+            return;
         }
-        error = ""
-        refresh()
+        error = "";
+        refresh();
         if (!monitor.running) {
-            monitor.command = [
-                dbusMonitorPath, "--system",
-                "type='signal',sender='org.freedesktop.login1',"
-                    + "interface='org.freedesktop.DBus.Properties',"
-                    + "member='PropertiesChanged'",
-                "type='signal',sender='org.freedesktop.login1',"
-                    + "path='/org/freedesktop/login1',"
-                    + "interface='org.freedesktop.login1.Manager',"
-                    + "member='PrepareForSleep'"
-            ]
-            monitor.running = true
+            monitor.command = [dbusMonitorPath, "--system", "type='signal',sender='org.freedesktop.login1'," + "interface='org.freedesktop.DBus.Properties'," + "member='PropertiesChanged'", "type='signal',sender='org.freedesktop.login1'," + "path='/org/freedesktop/login1'," + "interface='org.freedesktop.login1.Manager'," + "member='PrepareForSleep'"];
+            monitor.running = true;
         }
     }
 
     function refresh() {
         if (synthetic || consumers === 0 || loginctlPath.length === 0)
-            return
+            return;
         if (refreshProcess.running) {
-            refreshPending = true
-            return
+            refreshPending = true;
+            return;
         }
-        refreshPending = false
-        refreshProcess.output = ""
-        refreshProcess.command = [
-            loginctlPath, "show-session", sessionId,
-            "--property=LockedHint", "--value"
-        ]
-        refreshProcess.running = true
+        refreshPending = false;
+        refreshProcess.output = "";
+        refreshProcess.command = [loginctlPath, "show-session", sessionId, "--property=LockedHint", "--value"];
+        refreshProcess.running = true;
     }
 
     function setTestState(lockState, sleepState) {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
-            return false
-        synthetic = true
-        available = true
-        error = ""
-        locked = Boolean(lockState)
-        preparingForSleep = Boolean(sleepState)
-        return true
+            return false;
+        synthetic = true;
+        available = true;
+        error = "";
+        locked = Boolean(lockState);
+        preparingForSleep = Boolean(sleepState);
+        return true;
     }
 
     function clearTestState() {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
-            return false
-        synthetic = false
-        preparingForSleep = false
-        refresh()
-        return true
+            return false;
+        synthetic = false;
+        preparingForSleep = false;
+        refresh();
+        return true;
     }
 
     Process {
         id: resolver
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: resolver.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: resolver.output = text
+        }
         onExited: {
             for (const line of String(output || "").split("\n")) {
                 if (line.startsWith("loginctl="))
-                    root.loginctlPath = line.slice(9).trim()
+                    root.loginctlPath = line.slice(9).trim();
                 else if (line.startsWith("dbus-monitor="))
-                    root.dbusMonitorPath = line.slice(13).trim()
+                    root.dbusMonitorPath = line.slice(13).trim();
             }
-            root.toolsChecked = true
-            root.startObservation()
+            root.toolsChecked = true;
+            root.startObservation();
         }
     }
 
     Process {
         id: refreshProcess
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: refreshProcess.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: refreshProcess.output = text
+        }
         onExited: exitCode => {
             if (root.consumers === 0)
-                return
+                return;
             if (root.synthetic)
-                return
+                return;
             if (exitCode === 0) {
-                root.locked = output.trim().toLowerCase() === "yes"
-                root.available = true
-                root.error = ""
+                root.locked = output.trim().toLowerCase() === "yes";
+                root.available = true;
+                root.error = "";
             } else {
-                root.available = false
-                root.error = "Session lock state is unavailable"
+                root.available = false;
+                root.error = "Session lock state is unavailable";
             }
             if (root.refreshPending)
-                Qt.callLater(root.refresh)
+                Qt.callLater(root.refresh);
         }
     }
 
@@ -167,25 +154,24 @@ Singleton {
         stdout: SplitParser {
             onRead: line => {
                 if (root.synthetic)
-                    return
-                const value = String(line || "")
+                    return;
+                const value = String(line || "");
                 if (value.indexOf('string "LockedHint"') >= 0)
-                    root.refresh()
+                    root.refresh();
                 if (value.indexOf("member=PrepareForSleep") >= 0) {
-                    root.awaitingSleepValue = true
+                    root.awaitingSleepValue = true;
                 } else if (root.awaitingSleepValue) {
-                    const normalized = value.trim().toLowerCase()
-                    if (normalized === "boolean true"
-                            || normalized === "boolean false") {
-                        root.awaitingSleepValue = false
-                        root.preparingForSleep = normalized.endsWith("true")
+                    const normalized = value.trim().toLowerCase();
+                    if (normalized === "boolean true" || normalized === "boolean false") {
+                        root.awaitingSleepValue = false;
+                        root.preparingForSleep = normalized.endsWith("true");
                     }
                 }
             }
         }
         onExited: {
             if (root.consumers > 0)
-                retryTimer.restart()
+                retryTimer.restart();
         }
     }
 
@@ -205,6 +191,6 @@ Singleton {
             preparingForSleep: preparingForSleep,
             synthetic: synthetic,
             error: error
-        }
+        };
     }
 }

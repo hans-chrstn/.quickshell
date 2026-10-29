@@ -226,7 +226,7 @@ Item {
                     from: 0
                     to: 1
                     value: Math.max(0, Math.min(1, Number(row.applicationState?.volume) || 0))
-                    accentColor: row.applicationState?.muted ? Theme.textTertiary : Theme.textPrimary
+                    accentColor: row.applicationState?.muted ? Theme.textTertiary : Theme.selection
                     Accessible.name: row.displayName + " sound level"
                     onLevelEdited: value => AudioService.setApplicationVolume(row.key, value)
                     onStepRequested: steps => AudioService.adjustApplicationVolume(row.key, steps)

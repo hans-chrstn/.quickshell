@@ -8,10 +8,9 @@ IslandModule {
 
     moduleId: "notification"
     priority: 60
-    active: NotificationService.presentationVisible
-        && NotificationService.current !== null
-        && NotificationService.current.screenName === screenName
+    active: NotificationService.presentationVisible && NotificationService.current !== null && NotificationService.current.screenName === screenName
     attention: active && NotificationService.presentationVisible
+    unsolicited: true
     collapsedWidth: Design.scaledWidth(260)
     expandedWidth: Design.scaledWidth(440)
     expandedHeight: Design.scaledHeight(96)
@@ -37,5 +36,7 @@ IslandModule {
         maximumHeight: Design.scaledHeight(160)
     }
 
-    view: Component { NotificationModule {} }
+    view: Component {
+        NotificationModule {}
+    }
 }

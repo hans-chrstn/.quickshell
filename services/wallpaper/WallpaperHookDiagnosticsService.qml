@@ -6,9 +6,6 @@ import "WallpaperHookDiagnostics.js" as Diagnostics
 
 Singleton {
     function snapshot() {
-        return Diagnostics.derive(
-            WallpaperHookService.snapshot(),
-            WallpaperHookExecutorService.snapshot(),
-            WallpaperPlaylistApplicationService.snapshot())
+        return Diagnostics.derive(WallpaperHookService.snapshot(), WallpaperHookExecutorService.snapshot(), WallpaperPlaylistApplicationService.snapshot());
     }
 }

@@ -17,13 +17,13 @@ TestCase {
         }, {
             availableWidth: 1920,
             availableHeight: 1080
-        })
+        });
 
-        compare(result.source, "declared")
-        compare(result.resolvedWidth, 220)
-        compare(result.resolvedHeight, 34)
-        verify(!result.widthConstrained)
-        verify(!result.heightConstrained)
+        compare(result.source, "declared");
+        compare(result.resolvedWidth, 220);
+        compare(result.resolvedHeight, 34);
+        verify(!result.widthConstrained);
+        verify(!result.heightConstrained);
     }
 
     function test_intrinsicPreferenceIsConstrainedByMonitor() {
@@ -38,16 +38,16 @@ TestCase {
         }, {
             availableWidth: 700,
             availableHeight: 400
-        })
+        });
 
-        compare(result.source, "intrinsic")
-        compare(result.requestedWidth, 780)
-        compare(result.resolvedWidth, 700)
-        compare(result.resolvedHeight, 400)
-        verify(result.widthConstrained)
-        verify(result.heightConstrained)
-        verify(!result.widthBelowMinimum)
-        verify(!result.heightBelowMinimum)
+        compare(result.source, "intrinsic");
+        compare(result.requestedWidth, 780);
+        compare(result.resolvedWidth, 700);
+        compare(result.resolvedHeight, 400);
+        verify(result.widthConstrained);
+        verify(result.heightConstrained);
+        verify(!result.widthBelowMinimum);
+        verify(!result.heightBelowMinimum);
     }
 
     function test_intrinsicMeasurementReplacesPreferredSize() {
@@ -65,13 +65,13 @@ TestCase {
         }, {}, {
             width: 286,
             height: 66
-        })
+        });
 
-        verify(result.measurementReady)
-        compare(result.requestedWidth, 286)
-        compare(result.requestedHeight, 66)
-        compare(result.resolvedWidth, 286)
-        compare(result.resolvedHeight, 66)
+        verify(result.measurementReady);
+        compare(result.requestedWidth, 286);
+        compare(result.requestedHeight, 66);
+        compare(result.resolvedWidth, 286);
+        compare(result.resolvedHeight, 66);
     }
 
     function test_missingIntrinsicMeasurementUsesFallbackPolicy() {
@@ -86,11 +86,11 @@ TestCase {
         }, {
             availableWidth: 1920,
             availableHeight: 1080
-        })
+        });
 
-        verify(!result.measurementReady)
-        compare(result.resolvedWidth, 330)
-        compare(result.resolvedHeight, 88)
+        verify(!result.measurementReady);
+        compare(result.resolvedWidth, 330);
+        compare(result.resolvedHeight, 88);
     }
 
     function test_unavoidableMinimumViolationIsExplicit() {
@@ -104,12 +104,12 @@ TestCase {
         }, {
             availableWidth: 500,
             availableHeight: 240
-        })
+        });
 
-        compare(result.resolvedWidth, 500)
-        compare(result.resolvedHeight, 240)
-        verify(result.widthBelowMinimum)
-        verify(result.heightBelowMinimum)
+        compare(result.resolvedWidth, 500);
+        compare(result.resolvedHeight, 240);
+        verify(result.widthBelowMinimum);
+        verify(result.heightBelowMinimum);
     }
 
     function test_invalidValuesUseBoundedFallbacks() {
@@ -124,13 +124,13 @@ TestCase {
         }, {}, {
             width: 330,
             height: 88
-        })
+        });
 
-        compare(result.source, "declared")
-        compare(result.requestedWidth, 330)
-        compare(result.requestedHeight, 88)
-        compare(result.resolvedWidth, 330)
-        compare(result.resolvedHeight, 88)
+        compare(result.source, "declared");
+        compare(result.requestedWidth, 330);
+        compare(result.requestedHeight, 88);
+        compare(result.resolvedWidth, 330);
+        compare(result.resolvedHeight, 88);
     }
 
     function test_maximumCannotFallBelowMinimum() {
@@ -144,13 +144,13 @@ TestCase {
         }, {
             availableWidth: 1000,
             availableHeight: 1000
-        })
+        });
 
-        compare(result.minimumWidth, 300)
-        compare(result.maximumWidth, 300)
-        compare(result.requestedWidth, 300)
-        compare(result.minimumHeight, 80)
-        compare(result.maximumHeight, 80)
-        compare(result.requestedHeight, 80)
+        compare(result.minimumWidth, 300);
+        compare(result.maximumWidth, 300);
+        compare(result.requestedWidth, 300);
+        compare(result.minimumHeight, 80);
+        compare(result.maximumHeight, 80);
+        compare(result.requestedHeight, 80);
     }
 }

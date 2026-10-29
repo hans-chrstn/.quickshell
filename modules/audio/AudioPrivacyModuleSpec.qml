@@ -10,6 +10,7 @@ IslandModule {
     priority: 45
     active: AudioPrivacyPresentationService.active && AudioPrivacyPresentationService.targetScreenName === screenName
     attention: active
+    unsolicited: true
     collapsedWidth: Design.scaledWidth(260)
     collapsedHeight: Design.collapsedHeight
     expandedWidth: Design.scaledWidth(440)

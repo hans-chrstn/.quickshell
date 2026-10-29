@@ -18,7 +18,9 @@ SettingPage {
             Layout.fillWidth: true
             title: "Collapsed Width"
             description: "Width of the island in its resting state"
-            from: 100; to: 300; stepSize: 5
+            from: 100
+            to: 300
+            stepSize: 5
             unit: "px"
             value: SettingsService.islandCollapsedWidth
             onValueEdited: value => SettingsService.setSetting("islandCollapsedWidth", value)
@@ -28,7 +30,9 @@ SettingPage {
             Layout.fillWidth: true
             title: "Expanded Width"
             description: "Width applied proportionally to every island module"
-            from: 90; to: 125; stepSize: 1
+            from: 90
+            to: 125
+            stepSize: 1
             unit: "%"
             value: SettingsService.islandWidthPercent
             onValueEdited: value => SettingsService.setSetting("islandWidthPercent", value)
@@ -38,7 +42,9 @@ SettingPage {
             Layout.fillWidth: true
             title: "Expanded Height"
             description: "Height applied proportionally to every island module"
-            from: 90; to: 125; stepSize: 1
+            from: 90
+            to: 125
+            stepSize: 1
             unit: "%"
             value: SettingsService.islandHeightPercent
             onValueEdited: value => SettingsService.setSetting("islandHeightPercent", value)
@@ -48,7 +54,9 @@ SettingPage {
             Layout.fillWidth: true
             title: "Body Corner Radius"
             description: "Rounding of the bottom corners of the island"
-            from: 0; to: 40; stepSize: 1
+            from: 0
+            to: 40
+            stepSize: 1
             unit: "px"
             value: SettingsService.islandBodyRadius
             onValueEdited: value => SettingsService.setSetting("islandBodyRadius", value)
@@ -58,7 +66,9 @@ SettingPage {
             Layout.fillWidth: true
             title: "Wing Size"
             description: "Width of the side wings that anchor to the top edge"
-            from: 0; to: 40; stepSize: 1
+            from: 0
+            to: 40
+            stepSize: 1
             unit: "px"
             value: SettingsService.islandWing
             onValueEdited: value => SettingsService.setSetting("islandWing", value)
@@ -72,7 +82,9 @@ SettingPage {
             onToggled: newValue => SettingsService.setSetting("enableBlur", newValue)
         }
 
-        Item { Layout.fillHeight: true }
+        Item {
+            Layout.fillHeight: true
+        }
 
         SettingButton {
             label: "Reset Style"

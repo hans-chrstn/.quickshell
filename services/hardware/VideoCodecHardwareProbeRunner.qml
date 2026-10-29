@@ -15,32 +15,27 @@ Item {
 
     function start(path) {
         if (busy || String(path || "").length === 0)
-            return false
-        generation += 1
-        probeProcess.output = ""
-        probeProcess.operationGeneration = generation
+            return false;
+        generation += 1;
+        probeProcess.output = "";
+        probeProcess.operationGeneration = generation;
         probeProcess.environment = {
-            QT_LOGGING_RULES: "qt.multimedia.ffmpeg.hwaccel=true;"
-                + "qt.multimedia.ffmpeg.hwaccelvaapi=true;"
-                + "qt.multimedia.ffmpeg.streamdecoder=true",
+            QT_LOGGING_RULES: "qt.multimedia.ffmpeg.hwaccel=true;" + "qt.multimedia.ffmpeg.hwaccelvaapi=true;" + "qt.multimedia.ffmpeg.streamdecoder=true",
             QS_CODEC_PROBE_URL: String(LocalUrl.fromPath(path))
-        }
-        probeProcess.command = ["/proc/self/exe", "-p",
-            Quickshell.shellPath(
-                "services/hardware/probes/VideoHardwareProbe.qml"),
-            "--no-color", "-v"]
-        probeProcess.running = true
-        timeoutTimer.restart()
-        return true
+        };
+        probeProcess.command = ["/proc/self/exe", "-p", Quickshell.shellPath("services/hardware/probes/VideoHardwareProbe.qml"), "--no-color", "-v"];
+        probeProcess.running = true;
+        timeoutTimer.restart();
+        return true;
     }
 
     function cancel() {
         if (!busy)
-            return false
-        generation += 1
-        timeoutTimer.stop()
-        probeProcess.signal(15)
-        return true
+            return false;
+        generation += 1;
+        timeoutTimer.stop();
+        probeProcess.signal(15);
+        return true;
     }
 
     Process {
@@ -55,9 +50,9 @@ Item {
         }
         onExited: exitCode => {
             if (operationGeneration !== root.generation)
-                return
-            timeoutTimer.stop()
-            root.completed(output)
+                return;
+            timeoutTimer.stop();
+            root.completed(output);
         }
     }
 
@@ -66,7 +61,7 @@ Item {
         interval: root.durationMs
         onTriggered: {
             if (probeProcess.running)
-                probeProcess.signal(15)
+                probeProcess.signal(15);
         }
     }
 }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 
 Item {
@@ -36,39 +37,14 @@ Item {
             }
         }
 
-        Rectangle {
+        ToggleSwitch {
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            Layout.preferredWidth: 36
-            Layout.preferredHeight: 20
-            radius: 10
-            color: root.checked ? Theme.accent : Theme.fillElevated
-            border.width: 1
-            border.color: Theme.separator
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 120
-                }
-            }
-
-            Rectangle {
-                x: root.checked ? parent.width - width - 2 : 2
-                y: 2
-                width: 16
-                height: 16
-                radius: 8
-                color: Theme.textPrimary
-                Behavior on x {
-                    NumberAnimation {
-                        duration: 120
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-
-            TapHandler {
-                onTapped: root.toggled(!root.checked)
-            }
+            Layout.preferredWidth: 43
+            Layout.preferredHeight: 25
+            checked: root.checked
+            activeColor: root.dangerous ? Theme.statusDanger : Theme.selection
+            accessibleName: root.title
+            onToggled: checked => root.toggled(checked)
         }
     }
 }

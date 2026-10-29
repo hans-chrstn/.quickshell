@@ -114,9 +114,21 @@ TestCase {
 
     function test_confirmedRemovalKeepsAssetsAndOtherTracks() {
         const original = project();
-        original.project.assets = [{ id: "asset", sourcePath: "/untouched.png" }];
+        original.project.assets = [
+            {
+                id: "asset",
+                sourcePath: "/untouched.png"
+            }
+        ];
         original.project.durationMs = 10000;
-        original.project.tracks[0].clips = [{ id: "one" }, { id: "two" }];
+        original.project.tracks[0].clips = [
+            {
+                id: "one"
+            },
+            {
+                id: "two"
+            }
+        ];
         const before = JSON.stringify(original);
         const review = Tracks.removalReview(original, "visual");
         compare(review.clipCount, 2);
@@ -132,7 +144,12 @@ TestCase {
 
     function test_rejectsStaleAndCrossProjectConfirmation() {
         const original = project();
-        original.project.tracks[0].clips = [{ id: "one", durationMs: 1000 }];
+        original.project.tracks[0].clips = [
+            {
+                id: "one",
+                durationMs: 1000
+            }
+        ];
         const review = Tracks.removalReview(original, "visual");
         original.project.tracks[0].clips[0].durationMs = 2000;
         verify(!Tracks.removeTrack(original, "visual", review).accepted);
@@ -148,7 +165,11 @@ TestCase {
     function test_emptyTrackBecomingPopulatedRequiresNewReview() {
         const original = project();
         const review = Tracks.removalReview(original, "visual");
-        original.project.tracks[0].clips = [{ id: "new" }];
+        original.project.tracks[0].clips = [
+            {
+                id: "new"
+            }
+        ];
         verify(!Tracks.removeTrack(original, "visual", review).accepted);
         verify(!Tracks.removeTrack(original, "visual").accepted);
         compare(original.project.tracks.length, 2);

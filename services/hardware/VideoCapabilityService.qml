@@ -24,74 +24,67 @@ Singleton {
     property var codecEvidence: ({})
 
     readonly property bool busy: state === "discovering"
-    readonly property var verifiedDecodeCodecs:
-        CapabilityParser.mergedCodecs(deviceRecords)
-    readonly property string recommendedCodec:
-        CapabilityParser.recommendedCodec(verifiedDecodeCodecs)
-    readonly property bool recommendationVerified:
-        verifiedDecodeCodecs.indexOf(recommendedCodec) >= 0
-    readonly property var codecCandidates: CapabilityParser.codecCandidates(
-        verifiedDecodeCodecs, softwareEncoders)
-    readonly property var codecEvaluations: CodecEvidence.evaluateCandidates(
-        codecCandidates, codecEvidence)
-    readonly property var optimizationCandidate: CodecSelection.select(
-        codecEvaluations, codecCandidates)
+    readonly property var verifiedDecodeCodecs: CapabilityParser.mergedCodecs(deviceRecords)
+    readonly property string recommendedCodec: CapabilityParser.recommendedCodec(verifiedDecodeCodecs)
+    readonly property bool recommendationVerified: verifiedDecodeCodecs.indexOf(recommendedCodec) >= 0
+    readonly property var codecCandidates: CapabilityParser.codecCandidates(verifiedDecodeCodecs, softwareEncoders)
+    readonly property var codecEvaluations: CodecEvidence.evaluateCandidates(codecCandidates, codecEvidence)
+    readonly property var optimizationCandidate: CodecSelection.select(codecEvaluations, codecCandidates)
 
     function refresh() {
         if (busy)
-            return false
-        state = "discovering"
-        error = ""
-        vainfoPath = ""
-        renderNodes = []
-        deviceRecords = []
-        nodeIndex = 0
-        hardwareFinished = false
-        encoderChecked = false
-        ffmpegPath = ""
-        softwareEncoders = []
-        toolCheck.output = ""
-        toolCheck.command = ["/bin/sh", "-c", "command -v vainfo"]
-        toolCheck.running = true
-        encoderToolCheck.output = ""
-        encoderToolCheck.command = ["/bin/sh", "-c", "command -v ffmpeg"]
-        encoderToolCheck.running = true
-        return true
+            return false;
+        state = "discovering";
+        error = "";
+        vainfoPath = "";
+        renderNodes = [];
+        deviceRecords = [];
+        nodeIndex = 0;
+        hardwareFinished = false;
+        encoderChecked = false;
+        ffmpegPath = "";
+        softwareEncoders = [];
+        toolCheck.output = "";
+        toolCheck.command = ["/bin/sh", "-c", "command -v vainfo"];
+        toolCheck.running = true;
+        encoderToolCheck.output = "";
+        encoderToolCheck.command = ["/bin/sh", "-c", "command -v ffmpeg"];
+        encoderToolCheck.running = true;
+        return true;
     }
 
     function acceptBenchmarkRecords(records) {
-        codecEvidence = CodecEvidence.fromBenchmarkRecords(records)
+        codecEvidence = CodecEvidence.fromBenchmarkRecords(records);
     }
 
     function clearBenchmarkEvidence() {
-        codecEvidence = ({})
+        codecEvidence = ({});
     }
 
     function finishDiscovery() {
         if (!hardwareFinished || !encoderChecked)
-            return
+            return;
         if (deviceRecords.length > 0) {
-            state = "ready"
-            return
+            state = "ready";
+            return;
         }
-        state = "unavailable"
+        state = "unavailable";
         if (error.length === 0)
-            error = "Hardware decode profiles are unavailable; using conservative H.264"
+            error = "Hardware decode profiles are unavailable; using conservative H.264";
     }
 
     function inspectNextNode() {
         if (nodeIndex >= renderNodes.length) {
-            hardwareFinished = true
+            hardwareFinished = true;
             if (deviceRecords.length === 0 && error.length === 0)
-                error = "No VAAPI render node could be inspected"
-            finishDiscovery()
-            return
+                error = "No VAAPI render node could be inspected";
+            finishDiscovery();
+            return;
         }
-        const node = renderNodes[nodeIndex]
-        profileCheck.output = ""
-        profileCheck.command = [vainfoPath, "--display", "drm",
-            "--device", node]
-        profileCheck.running = true
+        const node = renderNodes[nodeIndex];
+        profileCheck.output = "";
+        profileCheck.command = [vainfoPath, "--display", "drm", "--device", node];
+        profileCheck.running = true;
     }
 
     function snapshot() {
@@ -109,73 +102,73 @@ Singleton {
             codecEvaluations: JsonCopy.value(codecEvaluations),
             optimizationCandidate: JsonCopy.value(optimizationCandidate),
             conservativeCodec: "h264",
-            autoSelectionReady:
-                CodecEvidence.automaticSelectionReady(codecEvaluations),
-            fallbackPolicy: recommendationVerified ? "none"
-                : "conservative-h264"
-        }
+            autoSelectionReady: CodecEvidence.automaticSelectionReady(codecEvaluations),
+            fallbackPolicy: recommendationVerified ? "none" : "conservative-h264"
+        };
     }
 
     Process {
         id: toolCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: toolCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: toolCheck.output = text
+        }
         onExited: exitCode => {
-            root.vainfoPath = exitCode === 0 ? output.trim() : ""
+            root.vainfoPath = exitCode === 0 ? output.trim() : "";
             if (root.vainfoPath.length === 0) {
-                root.error = "vainfo is unavailable; using conservative H.264"
-                root.hardwareFinished = true
-                root.finishDiscovery()
-                return
+                root.error = "vainfo is unavailable; using conservative H.264";
+                root.hardwareFinished = true;
+                root.finishDiscovery();
+                return;
             }
-            nodeCheck.output = ""
-            nodeCheck.command = ["find", "/dev/dri", "-maxdepth", "1",
-                "-type", "c", "-name", "renderD*", "-print"]
-            nodeCheck.running = true
+            nodeCheck.output = "";
+            nodeCheck.command = ["find", "/dev/dri", "-maxdepth", "1", "-type", "c", "-name", "renderD*", "-print"];
+            nodeCheck.running = true;
         }
     }
 
     Process {
         id: nodeCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: nodeCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: nodeCheck.output = text
+        }
         onExited: exitCode => {
-            root.renderNodes = exitCode === 0 ? output.split(/\r?\n/)
-                .map(value => value.trim()).filter(value => value.length > 0)
-                .sort() : []
+            root.renderNodes = exitCode === 0 ? output.split(/\r?\n/).map(value => value.trim()).filter(value => value.length > 0).sort() : [];
             if (root.renderNodes.length === 0) {
-                root.error = "No DRM render nodes are available; using conservative H.264"
-                root.hardwareFinished = true
-                root.finishDiscovery()
-                return
+                root.error = "No DRM render nodes are available; using conservative H.264";
+                root.hardwareFinished = true;
+                root.finishDiscovery();
+                return;
             }
-            root.nodeIndex = 0
-            root.inspectNextNode()
+            root.nodeIndex = 0;
+            root.inspectNextNode();
         }
     }
 
     Process {
         id: profileCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: profileCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: profileCheck.output = text
+        }
         stderr: StdioCollector {
             onStreamFinished: profileCheck.output += "\n" + text
         }
         onExited: exitCode => {
-            const node = root.renderNodes[root.nodeIndex]
+            const node = root.renderNodes[root.nodeIndex];
             if (exitCode === 0) {
-                const record = CapabilityParser.parseVainfo(output, node)
+                const record = CapabilityParser.parseVainfo(output, node);
                 if (record.decodeCodecs.length > 0) {
-                    const updated = root.deviceRecords.slice()
-                    updated.push(record)
-                    root.deviceRecords = updated
+                    const updated = root.deviceRecords.slice();
+                    updated.push(record);
+                    root.deviceRecords = updated;
                 }
             }
-            root.nodeIndex += 1
-            root.inspectNextNode()
+            root.nodeIndex += 1;
+            root.inspectNextNode();
         }
     }
-
 
     Process {
         id: encoderToolCheck
@@ -184,30 +177,31 @@ Singleton {
             onStreamFinished: encoderToolCheck.output = text
         }
         onExited: exitCode => {
-            root.ffmpegPath = exitCode === 0 ? output.trim() : ""
+            root.ffmpegPath = exitCode === 0 ? output.trim() : "";
             if (root.ffmpegPath.length === 0) {
-                root.encoderChecked = true
-                root.finishDiscovery()
-                return
+                root.encoderChecked = true;
+                root.finishDiscovery();
+                return;
             }
-            encoderCheck.output = ""
-            encoderCheck.command = [root.ffmpegPath, "-hide_banner", "-encoders"]
-            encoderCheck.running = true
+            encoderCheck.output = "";
+            encoderCheck.command = [root.ffmpegPath, "-hide_banner", "-encoders"];
+            encoderCheck.running = true;
         }
     }
 
     Process {
         id: encoderCheck
         property string output: ""
-        stdout: StdioCollector { onStreamFinished: encoderCheck.output = text }
+        stdout: StdioCollector {
+            onStreamFinished: encoderCheck.output = text
+        }
         stderr: StdioCollector {
             onStreamFinished: encoderCheck.output += "\n" + text
         }
         onExited: exitCode => {
-            root.softwareEncoders = exitCode === 0
-                ? CapabilityParser.parseEncoders(output) : []
-            root.encoderChecked = true
-            root.finishDiscovery()
+            root.softwareEncoders = exitCode === 0 ? CapabilityParser.parseEncoders(output) : [];
+            root.encoderChecked = true;
+            root.finishDiscovery();
         }
     }
 }

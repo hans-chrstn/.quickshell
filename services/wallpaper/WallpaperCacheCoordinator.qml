@@ -10,17 +10,21 @@ Item {
     Component.onCompleted: startupTimer.start()
 
     function schedule() {
-        cleanupTimer.restart()
+        cleanupTimer.restart();
     }
 
     Connections {
         target: WallpaperPosterService
-        function onRecordsChanged() { root.schedule() }
+        function onRecordsChanged() {
+            root.schedule();
+        }
     }
 
     Connections {
         target: WallpaperOptimizationService
-        function onRecordsChanged() { root.schedule() }
+        function onRecordsChanged() {
+            root.schedule();
+        }
     }
 
     property Timer startupTimer: Timer {

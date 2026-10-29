@@ -1,12 +1,18 @@
 import QtQuick
 import Quickshell.Services.Pipewire
+import "EasyEffectsPathModel.js" as EasyEffectsPathModel
 
 QtObject {
     id: root
 
     readonly property bool ready: Pipewire.ready
-    readonly property var outputNode: Pipewire.defaultAudioSink
-    readonly property var inputNode: Pipewire.defaultAudioSource
+    readonly property var rawOutputNode: Pipewire.defaultAudioSink
+    readonly property var rawInputNode: Pipewire.defaultAudioSource
+    readonly property var availableNodes: Pipewire.nodes?.values || []
+    readonly property var outputResolution: EasyEffectsPathModel.resolution("output", rawOutputNode, availableNodes)
+    readonly property var inputResolution: EasyEffectsPathModel.resolution("input", rawInputNode, availableNodes)
+    readonly property var outputNode: nodeById(outputResolution.targetId) || rawOutputNode
+    readonly property var inputNode: nodeById(inputResolution.targetId) || rawInputNode
     readonly property var trackedNodes: {
         const result = [];
         if (outputNode)
@@ -18,6 +24,11 @@ QtObject {
     property var output: unavailableRecord("output")
     property var input: unavailableRecord("input")
     property int revision: 0
+
+    function nodeById(nodeId) {
+        const targetId = Number(nodeId);
+        return availableNodes.find(node => Number(node?.id) === targetId) || null;
+    }
 
     function unavailableRecord(role) {
         return {
@@ -37,15 +48,19 @@ QtObject {
         };
     }
 
-    function recordFor(role, node) {
+    function recordFor(role, node, resolution) {
         const available = !!node;
         const nodeReady = available && !!node.ready && !!node.audio;
         return {
             role: role,
             available: available,
             id: available ? Number(node.id) : -1,
+            defaultNodeId: Number(resolution?.defaultId) || -1,
             key: available ? role + ":" + String(node.name || "") : "",
             name: available ? String(node.description || node.nickname || node.name || "") : "",
+            resolution: String(resolution?.code || "default-unavailable"),
+            virtualDefault: resolution?.virtualDefault === true,
+            mapped: resolution?.mapped === true,
             ready: nodeReady,
             volume: nodeReady ? Number(node.audio.volume) : null,
             muted: nodeReady ? !!node.audio.muted : null,
@@ -59,8 +74,8 @@ QtObject {
     }
 
     function publish() {
-        output = recordFor("output", outputNode);
-        input = recordFor("input", inputNode);
+        output = recordFor("output", outputNode, outputResolution);
+        input = recordFor("input", inputNode, inputResolution);
         revision += 1;
     }
 
@@ -145,6 +160,14 @@ QtObject {
         }
 
         function onDefaultAudioSourceChanged() {
+            root.schedulePublish();
+        }
+    }
+
+    property Connections nodeListChanges: Connections {
+        target: Pipewire.nodes
+
+        function onValuesChanged() {
             root.schedulePublish();
         }
     }

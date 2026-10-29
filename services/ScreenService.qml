@@ -9,13 +9,13 @@ Singleton {
         if (preferredName) {
             for (let screen of Quickshell.screens) {
                 if (screen.name === preferredName)
-                    return preferredName
+                    return preferredName;
             }
         }
 
-        const focused = Hyprland.focusedMonitor?.name ?? ""
+        const focused = Hyprland.focusedMonitor?.name ?? "";
         if (focused)
-            return focused
-        return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : ""
+            return focused;
+        return Quickshell.screens.length > 0 ? Quickshell.screens[0].name : "";
     }
 }

@@ -12,25 +12,24 @@ Timer {
     repeat: false
 
     function startFocus(): void {
-        attempts = 0
+        attempts = 0;
         if (targetItem) {
-            targetItem.forceActiveFocus()
+            targetItem.forceActiveFocus();
             if (!targetItem.activeFocus && maxAttempts > 0) {
-                attempts = 1
-                restart()
+                attempts = 1;
+                restart();
             }
         }
     }
 
     onTriggered: {
         if (activeService && !activeService.opened)
-            return
-
+            return;
         if (targetItem) {
-            targetItem.forceActiveFocus()
+            targetItem.forceActiveFocus();
             if (!targetItem.activeFocus && attempts < maxAttempts) {
-                attempts += 1
-                restart()
+                attempts += 1;
+                restart();
             }
         }
     }

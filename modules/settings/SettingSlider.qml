@@ -1,6 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
+import qs.components
 import qs.core
 
 Item {
@@ -45,58 +45,29 @@ Item {
 
             Text {
                 text: Math.round(root.value) + " " + root.unit
-                color: Theme.textSecondary
+                color: control.activeFocus || control.pressed ? Theme.selection : Theme.textSecondary
                 font.family: Design.fontMono
                 font.pixelSize: 10
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Design.motionStateDuration
+                        easing.type: Design.motionStandardEasing
+                    }
+                }
             }
         }
 
-        Slider {
+        ValueSlider {
             id: control
             Layout.fillWidth: true
-            Layout.preferredHeight: 16
+            Layout.preferredHeight: 30
             from: root.from
             to: root.to
             stepSize: root.stepSize
             value: root.value
-            onMoved: root.valueEdited(value)
-
-            background: Rectangle {
-                x: control.leftPadding
-                y: control.topPadding + control.availableHeight / 2 - height / 2
-                width: control.availableWidth
-                height: 3
-                radius: 2
-                color: Theme.separator
-
-                Rectangle {
-                    width: control.visualPosition * parent.width
-                    height: parent.height
-                    radius: parent.radius
-                    color: Theme.accent
-                }
-            }
-
-            handle: Rectangle {
-                x: control.leftPadding + control.visualPosition * (control.availableWidth - width)
-                y: control.topPadding + control.availableHeight / 2 - height / 2
-                implicitWidth: 12
-                implicitHeight: 12
-                radius: 6
-                color: Theme.textPrimary
-                scale: control.pressed ? 1.25 : (sliderHover.hovered ? 1.12 : 1)
-
-                Behavior on scale {
-                    NumberAnimation {
-                        duration: 90
-                        easing.type: Easing.OutCubic
-                    }
-                }
-
-                HoverHandler {
-                    id: sliderHover
-                }
-            }
+            accentColor: Theme.selection
+            onEditRequested: value => root.valueEdited(value)
         }
     }
 }

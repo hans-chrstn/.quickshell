@@ -12,10 +12,8 @@ Item {
     property bool previewMode: false
     property bool previewPlaying: false
     property int previewPositionMs: 0
-    readonly property bool playbackRequested:
-        playbackPolicy.playbackRequested
-    readonly property bool playingAllowed:
-        root.previewMode ? root.previewPlaying : playbackPolicy.playbackAllowed
+    readonly property bool playbackRequested: playbackPolicy.playbackRequested
+    readonly property bool playingAllowed: root.previewMode ? root.previewPlaying : playbackPolicy.playbackAllowed
     property bool firstFrameReady: false
     property int suspendedPositionMs: 0
     property bool decoderRetained: false
@@ -24,62 +22,58 @@ Item {
     readonly property int decoderEvictionDelayMs: 30000
     readonly property bool decoderEvicted: !decoderRetained
     readonly property bool decoderLoaded: decoder.item !== null
-    readonly property bool decoderRequested:
-        root.previewMode || root.decoderRetained
-    readonly property bool playbackActive:
-        Boolean(decoder.item?.actuallyPlaying)
+    readonly property bool decoderRequested: root.previewMode || root.decoderRetained
+    readonly property bool playbackActive: Boolean(decoder.item?.actuallyPlaying)
     readonly property bool posterReady: posterImage.status === Image.Ready
     readonly property bool visualReady: firstFrameReady || posterReady
 
-    readonly property string state: decoder.item ? decoder.item.state
-        : decoderRetained ? "loading" : "ready"
+    readonly property string state: decoder.item ? decoder.item.state : decoderRetained ? "loading" : "ready"
     readonly property string error: decoder.item ? decoder.item.error : ""
     readonly property bool suspended: playbackPolicy.suspended
-    readonly property string suspendedReason:
-        playbackPolicy.suspendedReason
+    readonly property string suspendedReason: playbackPolicy.suspendedReason
 
     function applyPlaybackPolicy() {
         if (playingAllowed) {
-            evictionTimer.stop()
+            evictionTimer.stop();
             if (!decoderRetained) {
-                firstFrameReady = false
-                decoderEvictionReason = "sustained-suspension"
-                decoderRetained = true
+                firstFrameReady = false;
+                decoderEvictionReason = "sustained-suspension";
+                decoderRetained = true;
             }
         } else {
             if (decoder.item)
-                decoder.item.captureAndPause()
+                decoder.item.captureAndPause();
             if (decoderRetained)
-                evictionTimer.restart()
+                evictionTimer.restart();
             else
-                evictionTimer.stop()
+                evictionTimer.stop();
         }
     }
 
     function evictDecoder(reason) {
         if (root.previewMode || playingAllowed || !decoderRetained)
-            return false
+            return false;
         if (decoder.item)
-            decoder.item.captureAndPause()
-        firstFrameReady = false
-        decoderEvictionReason = String(reason || "sustained-suspension")
-        decoderRetained = false
-        return true
+            decoder.item.captureAndPause();
+        firstFrameReady = false;
+        decoderEvictionReason = String(reason || "sustained-suspension");
+        decoderRetained = false;
+        return true;
     }
 
     onPlaybackRequestedChanged: {
         if (playbackRequested) {
-            adaptiveEligibilityTimer.stop()
-            adaptiveEvictionEligible = false
+            adaptiveEligibilityTimer.stop();
+            adaptiveEvictionEligible = false;
         } else {
-            adaptiveEligibilityTimer.restart()
+            adaptiveEligibilityTimer.restart();
         }
     }
     onPreviewModeChanged: applyPlaybackPolicy()
     onPreviewPlayingChanged: applyPlaybackPolicy()
     onPreviewPositionMsChanged: {
         if (root.previewMode && !root.previewPlaying && decoder.item)
-            decoder.item.seekTo(root.previewPositionMs)
+            decoder.item.seekTo(root.previewPositionMs);
     }
     onPlayingAllowedChanged: applyPlaybackPolicy()
     Component.onCompleted: applyPlaybackPolicy()
@@ -111,10 +105,8 @@ Item {
         basePriority: 50
         requestedActive: root.decoderRequested
         usageActive: root.playingAllowed
-        retentionReason: root.playingAllowed ? "playback-active"
-            : root.decoderRetained ? "suspension-grace-period" : ""
-        evictionReason: root.decoderRetained ? ""
-            : root.decoderEvictionReason
+        retentionReason: root.playingAllowed ? "playback-active" : root.decoderRetained ? "suspension-grace-period" : ""
+        evictionReason: root.decoderRetained ? "" : root.decoderEvictionReason
         sourceComponent: decoderComponent
         onAdaptiveEvictionRequested: reason => root.evictDecoder(reason)
     }
@@ -124,13 +116,12 @@ Item {
         VideoDecoder {
             path: root.path
             playbackAllowed: root.playingAllowed
-            resumePositionMs: root.previewMode
-                ? root.previewPositionMs : root.suspendedPositionMs
+            resumePositionMs: root.previewMode ? root.previewPositionMs : root.suspendedPositionMs
             onPositionCaptured: positionMs => {
-                root.suspendedPositionMs = positionMs
+                root.suspendedPositionMs = positionMs;
             }
             onFirstFrameReadyChanged: {
-                root.firstFrameReady = firstFrameReady
+                root.firstFrameReady = firstFrameReady;
             }
         }
     }
@@ -141,7 +132,7 @@ Item {
         repeat: false
         onTriggered: {
             if (!root.playbackRequested && root.decoderRetained)
-                root.adaptiveEvictionEligible = true
+                root.adaptiveEvictionEligible = true;
         }
     }
 
@@ -150,8 +141,7 @@ Item {
         interval: root.decoderEvictionDelayMs
         repeat: false
         onTriggered: {
-            root.evictDecoder("sustained-suspension")
+            root.evictDecoder("sustained-suspension");
         }
     }
-
 }

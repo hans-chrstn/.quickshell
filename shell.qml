@@ -10,6 +10,7 @@ import qs.services.audio
 import qs.services.ipc
 import qs.services.config
 import qs.services.display
+import qs.services.island
 import qs.services.launcher
 import qs.services.notifications
 import qs.services.session
@@ -24,6 +25,8 @@ ShellRoot {
     ShellIpc {}
 
     AudioShortcuts {}
+
+    IslandShortcuts {}
 
     AudioNotificationBridge {}
 

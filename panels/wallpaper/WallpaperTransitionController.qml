@@ -11,21 +11,21 @@ QtObject {
     signal completed(int generation)
 
     function start(nextGeneration, nextDurationMs) {
-        progressAnimation.stop()
-        generation = nextGeneration
-        durationMs = Math.max(0, Math.round(Number(nextDurationMs) || 0))
-        progress = durationMs > 0 ? 0 : 1
-        running = durationMs > 0
+        progressAnimation.stop();
+        generation = nextGeneration;
+        durationMs = Math.max(0, Math.round(Number(nextDurationMs) || 0));
+        progress = durationMs > 0 ? 0 : 1;
+        running = durationMs > 0;
         if (running)
-            progressAnimation.start()
+            progressAnimation.start();
         else
-            completed(generation)
+            completed(generation);
     }
 
     function cancel() {
-        progressAnimation.stop()
-        running = false
-        progress = 1
+        progressAnimation.stop();
+        running = false;
+        progress = 1;
     }
 
     property NumberAnimation progressAnimation: NumberAnimation {
@@ -36,9 +36,9 @@ QtObject {
         duration: root.durationMs
         easing.type: Easing.InOutCubic
         onFinished: {
-            root.progress = 1
-            root.running = false
-            root.completed(root.generation)
+            root.progress = 1;
+            root.running = false;
+            root.completed(root.generation);
         }
     }
 }

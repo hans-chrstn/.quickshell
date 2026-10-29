@@ -12,42 +12,37 @@ Item {
     property bool firstFrameReady: false
 
     readonly property int currentPositionMs: Number(player.position) || 0
-    readonly property bool actuallyPlaying:
-        player.playbackState === MediaPlayer.PlayingState
-    readonly property string state: player.error !== MediaPlayer.NoError
-        ? "error" : firstFrameReady ? "ready" : "loading"
-    readonly property string error: player.error !== MediaPlayer.NoError
-        ? String(player.errorString || "Video wallpaper could not be decoded") : ""
+    readonly property bool actuallyPlaying: player.playbackState === MediaPlayer.PlayingState
+    readonly property string state: player.error !== MediaPlayer.NoError ? "error" : firstFrameReady ? "ready" : "loading"
+    readonly property string error: player.error !== MediaPlayer.NoError ? String(player.errorString || "Video wallpaper could not be decoded") : ""
 
     signal positionCaptured(int positionMs)
 
     function captureAndPause() {
-        const position = currentPositionMs
-        positionCaptured(position)
-        player.pause()
+        const position = currentPositionMs;
+        positionCaptured(position);
+        player.pause();
     }
 
     function seekTo(positionMs) {
-        player.pause()
-        player.position = Math.max(0, Number(positionMs) || 0)
-        resumeApplied = true
+        player.pause();
+        player.position = Math.max(0, Number(positionMs) || 0);
+        resumeApplied = true;
     }
 
     function syncPlayback() {
         if (player.source == "")
-            return
-        if ((player.mediaStatus === MediaPlayer.LoadedMedia
-                || player.mediaStatus === MediaPlayer.BufferedMedia)
-                && !resumeApplied) {
+            return;
+        if ((player.mediaStatus === MediaPlayer.LoadedMedia || player.mediaStatus === MediaPlayer.BufferedMedia) && !resumeApplied) {
             if (resumePositionMs > 0)
-                player.position = resumePositionMs
-            resumeApplied = true
+                player.position = resumePositionMs;
+            resumeApplied = true;
         }
         if (!playbackAllowed) {
-            captureAndPause()
-            return
+            captureAndPause();
+            return;
         }
-        player.play()
+        player.play();
     }
 
     onPlaybackAllowedChanged: syncPlayback()
@@ -66,14 +61,13 @@ Item {
         loops: MediaPlayer.Infinite
 
         onSourceChanged: {
-            root.resumeApplied = false
-            root.firstFrameReady = false
-            root.syncPlayback()
+            root.resumeApplied = false;
+            root.firstFrameReady = false;
+            root.syncPlayback();
         }
         onMediaStatusChanged: {
-            if (mediaStatus === MediaPlayer.LoadedMedia
-                    || mediaStatus === MediaPlayer.BufferedMedia) {
-                root.syncPlayback()
+            if (mediaStatus === MediaPlayer.LoadedMedia || mediaStatus === MediaPlayer.BufferedMedia) {
+                root.syncPlayback();
             }
         }
     }
@@ -81,7 +75,9 @@ Item {
     Connections {
         target: output.videoSink
         enabled: !root.firstFrameReady
-        function onVideoFrameChanged() { root.firstFrameReady = true }
+        function onVideoFrameChanged() {
+            root.firstFrameReady = true;
+        }
     }
 
     Component.onCompleted: syncPlayback()

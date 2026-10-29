@@ -10,31 +10,31 @@ Singleton {
     property var screens: ({})
 
     function report(screenName, record) {
-        const name = String(screenName || "").trim()
+        const name = String(screenName || "").trim();
         if (name.length === 0 || !record)
-            return false
+            return false;
 
-        const updated = JsonCopy.value(screens)
-        updated[name] = JsonCopy.value(record)
-        screens = updated
-        return true
+        const updated = JsonCopy.value(screens);
+        updated[name] = JsonCopy.value(record);
+        screens = updated;
+        return true;
     }
 
     function remove(screenName) {
-        const name = String(screenName || "").trim()
+        const name = String(screenName || "").trim();
         if (name.length === 0 || screens[name] === undefined)
-            return false
+            return false;
 
-        const updated = ({})
+        const updated = ({});
         for (const key in screens) {
             if (key !== name)
-                updated[key] = JsonCopy.value(screens[key])
+                updated[key] = JsonCopy.value(screens[key]);
         }
-        screens = updated
-        return true
+        screens = updated;
+        return true;
     }
 
     function snapshot() {
-        return JsonCopy.value(screens)
+        return JsonCopy.value(screens);
     }
 }

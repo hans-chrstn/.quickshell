@@ -1,30 +1,30 @@
 .pragma library
 
 function rendererFor(media) {
-    const kind = String(media?.kind || "")
-    const codec = String(media?.codec || "").toLowerCase()
+    const kind = String(media?.kind || "");
+    const codec = String(media?.codec || "").toLowerCase();
     if (kind === "static")
-        return codec === "webp" ? "" : "static"
+        return codec === "webp" ? "" : "static";
     if (kind === "video")
-        return "video"
+        return "video";
     if (kind !== "animatedImage")
-        return ""
+        return "";
     if (codec === "gif")
-        return "animated-image"
+        return "animated-image";
     if (codec === "apng")
-        return "animated-media"
-    return ""
+        return "animated-media";
+    return "";
 }
 
 function animatedBackendFor(media) {
-    const renderer = rendererFor(media)
+    const renderer = rendererFor(media);
     if (renderer === "animated-image")
-        return "image"
+        return "image";
     if (renderer === "animated-media")
-        return "media"
-    return ""
+        return "media";
+    return "";
 }
 
 function supported(media) {
-    return rendererFor(media).length > 0
+    return rendererFor(media).length > 0;
 }

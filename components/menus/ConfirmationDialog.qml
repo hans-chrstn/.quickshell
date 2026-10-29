@@ -1,9 +1,8 @@
 import QtQuick
-import QtQuick.Controls
 import qs.core
 import qs.components.menus
 
-Dialog {
+ModalDialog {
     id: root
 
     property string message: ""
@@ -11,25 +10,8 @@ Dialog {
     property bool destructive: true
     property int currentIndex: 0
 
-    parent: Overlay.overlay
-    width: Math.min(360, Math.max(0, (parent?.width ?? 376) - 16))
-    x: parent ? (parent.width - width) / 2 : 0
-    y: parent ? Math.max(8, (parent.height - implicitHeight) / 2) : 0
-    padding: 16
-    modal: true
-    focus: true
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    header: null
-    footer: null
     onAboutToShow: currentIndex = 0
     onOpened: contentItem.forceActiveFocus()
-
-    background: Rectangle {
-        radius: 18
-        color: Theme.overlay
-        border.width: 1
-        border.color: Theme.separatorStrong
-    }
 
     contentItem: Column {
         spacing: 12

@@ -2,10 +2,10 @@
 
 function requested(ready, globalPlaylistId, screenPlaylistIds, rules) {
     if (!ready)
-        return false
+        return false;
     if (String(globalPlaylistId || "").trim().length > 0)
-        return true
+        return true;
     if (Object.keys(screenPlaylistIds || ({})).length > 0)
-        return true
-    return (rules || []).some(rule => Boolean(rule?.enabled))
+        return true;
+    return (rules || []).some(rule => Boolean(rule?.enabled));
 }

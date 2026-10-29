@@ -9,6 +9,38 @@ Singleton {
     readonly property string fontText: "SF Pro Text"
     readonly property string fontMono: "SF Mono"
 
+    readonly property int typeDisplay: 22
+    readonly property int typeTitle: 17
+    readonly property int typeBody: 13
+    readonly property int typeLabel: 11
+    readonly property int typeCaption: 10
+
+    readonly property int space2: 2
+    readonly property int space4: 4
+    readonly property int space6: 6
+    readonly property int space8: 8
+    readonly property int space12: 12
+    readonly property int space16: 16
+    readonly property int space20: 20
+    readonly property int space24: 24
+
+    readonly property int radiusControl: 10
+    readonly property int radiusGrouped: 14
+    readonly property int radiusPanel: 22
+    readonly property int radiusWorkspace: 28
+    readonly property int radiusCapsule: 999
+    readonly property int controlHeight: 32
+    readonly property int minimumTouchTarget: 36
+
+    readonly property int motionPressDuration: 80
+    readonly property int motionStateDuration: 140
+    readonly property int motionControlDuration: 170
+    readonly property int motionTravelDuration: 190
+    readonly property int motionExitDuration: 220
+    readonly property int motionStandardEasing: Easing.OutCubic
+    readonly property int motionSpatialEasing: Easing.InOutCubic
+    readonly property var motionControlCurve: [0.2, 0, 0, 1, 1, 1]
+
     readonly property int wing: SettingsService.islandWing
     readonly property int collapsedWidth: SettingsService.islandCollapsedWidth
     readonly property int collapsedHeight: 34
@@ -30,7 +62,7 @@ Singleton {
 
     readonly property int revealDuration: SettingsService.revealDuration
     readonly property int resizeDuration: SettingsService.resizeDuration
-    readonly property int islandMorphEasing: Easing.InOutCubic
+    readonly property int islandMorphEasing: motionSpatialEasing
     readonly property int contentRevealDuration: SettingsService.contentRevealDuration
     readonly property int attentionExpandDelay: SettingsService.attentionExpandDelay
     readonly property int moduleCloseDuration: SettingsService.moduleCloseDuration

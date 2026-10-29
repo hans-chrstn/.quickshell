@@ -11,36 +11,34 @@ Singleton {
     id: root
 
     readonly property var assignedAssessments: {
-        WallpaperProbeService.records
-        const result = []
-        const seen = ({})
-        const globalPath = String(WallpaperAssignmentService.globalWallpaper || "")
+        WallpaperProbeService.records;
+        const result = [];
+        const seen = ({});
+        const globalPath = String(WallpaperAssignmentService.globalWallpaper || "");
         if (globalPath.length > 0) {
-            seen[globalPath] = true
-            result.push(assessment("All Displays", globalPath))
+            seen[globalPath] = true;
+            result.push(assessment("All Displays", globalPath));
         }
-        const overrides = WallpaperAssignmentService.screenWallpapers
+        const overrides = WallpaperAssignmentService.screenWallpapers;
         for (const screenName in overrides) {
-            const path = String(overrides[screenName] || "")
+            const path = String(overrides[screenName] || "");
             if (path.length === 0)
-                continue
-            result.push(assessment(screenName, path))
+                continue;
+            result.push(assessment(screenName, path));
         }
-        return result
+        return result;
     }
 
     function assessment(target, path) {
-        const record = WallpaperProbeService.recordFor(path)
-        const frameRate = Number(record.frameRate) || 0
-        const bitRate = Number(record.bitRate) || 0
-        const codec = String(record.codec || "").toLowerCase()
-        const evaluation = VideoCapabilityService.codecEvaluations.find(
-            candidate => String(candidate.codec || "") === codec) || ({})
+        const record = WallpaperProbeService.recordFor(path);
+        const frameRate = Number(record.frameRate) || 0;
+        const bitRate = Number(record.bitRate) || 0;
+        const codec = String(record.codec || "").toLowerCase();
+        const evaluation = VideoCapabilityService.codecEvaluations.find(candidate => String(candidate.codec || "") === codec) || ({});
         const policy = GuardrailPolicy.assess(record, {
-            decodeProfileVerified:
-                VideoCapabilityService.verifiedDecodeCodecs.indexOf(codec) >= 0,
+            decodeProfileVerified: VideoCapabilityService.verifiedDecodeCodecs.indexOf(codec) >= 0,
             pipelineAccepted: evaluation.measurementAccepted === true
-        })
+        });
 
         return {
             target: String(target || ""),
@@ -55,10 +53,10 @@ Singleton {
             severity: policy.severity,
             issues: policy.issues,
             hardwareState: policy.hardwareState
-        }
+        };
     }
 
     function snapshot() {
-        return JsonCopy.value(assignedAssessments)
+        return JsonCopy.value(assignedAssessments);
     }
 }

@@ -10,6 +10,7 @@ IslandModule {
     priority: 50
     active: AudioHudService.active && AudioHudService.targetScreenName === screenName
     attention: AudioHudService.visible && AudioHudService.targetScreenName === screenName
+    unsolicited: true
     collapsedWidth: Design.scaledWidth(240)
     collapsedHeight: Design.collapsedHeight
     expandedWidth: Design.scaledWidth(240)

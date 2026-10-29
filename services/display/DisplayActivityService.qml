@@ -13,59 +13,58 @@ Singleton {
     property bool observerReady: false
     readonly property int idleTimeoutSeconds: {
         if (Quickshell.env("QS_TEST_MODE") === "1") {
-            const requested = Number(Quickshell.env("QS_IDLE_TIMEOUT_SECONDS"))
+            const requested = Number(Quickshell.env("QS_IDLE_TIMEOUT_SECONDS"));
             if (Number.isFinite(requested) && requested >= 1 && requested <= 7200)
-                return Math.round(requested)
+                return Math.round(requested);
         }
-        return ConfigService.wallpaperIdleTimeoutSeconds
+        return ConfigService.wallpaperIdleTimeoutSeconds;
     }
     readonly property int consumers: {
-        let total = 0
+        let total = 0;
         for (const name in consumerScreens)
-            total += Number(consumerScreens[name]) || 0
-        return total
+            total += Number(consumerScreens[name]) || 0;
+        return total;
     }
     readonly property bool observing: consumers > 0
-    readonly property bool idle: syntheticIdleState >= 0
-        ? syntheticIdleState === 1 : idleMonitor.isIdle
+    readonly property bool idle: syntheticIdleState >= 0 ? syntheticIdleState === 1 : idleMonitor.isIdle
     readonly property bool desktopActive: !idle
 
     function acquire(screenName) {
-        const name = String(screenName || "").trim().slice(0, 128)
+        const name = String(screenName || "").trim().slice(0, 128);
         if (name.length === 0)
-            return false
-        const updated = Object.assign({}, consumerScreens)
-        updated[name] = (Number(updated[name]) || 0) + 1
-        consumerScreens = updated
-        return true
+            return false;
+        const updated = Object.assign({}, consumerScreens);
+        updated[name] = (Number(updated[name]) || 0) + 1;
+        consumerScreens = updated;
+        return true;
     }
 
     function release(screenName) {
-        const name = String(screenName || "").trim().slice(0, 128)
+        const name = String(screenName || "").trim().slice(0, 128);
         if (name.length === 0)
-            return false
-        const updated = Object.assign({}, consumerScreens)
-        const count = Math.max(0, (Number(updated[name]) || 0) - 1)
+            return false;
+        const updated = Object.assign({}, consumerScreens);
+        const count = Math.max(0, (Number(updated[name]) || 0) - 1);
         if (count > 0)
-            updated[name] = count
+            updated[name] = count;
         else
-            delete updated[name]
-        consumerScreens = updated
-        return true
+            delete updated[name];
+        consumerScreens = updated;
+        return true;
     }
 
     function setSyntheticIdle(value) {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
-            return false
-        syntheticIdleState = Boolean(value) ? 1 : 0
-        return true
+            return false;
+        syntheticIdleState = Boolean(value) ? 1 : 0;
+        return true;
     }
 
     function clearSyntheticIdle() {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
-            return false
-        syntheticIdleState = -1
-        return true
+            return false;
+        syntheticIdleState = -1;
+        return true;
     }
 
     function snapshot() {
@@ -79,7 +78,7 @@ Singleton {
             idle: idle,
             desktopActive: desktopActive,
             synthetic: syntheticIdleState >= 0
-        }
+        };
     }
 
     IdleMonitor {

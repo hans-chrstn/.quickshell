@@ -12,7 +12,7 @@ Item {
     required property real maximumValue
     required property bool muted
     property bool available: true
-    property color accentColor: Theme.accent
+    property color accentColor: Theme.selection
     readonly property bool amplified: !muted && value > 1.0001
     readonly property color effectiveAccent: muted ? Theme.textSecondary : amplified ? Theme.warning : accentColor
     signal valueEdited(real value)

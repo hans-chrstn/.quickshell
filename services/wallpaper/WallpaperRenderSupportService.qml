@@ -6,14 +6,14 @@ import "WallpaperRenderSupport.js" as Support
 
 Singleton {
     function rendererFor(media) {
-        return Support.rendererFor(media)
+        return Support.rendererFor(media);
     }
 
     function animatedBackendFor(media) {
-        return Support.animatedBackendFor(media)
+        return Support.animatedBackendFor(media);
     }
 
     function supported(media) {
-        return Support.supported(media)
+        return Support.supported(media);
     }
 }

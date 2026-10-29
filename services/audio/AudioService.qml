@@ -10,6 +10,7 @@ import "AudioControlPolicy.js" as AudioControlPolicy
 import "AudioDeviceModel.js" as AudioDeviceModel
 import "AudioPrivacyMuteModel.js" as AudioPrivacyMuteModel
 import "AudioRoutePolicyModel.js" as AudioRoutePolicyModel
+import "AudioSceneModel.js" as AudioSceneModel
 import "AudioStatusModel.js" as AudioStatusModel
 
 Singleton {
@@ -17,6 +18,9 @@ Singleton {
 
     property var inventoryConsumers: ({})
     property bool applicationRouteLease: false
+    property bool sceneInventoryLease: false
+    property bool sceneEffectsLease: false
+    property var pendingSceneActivation: null
     property var lastApplicationRoutePolicyResult: null
     readonly property var controlPolicy: AudioControlPolicy.normalizedPolicy({
         step: ConfigService.audioVolumeStepPercent / 100,
@@ -27,7 +31,7 @@ Singleton {
     })
     readonly property int inventoryConsumerCount: Object.keys(inventoryConsumers).length
     readonly property int rememberedApplicationRouteCount: Object.keys(rememberedApplicationRoutes || ({})).length
-    readonly property bool inventoryRequested: inventoryConsumerCount > 0 || applicationControlCoordinator.busy || applicationRouteLease || rememberedApplicationRouteCount > 0
+    readonly property bool inventoryRequested: inventoryConsumerCount > 0 || applicationControlCoordinator.busy || applicationRouteLease || rememberedApplicationRouteCount > 0 || sceneInventoryLease
     readonly property bool inventoryLoaded: inventoryObserver.loaded
     readonly property bool ready: masterProvider.ready
     readonly property int revision: Number(inventoryObserver.item?.revision) || 0
@@ -51,6 +55,9 @@ Singleton {
     readonly property var inputDeviceTransition: inventoryObserver.item?.inputTransition || emptyDeviceTransition("input")
     readonly property var deviceAliases: ConfigService.audioDeviceAliases
     readonly property var rememberedApplicationRoutes: ConfigService.audioRoutePolicies
+    readonly property var scenes: ConfigService.audioScenes
+    readonly property bool sceneActivationBusy: pendingSceneActivation !== null || sceneCoordinator.busy
+    readonly property string sceneActivationSceneId: String(pendingSceneActivation?.scene?.id || sceneCoordinator.operation?.sceneId || "")
     readonly property int changeSequence: controlCoordinator.sequence
     readonly property var lastChange: controlCoordinator.lastChange
     readonly property int applicationControlRevision: applicationControlCoordinator.revision
@@ -70,9 +77,11 @@ Singleton {
     }
     readonly property var privacy: privacyProvider.state
     readonly property var privacyControl: AudioPrivacyMuteModel.controlState(privacy, input, controlCoordinator.inputPending)
+    readonly property var effects: EasyEffectsService.snapshot()
 
     signal semanticChange(var change)
     signal deviceTransitionOccurred(var transition)
+    signal sceneResultOccurred(var result)
 
     function emptyRoleCounts() {
         return {
@@ -136,6 +145,186 @@ Singleton {
             delete updated[id];
         inventoryConsumers = updated;
         return true;
+    }
+
+    function setEffectsConsumer(resourceId, requested) {
+        return EasyEffectsService.setConsumer(resourceId, requested);
+    }
+
+    function refreshEffects() {
+        return EasyEffectsService.refresh();
+    }
+
+    function setEffectsBypassed(enabled) {
+        return EasyEffectsService.setBypassed(enabled);
+    }
+
+    function loadEffectsPreset(pipeline, preset) {
+        return EasyEffectsService.loadPreset(pipeline, preset);
+    }
+
+    function effectsStatus() {
+        return EasyEffectsService.snapshot();
+    }
+
+    function sceneContext() {
+        return {
+            nodes: nodes,
+            defaultOutput: defaults.output,
+            defaultInput: defaults.input,
+            output: output,
+            input: input,
+            effects: effects
+        };
+    }
+
+    function audioScenesStatus() {
+        return {
+            loaded: ConfigService.loaded,
+            count: scenes.length,
+            scenes: JsonCopy.value(scenes),
+            inventoryLoaded: inventoryLoaded,
+            effectsLoaded: effects.loaded === true
+        };
+    }
+
+    function captureAudioScene(name) {
+        if (!ConfigService.loaded)
+            return {
+                accepted: false,
+                code: "config-unavailable",
+                message: "Audio scenes are unavailable until configuration has loaded."
+            };
+        const result = AudioSceneModel.capture(name, sceneContext(), scenes, Date.now());
+        if (result.accepted)
+            ConfigService.setAudioScenes(result.scenes);
+        return JsonCopy.value(result);
+    }
+
+    function removeAudioScene(sceneId) {
+        if (!ConfigService.loaded)
+            return {
+                accepted: false,
+                code: "config-unavailable",
+                message: "Audio scenes are unavailable until configuration has loaded."
+            };
+        const result = AudioSceneModel.remove(scenes, sceneId);
+        if (result.accepted)
+            ConfigService.setAudioScenes(result.scenes);
+        return JsonCopy.value(result);
+    }
+
+    function audioScenePlan(sceneId) {
+        const scene = AudioSceneModel.sceneForId(scenes, sceneId);
+        if (!scene)
+            return {
+                accepted: false,
+                code: "scene-unavailable",
+                message: "The audio scene is no longer available."
+            };
+        return JsonCopy.value(AudioSceneModel.applyPlan(scene, sceneContext()));
+    }
+
+    function sceneNeedsInventory(scene) {
+        return String(scene?.outputDeviceKey || "").length > 0 || String(scene?.inputDeviceKey || "").length > 0;
+    }
+
+    function sceneNeedsEffects(scene) {
+        return String(scene?.outputPreset || "").length > 0 || String(scene?.inputPreset || "").length > 0;
+    }
+
+    function activateAudioScene(sceneId) {
+        if (pendingSceneActivation || sceneCoordinator.busy)
+            return {
+                accepted: false,
+                code: "busy",
+                message: "Another audio scene change is still active."
+            };
+        const scene = AudioSceneModel.sceneForId(scenes, sceneId);
+        if (!scene)
+            return {
+                accepted: false,
+                code: "scene-unavailable",
+                message: "The audio scene is no longer available."
+            };
+        const needsInventory = sceneNeedsInventory(scene);
+        const needsEffects = sceneNeedsEffects(scene);
+        pendingSceneActivation = {
+            scene: scene,
+            needsInventory: needsInventory,
+            needsEffects: needsEffects
+        };
+        sceneInventoryLease = needsInventory;
+        sceneEffectsLease = needsEffects;
+        if (needsEffects)
+            EasyEffectsService.setConsumer("audio.scene-transaction", true);
+        scenePreparationTimeout.restart();
+        Qt.callLater(root.prepareSceneActivation);
+        return {
+            accepted: true,
+            code: "preparing",
+            message: "",
+            sceneId: scene.id
+        };
+    }
+
+    function prepareSceneActivation() {
+        const pending = pendingSceneActivation;
+        if (!pending)
+            return;
+        if (pending.needsInventory && (!inventoryLoaded || inventoryObserver.item?.ready !== true))
+            return;
+        if (pending.needsEffects) {
+            if (!effects.loaded || effects.busy || effects.state === "idle" || effects.state === "discovering")
+                return;
+            if (effects.state !== "ready") {
+                failScenePreparation("effects-unavailable", "EasyEffects is not ready for the saved scene presets.");
+                return;
+            }
+        }
+        const plan = AudioSceneModel.applyPlan(pending.scene, sceneContext());
+        if (!plan.accepted) {
+            failScenePreparation(plan.code, plan.message);
+            return;
+        }
+        pendingSceneActivation = null;
+        scenePreparationTimeout.stop();
+        const result = sceneCoordinator.request(pending.scene.id, plan.steps);
+        if (!result.accepted && !sceneCoordinator.busy)
+            releaseSceneLeases();
+    }
+
+    function failScenePreparation(code, message) {
+        const sceneId = String(pendingSceneActivation?.scene?.id || "");
+        pendingSceneActivation = null;
+        scenePreparationTimeout.stop();
+        releaseSceneLeases();
+        const result = {
+            accepted: false,
+            code: code,
+            message: message,
+            sceneId: sceneId,
+            sequence: sceneCoordinator.sequence
+        };
+        sceneResultOccurred(result);
+        return result;
+    }
+
+    function releaseSceneLeases() {
+        sceneInventoryLease = false;
+        if (sceneEffectsLease)
+            EasyEffectsService.setConsumer("audio.scene-transaction", false);
+        sceneEffectsLease = false;
+    }
+
+    function audioSceneActivationStatus() {
+        return {
+            preparing: pendingSceneActivation !== null,
+            sceneId: String(pendingSceneActivation?.scene?.id || sceneCoordinator.operation?.sceneId || ""),
+            inventoryLease: sceneInventoryLease,
+            effectsLease: sceneEffectsLease,
+            coordinator: JsonCopy.value(sceneCoordinator.diagnostics())
+        };
     }
 
     function setMasterVolume(role, value) {
@@ -384,16 +573,20 @@ Singleton {
             applicationControls: JsonCopy.value(applicationControlCoordinator.diagnostics()),
             applicationRouting: applicationRouteStatus(),
             rememberedApplicationRoutes: JsonCopy.value(rememberedApplicationRoutes),
+            scenes: JsonCopy.value(scenes),
+            sceneActivation: audioSceneActivationStatus(),
             applicationRoutePolicy: JsonCopy.value(applicationRoutePolicyState),
             lastApplicationRoutePolicyResult: JsonCopy.value(lastApplicationRoutePolicyResult),
             privacy: privacyStatus(),
+            effects: JsonCopy.value(effects),
             capabilities: {
                 nodeEnumeration: "native",
                 linkObservation: "native",
                 defaultObservation: "native",
                 preferredDefaultWrite: inventoryLoaded ? "native" : "demand-loaded",
                 masterVolumeMute: "native",
-                applicationRouting: inventoryLoaded ? "bounded-helper" : "demand-loaded"
+                applicationRouting: inventoryLoaded ? "bounded-helper" : "demand-loaded",
+                effects: effects.loaded ? String(effects.capability?.backend || "none") : "demand-loaded"
             }
         };
     }
@@ -422,6 +615,31 @@ Singleton {
 
         provider: inventoryObserver.item
         policy: root.controlPolicy
+    }
+
+    AudioSceneOperationExecutor {
+        id: sceneExecutor
+
+        outputState: root.output
+        inputState: root.input
+        outputSelection: root.outputDeviceSelection
+        inputSelection: root.inputDeviceSelection
+        outputPending: controlCoordinator.outputPending
+        inputPending: controlCoordinator.inputPending
+        requestDevice: (role, stableKey) => root.setPreferredDevice(role, stableKey)
+        requestPreset: (pipeline, preset) => root.loadEffectsPreset(pipeline, preset)
+        requestVolume: (role, value) => root.setMasterVolume(role, value)
+    }
+
+    AudioSceneCoordinator {
+        id: sceneCoordinator
+
+        executor: sceneExecutor
+
+        onResultOccurred: result => {
+            root.releaseSceneLeases();
+            root.sceneResultOccurred(result);
+        }
     }
 
     LifecycleLoader {
@@ -460,5 +678,23 @@ Singleton {
                 return;
             root.lastApplicationRoutePolicyResult = root.rememberApplicationRoute(result.applicationKey, result.targetStableKey);
         }
+    }
+
+    property Connections effectsConnections: Connections {
+        target: EasyEffectsService
+
+        function onResultOccurred(result) {
+            sceneExecutor.handleEffectsResult(result);
+            Qt.callLater(root.prepareSceneActivation);
+        }
+    }
+
+    onInventoryLoadedChanged: Qt.callLater(prepareSceneActivation)
+    onInventoryHealthChanged: Qt.callLater(prepareSceneActivation)
+    onEffectsChanged: Qt.callLater(prepareSceneActivation)
+
+    property Timer scenePreparationTimeout: Timer {
+        interval: 5000
+        onTriggered: root.failScenePreparation("preparation-timeout", "The audio scene dependencies did not become ready in time.")
     }
 }

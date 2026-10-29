@@ -12,23 +12,22 @@ Singleton {
     readonly property bool active: consumerCount > 0
 
     function setConsumer(resourceId, requested) {
-        const id = String(resourceId || "").trim().slice(0, 192)
+        const id = String(resourceId || "").trim().slice(0, 192);
         if (id.length === 0)
-            return false
-        const enabled = Boolean(requested)
+            return false;
+        const enabled = Boolean(requested);
         if (Boolean(consumers[id]) === enabled)
-            return true
-        const updated = Object.assign({}, consumers)
+            return true;
+        const updated = Object.assign({}, consumers);
         if (enabled)
-            updated[id] = true
+            updated[id] = true;
         else
-            delete updated[id]
-        const activating = Object.keys(consumers).length === 0
-            && Object.keys(updated).length > 0
-        consumers = updated
+            delete updated[id];
+        const activating = Object.keys(consumers).length === 0 && Object.keys(updated).length > 0;
+        consumers = updated;
         if (activating)
-            now = new Date()
-        return true
+            now = new Date();
+        return true;
     }
 
     function snapshot() {
@@ -38,7 +37,7 @@ Singleton {
             consumers: Object.keys(consumers).sort(),
             precision: "minute",
             now: now.toISOString()
-        }
+        };
     }
 
     SystemClock {

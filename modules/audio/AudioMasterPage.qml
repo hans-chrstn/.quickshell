@@ -39,7 +39,7 @@ Item {
                 maximumValue: Number(root.policy?.outputCeiling) || 1
                 muted: root.output?.muted ?? false
                 available: root.output?.available ?? false
-                accentColor: Theme.textPrimary
+                accentColor: Theme.selection
                 onValueEdited: value => AudioService.setMasterVolume("output", value)
                 onMuteRequested: muted => AudioService.setMasterMuted("output", muted)
                 onStepRequested: steps => AudioService.adjustMasterVolume("output", steps)
@@ -63,7 +63,7 @@ Item {
                 maximumValue: Number(root.policy?.inputCeiling) || 1
                 muted: root.input?.muted ?? false
                 available: root.input?.available ?? false
-                accentColor: Theme.textPrimary
+                accentColor: Theme.selection
                 onValueEdited: value => AudioService.setMasterVolume("input", value)
                 onMuteRequested: muted => AudioService.setMasterMuted("input", muted)
                 onStepRequested: steps => AudioService.adjustMasterVolume("input", steps)

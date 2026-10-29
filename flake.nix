@@ -230,6 +230,32 @@
           format = makeQualityApp "quickshell-format" format;
           lint = makeQualityApp "quickshell-lint" lint;
           test = makeQualityApp "quickshell-test" test;
+          visual-lab = {
+            type = "app";
+            meta.description = "Quickshell isolated visual motion laboratory";
+            program = "${
+              pkgs.writeShellApplication {
+                name = "quickshell-visual-lab";
+                runtimeInputs = [
+                  wrappedShell
+                  pkgs.coreutils
+                  pkgs.git
+                ];
+                text = ''
+                  root=$(git rev-parse --show-toplevel)
+                  lab=$(mktemp -d)
+                  cleanup() {
+                    rm -f "$lab/shell.qml" "$lab/tests"
+                    rmdir "$lab"
+                  }
+                  trap cleanup EXIT
+                  cp "$root/tests/visual/VisualLabEntry.qml" "$lab/shell.qml"
+                  ln -s "$root/tests" "$lab/tests"
+                  quickshell -p "$lab" "$@"
+                '';
+              }
+            }/bin/quickshell-visual-lab";
+          };
         }
       );
 

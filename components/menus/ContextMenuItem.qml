@@ -11,7 +11,8 @@ Item {
 
     readonly property bool actionEnabled: action?.enabled !== false
     readonly property bool destructive: action?.destructive === true
-    implicitHeight: 34 + (action?.separatorBefore === true ? 7 : 0)
+    implicitHeight: 38 + (action?.separatorBefore === true ? 9 : 0)
+    opacity: actionEnabled ? 1 : 0.34
 
     Rectangle {
         anchors.left: parent.left
@@ -26,31 +27,42 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: 32
-        radius: 9
-        color: root.highlighted && root.actionEnabled ? (root.destructive ? Theme.tint(Theme.danger) : Theme.fillElevated) : "transparent"
-        border.width: root.highlighted && root.actionEnabled ? 1 : 0
-        border.color: root.destructive ? Theme.tintStrong(Theme.danger) : Theme.glassHighlight
+        height: 36
+        radius: 10
+        color: root.highlighted && root.actionEnabled ? (root.destructive ? Theme.tintStrong(Theme.statusDanger) : Theme.interactionSelected) : "transparent"
 
         Behavior on color {
             ColorAnimation {
-                duration: 90
+                duration: Design.motionStateDuration
+                easing.type: Design.motionStandardEasing
             }
         }
 
         Text {
             anchors.left: parent.left
-            anchors.right: parent.right
+            anchors.right: shortcutText.visible ? shortcutText.left : parent.right
             anchors.verticalCenter: parent.verticalCenter
             anchors.leftMargin: 10
-            anchors.rightMargin: 10
+            anchors.rightMargin: shortcutText.visible ? 8 : 10
             text: String(root.action?.label || "")
-            color: !root.actionEnabled ? Theme.textSecondary : root.destructive ? Theme.danger : Theme.textPrimary
-            opacity: root.actionEnabled ? 1 : 0.48
+            color: root.destructive ? Theme.statusDanger : Theme.textPrimary
             elide: Text.ElideRight
             font.family: Design.fontText
-            font.pixelSize: 11
+            font.pixelSize: Design.typeLabel
             font.weight: Font.Medium
+        }
+
+        Text {
+            id: shortcutText
+
+            anchors.right: parent.right
+            anchors.rightMargin: 11
+            anchors.verticalCenter: parent.verticalCenter
+            visible: text.length > 0
+            text: String(root.action?.shortcut || "")
+            color: Theme.textTertiary
+            font.family: Design.fontText
+            font.pixelSize: 9
         }
     }
 

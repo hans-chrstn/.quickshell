@@ -8,8 +8,7 @@ IslandModule {
 
     moduleId: "session"
     priority: 90
-    active: (SessionService.opened || SessionService.closing)
-        && SessionService.targetScreenName === screenName
+    active: (SessionService.opened || SessionService.closing) && SessionService.targetScreenName === screenName
     attention: active && !SessionService.closing
     wantsKeyboard: SessionService.opened
     collapsedWidth: Design.collapsedWidth
@@ -37,5 +36,7 @@ IslandModule {
         maximumHeight: Design.scaledHeight(320)
     }
 
-    view: Component { SessionModule { } }
+    view: Component {
+        SessionModule {}
+    }
 }

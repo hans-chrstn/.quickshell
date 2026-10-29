@@ -6,17 +6,12 @@ import "WallpaperAutomationDemand.js" as AutomationDemand
 Item {
     id: root
 
-    readonly property bool ready: WallpaperPlaylistTargetService.loaded
-        && WallpaperTimeRuleService.loaded
-    readonly property bool requested: AutomationDemand.requested(
-        ready,
-        WallpaperPlaylistTargetService.globalPlaylistId,
-        WallpaperPlaylistTargetService.screenPlaylistIds,
-        WallpaperTimeRuleService.rules)
+    readonly property bool ready: WallpaperPlaylistTargetService.loaded && WallpaperTimeRuleService.loaded
+    readonly property bool requested: AutomationDemand.requested(ready, WallpaperPlaylistTargetService.globalPlaylistId, WallpaperPlaylistTargetService.screenPlaylistIds, WallpaperTimeRuleService.rules)
 
     onRequestedChanged: {
         if (!requested)
-            WallpaperScheduledOverlayService.clear()
+            WallpaperScheduledOverlayService.clear();
     }
 
     LifecycleLoader {
@@ -27,9 +22,7 @@ Item {
         requestedActive: root.requested
         usageActive: root.requested
         retentionReason: requestedActive ? "automation-demand" : ""
-        evictionReason: requestedActive ? "" : root.ready
-            ? "no-automation-demand" : "automation-state-loading"
-        source: requestedActive
-            ? Qt.resolvedUrl("WallpaperAutomationRuntime.qml") : ""
+        evictionReason: requestedActive ? "" : root.ready ? "no-automation-demand" : "automation-state-loading"
+        source: requestedActive ? Qt.resolvedUrl("WallpaperAutomationRuntime.qml") : ""
     }
 }
