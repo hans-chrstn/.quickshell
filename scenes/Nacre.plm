@@ -1,0 +1,7 @@
+language 0.4
+import "island/IslandBody.plm" as island
+
+scene Nacre {
+    surface { size: full, 144; anchor: top; screens: each; keyboard: on_demand }
+    island.Body(screen.width)
+}

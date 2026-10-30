@@ -1,1 +1,3 @@
-https://github.com/user-attachments/assets/e377d0aa-07ba-4a53-a185-007e39012e36
+# Nacre
+
+Nacre is a new Pleamar-based desktop shell experiment. It starts with one iOS-inspired, minimal, living Dynamic Island.

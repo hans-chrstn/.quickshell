@@ -1,384 +1,106 @@
 {
+  description = "Nacre, a Pleamar-powered desktop shell";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    pleamar.url = "github:k4ditano/pleamar";
+    pleamar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs =
     {
-      nixpkgs,
-      quickshell,
       self,
+      nixpkgs,
+      pleamar,
     }:
     let
       systems = [
         "x86_64-linux"
         "aarch64-linux"
       ];
-      forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
+      forAllSystems = function: nixpkgs.lib.genAttrs systems function;
+      checkTool =
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.writeShellApplication {
+          name = "nacre-check";
+          runtimeInputs = [
+            pleamar.packages.${system}.default
+            pkgs.luau-lsp
+            pkgs.findutils
+            pkgs.gnugrep
+          ];
+          text = ''
+            project_root="''${1:-.}"
+            checked_scenes=0
+            checked_logic=0
+            definitions_dir="$(mktemp -d)"
+            trap 'rm -r "$definitions_dir"' EXIT
+            pleamar --luau-types > "$definitions_dir/base.luau"
+
+            for source_dir in "$project_root/scenes" "$project_root/tests"; do
+              if [ ! -d "$source_dir" ]; then
+                continue
+              fi
+
+              while IFS= read -r -d "" scene_file; do
+                if ! grep -Eq '^[[:space:]]*scene[[:space:]]+[[:alpha:]_]' "$scene_file"; then
+                  continue
+                fi
+
+                pleamar --check "$scene_file"
+                checked_scenes=$((checked_scenes + 1))
+              done < <(find "$source_dir" -type f -name '*.plm' -print0)
+
+              while IFS= read -r -d "" logic_file; do
+                scene_file="''${logic_file%.luau}.plm"
+                definitions="$definitions_dir/base.luau"
+                if [ -f "$scene_file" ] && grep -Eq '^[[:space:]]*scene[[:space:]]+[[:alpha:]_]' "$scene_file"; then
+                  definitions="$definitions_dir/scene-$checked_logic.luau"
+                  pleamar --luau-types "$scene_file" > "$definitions"
+                fi
+                luau-lsp analyze --platform standard --definitions="@pleamar=$definitions" "$logic_file"
+                checked_logic=$((checked_logic + 1))
+              done < <(find "$source_dir" -type f -name '*.luau' -print0)
+            done
+
+            if [ "$checked_scenes" -eq 0 ]; then
+              echo "No Pleamar scenes found to check" >&2
+              exit 1
+            fi
+
+            echo "Nacre checks passed: $checked_scenes scene(s), $checked_logic Luau file(s)"
+          '';
+        };
     in
     {
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = import nixpkgs { inherit system; };
-          qtMultimedia = pkgs.kdePackages.qtmultimedia;
-          qtImageFormats = pkgs.kdePackages.qtimageformats;
-          libvaUtils = pkgs.libva-utils;
-          ffmpeg = pkgs.ffmpeg-full;
-          kirigami = pkgs.kdePackages.kirigami.unwrapped;
-          qmlQuickshell = quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default;
-          mediaEngine = pkgs.stdenv.mkDerivation {
-            pname = "qs-mediaengine";
-            version = "0.1.0";
-            src = ./plugins/mediaengine;
-            nativeBuildInputs = [
-              pkgs.cmake
-              pkgs.ninja
-            ];
-            buildInputs = [
-              pkgs.qt6.qtbase
-              pkgs.qt6.qtdeclarative
-              pkgs.sqlite
-            ];
-            dontWrapQtApps = true;
-          };
-          displayPowerPlugin = pkgs.stdenv.mkDerivation {
-            pname = "qs-displaypower";
-            version = "0.1.0";
-            src = ./plugins/displaypower;
-            nativeBuildInputs = [
-              pkgs.cmake
-              pkgs.ninja
-              pkgs.pkg-config
-              pkgs.wayland-scanner
-            ];
-            buildInputs = [
-              pkgs.qt6.qtbase
-              pkgs.qt6.qtdeclarative
-              pkgs.wayland
-            ];
-            cmakeFlags = [ "-DWLR_PROTOCOLS=${pkgs.wlr-protocols}/share/wlr-protocols" ];
-            dontWrapQtApps = true;
-          };
-          cachePlugin = pkgs.stdenv.mkDerivation {
-            pname = "qs-cache";
-            version = "0.1.0";
-            src = ./plugins/cache;
-            nativeBuildInputs = [
-              pkgs.cmake
-              pkgs.ninja
-            ];
-            buildInputs = [
-              pkgs.qt6.qtbase
-              pkgs.qt6.qtdeclarative
-              pkgs.sqlite
-            ];
-            dontWrapQtApps = true;
-          };
-        in
-        rec {
-          config = pkgs.stdenv.mkDerivation {
-            name = "quickshell-config";
-            src = ./.;
-            installPhase = ''
-              mkdir -p $out
-              cp -r * $out/
-            '';
-          };
+      packages = forAllSystems (system: {
+        pleamar = pleamar.packages.${system}.default;
+        default = self.packages.${system}.pleamar;
+      });
 
-          quickshell = pkgs.symlinkJoin {
-            name = "quickshell-wrapped";
-            meta.mainProgram = "qs";
-            paths = [
-              qmlQuickshell
-              mediaEngine
-              cachePlugin
-              displayPowerPlugin
-            ];
-            nativeBuildInputs = [ pkgs.makeWrapper ];
-            postBuild = ''
-              for bin in $out/bin/*; do
-                wrapProgram "$bin" \
-                  --prefix QML2_IMPORT_PATH : "${qtMultimedia}/lib/qt-6/qml" \
-                  --prefix QML2_IMPORT_PATH : "${mediaEngine}/lib/qt-6/qml" \
-                  --prefix QML2_IMPORT_PATH : "${cachePlugin}/lib/qt-6/qml" \
-                  --prefix QML2_IMPORT_PATH : "${displayPowerPlugin}/lib/qt-6/qml" \
-                  --prefix QML2_IMPORT_PATH : "${kirigami}/lib/qt-6/qml" \
-                  --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
-                  --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
-                  --prefix PATH : "${libvaUtils}/bin" \
-                  --prefix PATH : "${ffmpeg}/bin" \
-                  --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
-                  --set QS_LOG_FILE /dev/stderr \
-                  --add-flags "--verbose"
-              done
-            '';
-          };
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.pleamar}/bin/pleamar";
+          meta.description = "Run the pinned Pleamar runtime";
+        };
+        check = {
+          type = "app";
+          program = "${checkTool system}/bin/nacre-check";
+          meta.description = "Check Nacre scenes and Luau logic";
+        };
+      });
 
-          default = quickshell;
-        }
-      );
-
-      apps = forAllSystems (
-        system:
-        let
-          pkgs = import nixpkgs { inherit system; };
-          wrappedShell = self.packages.${system}.quickshell;
-          qualityTools = [
-            pkgs.git
-            pkgs.bash
-            pkgs.qt6.qtdeclarative
-            pkgs.clang-tools
-            pkgs.nixfmt
-          ];
-          makeQualityApp = name: text: {
-            type = "app";
-            meta.description = "Quickshell project quality tool: ${name}";
-            program = "${
-              pkgs.writeShellApplication {
-                inherit name;
-                runtimeInputs = qualityTools;
-                inherit text;
-              }
-            }/bin/${name}";
-          };
-          formatCheck = ''
-            root=$(git rev-parse --show-toplevel)
-            cd "$root"
-            if (($#)); then files=("$@"); else
-              mapfile -t files < <(
-                {
-                  git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**'
-                  git ls-files --others --exclude-standard -- '*.qml' '*.cpp' '*.h' '*.js' 'flake.nix' ':!temp/**' ':!notes/**'
-                } | sort -u
-              )
-            fi
-            status=0
-            tmp=$(mktemp -d)
-            trap 'rm -rf "$tmp"' EXIT
-            for file in "''${files[@]}"; do
-              [[ -f "$file" ]] || continue
-              case "$file" in
-                *.qml|*.js)
-                  out="$tmp/$(basename "$file")"
-                  if ! qmlformat "$file" > "$out"; then echo "format: qmlformat failed: $file" >&2; status=1
-                  elif ! diff -u "$file" "$out" >/dev/null; then echo "format: $file is not qmlformat-clean" >&2; status=1; fi ;;
-                *.cpp|*.h) clang-format --dry-run --Werror "$file" >/dev/null || { echo "format: $file is not clang-format-clean" >&2; status=1; } ;;
-                flake.nix) nixfmt --check "$file" >/dev/null || { echo "format: $file is not nixfmt-clean" >&2; status=1; } ;;
-              esac
-            done
-            exit "$status"
-          '';
-          format = ''
-            root=$(git rev-parse --show-toplevel)
-            cd "$root"
-            if (($#)); then files=("$@"); else mapfile -t files < <(rg --files -g '*.qml' -g '*.js' -g '*.cpp' -g '*.h' -g 'flake.nix' -g '!temp/**' -g '!notes/**' -g '!result/**'); fi
-            for file in "''${files[@]}"; do
-              [[ -f "$file" ]] || continue
-              case "$file" in *.qml|*.js) qmlformat -i "$file" ;; *.cpp|*.h) clang-format -i "$file" ;; flake.nix) nixfmt "$file" ;; esac
-            done
-          '';
-          lint = ''
-            root=$(git rev-parse --show-toplevel)
-            cd "$root"
-            if (($#)); then files=("$@"); else
-              mapfile -t files < <(
-                {
-                  git diff --name-only --diff-filter=ACMRT HEAD -- '*.qml' '*.js' ':!temp/**' ':!notes/**'
-                  git ls-files --others --exclude-standard -- '*.qml' '*.js' ':!temp/**' ':!notes/**'
-                } | sort -u
-              )
-            fi
-            status=0
-            lintArgs=(--max-warnings -1 --import disable --missing-property disable --missing-type disable --unresolved-type disable --unqualified disable --access-singleton-via-object disable --signal-handler-parameters disable)
-            for file in "''${files[@]}"; do
-              [[ -f "$file" ]] || continue
-              qmllint "''${lintArgs[@]}" "$file" || status=1
-              if [[ "$file" == *.qml ]] && rg -q '^Singleton[[:space:]]*\{' "$file" && ! rg -q '^import Quickshell([[:space:]]|$)' "$file"; then
-                echo "lint: Quickshell Singleton without Quickshell import: $file" >&2
-                status=1
-              fi
-              if [[ "$file" == *.qml ]] && rg -q 'Theme\.' "$file" && [[ "$file" != core/Theme.qml ]] && ! rg -q '^import qs\.core([[:space:]]|$)' "$file"; then
-                echo "lint: Theme consumer without qs.core import: $file" >&2
-                status=1
-              fi
-            done
-            exit "$status"
-          '';
-          test = ''
-            root=$(git rev-parse --show-toplevel)
-            cd "$root"
-            export QML2_IMPORT_PATH="${wrappedShell}/lib/qt-6/qml:${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${pkgs.kdePackages.qtmultimedia}/lib/qt-6/qml:${pkgs.kdePackages.kirigami.unwrapped}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
-            hasInput=0
-            for argument in "$@"; do
-              if [[ "$argument" == "-input" ]]; then hasInput=1; fi
-            done
-            if ((hasInput)); then
-              exec qmltestrunner "$@"
-            else
-              exec qmltestrunner -input tests "$@"
-            fi
-          '';
-        in
-        {
-          format-check = makeQualityApp "quickshell-format-check" formatCheck;
-          format = makeQualityApp "quickshell-format" format;
-          lint = makeQualityApp "quickshell-lint" lint;
-          test = makeQualityApp "quickshell-test" test;
-          visual-lab = {
-            type = "app";
-            meta.description = "Quickshell isolated visual motion laboratory";
-            program = "${
-              pkgs.writeShellApplication {
-                name = "quickshell-visual-lab";
-                runtimeInputs = [
-                  wrappedShell
-                  pkgs.coreutils
-                  pkgs.git
-                ];
-                text = ''
-                  root=$(git rev-parse --show-toplevel)
-                  lab=$(mktemp -d)
-                  cleanup() {
-                    rm -f "$lab/shell.qml" "$lab/tests"
-                    rmdir "$lab"
-                  }
-                  trap cleanup EXIT
-                  cp "$root/tests/visual/VisualLabEntry.qml" "$lab/shell.qml"
-                  ln -s "$root/tests" "$lab/tests"
-                  quickshell -p "$lab" "$@"
-                '';
-              }
-            }/bin/quickshell-visual-lab";
-          };
-        }
-      );
+      checks = forAllSystems (system: {
+        project = nixpkgs.legacyPackages.${system}.runCommand "nacre-project-check" { } ''
+          ${checkTool system}/bin/nacre-check ${self}
+          touch "$out"
+        '';
+      });
 
       formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
-
-      nixosModules.default =
-        {
-          pkgs,
-          lib,
-          config,
-          ...
-        }:
-        let
-          cfg = config.services.quickshell-greeter;
-        in
-        {
-          options.services.quickshell-greeter = {
-            enable = lib.mkEnableOption "Quickshell Greeter";
-            package = lib.mkOption {
-              type = lib.types.package;
-              default = self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
-              description = "The wrapped quickshell package.";
-            };
-            configPackage = lib.mkOption {
-              type = lib.types.package;
-              default = self.packages.${pkgs.stdenv.hostPlatform.system}.config;
-              description = "The package containing greeter.qml and assets.";
-            };
-          };
-
-          config = lib.mkIf cfg.enable {
-            users.users.greeter.extraGroups = [
-              "video"
-              "input"
-              "render"
-              "seat"
-            ];
-            services.seatd.enable = true;
-
-            services.greetd = {
-              enable = true;
-              settings = {
-                terminal.vt = 1;
-                default_session = {
-                  command =
-                    let
-                      hyprlandConfig = pkgs.writeText "greeter-hyprland.conf" ''
-                        exec-once = sh -c "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; hyprctl dispatch exit"
-
-                        misc {
-                          disable_hyprland_logo = true
-                          disable_splash_rendering = true
-                          background_color = 0x000000
-                        }
-
-                        decoration {
-                          rounding = 0
-                        }
-
-                        monitor = ,prefer,auto,1
-                      '';
-                    in
-                    "${pkgs.dbus}/bin/dbus-run-session ${pkgs.hyprland}/bin/hyprland --config ${hyprlandConfig}";
-                  user = "greeter";
-                };
-              };
-            };
-
-            environment.systemPackages = [
-              pkgs.hyprland
-              cfg.package
-            ];
-            environment.variables.WLR_NO_HARDWARE_CURSORS = "1";
-
-            systemd.services.greetd.serviceConfig = {
-              Type = "idle";
-              StandardInput = "null";
-              StandardOutput = "journal";
-              StandardError = "journal";
-              TTYReset = true;
-              TTYVHangup = true;
-              TTYVTDisallocate = true;
-            };
-
-            services.gnome.gnome-keyring.enable = true;
-            security.pam.services.login.enableGnomeKeyring = true;
-            security.pam.services.greetd.enableGnomeKeyring = true;
-          };
-        };
-
-      devShells = forAllSystems (
-        system:
-        let
-          pkgs = import nixpkgs { inherit system; };
-          kirigami = pkgs.kdePackages.kirigami.unwrapped;
-          qtMultimedia = pkgs.kdePackages.qtmultimedia;
-        in
-        {
-          default = pkgs.mkShell {
-            nativeBuildInputs = [
-              quickshell.packages.${pkgs.stdenv.hostPlatform.system}.default
-              pkgs.libcava
-              pkgs.quickshell
-              pkgs.upower
-              pkgs.libnotify
-              pkgs.wf-recorder
-              pkgs.pulseaudio
-              qtMultimedia
-              pkgs.ffmpeg-full
-              kirigami
-              pkgs.kdePackages.sonnet
-              pkgs.kdePackages.qtimageformats
-              pkgs.kdePackages.kimageformats
-              pkgs.libva-utils
-              pkgs.clang-tools
-              pkgs.nixfmt
-            ];
-
-            shellHook = ''
-              export QML2_IMPORT_PATH="${pkgs.qt6.qtdeclarative}/lib/qt-6/qml:${qtMultimedia}/lib/qt-6/qml:${kirigami}/lib/qt-6/qml''${QML2_IMPORT_PATH:+:$QML2_IMPORT_PATH}"
-            '';
-          };
-        }
-      );
     };
 }

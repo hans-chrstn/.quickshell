@@ -1,7 +1,6 @@
-**/temp/
-**/.direnv/
-/notes/
-**/.envrc
-**/result
-**/**/references/
-**/**/new/
+temp/
+.direnv/
+.envrc
+result
+target/
+notes/

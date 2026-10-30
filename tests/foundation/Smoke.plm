@@ -1,0 +1,7 @@
+language 0.4
+scene Smoke {
+    surface { size: 96, 36; anchor: top }
+    fact ready = false
+    box { from: 0, 0; size: 96, 36; corner: 18; color: #171717 }
+    text "Nacre" { at: 48, 18; anchor: center; size: 12; color: #f2f2f2 }
+}

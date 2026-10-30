@@ -1,0 +1,65 @@
+language 0.4
+library IslandBody strict {
+    component Body(viewportWidth: number) {
+        size: viewportWidth, 144
+        let cx = viewportWidth / 2
+        fact phase: dormant | compact | wide = dormant
+        prop presence = 0 ~gentle
+        prop expanded = 0 ~gentle
+        follow presence = if(phase == dormant, 0, 1)
+        follow expanded = if(phase == wide, 1, 0)
+        let width = 46 + presence * 2 + expanded * 238
+        let height = 46 + presence * 2 + expanded * 24
+        let top = 14
+        let rise = (1 - presence) * (height + top + 12)
+        let centerY = top + height / 2 - rise
+        let faceX = cx - expanded * (width / 2 - 35)
+        let faceY = centerY - 1
+        let hitHeight = if(phase == dormant, 12, top + height)
+        let eyeGap = 7 * (1 - expanded)
+        let eyeSize = 6 + expanded * 11
+        let eyeHeight = 10 + expanded * 7
+
+        body {
+            gradient: cx, 8 to cx, 94, #252629, #0c0d0f
+            rim: 12%
+            shadow: 0, 7, 18, 24%
+            box { at: cx, centerY; size: width, height; corner: 24 + expanded * 11 }
+        }
+
+        body {
+            color: mix(#eeeae4, #d9ae79, expanded)
+            box { at: faceX - eyeGap, faceY - 2; size: eyeSize, eyeHeight; corner: eyeSize / 2; blend: expanded * 18 }
+            box { at: faceX + eyeGap, faceY - 2; size: eyeSize, eyeHeight; corner: eyeSize / 2; blend: expanded * 18 }
+        }
+        box {
+            at: faceX, faceY + 10
+            size: 10, 1.5
+            corner: 1
+            color: #d9ae79
+            opacity: 75% * clamp(1 - expanded * 3, 0, 1)
+        }
+
+        text "Nacre" {
+            at: cx + 17, centerY - 1
+            anchor: center
+            size: 18
+            weight: 600
+            family: "sans-serif"
+            color: #f4f2ef
+            opacity: clamp((expanded - 0.55) * 2.3, 0, 1)
+        }
+
+        zone box island_hit {
+            at: cx, hitHeight / 2
+            size: max(96, width), hitHeight
+            corner: 36
+            cursor: pointer
+            label: "Toggle Nacre island"
+        }
+        on enter island_hit while phase == dormant { phase = compact }
+        on leave island_hit { phase = dormant }
+        on press island_hit { phase = if(phase == wide, compact, wide) }
+        on key escape while phase == wide { phase = compact }
+    }
+}
