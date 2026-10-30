@@ -1,0 +1,79 @@
+language 0.4
+library IslandFace strict {
+    component Face(viewportWidth: number, faceX: number, faceY: number, colonX: number, eyes: number, mouth: number, expanded: number, whenCurious: bool, whenPleased: bool) {
+        size: viewportWidth, 144
+        prop eyeGap = 7
+        prop leftEyeWidth = 6
+        prop leftEyeHeight = 10
+        prop rightEyeWidth = 6
+        prop rightEyeHeight = 10
+        prop mouthSpan = 10
+        prop mouthBend = 0
+        prop mouthWeight = 1.5
+        pose delight = 0
+
+        gesture greet reflex {
+            100ms out_quad { delight: 1 }
+            170ms out_cubic { delight: 0 }
+        }
+        on change whenPleased while whenPleased { play greet }
+
+        layer expression {
+            pleased while whenPleased {
+                eyeGap: 7 ~180ms
+                leftEyeWidth: 7 ~180ms
+                leftEyeHeight: 7 ~180ms
+                rightEyeWidth: 7 ~180ms
+                rightEyeHeight: 7 ~180ms
+                mouthSpan: 14 ~180ms
+                mouthBend: 6 ~180ms
+                mouthWeight: 2.6 ~180ms
+            }
+            curious while whenCurious {
+                eyeGap: 8 ~180ms
+                leftEyeWidth: 7 ~180ms
+                leftEyeHeight: 12 ~180ms
+                rightEyeWidth: 7 ~180ms
+                rightEyeHeight: 12 ~180ms
+                mouthSpan: 4 ~180ms
+                mouthBend: 0 ~180ms
+                mouthWeight: 1.5 ~180ms
+            }
+            neutral {
+                eyeGap: 7 ~180ms
+                leftEyeWidth: 6 ~180ms
+                leftEyeHeight: 10 ~180ms
+                rightEyeWidth: 6 ~180ms
+                rightEyeHeight: 10 ~180ms
+                mouthSpan: 10 ~180ms
+                mouthBend: 0 ~180ms
+                mouthWeight: 1.5 ~180ms
+            }
+        }
+
+        let eyeX = faceX + (colonX - faceX) * expanded
+        let gap = eyeGap * eyes * (1 - expanded)
+        let leftWidth = (leftEyeWidth * (1 - expanded) + 4 * expanded) * eyes
+        let leftHeight = ((leftEyeHeight - delight * 2) * (1 - expanded) + 4 * expanded) * eyes
+        let rightWidth = (rightEyeWidth * (1 - expanded) + 4 * expanded) * eyes
+        let rightHeight = ((rightEyeHeight - delight * 2) * (1 - expanded) + 4 * expanded) * eyes
+        let mouthX = faceX + (colonX - faceX) * expanded
+        let mouthY = faceY + 10 - 3 * expanded
+        let mouthLength = mouthSpan * mouth * (1 - expanded)
+        let mouthStroke = (mouthWeight * (1 - expanded) + 4 * expanded) * mouth
+
+        body {
+            color: mix(#eeeae4, #d9ae79, expanded)
+            box { at: eyeX - gap, faceY - 2 - 3 * expanded; size: leftWidth, leftHeight; corner: leftWidth / 2 }
+            box { at: eyeX + gap, faceY - 2 - 3 * expanded; size: rightWidth, rightHeight; corner: rightWidth / 2 }
+        }
+        path {
+            at: mouthX, mouthY
+            stroke: mouthStroke
+            color: #d9ae79
+            move -mouthLength / 2, 0
+            curve mouthLength / 2, 0 via 0, (mouthBend + delight * 2) * mouth * (1 - expanded)
+        }
+        box { at: mouthX, mouthY; size: 4 * expanded * mouth, 4 * expanded * mouth; corner: 2; color: #d9ae79 }
+    }
+}

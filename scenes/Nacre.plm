@@ -2,6 +2,8 @@ language 0.4
 import "island/IslandBody.plm" as island
 
 scene Nacre {
+    permissions { services: "clock" }
+    service clock as now { time: text = "--:--"; date: text = "" }
     surface { size: full, 144; anchor: top; screens: each; keyboard: on_demand }
-    island.Body(screen.width)
+    island.Body(screen.width, now.time, now.date)
 }

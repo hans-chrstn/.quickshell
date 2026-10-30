@@ -1,0 +1,9 @@
+language 0.4
+import "IslandBody.plm" as island
+
+scene MoodLab {
+    permissions { services: "clock" }
+    service clock as now { time: text = "--:--"; date: text = "" }
+    surface { size: full, 144; anchor: top; screens: each; keyboard: on_demand }
+    island.Body(screen.width, now.time, now.date, true)
+}
