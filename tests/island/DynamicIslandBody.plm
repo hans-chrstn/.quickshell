@@ -1,0 +1,33 @@
+// DynamicIslandBody.plm — Glass Dynamic Island Body
+// Luminous Apple smoked acrylic glass with physical frosting, optical refraction bevel, and specular edge highlight.
+import "Theme.plm"
+
+library DynamicIslandBodyLib {
+    component DynamicIslandBody(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        shadow_alpha: number,
+        base_color: color = glass_base_color
+    ) {
+        body {
+            color: base_color
+            glass: 100%
+            frost: auto
+            smoke: 78%
+            refraction: 100%
+            dispersion: 100%
+            mirror: 35%
+            highlight: 65%
+            shadow: 0, 4, 10, shadow_alpha * shadow_base_opacity
+
+            box {
+                at: cx, cy
+                size: w, h
+                corner: corner
+            }
+        }
+    }
+}

@@ -1,0 +1,205 @@
+// ExpandedView.plm — Apple-inspired expanded Dynamic Island card
+// Rich media/status card: Header with visualizer, Artwork + Track info, Scrub bar, Playback controls.
+library ExpandedViewLib {
+    component ExpandedView(
+        cx: number,
+        cy: number,
+        title_str: text,
+        artist_str: text,
+        time_elapsed: text,
+        time_remaining: text,
+        w1: number,
+        w2: number,
+        w3: number,
+        w4: number,
+        opacity_val: number,
+        is_playing: bool = true,
+        ink_primary: color = #f4f6fa,
+        ink_secondary: color = #8c94a6,
+        ink_muted: color = #5e6678,
+        accent: color = #38bdf8
+    ) {
+        group {
+            opacity: opacity_val
+
+            // ── 1. Top Header Row ─────────────────────────────────────────
+            // Context header label
+            text "NOW PLAYING" {
+                at: cx - 142, cy - 48
+                anchor: left center
+                size: 9
+                weight: 700
+                color: ink_muted
+            }
+
+            // Glowing status bead
+            ellipse {
+                at: cx - 64, cy - 48
+                radius: 2.5
+                color: accent
+            }
+
+            // Top right mini visualizer bars (5 bars)
+            box {
+                at: cx + 118, cy - 48
+                size: 2, 5 + w1 * 0.7
+                corner: 1
+                color: accent
+            }
+            box {
+                at: cx + 124, cy - 48
+                size: 2, 8 + w2 * 0.7
+                corner: 1
+                color: accent
+            }
+            box {
+                at: cx + 130, cy - 48
+                size: 2, 11 + w3 * 0.7
+                corner: 1
+                color: accent
+            }
+            box {
+                at: cx + 136, cy - 48
+                size: 2, 7 + w4 * 0.7
+                corner: 1
+                color: accent
+            }
+            box {
+                at: cx + 142, cy - 48
+                size: 2, 9 + w1 * 0.7
+                corner: 1
+                color: accent
+            }
+
+            // ── 2. Artwork & Track Info Row ──────────────────────────────
+            // Artwork container (squircle)
+            box {
+                at: cx - 124, cy - 14
+                size: 38, 38
+                corner: 10
+                color: #121622
+            }
+            // Artwork inner rim/accent
+            ellipse {
+                at: cx - 124, cy - 14
+                radius: 11
+                color: #1a2233
+            }
+            ellipse {
+                at: cx - 124, cy - 14
+                radius: 5
+                color: accent
+            }
+            ellipse {
+                at: cx - 124, cy - 14
+                radius: 2
+                color: #ffffff
+            }
+
+            // Track Title
+            text title_str {
+                at: cx - 94, cy - 20
+                anchor: left center
+                size: 14
+                weight: 600
+                color: ink_primary
+            }
+
+            // Artist / Subtitle
+            text artist_str {
+                at: cx - 94, cy - 6
+                anchor: left center
+                size: 11
+                weight: 500
+                color: ink_secondary
+            }
+
+            // ── 3. Audio Progress / Scrubber Row ─────────────────────────
+            // Background track
+            box {
+                at: cx, cy + 16
+                size: 284, 3
+                corner: 1.5
+                color: #1a202c
+            }
+            // Active progress fill (40% played)
+            box {
+                at: cx - 142 + 57, cy + 16
+                size: 114, 3
+                corner: 1.5
+                color: accent
+            }
+            // Playhead indicator knob
+            ellipse {
+                at: cx - 142 + 114, cy + 16
+                radius: 3.5
+                color: #ffffff
+            }
+
+            // Timestamps
+            text time_elapsed {
+                at: cx - 142, cy + 28
+                anchor: left center
+                size: 9
+                weight: 500
+                color: ink_muted
+            }
+            text time_remaining {
+                at: cx + 142, cy + 28
+                anchor: right center
+                size: 9
+                weight: 500
+                color: ink_muted
+            }
+
+            // ── 4. Transport Controls Row ────────────────────────────────
+            // Previous track button
+            text "<<" {
+                at: cx - 52, cy + 46
+                anchor: center
+                size: 13
+                weight: 700
+                color: ink_secondary
+            }
+
+            // Center Action / Play-Pause circular button
+            ellipse {
+                at: cx, cy + 46
+                radius: 12
+                color: #f4f6fa
+            }
+            // Pause bars inside the button (when playing)
+            box {
+                at: cx - 3, cy + 46
+                size: 2.2, 8
+                corner: 1
+                color: #07080b
+                opacity: if(is_playing, 1, 0)
+            }
+            box {
+                at: cx + 3, cy + 46
+                size: 2.2, 8
+                corner: 1
+                color: #07080b
+                opacity: if(is_playing, 1, 0)
+            }
+            // Play triangle inside the button (when paused)
+            text "▶" {
+                at: cx + 1, cy + 46
+                anchor: center
+                size: 10
+                color: #07080b
+                opacity: if(is_playing, 0, 1)
+            }
+
+            // Next track button
+            text ">>" {
+                at: cx + 52, cy + 46
+                anchor: center
+                size: 13
+                weight: 700
+                color: ink_secondary
+            }
+        }
+    }
+}

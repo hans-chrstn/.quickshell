@@ -1,0 +1,79 @@
+// Theme.plm — Centralized Configuration, Tokens, Theme, and Physics Settings
+// Mandatory source of truth for all geometry, springs, glass materials,
+// shadows, colors, typography, and hit zones.
+library Theme {
+    // ── 1. Color Palette & Typography Tokens ──────────────────────────────
+    let ink_primary = #f4f6fa
+    let ink_secondary = #8c94a6
+    let ink_muted = #5e6678
+
+    let accent_primary = #38bdf8
+    let accent_secondary = #818cf8
+    let accent_emerald = #10b981
+    let accent_rose = #f43f5e
+    let accent_amber = #e8b072
+
+    let track_bg = #1a202c
+    let badge_bg = #121620
+
+    // ── 2. Luminous Apple Smoked Glass Settings ───────────────────────────
+    let glass_base_color = #0a0d14
+    let glass_amount = 1.0
+    let glass_smoke = 0.78
+    let glass_refraction = 1.0
+    let glass_dispersion = 1.0
+    let glass_mirror = 0.35
+    let glass_highlight = 0.65
+    let shadow_base_opacity = 0.35
+
+    // ── 3. Island State Dimensions & Coordinates ──────────────────────────
+    let center_x = 960
+
+    // Phase 0: Dormant (hidden seed at top edge)
+    let dormant_w = 140
+    let dormant_h = 24
+    let dormant_y = 10
+    let dormant_corner = 12
+
+    // Phase 1: Compact Island (sleek stadium pill)
+    let compact_w = 220
+    let compact_h = 38
+    let compact_y = 28
+    let compact_corner = 19
+    let compact_shadow_alpha = 0.50
+
+    // Phase 2: Expanded Card (rich media/control card)
+    let expanded_w = 340
+    let expanded_h = 136
+    let expanded_y = 78
+    let expanded_corner = 28
+    let expanded_shadow_alpha = 1.0
+
+    // ── 4. Interaction & Hit Zone Dimensions ──────────────────────────────
+    let wake_zone_w = 240
+    let wake_zone_h = 10
+    let wake_zone_y = 4
+
+    let grace_zone_w = 400
+    let grace_zone_h = 190
+    let grace_zone_y = 80
+    let grace_zone_corner = 36
+
+    // ── 5. Physical Springs (Near-critically damped ζ ≈ 0.86) ─────────────
+    // Calibrated for calm, liquid fluid motion in both expansion and retract
+    spring fluid = 150, 21
+    spring snappy = 240, 25
+    spring bouncy = 170, 16
+    spring calm = 120, 18
+    spring quick = 280, 30
+
+    // ── 6. Audio Visualizer Waves ─────────────────────────────────────────
+    let wave_amp_1 = 3.5
+    let wave_speed_1 = 3.2
+    let wave_amp_2 = 5.0
+    let wave_speed_2 = 4.1
+    let wave_amp_3 = 4.2
+    let wave_speed_3 = 2.8
+    let wave_amp_4 = 2.8
+    let wave_speed_4 = 3.9
+}

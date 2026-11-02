@@ -1,7 +1,47 @@
-language 0.4
+language 0.9
+
 scene Smoke {
-    surface { size: 96, 36; anchor: top }
-    fact ready = false
-    box { from: 0, 0; size: 96, 36; corner: 18; color: #171717 }
-    text "Nacre" { at: 48, 18; anchor: center; size: 12; color: #f2f2f2 }
+    surface {
+        size: 300, 100
+        anchor: center
+        kind: window
+    }
+
+    fact count = 0
+    text label = "Smoke test ready"
+    event tick ->
+
+    prop hover = 0 ~quick
+
+    box {
+        from: 0, 0
+        size: 300, 100
+        corner: 14
+        color: #121417
+    }
+
+    zone box btn {
+        at: 150, 50
+        size: 260, 60
+        corner: 10
+        cursor: pointer
+    }
+
+    box {
+        at: 150, 50
+        size: 260, 60
+        corner: 10
+        color: mix(#1e222a, #2a313d, hover)
+    }
+
+    text label {
+        at: 150, 50
+        anchor: center
+        size: 15
+        color: #f2f4f8
+    }
+
+    on enter btn { hover: 1 }
+    on leave btn { hover: 0 }
+    on press btn { emit tick }
 }

@@ -1,0 +1,91 @@
+// CompactView.plm — Apple-inspired compact Dynamic Island view
+// Left: Glowing status badge + live time; Right: Date + 5 living audio equalizer bars.
+library CompactViewLib {
+    component CompactView(
+        cx: number,
+        cy: number,
+        time_str: text,
+        date_str: text,
+        w1: number,
+        w2: number,
+        w3: number,
+        w4: number,
+        opacity_val: number,
+        ink: color = #f4f6fa,
+        accent: color = #38bdf8
+    ) {
+        group {
+            opacity: opacity_val
+
+            // Left icon badge: dark squircle container
+            box {
+                at: cx - 88, cy
+                size: 20, 20
+                corner: 6
+                color: #121620
+            }
+
+            // Glowing indicator jewel in center of badge
+            ellipse {
+                at: cx - 88, cy
+                radius: 3.5
+                color: accent
+            }
+            ellipse {
+                at: cx - 88, cy
+                radius: 1.5
+                color: #ffffff
+            }
+
+            // Compact Time
+            text time_str {
+                at: cx - 72, cy
+                anchor: left center
+                size: 13
+                weight: 600
+                color: ink
+            }
+
+            // Compact Date
+            text date_str {
+                at: cx + 38, cy
+                anchor: right center
+                size: 11
+                weight: 500
+                color: #8c94a6
+            }
+
+            // Living mini equalizer visualizer (5 bars)
+            box {
+                at: cx + 56, cy
+                size: 2.5, 7 + w1
+                corner: 1.25
+                color: accent
+            }
+            box {
+                at: cx + 64, cy
+                size: 2.5, 12 + w2
+                corner: 1.25
+                color: accent
+            }
+            box {
+                at: cx + 72, cy
+                size: 2.5, 16 + w3
+                corner: 1.25
+                color: accent
+            }
+            box {
+                at: cx + 80, cy
+                size: 2.5, 11 + w4
+                corner: 1.25
+                color: accent
+            }
+            box {
+                at: cx + 88, cy
+                size: 2.5, 8 + w1
+                corner: 1.25
+                color: accent
+            }
+        }
+    }
+}

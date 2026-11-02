@@ -1,0 +1,186 @@
+language 0.9
+
+import "Theme.plm"
+import "DynamicIslandBody.plm"
+import "CompactView.plm"
+import "ExpandedView.plm"
+
+scene IslandHostTest {
+    surface {
+        size: 1920, 260
+        anchor: top
+        level: overlay
+        screens: "DP-1"
+    }
+
+    permissions {
+        services: "clock"
+    }
+
+    service clock as now {
+        time: text = "--:--"
+        date: text = "Mon, Nov 2"
+    }
+
+    // ── Logic State Boundary ──────────────────────────────────────
+    // phase: 0 = dormant (invisible), 1 = compact island, 2 = expanded card
+    fact phase = 0
+    fact playing = true
+
+    text track_title = "Color Your Night"
+    text track_artist = "Persona 3 Reload · Lotus Juice"
+    text time_elapsed = "1:42"
+    text time_remaining = "-2:18"
+    text short_date = "Nov 2"
+
+    event open_wide ->
+    event fold_compact ->
+    event dismiss ->
+
+    // ── Motion Springs & Dimensions ───────────────────────────────
+    // Physical geometry springs driven by centralized Theme spring tokens
+    prop cur_y = 10 ~fluid
+    prop cur_w = 140 ~fluid
+    prop cur_h = 24 ~fluid
+    prop cur_corner = 12 ~fluid
+    prop island_alpha = 0 ~fluid
+    prop shadow_alpha = 0 ~calm
+
+    // Living soundwave ripples (subtle continuous animation)
+    prop wave_1 = 0
+    prop wave_2 = 0
+    prop wave_3 = 0
+    prop wave_4 = 0
+
+    wave wave_1 = 3.5 at 3.2
+    wave wave_2 = 5.0 at 4.1
+    wave wave_3 = 4.2 at 2.8
+    wave wave_4 = 2.8 at 3.9
+
+    // Explicit state-driven targets (Centralized Theme geometry)
+    follow cur_y = if(phase == 2, expanded_y, if(phase == 1, compact_y, dormant_y))
+    follow cur_w = if(phase == 2, expanded_w, if(phase == 1, compact_w, dormant_w))
+    follow cur_h = if(phase == 2, expanded_h, if(phase == 1, compact_h, dormant_h))
+    follow cur_corner = if(phase == 2, expanded_corner, if(phase == 1, compact_corner, dormant_corner))
+    follow shadow_alpha = if(phase == 2, expanded_shadow_alpha, if(phase == 1, compact_shadow_alpha, 0.0))
+    follow island_alpha = if(phase > 0, 1.0, 0.0)
+
+    // Direct mathematical alphas tied to physical height (cur_h):
+    // Continuous fluid motion in BOTH expansion, folding, and unhover retract.
+    let compact_alpha = if(cur_h < 60, clamp((cur_h - 25) / 11, 0, 1) * clamp(1 - (cur_h - 38) / 18, 0, 1), 0)
+    let expanded_alpha = if(cur_h > 85, clamp((cur_h - 85) / 35, 0, 1), 0)
+
+    let cx = center_x
+
+    // ── Drawing Composition ───────────────────────────────────────
+    // Entire UI emerges and retracts seamlessly with zero dormant blip
+    group {
+        opacity: island_alpha
+
+        // 1. Smoked Glass Island Body (luminous optical glass, zero jagged borders)
+        DynamicIslandBody(
+            cx,
+            cur_y,
+            cur_w,
+            cur_h,
+            cur_corner,
+            shadow_alpha,
+            glass_base_color
+        )
+
+        // 2. Compact Dynamic Island View
+        CompactView(
+            cx,
+            cur_y,
+            now.time,
+            short_date,
+            wave_1,
+            wave_2,
+            wave_3,
+            wave_4,
+            compact_alpha,
+            ink_primary,
+            accent_primary
+        )
+
+        // 3. Expanded Dynamic Island View
+        ExpandedView(
+            cx,
+            cur_y,
+            track_title,
+            track_artist,
+            time_elapsed,
+            time_remaining,
+            wave_1,
+            wave_2,
+            wave_3,
+            wave_4,
+            expanded_alpha,
+            playing,
+            ink_primary,
+            ink_secondary,
+            ink_muted,
+            accent_primary
+        )
+    }
+
+    // ── Hit Zones & Input Routing ─────────────────────────────────
+    // RULE: Outer grace area declared BEFORE interactive child buttons
+    zone box grace_area {
+        at: cx, grace_zone_y
+        size: grace_zone_w, grace_zone_h
+        corner: grace_zone_corner
+        active: phase > 0
+    }
+
+    // Top-center wake strip: dormant state hover trigger
+    zone box wake_strip {
+        at: cx, wake_zone_y
+        size: wake_zone_w, wake_zone_h
+        corner: 5
+        cursor: pointer
+        active: phase == 0
+        label: "Wake Island"
+        role: button
+    }
+
+    // Compact button: click expands into wide island
+    zone box compact_btn {
+        at: cx, cur_y
+        size: cur_w, cur_h
+        corner: compact_corner
+        cursor: pointer
+        active: phase == 1
+        label: "Open Island"
+        role: button
+    }
+
+    // Expanded card zone: click folds back to compact
+    zone box expanded_card {
+        at: cx, cur_y
+        size: cur_w, cur_h
+        corner: expanded_corner
+        cursor: pointer
+        active: phase == 2
+        label: "Fold Island"
+        role: button
+    }
+
+    // Play/Pause button zone declared AFTER expanded_card
+    zone ellipse play_btn {
+        at: cx, cur_y + 46
+        radius: 14
+        cursor: pointer
+        active: phase == 2
+        label: "Play or Pause"
+        role: button
+    }
+
+    // ── Renderer Event Rules ──────────────────────────────────────
+    on enter wake_strip { phase = 1 }
+    on press wake_strip { phase = 1 }
+    on press compact_btn { phase = 2; emit open_wide }
+    on press play_btn { playing = if(playing, false, true) }
+    on press expanded_card { phase = 1; emit fold_compact }
+    on leave grace_area while phase == 1 { phase = 0 }
+}
