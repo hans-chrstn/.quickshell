@@ -10,6 +10,20 @@ library Theme {
     let accent_rose = #f43f5e
     let accent_amber = #e8b072
 
+    let hygge_base = #161413
+    let hygge_card = #221e1a
+    let hygge_card_hover = #2b2520
+    let hygge_track = #342d27
+    let hygge_linen = #f7f2ea
+    let hygge_sand = #cec4b8
+    let hygge_stone = #877d73
+    let hygge_clay = #c97a56
+    let hygge_honey = #d49f6a
+    let hygge_sage = #889a84
+    let hygge_terracotta = #b45f3c
+    let hygge_flax = #dec8b0
+    let hygge_charcoal = #1c1916
+
     let track_bg = #1a202c
     let badge_bg = #121620
     let search_item_hover = #182236
@@ -120,6 +134,7 @@ library Theme {
     spring bouncy = 170, 16
     spring calm = 120, 18
     spring quick = 280, 30
+    spring wheel_spring = 220, 29
 
     let wave_amp_1 = 3.5
     let wave_speed_1 = 3.2
@@ -141,4 +156,33 @@ library Theme {
     let util_card_w = 248
     let util_card_h = 76
     let util_card_corner = 14
+
+    let pearl_size = 28
+    let pearl_corner = 14
+    let cluster_w = 40
+    let cluster_h = 180
+    let cluster_corner = 20
+    let popover_w = 260
+    let popover_h = 300
+    let popover_corner = 24
+
+    let strip_w = 56
+    let strip_h = 300
+    let strip_corner = 28
+    let fader_track_w = 12
+    let fader_track_h = 100
+    let fader_track_corner = 6
+    let fader_knob_size = 18
+    let fader_knob_corner = 9
+    let toggle_track_w = 36
+    let toggle_track_h = 20
+    let toggle_track_corner = 10
+    let toggle_knob_r = 7
+
+    let drum_slot_h = 44
+    let drum_center_size = 38
+    let drum_center_corner = 19
+    let drum_pill_w = 48
+    let drum_pill_h = 240
+    let drum_pill_corner = 24
 }

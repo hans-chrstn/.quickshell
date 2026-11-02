@@ -1,34 +1,165 @@
 import "../island/Theme.plm"
 
 library SideUtilityLib {
-    component ToolBead(
-        cx: number,
-        cy: number,
-        idx: number,
-        selected_idx: number,
-        tool_evt: event
-    ) {
-        let is_sel = selected_idx == idx
-        let bead_size = 32
+    component ToolIconVector(tool_id: number, cx: number, cy: number, is_center: bool) {
+        let pri_col = if(is_center, hygge_linen, hygge_sand)
+        let sec_col = if(is_center, hygge_sand, hygge_stone)
 
-        box hit {
-            at: cx, cy
-            size: bead_size, bead_size
-            corner: bead_size / 2
-            color: if(is_sel, accent_primary, badge_bg)
-            opacity: if(is_sel, 1.0, 0.4)
-            cursor: pointer
+        group {
+            show: tool_id == 0
+            box {
+                at: cx, cy
+                size: 18, 14
+                corner: 3
+                stroke: 1.5
+                color: if(is_center, hygge_clay, hygge_stone)
+            }
+            ellipse {
+                at: cx - 3, cy - 2
+                radius: 2.0
+                color: if(is_center, hygge_honey, hygge_stone)
+            }
+            path {
+                at: cx, cy + 3
+                color: if(is_center, hygge_sage, hygge_stone)
+                move -6, 2
+                line -2, -2
+                line 2, 1
+                line 5, -2
+                line 6, 2
+                close
+            }
         }
 
-        box {
-            at: cx - 17, cy
-            size: 2, 12
-            corner: 1
-            color: accent_primary
-            opacity: if(is_sel, 1.0, 0.0)
+        group {
+            show: tool_id == 1
+            box {
+                at: cx - 4, cy
+                size: 5, 8
+                corner: 1.5
+                color: if(is_center, hygge_honey, sec_col)
+            }
+            path {
+                at: cx, cy
+                color: if(is_center, hygge_honey, sec_col)
+                move -2, -3
+                line 3, -6
+                line 3, 6
+                line -2, 3
+                close
+            }
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: pri_col
+            }
+            arc {
+                at: cx + 3, cy
+                radius: 7.5
+                span: 110deg
+                rotate: -90deg
+                width: 1.5
+                color: if(is_center, hygge_honey, sec_col)
+            }
         }
 
-        on press hit { emit tool_evt(idx) }
+        group {
+            show: tool_id == 2
+            box {
+                at: cx, cy - 2
+                size: 16, 12
+                corner: 2.5
+                stroke: 1.5
+                color: if(is_center, hygge_sage, sec_col)
+            }
+            line {
+                from: cx, cy + 4
+                to: cx, cy + 7
+                width: 1.5
+                color: sec_col
+            }
+            box {
+                at: cx, cy + 7
+                size: 8, 1.5
+                corner: 0.5
+                color: sec_col
+            }
+            ellipse {
+                at: cx + 3, cy - 4
+                radius: 1.8
+                color: if(is_center, hygge_honey, pri_col)
+            }
+        }
+
+        group {
+            show: tool_id == 3
+            box {
+                at: cx - 1, cy
+                size: 17, 10
+                corner: 2.5
+                stroke: 1.5
+                color: if(is_center, hygge_terracotta, sec_col)
+            }
+            box {
+                at: cx + 8.5, cy
+                size: 2, 4
+                corner: 1
+                color: if(is_center, hygge_terracotta, sec_col)
+            }
+            path {
+                at: cx - 1, cy
+                color: if(is_center, hygge_honey, pri_col)
+                move 1, -3
+                line -2, 1
+                line 0, 1
+                line -1, 3
+                line 2, -1
+                line 0, -1
+                close
+            }
+        }
+
+        group {
+            show: tool_id == 4
+            ellipse {
+                at: cx, cy
+                radius: 6.0
+                stroke: 1.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            ellipse {
+                at: cx, cy
+                radius: 2.2
+                color: if(is_center, hygge_honey, pri_col)
+            }
+            box {
+                at: cx, cy - 7
+                size: 2.5, 2
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx, cy + 7
+                size: 2.5, 2
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx - 7, cy
+                size: 2, 2.5
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx + 7, cy
+                size: 2, 2.5
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+        }
     }
 
     component WallpaperCard(
@@ -47,16 +178,23 @@ library SideUtilityLib {
             from: 0, 0
             size: card_w, card_h
             corner: util_card_corner
-            color: if(is_active, accent_primary, badge_bg)
-            opacity: if(is_active, 18%, 80%)
+            color: if(is_active, hygge_card_hover, hygge_card)
+            opacity: if(is_active, 1.0, 0.85)
             cursor: pointer
         }
 
         box {
-            from: 0, 12
-            size: 3, card_h - 24
+            from: 0, 10
+            size: 3, card_h - 20
             corner: 1.5
-            color: accent_primary
+            color: hygge_clay
+            opacity: if(is_active, 1.0, 0.0)
+        }
+
+        ellipse {
+            at: card_w - 18, 22
+            radius: 3
+            color: hygge_clay
             opacity: if(is_active, 1.0, 0.0)
         }
 
@@ -66,25 +204,25 @@ library SideUtilityLib {
             family: "SF Pro"
             size: text_size_body
             weight: weight_semibold
-            color: if(is_active, ink_primary, ink_secondary)
+            color: if(is_active, hygge_linen, hygge_sand)
         }
 
         text type_text {
-            at: 16, 42
+            at: 16, 44
             anchor: left center
             family: "SF Mono"
             size: text_size_badge
             weight: weight_medium
-            color: accent_primary
+            color: if(is_active, hygge_clay, hygge_stone)
         }
 
         text fps_text {
-            at: card_w - 16, 42
+            at: card_w - 16, 44
             anchor: right center
             family: "SF Mono"
             size: text_size_badge
             weight: weight_semibold
-            color: ink_muted
+            color: hygge_stone
         }
 
         on press card_hit { emit pick_evt(card_idx) }

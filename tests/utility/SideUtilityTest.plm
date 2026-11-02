@@ -6,7 +6,8 @@ import "SideUtilityView.plm"
 
 scene SideUtilityTest {
     surface {
-        size: 380, 520
+        size: 440, 520
+        margin: 0, -30, 0, 0
         anchor: right
         level: overlay
         screens: "DP-1"
@@ -14,8 +15,11 @@ scene SideUtilityTest {
     }
 
     fact phase = 0
-    fact active_tool = 0
+    fact center_tool = 0
+    fact grab_y = 0
     fact selected_wall = 0
+    fact night_light = false
+    fact volume_pct = 80
 
     text wall_0_title = "Cyber Tokyo"
     text wall_0_type = "60 FPS · WEBM LOOP"
@@ -29,43 +33,122 @@ scene SideUtilityTest {
     text wall_2_type = "STATIC · AVIF IMAGE"
     text wall_2_res = "3840x2160"
 
-    event select_tool
+    text tool_name = "WALLPAPER STUDIO"
+    text tool_sub = "GPU DIRECT RENDER"
+
+    event select_tool ->
     event pick_wall ->
-    event close_flyout ->
+    event toggle_drawer ->
+    event toggle_night ->
+    event set_vol ->
 
-    prop pill_alpha = 0 ~fluid
-    prop flyout_alpha = 0 ~fluid
-    prop flyout_x_slide = 24 ~fluid
-
-    follow pill_alpha = if(phase > 0, 1.0, 0.0)
-    follow flyout_alpha = if(phase == 2, 1.0, 0.0)
-    follow flyout_x_slide = if(phase == 2, 0.0, 24.0)
-
+    let screen_edge_x = 410
     let py = 260
-    let pill_cx = 380 - 12 - util_pill_w / 2
-    let flyout_cx = pill_cx - util_pill_w / 2 - 12 - util_flyout_w / 2
+
+    let side_active_cx = screen_edge_x - 12 - drum_pill_w / 2
+    let side_dormant_cx = screen_edge_x - 4
+    let side_dormant_w = 24
+    let side_dormant_h = 140
+    let side_dormant_corner = 12
+
+    let flyout_cx = side_active_cx - drum_pill_w / 2 - 12 - util_flyout_w / 2
+
+    prop cur_x = 406 ~fluid
+    prop cur_w = 24 ~fluid
+    prop cur_h = 140 ~fluid
+    prop cur_corner = 12 ~fluid
+    prop rail_alpha = 0 ~fluid
+    prop shadow_alpha = 0 ~calm
+    prop drawer_alpha = 0 ~fluid
+    prop drawer_slide = 24 ~fluid
+    prop drum_pos = 0 ~wheel_spring
+
+    follow cur_x = if(phase > 0, side_active_cx, side_dormant_cx)
+    follow cur_w = if(phase > 0, drum_pill_w, side_dormant_w)
+    follow cur_h = if(phase > 0, drum_pill_h, side_dormant_h)
+    follow cur_corner = if(phase > 0, drum_pill_corner, side_dormant_corner)
+    follow rail_alpha = if(phase > 0, 1.0, 0.0)
+    follow shadow_alpha = if(phase > 0, compact_shadow_alpha, 0.0)
+    follow drawer_alpha = if(phase == 2, 1.0, 0.0)
+    follow drawer_slide = if(phase == 2, 0.0, 24.0)
+
+    let content_alpha = clamp((cur_w - 30) / 14, 0, 1)
 
     zone box grace_area {
-        at: 190, py
-        size: 380, 480
+        at: if(phase == 2, 220, 310), py
+        size: if(phase == 2, 400, 240), if(phase == 2, 500, 480)
         active: phase > 0
     }
 
     zone box edge_wake {
-        at: 377, py
-        size: 6, util_pill_h + 40
+        at: screen_edge_x - 5, py
+        size: 20, drum_pill_h + 80
         cursor: pointer
         active: phase == 0
-        label: "Wake Side Island"
+        label: "Wake Rolling Utility"
+        role: button
+    }
+
+    zone box drum_rail_zone {
+        at: cur_x, py
+        size: cur_w, cur_h
+        cursor: pointer
+        active: phase > 0
+        label: "Drum Rail Scroll"
+        role: slider
+    }
+
+    zone box slot_above {
+        at: cur_x, py - 48
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase == 1
+        label: "Roll Slot Up"
+        role: button
+    }
+
+    zone box center_loupe_hit {
+        at: cur_x, py
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase > 0
+        label: "Activate Center Tool"
+        role: button
+    }
+
+    zone box slot_below {
+        at: cur_x, py + 48
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase == 1
+        label: "Roll Slot Down"
+        role: button
+    }
+
+    zone box flyout_esc {
+        at: flyout_cx - drawer_slide + 104, py - 136
+        size: 32, 20
+        cursor: pointer
+        active: phase == 2
+        label: "Close Flyout"
+        role: button
+    }
+
+    zone box night_toggle_hit {
+        at: flyout_cx - drawer_slide + 92, py - 40
+        size: 44, 28
+        cursor: pointer
+        active: phase == 2 and center_tool == 2
+        label: "Toggle Night Mode"
         role: button
     }
 
     group {
         group {
-            opacity: flyout_alpha
+            opacity: drawer_alpha
 
             DynamicIslandBody(
-                flyout_cx - flyout_x_slide,
+                flyout_cx - drawer_slide,
                 py,
                 util_flyout_w,
                 util_flyout_h,
@@ -76,165 +159,309 @@ scene SideUtilityTest {
 
             group {
                 clip box {
-                    at: flyout_cx - flyout_x_slide, py
+                    at: flyout_cx - drawer_slide, py
                     size: util_flyout_w, util_flyout_h
                     corner: util_flyout_corner
                 }
 
-                text "WALLPAPERS" {
-                    at: flyout_cx - flyout_x_slide - 110, py - 136
+                text tool_name {
+                    at: flyout_cx - drawer_slide - 110, py - 136
                     anchor: left center
                     family: "SF Pro"
                     size: text_size_caption
                     weight: weight_bold
-                    color: ink_muted
+                    color: hygge_linen
                 }
 
                 box {
-                    at: flyout_cx - flyout_x_slide + 104, py - 136
+                    at: flyout_cx - drawer_slide + 104, py - 136
                     size: 28, 16
                     corner: 4
-                    color: badge_bg
+                    color: hygge_card
                 }
                 text "ESC" {
-                    at: flyout_cx - flyout_x_slide + 104, py - 136
+                    at: flyout_cx - drawer_slide + 104, py - 136
                     anchor: center
                     family: "SF Mono"
                     size: text_size_badge
                     weight: weight_semibold
-                    color: ink_muted
+                    color: hygge_stone
                 }
 
                 box {
-                    at: flyout_cx - flyout_x_slide, py - 118
+                    at: flyout_cx - drawer_slide, py - 118
                     size: 248, 1
-                    color: track_bg
+                    color: hygge_track
                 }
 
-                column cards {
-                    at: flyout_cx - flyout_x_slide - 124, py - 104
-                    gap: 8
+                group {
+                    show: center_tool == 0
 
-                    WallpaperCard(
-                        wall_0_title,
-                        wall_0_type,
-                        wall_0_res,
-                        selected_wall == 0,
-                        util_card_w,
-                        util_card_h,
-                        pick_wall,
-                        0
-                    )
+                    column cards {
+                        at: flyout_cx - drawer_slide - 124, py - 104
+                        gap: 8
 
-                    WallpaperCard(
-                        wall_1_title,
-                        wall_1_type,
-                        wall_1_res,
-                        selected_wall == 1,
-                        util_card_w,
-                        util_card_h,
-                        pick_wall,
-                        1
-                    )
+                        WallpaperCard(
+                            wall_0_title,
+                            wall_0_type,
+                            wall_0_res,
+                            selected_wall == 0,
+                            util_card_w,
+                            util_card_h,
+                            pick_wall,
+                            0
+                        )
 
-                    WallpaperCard(
-                        wall_2_title,
-                        wall_2_type,
-                        wall_2_res,
-                        selected_wall == 2,
-                        util_card_w,
-                        util_card_h,
-                        pick_wall,
-                        2
-                    )
+                        WallpaperCard(
+                            wall_1_title,
+                            wall_1_type,
+                            wall_1_res,
+                            selected_wall == 1,
+                            util_card_w,
+                            util_card_h,
+                            pick_wall,
+                            1
+                        )
+
+                        WallpaperCard(
+                            wall_2_title,
+                            wall_2_type,
+                            wall_2_res,
+                            selected_wall == 2,
+                            util_card_w,
+                            util_card_h,
+                            pick_wall,
+                            2
+                        )
+                    }
+
+                    box {
+                        at: flyout_cx - drawer_slide, py + 144
+                        size: 248, 1
+                        color: hygge_track
+                    }
+                    text "ENGINE: GPU VULKAN DIRECT" {
+                        at: flyout_cx - drawer_slide, py + 154
+                        anchor: center
+                        family: "SF Mono"
+                        size: text_size_badge
+                        weight: weight_semibold
+                        color: hygge_clay
+                    }
                 }
 
-                box {
-                    at: flyout_cx - flyout_x_slide, py + 144
-                    size: 248, 1
-                    color: track_bg
+                group {
+                    show: center_tool == 1
+
+                    text "MASTER OUTPUT VOLUME" {
+                        at: flyout_cx - drawer_slide - 110, py - 96
+                        anchor: left center
+                        family: "SF Pro"
+                        size: text_size_badge
+                        weight: weight_semibold
+                        color: hygge_stone
+                    }
+
+                    box {
+                        at: flyout_cx - drawer_slide, py - 60
+                        size: 240, 6
+                        corner: 3
+                        color: hygge_track
+                    }
+                    let vol_w = (volume_pct / 100) * 240
+                    box {
+                        at: flyout_cx - drawer_slide - 120 + vol_w / 2, py - 60
+                        size: vol_w, 6
+                        corner: 3
+                        color: hygge_clay
+                    }
+
+                    box {
+                        at: flyout_cx - drawer_slide, py + 20
+                        size: 248, 70
+                        corner: util_card_corner
+                        color: hygge_card
+                    }
+                    text "Headphones (Analog DAC)" {
+                        at: flyout_cx - drawer_slide - 100, py + 6
+                        anchor: left center
+                        family: "SF Pro"
+                        size: text_size_body
+                        weight: weight_semibold
+                        color: hygge_linen
+                    }
+                    text "ACTIVE SINK · 96kHz 24-BIT" {
+                        at: flyout_cx - drawer_slide - 100, py + 28
+                        anchor: left center
+                        family: "SF Mono"
+                        size: text_size_badge
+                        weight: weight_medium
+                        color: hygge_sage
+                    }
                 }
-                text "ENGINE: GPU VULKAN DIRECT" {
-                    at: flyout_cx - flyout_x_slide, py + 154
-                    anchor: center
-                    family: "SF Mono"
-                    size: text_size_badge
-                    weight: weight_semibold
-                    color: accent_primary
+
+                group {
+                    show: center_tool == 2
+
+                    text "NIGHT LIGHT & DISPLAY" {
+                        at: flyout_cx - drawer_slide - 110, py - 96
+                        anchor: left center
+                        family: "SF Pro"
+                        size: text_size_badge
+                        weight: weight_semibold
+                        color: hygge_stone
+                    }
+
+                    box {
+                        at: flyout_cx - drawer_slide, py - 40
+                        size: 248, 60
+                        corner: util_card_corner
+                        color: hygge_card
+                    }
+                    text "Warm Color Temperature" {
+                        at: flyout_cx - drawer_slide - 100, py - 40
+                        anchor: left center
+                        family: "SF Pro"
+                        size: text_size_body
+                        weight: weight_medium
+                        color: hygge_linen
+                    }
+                    box {
+                        at: flyout_cx - drawer_slide + 92, py - 40
+                        size: toggle_track_w, toggle_track_h
+                        corner: toggle_track_corner
+                        color: if(night_light, hygge_honey, hygge_track)
+                    }
+                    ellipse {
+                        at: flyout_cx - drawer_slide + if(night_light, 100, 84), py - 40
+                        radius: toggle_knob_r
+                        color: hygge_linen
+                    }
+                }
+
+                group {
+                    show: center_tool == 3 or center_tool == 4
+
+                    box {
+                        at: flyout_cx - drawer_slide, py
+                        size: 248, 120
+                        corner: util_card_corner
+                        color: hygge_card
+                    }
+                    text "SYSTEM SERVICE READY" {
+                        at: flyout_cx - drawer_slide, py - 16
+                        anchor: center
+                        family: "SF Pro"
+                        size: text_size_body
+                        weight: weight_semibold
+                        color: hygge_linen
+                    }
+                    text tool_sub {
+                        at: flyout_cx - drawer_slide, py + 16
+                        anchor: center
+                        family: "SF Mono"
+                        size: text_size_badge
+                        weight: weight_medium
+                        color: hygge_clay
+                    }
                 }
             }
         }
 
         group {
-            opacity: pill_alpha
+            opacity: rail_alpha
 
             DynamicIslandBody(
-                pill_cx,
+                cur_x,
                 py,
-                util_pill_w,
-                util_pill_h,
-                util_pill_corner,
-                compact_shadow_alpha,
+                cur_w,
+                cur_h,
+                cur_corner,
+                shadow_alpha,
                 glass_base_color
             )
 
             group {
-                clip box {
-                    at: pill_cx, py
-                    size: util_pill_w, util_pill_h
-                    corner: util_pill_corner
-                }
+                opacity: content_alpha
 
                 group {
-                    ToolBead(pill_cx, py - 66, 0, active_tool, select_tool)
-                    ellipse { at: pill_cx - 4, py - 70; radius: 2.5; color: accent_primary }
-                    ellipse { at: pill_cx + 4, py - 70; radius: 2.5; color: accent_emerald }
-                    ellipse { at: pill_cx - 4, py - 62; radius: 2.5; color: accent_rose }
-                    ellipse { at: pill_cx + 4, py - 62; radius: 2.5; color: accent_amber }
-                }
+                    clip box {
+                        at: cur_x, py
+                        size: cur_w, cur_h
+                        corner: cur_corner
+                    }
 
-                group {
-                    ToolBead(pill_cx, py - 22, 1, active_tool, select_tool)
-                    box { at: pill_cx - 5, py - 22; size: 4, 6; corner: 1; color: ink_primary }
-                    path { at: pill_cx - 1, py - 22; color: ink_primary; move -2, -3; line 4, -5; line 4, 5; line -2, 3; close }
-                    ellipse { at: pill_cx + 7, py - 22; radius: 3; stroke: 1.5; color: ink_secondary }
-                }
+                    let d_0 = mod(0 - drum_pos / 48 + 2, 5) - 2
+                    let y_0 = py + d_0 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_0) * 0.45, 0.05, 1.0)
+                        ToolIconVector(0, cur_x, y_0, abs(d_0) < 0.35)
+                    }
 
-                group {
-                    ToolBead(pill_cx, py + 22, 2, active_tool, select_tool)
-                    box { at: pill_cx, py + 20; size: 14, 10; corner: 2; stroke: 1.5; color: ink_primary }
-                    line { from: pill_cx, py + 26; to: pill_cx, py + 29; width: 1.5; color: ink_primary }
-                    box { at: pill_cx, py + 29; size: 8, 1.5; color: ink_primary }
-                }
+                    let d_1 = mod(1 - drum_pos / 48 + 2, 5) - 2
+                    let y_1 = py + d_1 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_1) * 0.45, 0.05, 1.0)
+                        ToolIconVector(1, cur_x, y_1, abs(d_1) < 0.35)
+                    }
 
-                group {
-                    ToolBead(pill_cx, py + 66, 3, active_tool, select_tool)
-                    ellipse { at: pill_cx, py + 66; radius: 5; stroke: 1.5; color: ink_primary }
-                    box { at: pill_cx, py + 66; size: 14, 2; color: ink_secondary }
-                    box { at: pill_cx, py + 66; size: 2, 14; color: ink_secondary }
+                    let d_2 = mod(2 - drum_pos / 48 + 2, 5) - 2
+                    let y_2 = py + d_2 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_2) * 0.45, 0.05, 1.0)
+                        ToolIconVector(2, cur_x, y_2, abs(d_2) < 0.35)
+                    }
+
+                    let d_3 = mod(3 - drum_pos / 48 + 2, 5) - 2
+                    let y_3 = py + d_3 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_3) * 0.45, 0.05, 1.0)
+                        ToolIconVector(3, cur_x, y_3, abs(d_3) < 0.35)
+                    }
+
+                    let d_4 = mod(4 - drum_pos / 48 + 2, 5) - 2
+                    let y_4 = py + d_4 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_4) * 0.45, 0.05, 1.0)
+                        ToolIconVector(4, cur_x, y_4, abs(d_4) < 0.35)
+                    }
                 }
             }
         }
     }
 
-    zone box flyout_esc {
-        at: flyout_cx - flyout_x_slide + 104, py - 136
-        size: 32, 20
-        cursor: pointer
-        active: phase == 2
-        label: "Close Flyout"
-        role: button
-    }
-
     on enter edge_wake { phase = 1 }
     on press edge_wake { phase = 1 }
-    on select_tool(i) {
-        active_tool = i
-        phase = if(i == 0, 2, 1)
+
+    on press slot_above { drum_pos: drum_pos - 48 ~snappy }
+    on press slot_below { drum_pos: drum_pos + 48 ~snappy }
+    on press center_loupe_hit { emit toggle_drawer }
+
+    on scroll drum_rail_zone {
+        drum_pos: round(drum_pos / 48) * 48 - wheel * 48
     }
+
+    on press drum_rail_zone {
+        grab_y = drum_pos
+    }
+    on drag drum_rail_zone {
+        drum_pos: grab_y - drag.dy
+    }
+    on release drum_rail_zone {
+        drum_pos: round(drum_pos / 48) * 48 ~snappy
+    }
+
+    on change mod(round(drum_pos / 48), 5) {
+        emit select_tool(mod(round(drum_pos / 48), 5))
+    }
+
+    on press night_toggle_hit { emit toggle_night }
     on press flyout_esc while phase == 2 { phase = 1 }
     on key Escape while phase == 2 { phase = 1 }
     on leave grace_area while phase == 1 { phase = 0 }
-    on key Down while phase == 2 { selected_wall = min(selected_wall + 1, 2) }
-    on key Up while phase == 2 { selected_wall = max(selected_wall - 1, 0) }
+
+    on key Up while phase > 0 { drum_pos: drum_pos - 48 ~snappy }
+    on key Down while phase > 0 { drum_pos: drum_pos + 48 ~snappy }
+    on key Right while phase == 1 { phase = 2 }
+    on key Left while phase == 2 { phase = 1 }
 }
