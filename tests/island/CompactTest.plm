@@ -1,0 +1,91 @@
+language 0.9
+
+import "Theme.plm"
+import "DynamicIslandBody.plm"
+import "CompactView.plm"
+
+scene CompactTest {
+    surface {
+        size: 1920, 120
+        anchor: top
+        level: overlay
+        screens: "DP-1"
+    }
+
+    permissions {
+        services: "clock"
+    }
+
+    service clock as now {
+        time: text = "--:--"
+        date: text = ""
+    }
+
+    fact clicks = 0
+    text island_date = ""
+    event compact_click ->
+
+    prop wave_1 = 0
+    prop wave_2 = 0
+    prop wave_3 = 0
+    prop wave_4 = 0
+
+    wave wave_1 = 3.5 at 3.2
+    wave wave_2 = 5.0 at 4.1
+    wave wave_3 = 4.2 at 2.8
+    wave wave_4 = 2.8 at 3.9
+
+    let cx = 960
+    let cy = compact_y
+    let cw = compact_w
+    let ch = compact_h
+    let corner = compact_corner
+
+    group {
+        DynamicIslandBody(
+            cx,
+            cy,
+            cw,
+            ch,
+            corner,
+            compact_shadow_alpha,
+            glass_base_color
+        )
+
+        group {
+            clip box {
+                at: cx, cy
+                size: cw, ch
+                corner: corner
+            }
+
+            CompactView(
+                cx,
+                cy,
+                now.time,
+                island_date,
+                wave_1,
+                wave_2,
+                wave_3,
+                wave_4,
+                1.0,
+                ink_primary,
+                accent_primary
+            )
+        }
+    }
+
+    zone box compact_pill {
+        at: cx, cy
+        size: cw, ch
+        corner: corner
+        cursor: pointer
+        label: "Compact Island"
+        role: button
+    }
+
+    on press compact_pill {
+        clicks = clicks + 1
+        emit compact_click
+    }
+}

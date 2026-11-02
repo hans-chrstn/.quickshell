@@ -4,10 +4,11 @@ import "island/Theme.plm"
 import "island/DynamicIslandBody.plm"
 import "island/CompactView.plm"
 import "island/ExpandedView.plm"
+import "island/SearchView.plm"
 
 scene Nacre {
     surface {
-        size: full, 260
+        size: full, 320
         anchor: top
         level: overlay
         screens: each
@@ -15,7 +16,7 @@ scene Nacre {
     }
 
     permissions {
-        services: "clock", "media", "media.*"
+        services: "clock", "media", "media.*", "apps", "apps.launch"
     }
 
     service clock as now {
@@ -35,17 +36,23 @@ scene Nacre {
         player: text = ""
     }
 
-    // ── Logic State Boundary ──────────────────────────────────────
-    // phase: 0 = dormant (invisible), 1 = compact island, 2 = expanded card
     fact phase = 0
     fact playing = false
     fact media_progress = 0
+    fact sel = 0
 
     text track_title = ""
     text track_artist = ""
     text time_elapsed = ""
     text time_remaining = ""
     text island_date = ""
+    text query = ""
+
+    model hits max 5 {
+        name: text
+        icon: image 20, 20
+        exec: text
+    }
 
     event open_wide ->
     event fold_compact ->
@@ -54,8 +61,11 @@ scene Nacre {
     event media_prev ->
     event media_next ->
     event media_seek ->
+    event launch ->
+    event pop_search ->
+    event search_closed ->
+    event select_hit
 
-    // ── Motion Springs & Dimensions ───────────────────────────────
     prop cur_y = 10 ~fluid
     prop cur_w = 140 ~fluid
     prop cur_h = 24 ~fluid
@@ -63,7 +73,6 @@ scene Nacre {
     prop island_alpha = 0 ~fluid
     prop shadow_alpha = 0 ~calm
 
-    // Soundwave visualizer bars
     prop wave_1 = 0
     prop wave_2 = 0
     prop wave_3 = 0
@@ -74,26 +83,22 @@ scene Nacre {
     wave wave_3 = 4.2 at 2.8
     wave wave_4 = 2.8 at 3.9
 
-    // State-driven spring targets
-    follow cur_y = if(phase == 2, expanded_y, if(phase == 1, compact_y, dormant_y))
-    follow cur_w = if(phase == 2, expanded_w, if(phase == 1, compact_w, dormant_w))
-    follow cur_h = if(phase == 2, expanded_h, if(phase == 1, compact_h, dormant_h))
-    follow cur_corner = if(phase == 2, expanded_corner, if(phase == 1, compact_corner, dormant_corner))
-    follow shadow_alpha = if(phase == 2, expanded_shadow_alpha, if(phase == 1, compact_shadow_alpha, 0.0))
+    follow cur_y = if(phase == 3, search_y, if(phase == 2, expanded_y, if(phase == 1, compact_y, dormant_y)))
+    follow cur_w = if(phase == 3, search_w, if(phase == 2, expanded_w, if(phase == 1, compact_w, dormant_w)))
+    follow cur_h = if(phase == 3, search_h, if(phase == 2, expanded_h, if(phase == 1, compact_h, dormant_h)))
+    follow cur_corner = if(phase == 3, search_corner, if(phase == 2, expanded_corner, if(phase == 1, compact_corner, dormant_corner)))
+    follow shadow_alpha = if(phase == 3, search_shadow_alpha, if(phase == 2, expanded_shadow_alpha, if(phase == 1, compact_shadow_alpha, 0.0)))
     follow island_alpha = if(phase > 0, 1.0, 0.0)
 
-    // Fluid height-based continuous alphas in both expand and retract
-    let compact_alpha = if(cur_h < 60, clamp((cur_h - 25) / 11, 0, 1) * clamp(1 - (cur_h - 38) / 18, 0, 1), 0)
-    let expanded_alpha = if(cur_h > 85, clamp((cur_h - 85) / 35, 0, 1), 0)
+    let compact_alpha = if(phase == 1 and cur_h < 60, clamp((cur_h - 25) / 11, 0, 1) * clamp(1 - (cur_h - 38) / 18, 0, 1), 0)
+    let expanded_alpha = if(phase == 2 and cur_h > 85, clamp((cur_h - 85) / 35, 0, 1), 0)
+    let search_alpha = if(phase == 3 and cur_h > 120, clamp((cur_h - 120) / 60, 0, 1), 0)
 
-    // Dynamic horizontal center adapting to screen width
     let cx = screen.width / 2
 
-    // ── Drawing Composition ───────────────────────────────────────
     group {
         opacity: island_alpha
 
-        // 1. Smoked Glass Dynamic Island Body
         DynamicIslandBody(
             cx,
             cur_y,
@@ -104,7 +109,6 @@ scene Nacre {
             glass_base_color
         )
 
-        // 2. Contained Content Layer: clipped strictly to current capsule geometry
         group {
             clip box {
                 at: cx, cur_y
@@ -112,7 +116,6 @@ scene Nacre {
                 corner: cur_corner
             }
 
-            // Compact View
             CompactView(
                 cx,
                 cur_y,
@@ -127,7 +130,6 @@ scene Nacre {
                 accent_primary
             )
 
-            // Expanded View
             ExpandedView(
                 cx,
                 cur_y,
@@ -147,19 +149,82 @@ scene Nacre {
                 ink_muted,
                 accent_primary
             )
+
+            group {
+                opacity: search_alpha
+
+                ellipse {
+                    at: cx - 176, cur_y - 86
+                    radius: 5
+                    stroke: 2
+                    color: accent_primary
+                }
+                line {
+                    from: cx - 172, cur_y - 82
+                    to: cx - 168, cur_y - 78
+                    width: 2
+                    color: accent_primary
+                }
+
+                input query {
+                    at: cx - 152, cur_y - 96
+                    width: search_input_w
+                    size: text_size_search_input
+                    family: "SF Pro"
+                    weight: weight_medium
+                    color: ink_primary
+                    placeholder: "Search applications..."
+                    selection: accent_primary
+                }
+
+                box {
+                    at: cx + 174, cur_y - 86
+                    size: search_esc_badge_w, search_esc_badge_h
+                    corner: search_esc_badge_corner
+                    color: badge_bg
+                }
+                text "ESC" {
+                    at: cx + 174, cur_y - 86
+                    anchor: center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_semibold
+                    color: ink_muted
+                }
+
+                box {
+                    at: cx, cur_y - 68
+                    size: search_divider_w, search_divider_h
+                    color: track_bg
+                }
+
+                column results {
+                    at: cx - 192, cur_y - 54
+                    gap: 4
+                    for h in hits {
+                        AppRow(h, sel, launch, select_hit)
+                    }
+                }
+
+                text "No applications found" {
+                    at: cx, cur_y - 10
+                    anchor: center
+                    family: "SF Pro"
+                    size: text_size_body
+                    color: ink_muted
+                    show: hits.count == 0
+                }
+            }
         }
     }
 
-    // ── Hit Zones & Input Routing ─────────────────────────────────
-    // RULE: Outer grace area declared BEFORE interactive child buttons
     zone box grace_area {
-        at: cx, grace_zone_y
-        size: grace_zone_w, grace_zone_h
+        at: cx, if(phase == 3, search_grace_y, grace_zone_y)
+        size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
         corner: grace_zone_corner
         active: phase > 0
     }
 
-    // Top-center wake strip: dormant state hover trigger
     zone box wake_strip {
         at: cx, wake_zone_y
         size: wake_zone_w, wake_zone_h
@@ -170,7 +235,6 @@ scene Nacre {
         role: button
     }
 
-    // Compact button: click expands into wide card
     zone box compact_btn {
         at: cx, cur_y
         size: cur_w, cur_h
@@ -181,7 +245,16 @@ scene Nacre {
         role: button
     }
 
-    // Expanded card zone: click background folds back to compact
+    zone box compact_search_btn {
+        at: cx - 88, cur_y
+        size: compact_badge_size + 10, compact_badge_size + 10
+        corner: compact_badge_corner
+        cursor: pointer
+        active: phase == 1
+        label: "Search Applications"
+        role: button
+    }
+
     zone box expanded_card {
         at: cx, cur_y
         size: cur_w, cur_h
@@ -192,7 +265,6 @@ scene Nacre {
         role: button
     }
 
-    // Scrubber track zone: click or drag to seek
     zone box scrub_track {
         at: cx, cur_y + 16
         size: scrubber_track_w, scrub_hit_h
@@ -203,7 +275,6 @@ scene Nacre {
         role: slider
     }
 
-    // Previous track button zone
     zone box prev_btn {
         at: cx - 52, cur_y + 46
         size: nav_btn_hit_size, nav_btn_hit_size
@@ -214,7 +285,6 @@ scene Nacre {
         role: button
     }
 
-    // Play/Pause button zone
     zone ellipse play_btn {
         at: cx, cur_y + 46
         radius: play_btn_hit_r
@@ -224,7 +294,6 @@ scene Nacre {
         role: button
     }
 
-    // Next track button zone
     zone box next_btn {
         at: cx + 52, cur_y + 46
         size: nav_btn_hit_size, nav_btn_hit_size
@@ -235,15 +304,36 @@ scene Nacre {
         role: button
     }
 
-    // ── Renderer Event Rules ──────────────────────────────────────
+    zone box esc_btn {
+        at: cx + 174, cur_y - 86
+        size: 36, 22
+        corner: 4
+        cursor: pointer
+        active: phase == 3
+        label: "Close Search"
+        role: button
+    }
+
     on enter wake_strip { phase = 1 }
     on press wake_strip { phase = 1 }
-    on press compact_btn { phase = 2; emit open_wide }
+    on press compact_btn while phase == 1 and cur_h > 30 { phase = 2; emit open_wide }
+    on press right compact_btn while phase == 1 { phase = 3; focus query; emit pop_search }
+    on press compact_search_btn while phase == 1 { phase = 3; focus query; emit pop_search }
+    on pop_search while phase == 1 { phase = 3; focus query }
+    on key Ctrl+Space while phase == 1 { phase = 3; focus query; emit pop_search }
+    on key Super+Space while phase == 1 { phase = 3; focus query; emit pop_search }
     on press play_btn { emit media_toggle }
     on press prev_btn { emit media_prev }
     on press next_btn { emit media_next }
     on press scrub_track { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
     on drag scrub_track  { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
-    on press expanded_card { phase = 1; emit fold_compact }
+    on press expanded_card while phase == 2 { phase = 1; emit fold_compact }
+    on press esc_btn while phase == 3 { phase = 1; blur; emit search_closed }
+    on key Escape while phase == 3 { phase = 1; blur; emit search_closed }
+    on blur while phase == 3 { phase = 1; blur; emit search_closed }
+    on key Down while phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
+    on key Up while phase == 3 { sel = max(sel - 1, 0) }
+    on select_hit(i) while phase == 3 { sel = i }
     on leave grace_area while phase == 1 { phase = 0 }
+    on submit query while phase == 3 { emit launch(sel) }
 }

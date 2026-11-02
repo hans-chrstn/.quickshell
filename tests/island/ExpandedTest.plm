@@ -1,0 +1,148 @@
+language 0.9
+
+import "Theme.plm"
+import "DynamicIslandBody.plm"
+import "ExpandedView.plm"
+
+scene ExpandedTest {
+    surface {
+        size: 1920, 200
+        anchor: top
+        level: overlay
+        screens: "DP-1"
+    }
+
+    permissions {
+        services: "media", "media.*"
+    }
+
+    service media as song {
+        playing: bool = false
+        title: text = ""
+        artist: text = ""
+        album: text = ""
+        length: number = 0
+        position: number = 0
+        rate: number = 1.0
+        can_seek: bool = false
+        player: text = ""
+    }
+
+    fact playing = false
+    fact media_progress = 0
+
+    text track_title = ""
+    text track_artist = ""
+    text time_elapsed = ""
+    text time_remaining = ""
+
+    event media_toggle ->
+    event media_prev ->
+    event media_next ->
+    event media_seek ->
+
+    prop wave_1 = 0
+    prop wave_2 = 0
+    prop wave_3 = 0
+    prop wave_4 = 0
+
+    wave wave_1 = 3.5 at 3.2
+    wave wave_2 = 5.0 at 4.1
+    wave wave_3 = 4.2 at 2.8
+    wave wave_4 = 2.8 at 3.9
+
+    let cx = 960
+    let cy = expanded_y
+    let cw = expanded_w
+    let ch = expanded_h
+    let corner = expanded_corner
+
+    group {
+        DynamicIslandBody(
+            cx,
+            cy,
+            cw,
+            ch,
+            corner,
+            expanded_shadow_alpha,
+            glass_base_color
+        )
+
+        group {
+            clip box {
+                at: cx, cy
+                size: cw, ch
+                corner: corner
+            }
+
+            ExpandedView(
+                cx,
+                cy,
+                track_title,
+                track_artist,
+                time_elapsed,
+                time_remaining,
+                media_progress,
+                wave_1,
+                wave_2,
+                wave_3,
+                wave_4,
+                1.0,
+                playing,
+                ink_primary,
+                ink_secondary,
+                ink_muted,
+                accent_primary
+            )
+        }
+    }
+
+    zone box card_bg {
+        at: cx, cy
+        size: cw, ch
+        corner: corner
+        label: "Expanded Card"
+        role: button
+    }
+
+    zone box scrub_track {
+        at: cx, cy + 16
+        size: scrubber_track_w, scrub_hit_h
+        corner: scrub_hit_corner
+        cursor: pointer
+        label: "Scrub Media"
+        role: slider
+    }
+
+    zone box prev_btn {
+        at: cx - 52, cy + 46
+        size: nav_btn_hit_size, nav_btn_hit_size
+        corner: nav_btn_hit_corner
+        cursor: pointer
+        label: "Previous Track"
+        role: button
+    }
+
+    zone ellipse play_btn {
+        at: cx, cy + 46
+        radius: play_btn_hit_r
+        cursor: pointer
+        label: "Play or Pause"
+        role: button
+    }
+
+    zone box next_btn {
+        at: cx + 52, cy + 46
+        size: nav_btn_hit_size, nav_btn_hit_size
+        corner: nav_btn_hit_corner
+        cursor: pointer
+        label: "Next Track"
+        role: button
+    }
+
+    on press play_btn { emit media_toggle }
+    on press prev_btn { emit media_prev }
+    on press next_btn { emit media_next }
+    on press scrub_track { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
+    on drag scrub_track  { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
+}

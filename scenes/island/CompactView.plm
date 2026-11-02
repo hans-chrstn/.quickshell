@@ -1,5 +1,3 @@
-// CompactView.plm — Apple-inspired compact Dynamic Island view
-// Left: Glowing status badge + live time; Right: Date + 5 living audio equalizer bars.
 import "Theme.plm"
 
 library CompactViewLib {
@@ -19,7 +17,6 @@ library CompactViewLib {
         group {
             opacity: opacity_val
 
-            // Left icon badge: dark squircle container
             box {
                 at: cx - 88, cy
                 size: compact_badge_size, compact_badge_size
@@ -27,7 +24,6 @@ library CompactViewLib {
                 color: badge_bg
             }
 
-            // Glowing indicator jewel in center of badge
             ellipse {
                 at: cx - 88, cy
                 radius: compact_jewel_outer_r
@@ -36,10 +32,9 @@ library CompactViewLib {
             ellipse {
                 at: cx - 88, cy
                 radius: compact_jewel_inner_r
-                color: #ffffff
+                color: ink_white
             }
 
-            // Compact Time
             text time_str {
                 at: cx - 72, cy
                 anchor: left center
@@ -49,7 +44,6 @@ library CompactViewLib {
                 color: ink
             }
 
-            // Compact Date
             text date_str {
                 at: cx + 38, cy
                 anchor: right center
@@ -59,34 +53,33 @@ library CompactViewLib {
                 color: ink_secondary
             }
 
-            // Living mini equalizer visualizer (5 bars)
             box {
                 at: cx + 56, cy
-                size: compact_eq_bar_w, 7 + w1
+                size: compact_eq_bar_w, compact_eq_h1 + w1
                 corner: compact_eq_bar_corner
                 color: accent
             }
             box {
                 at: cx + 64, cy
-                size: compact_eq_bar_w, 12 + w2
+                size: compact_eq_bar_w, compact_eq_h2 + w2
                 corner: compact_eq_bar_corner
                 color: accent
             }
             box {
                 at: cx + 72, cy
-                size: compact_eq_bar_w, 16 + w3
+                size: compact_eq_bar_w, compact_eq_h3 + w3
                 corner: compact_eq_bar_corner
                 color: accent
             }
             box {
                 at: cx + 80, cy
-                size: compact_eq_bar_w, 11 + w4
+                size: compact_eq_bar_w, compact_eq_h4 + w4
                 corner: compact_eq_bar_corner
                 color: accent
             }
             box {
                 at: cx + 88, cy
-                size: compact_eq_bar_w, 8 + w1
+                size: compact_eq_bar_w, compact_eq_h5 + w1
                 corner: compact_eq_bar_corner
                 color: accent
             }

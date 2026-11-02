@@ -1,5 +1,3 @@
-// DynamicIslandBody.plm — Glass Dynamic Island Body
-// Luminous Apple smoked acrylic glass with physical frosting, optical refraction bevel, and specular edge highlight.
 import "Theme.plm"
 
 library DynamicIslandBodyLib {
