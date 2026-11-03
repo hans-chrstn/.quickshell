@@ -14,33 +14,47 @@ scene SideUtilityTest {
         keyboard: on_demand
     }
 
+    permissions {
+        services: "audio", "audio.*"
+    }
+
+    service audio as sound {
+        volume: number = 0.70
+        muted: bool = false
+        input: number = 0.50
+        input_muted: bool = false
+    }
+
     fact phase = 0
-    fact center_tool = 0
+    fact center_tool = 1
     fact grab_y = 0
-    fact selected_wall = 0
-    fact night_light = false
-    fact volume_pct = 80
+    fact selected_sink = 0
+    fact audio_volume = 70
+    fact audio_muted = false
+    fact mic_volume = 50
+    fact mic_muted = false
 
-    text wall_0_title = "Cyber Tokyo"
-    text wall_0_type = "60 FPS · WEBM LOOP"
-    text wall_0_res = "1920x1080"
+    text tool_name = "AUDIO STUDIO"
+    text tool_sub = "ANALOG DAC · 96kHz"
+    text active_sink_name = "USB Audio Analog Stereo"
+    text audio_status_desc = "PIPEWIRE · 48kHz"
+    text volume_percent_text = "70%"
+    text mic_percent_text = "50%"
+    text audio_engine_status = "PIPEWIRE · WIREPLUMBER DIRECT"
 
-    text wall_1_title = "Deep Sea Aurora"
-    text wall_1_type = "VULKAN · WGSL SHADER"
-    text wall_1_res = "PROCEDURAL"
-
-    text wall_2_title = "Carina Nebula 8K"
-    text wall_2_type = "STATIC · AVIF IMAGE"
-    text wall_2_res = "3840x2160"
-
-    text tool_name = "WALLPAPER STUDIO"
-    text tool_sub = "GPU DIRECT RENDER"
+    model sinks max 4 {
+        id: number
+        name: text
+        is_default: bool
+    }
 
     event select_tool ->
-    event pick_wall ->
     event toggle_drawer ->
-    event toggle_night ->
     event set_vol ->
+    event toggle_mute ->
+    event set_mic ->
+    event toggle_mic_mute ->
+    event pick_sink ->
 
     let screen_edge_x = 410
     let py = 260
@@ -52,6 +66,7 @@ scene SideUtilityTest {
     let side_dormant_corner = 12
 
     let flyout_cx = side_active_cx - drum_pill_w / 2 - 12 - util_flyout_w / 2
+    let flyout_card_h = 420
 
     prop cur_x = 406 ~fluid
     prop cur_w = 24 ~fluid
@@ -61,7 +76,7 @@ scene SideUtilityTest {
     prop shadow_alpha = 0 ~calm
     prop drawer_alpha = 0 ~fluid
     prop drawer_slide = 24 ~fluid
-    prop drum_pos = 0 ~wheel_spring
+    prop drum_pos = 48 ~wheel_spring
 
     follow cur_x = if(phase > 0, side_active_cx, side_dormant_cx)
     follow cur_w = if(phase > 0, drum_pill_w, side_dormant_w)
@@ -126,20 +141,11 @@ scene SideUtilityTest {
     }
 
     zone box flyout_esc {
-        at: flyout_cx - drawer_slide + 104, py - 136
+        at: flyout_cx - drawer_slide + 104, py - 170
         size: 32, 20
         cursor: pointer
         active: phase == 2
         label: "Close Flyout"
-        role: button
-    }
-
-    zone box night_toggle_hit {
-        at: flyout_cx - drawer_slide + 92, py - 40
-        size: 44, 28
-        cursor: pointer
-        active: phase == 2 and center_tool == 2
-        label: "Toggle Night Mode"
         role: button
     }
 
@@ -151,7 +157,7 @@ scene SideUtilityTest {
                 flyout_cx - drawer_slide,
                 py,
                 util_flyout_w,
-                util_flyout_h,
+                flyout_card_h,
                 util_flyout_corner,
                 1.0,
                 glass_base_color
@@ -160,210 +166,159 @@ scene SideUtilityTest {
             group {
                 clip box {
                     at: flyout_cx - drawer_slide, py
-                    size: util_flyout_w, util_flyout_h
+                    size: util_flyout_w, flyout_card_h
                     corner: util_flyout_corner
                 }
 
                 text tool_name {
-                    at: flyout_cx - drawer_slide - 110, py - 136
+                    at: flyout_cx - drawer_slide - 104, py - 178
                     anchor: left center
                     family: "SF Pro"
-                    size: text_size_caption
+                    size: 14
                     weight: weight_bold
                     color: hygge_linen
                 }
 
-                box {
-                    at: flyout_cx - drawer_slide + 104, py - 136
-                    size: 28, 16
-                    corner: 4
-                    color: hygge_card
-                }
-                text "ESC" {
-                    at: flyout_cx - drawer_slide + 104, py - 136
-                    anchor: center
+                text tool_sub {
+                    at: flyout_cx - drawer_slide - 104, py - 162
+                    anchor: left center
                     family: "SF Mono"
                     size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_clay
+                }
+
+                box {
+                    at: flyout_cx - drawer_slide + 104, py - 170
+                    size: 32, 20
+                    corner: 4
+                    color: badge_bg
+                }
+
+                text "ESC" {
+                    at: flyout_cx - drawer_slide + 104, py - 170
+                    anchor: center
+                    family: "SF Mono"
+                    size: 10
                     weight: weight_semibold
                     color: hygge_stone
                 }
 
-                box {
-                    at: flyout_cx - drawer_slide, py - 118
-                    size: 248, 1
+                text "MASTER VOLUME" {
+                    at: flyout_cx - drawer_slide - 104, py - 134
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                text volume_percent_text {
+                    at: flyout_cx - drawer_slide + 116, py - 134
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 12
+                    weight: weight_bold
+                    color: if(audio_muted, hygge_terracotta, hygge_honey)
+                }
+
+                AudioMuteBtn(
+                    flyout_cx - drawer_slide - 90,
+                    py - 106,
+                    audio_muted,
+                    toggle_mute
+                )
+
+                AudioSlider(
+                    flyout_cx - drawer_slide + 24,
+                    py - 106,
+                    176,
+                    8,
+                    audio_volume,
+                    audio_muted,
+                    set_vol
+                )
+
+                line {
+                    from: flyout_cx - drawer_slide - 110, py - 80
+                    to: flyout_cx - drawer_slide + 116, py - 80
+                    width: 1
                     color: hygge_track
                 }
 
-                group {
-                    show: center_tool == 0
+                text "OUTPUT DEVICES" {
+                    at: flyout_cx - drawer_slide - 104, py - 62
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
 
-                    column cards {
-                        at: flyout_cx - drawer_slide - 124, py - 104
-                        gap: 8
-
-                        WallpaperCard(
-                            wall_0_title,
-                            wall_0_type,
-                            wall_0_res,
-                            selected_wall == 0,
+                column {
+                    at: flyout_cx - drawer_slide - 116, py - 46
+                    gap: 5
+                    for s in sinks {
+                        AudioSinkCard(
+                            s.id,
+                            s.name,
+                            s.is_default,
                             util_card_w,
-                            util_card_h,
-                            pick_wall,
-                            0
+                            36,
+                            pick_sink
                         )
-
-                        WallpaperCard(
-                            wall_1_title,
-                            wall_1_type,
-                            wall_1_res,
-                            selected_wall == 1,
-                            util_card_w,
-                            util_card_h,
-                            pick_wall,
-                            1
-                        )
-
-                        WallpaperCard(
-                            wall_2_title,
-                            wall_2_type,
-                            wall_2_res,
-                            selected_wall == 2,
-                            util_card_w,
-                            util_card_h,
-                            pick_wall,
-                            2
-                        )
-                    }
-
-                    box {
-                        at: flyout_cx - drawer_slide, py + 144
-                        size: 248, 1
-                        color: hygge_track
-                    }
-                    text "ENGINE: GPU VULKAN DIRECT" {
-                        at: flyout_cx - drawer_slide, py + 154
-                        anchor: center
-                        family: "SF Mono"
-                        size: text_size_badge
-                        weight: weight_semibold
-                        color: hygge_clay
                     }
                 }
 
-                group {
-                    show: center_tool == 1
-
-                    text "MASTER OUTPUT VOLUME" {
-                        at: flyout_cx - drawer_slide - 110, py - 96
-                        anchor: left center
-                        family: "SF Pro"
-                        size: text_size_badge
-                        weight: weight_semibold
-                        color: hygge_stone
-                    }
-
-                    box {
-                        at: flyout_cx - drawer_slide, py - 60
-                        size: 240, 6
-                        corner: 3
-                        color: hygge_track
-                    }
-                    let vol_w = (volume_pct / 100) * 240
-                    box {
-                        at: flyout_cx - drawer_slide - 120 + vol_w / 2, py - 60
-                        size: vol_w, 6
-                        corner: 3
-                        color: hygge_clay
-                    }
-
-                    box {
-                        at: flyout_cx - drawer_slide, py + 20
-                        size: 248, 70
-                        corner: util_card_corner
-                        color: hygge_card
-                    }
-                    text "Headphones (Analog DAC)" {
-                        at: flyout_cx - drawer_slide - 100, py + 6
-                        anchor: left center
-                        family: "SF Pro"
-                        size: text_size_body
-                        weight: weight_semibold
-                        color: hygge_linen
-                    }
-                    text "ACTIVE SINK · 96kHz 24-BIT" {
-                        at: flyout_cx - drawer_slide - 100, py + 28
-                        anchor: left center
-                        family: "SF Mono"
-                        size: text_size_badge
-                        weight: weight_medium
-                        color: hygge_sage
-                    }
+                line {
+                    from: flyout_cx - drawer_slide - 110, py + 86
+                    to: flyout_cx - drawer_slide + 116, py + 86
+                    width: 1
+                    color: hygge_track
                 }
 
-                group {
-                    show: center_tool == 2
-
-                    text "NIGHT LIGHT & DISPLAY" {
-                        at: flyout_cx - drawer_slide - 110, py - 96
-                        anchor: left center
-                        family: "SF Pro"
-                        size: text_size_badge
-                        weight: weight_semibold
-                        color: hygge_stone
-                    }
-
-                    box {
-                        at: flyout_cx - drawer_slide, py - 40
-                        size: 248, 60
-                        corner: util_card_corner
-                        color: hygge_card
-                    }
-                    text "Warm Color Temperature" {
-                        at: flyout_cx - drawer_slide - 100, py - 40
-                        anchor: left center
-                        family: "SF Pro"
-                        size: text_size_body
-                        weight: weight_medium
-                        color: hygge_linen
-                    }
-                    box {
-                        at: flyout_cx - drawer_slide + 92, py - 40
-                        size: toggle_track_w, toggle_track_h
-                        corner: toggle_track_corner
-                        color: if(night_light, hygge_honey, hygge_track)
-                    }
-                    ellipse {
-                        at: flyout_cx - drawer_slide + if(night_light, 100, 84), py - 40
-                        radius: toggle_knob_r
-                        color: hygge_linen
-                    }
+                text "INPUT MICROPHONE" {
+                    at: flyout_cx - drawer_slide - 104, py + 104
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
                 }
 
-                group {
-                    show: center_tool == 3 or center_tool == 4
+                text mic_percent_text {
+                    at: flyout_cx - drawer_slide + 116, py + 104
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 11
+                    weight: weight_semibold
+                    color: if(mic_muted, hygge_terracotta, hygge_stone)
+                }
 
-                    box {
-                        at: flyout_cx - drawer_slide, py
-                        size: 248, 120
-                        corner: util_card_corner
-                        color: hygge_card
-                    }
-                    text "SYSTEM SERVICE READY" {
-                        at: flyout_cx - drawer_slide, py - 16
-                        anchor: center
-                        family: "SF Pro"
-                        size: text_size_body
-                        weight: weight_semibold
-                        color: hygge_linen
-                    }
-                    text tool_sub {
-                        at: flyout_cx - drawer_slide, py + 16
-                        anchor: center
-                        family: "SF Mono"
-                        size: text_size_badge
-                        weight: weight_medium
-                        color: hygge_clay
-                    }
+                AudioMuteBtn(
+                    flyout_cx - drawer_slide - 90,
+                    py + 132,
+                    mic_muted,
+                    toggle_mic_mute
+                )
+
+                AudioSlider(
+                    flyout_cx - drawer_slide + 24,
+                    py + 132,
+                    176,
+                    8,
+                    mic_volume,
+                    mic_muted,
+                    set_mic
+                )
+
+                text audio_engine_status {
+                    at: flyout_cx - drawer_slide, py + 172
+                    anchor: center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_stone
                 }
             }
         }
@@ -382,14 +337,31 @@ scene SideUtilityTest {
             )
 
             group {
-                opacity: content_alpha
+                clip box {
+                    at: cur_x, py
+                    size: cur_w, cur_h
+                    corner: cur_corner
+                }
+
+                box {
+                    at: cur_x, py
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    color: hygge_card_hover
+                    opacity: 0.85 * content_alpha
+                }
+
+                box {
+                    at: cur_x, py
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    stroke: 1.5
+                    color: hygge_clay
+                    opacity: 0.9 * content_alpha
+                }
 
                 group {
-                    clip box {
-                        at: cur_x, py
-                        size: cur_w, cur_h
-                        corner: cur_corner
-                    }
+                    opacity: content_alpha
 
                     let d_0 = mod(0 - drum_pos / 48 + 2, 5) - 2
                     let y_0 = py + d_0 * 48
@@ -455,7 +427,6 @@ scene SideUtilityTest {
         emit select_tool(mod(round(drum_pos / 48), 5))
     }
 
-    on press night_toggle_hit { emit toggle_night }
     on press flyout_esc while phase == 2 { phase = 1 }
     on key Escape while phase == 2 { phase = 1 }
     on leave grace_area while phase == 1 { phase = 0 }

@@ -1,17 +1,25 @@
-import "Theme.plm"
+import "../common/Theme.plm"
+import "../common/Primitives.plm"
 
 library SearchViewLib {
-    component AppRow(h: record, selected_idx: number, launch_evt: event, hover_evt: event) {
+    component AppRow(h: record, selected_idx: number, launch_evt: event, hover_evt: event, is_active: bool = true) {
         let is_sel = selected_idx == h.index
         size: search_row_w, search_row_h
 
-        box hit {
+        zone box hit {
+            from: 0, 0
+            size: search_row_w, search_row_h
+            corner: search_row_corner
+            cursor: pointer
+            active: is_active
+        }
+
+        box {
             from: 0, 0
             size: search_row_w, search_row_h
             corner: search_row_corner
             color: accent_primary
             opacity: if(is_sel, 16%, 0)
-            cursor: pointer
         }
 
         box {
@@ -47,5 +55,69 @@ library SearchViewLib {
 
         on enter hit { emit hover_evt(h.index) }
         on press hit { emit launch_evt(h.index) }
+    }
+
+    component SearchView(
+        cx: number,
+        cy: number,
+        alpha: number,
+        is_empty: bool,
+        is_active: bool = true
+    ) {
+        group {
+            opacity: alpha
+            show: is_active or alpha > 0.01
+
+            ellipse {
+                at: cx - 176, cy - 86
+                radius: 5
+                stroke: 2
+                color: accent_primary
+            }
+            line {
+                from: cx - 172, cy - 82
+                to: cx - 168, cy - 78
+                width: 2
+                color: accent_primary
+            }
+
+            input query {
+                at: cx - 152, cy - 96
+                width: search_input_w
+                size: text_size_search_input
+                family: "SF Pro"
+                weight: weight_medium
+                color: ink_primary
+                placeholder: "Search applications..."
+                selection: accent_primary
+            }
+
+            EscBadge(
+                cx + 174,
+                cy - 86,
+                search_esc_badge_w,
+                search_esc_badge_h,
+                search_esc_badge_corner,
+                badge_bg,
+                ink_muted
+            )
+
+            box {
+                at: cx, cy - 68
+                size: search_divider_w, search_divider_h
+                color: track_bg
+            }
+
+            children
+
+            text "No applications found" {
+                at: cx, cy - 10
+                anchor: center
+                family: "SF Pro"
+                size: text_size_body
+                color: ink_muted
+                show: is_empty
+            }
+        }
     }
 }

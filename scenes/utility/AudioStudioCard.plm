@@ -1,0 +1,185 @@
+import "../common/Theme.plm"
+import "../common/Primitives.plm"
+import "../common/GlassBody.plm"
+import "SideUtilityView.plm"
+
+library AudioStudioCardLib {
+    component AudioStudioCard(
+        cx: number,
+        cy: number,
+        card_w: number,
+        card_h: number,
+        corner: number,
+        slide_x: number,
+        alpha: number,
+        tool_title: text,
+        tool_subtitle: text,
+        vol: number,
+        vol_muted: bool,
+        vol_text: text,
+        mic_vol: number,
+        mic_muted: bool,
+        mic_text: text,
+        engine_status: text,
+        toggle_mute_evt: event,
+        set_vol_evt: event,
+        toggle_mic_mute_evt: event,
+        set_mic_evt: event
+    ) {
+        group {
+            opacity: alpha
+
+            GlassBody(
+                cx - slide_x,
+                cy,
+                card_w,
+                card_h,
+                corner,
+                1.0,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: cx - slide_x, cy
+                    size: card_w, card_h
+                    corner: corner
+                }
+
+                text tool_title {
+                    at: cx - slide_x - 104, cy - 178
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 14
+                    weight: weight_bold
+                    color: hygge_linen
+                }
+
+                text tool_subtitle {
+                    at: cx - slide_x - 104, cy - 162
+                    anchor: left center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_clay
+                    width: 180
+                    lines: 1
+                }
+
+                EscBadge(
+                    cx - slide_x + 104,
+                    cy - 170,
+                    32,
+                    20,
+                    4,
+                    badge_bg,
+                    hygge_stone
+                )
+
+                text "MASTER VOLUME" {
+                    at: cx - slide_x - 104, cy - 134
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                text vol_text {
+                    at: cx - slide_x + 116, cy - 134
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 12
+                    weight: weight_bold
+                    color: if(vol_muted, hygge_terracotta, hygge_honey)
+                }
+
+                AudioMuteBtn(
+                    cx - slide_x - 90,
+                    cy - 106,
+                    vol_muted,
+                    toggle_mute_evt
+                )
+
+                AudioSlider(
+                    cx - slide_x + 24,
+                    cy - 106,
+                    176,
+                    8,
+                    vol,
+                    vol_muted,
+                    set_vol_evt
+                )
+
+                line {
+                    from: cx - slide_x - 110, cy - 80
+                    to: cx - slide_x + 116, cy - 80
+                    width: 1
+                    color: hygge_track
+                }
+
+                text "OUTPUT DEVICES" {
+                    at: cx - slide_x - 104, cy - 62
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                children
+
+                line {
+                    from: cx - slide_x - 110, cy + 86
+                    to: cx - slide_x + 116, cy + 86
+                    width: 1
+                    color: hygge_track
+                }
+
+                text "INPUT MICROPHONE" {
+                    at: cx - slide_x - 104, cy + 104
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                text mic_text {
+                    at: cx - slide_x + 116, cy + 104
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 11
+                    weight: weight_semibold
+                    color: if(mic_muted, hygge_terracotta, hygge_stone)
+                }
+
+                AudioMuteBtn(
+                    cx - slide_x - 90,
+                    cy + 132,
+                    mic_muted,
+                    toggle_mic_mute_evt
+                )
+
+                AudioSlider(
+                    cx - slide_x + 24,
+                    cy + 132,
+                    176,
+                    8,
+                    mic_vol,
+                    mic_muted,
+                    set_mic_evt
+                )
+
+                text engine_status {
+                    at: cx - slide_x, cy + 172
+                    anchor: center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_stone
+                }
+            }
+        }
+    }
+}

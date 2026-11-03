@@ -40,6 +40,12 @@
             trap 'rm -r "$definitions_dir"' EXIT
             pleamar --luau-types > "$definitions_dir/base.luau"
 
+            if [ -f "$project_root/Nacre.plm" ]; then
+              pleamar --check "$project_root/Nacre.plm"
+              pleamar --luau-types "$project_root/Nacre.plm" > "$definitions_dir/nacre.luau"
+              checked_scenes=$((checked_scenes + 1))
+            fi
+
             for source_dir in "$project_root/scenes" "$project_root/tests"; do
               if [ ! -d "$source_dir" ]; then
                 continue
@@ -53,6 +59,21 @@
                 pleamar --check "$scene_file"
                 checked_scenes=$((checked_scenes + 1))
               done < <(find "$source_dir" -type f -name '*.plm' -print0)
+            done
+
+            if [ -f "$project_root/Nacre.luau" ]; then
+              definitions="$definitions_dir/base.luau"
+              if [ -f "$definitions_dir/nacre.luau" ]; then
+                definitions="$definitions_dir/nacre.luau"
+              fi
+              luau-lsp analyze --platform standard --definitions="@pleamar=$definitions" "$project_root/Nacre.luau"
+              checked_logic=$((checked_logic + 1))
+            fi
+
+            for source_dir in "$project_root/logic" "$project_root/scenes" "$project_root/tests"; do
+              if [ ! -d "$source_dir" ]; then
+                continue
+              fi
 
               while IFS= read -r -d "" logic_file; do
                 scene_file="''${logic_file%.luau}.plm"
@@ -60,6 +81,8 @@
                 if [ -f "$scene_file" ] && grep -Eq '^[[:space:]]*scene[[:space:]]+[[:alpha:]_]' "$scene_file"; then
                   definitions="$definitions_dir/scene-$checked_logic.luau"
                   pleamar --luau-types "$scene_file" > "$definitions"
+                elif [ -f "$definitions_dir/nacre.luau" ]; then
+                  definitions="$definitions_dir/nacre.luau"
                 fi
                 luau-lsp analyze --platform standard --definitions="@pleamar=$definitions" "$logic_file"
                 checked_logic=$((checked_logic + 1))

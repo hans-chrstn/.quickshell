@@ -162,69 +162,173 @@ library SideUtilityLib {
         }
     }
 
-    component WallpaperCard(
-        title_text: text,
-        type_text: text,
-        fps_text: text,
-        is_active: bool,
-        card_w: number,
-        card_h: number,
-        pick_evt: event,
-        card_idx: number
-    ) {
+    component AudioSlider(cx: number, cy: number, w: number, h: number, val: number, is_muted: bool, seek_evt: event) {
+        let fill_w = max(w * clamp(val / 100, 0, 1), h)
+        let knob_x = cx - w / 2 + w * clamp(val / 100, 0, 1)
+
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: hygge_track
+        }
+
+        box {
+            from: cx - w / 2, cy - h / 2
+            size: fill_w, h
+            corner: h / 2
+            color: if(is_muted, hygge_stone, hygge_honey)
+            opacity: if(is_muted, 0.6, 1.0)
+        }
+
+        ellipse {
+            at: knob_x, cy
+            radius: h * 0.85
+            color: if(is_muted, hygge_sand, hygge_linen)
+        }
+
+        zone box slider_hit {
+            at: cx, cy
+            size: w, h + 16
+            cursor: pointer
+            role: slider
+            label: "Adjust Audio Level"
+        }
+
+        on press slider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+        on drag slider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+    }
+
+    component AudioMuteBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: if(is_muted, hygge_terracotta, hygge_card)
+            opacity: if(is_muted, 0.95, 0.85)
+        }
+
+        box {
+            at: cx - 4, cy
+            size: 4, 8
+            corner: 1
+            color: if(is_muted, hygge_linen, hygge_sand)
+        }
+
+        path {
+            at: cx, cy
+            color: if(is_muted, hygge_linen, hygge_sand)
+            move -2, -4
+            line 3, -7
+            line 3, 7
+            line -2, 4
+            close
+        }
+
+        group {
+            show: not is_muted
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: hygge_honey
+            }
+            arc {
+                at: cx + 3, cy
+                radius: 7.5
+                span: 110deg
+                rotate: -90deg
+                width: 1.5
+                color: hygge_honey
+            }
+        }
+
+        group {
+            show: is_muted
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: hygge_linen
+            }
+        }
+
+        zone box mute_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Audio Mute"
+        }
+
+        on press mute_hit { emit mute_evt }
+    }
+
+    component AudioSinkCard(sink_id: number, sink_name: text, is_active: bool, card_w: number, card_h: number, sel_evt: event) {
         size: card_w, card_h
 
         box card_hit {
             from: 0, 0
             size: card_w, card_h
-            corner: util_card_corner
+            corner: 10
             color: if(is_active, hygge_card_hover, hygge_card)
-            opacity: if(is_active, 1.0, 0.85)
+            opacity: if(is_active, 1.0, 0.70)
             cursor: pointer
         }
 
         box {
-            from: 0, 10
-            size: 3, card_h - 20
+            from: 0, 6
+            size: 3, card_h - 12
             corner: 1.5
             color: hygge_clay
             opacity: if(is_active, 1.0, 0.0)
         }
 
-        ellipse {
-            at: card_w - 18, 22
-            radius: 3
-            color: hygge_clay
-            opacity: if(is_active, 1.0, 0.0)
+        box {
+            at: 16, card_h / 2
+            size: 3.5, 6
+            corner: 1
+            color: if(is_active, hygge_clay, hygge_stone)
         }
 
-        text title_text {
-            at: 16, 22
+        path {
+            at: 19.5, card_h / 2
+            color: if(is_active, hygge_clay, hygge_stone)
+            move -2, -2.5
+            line 2.5, -5
+            line 2.5, 5
+            line -2, 2.5
+            close
+        }
+
+        text sink_name {
+            at: 30, card_h / 2 - 5
             anchor: left center
             family: "SF Pro"
-            size: text_size_body
-            weight: weight_semibold
+            size: 11
+            weight: if(is_active, weight_semibold, weight_medium)
             color: if(is_active, hygge_linen, hygge_sand)
+            width: card_w - 56
+            lines: 1
         }
 
-        text type_text {
-            at: 16, 44
+        text if(is_active, "DEFAULT OUTPUT · ACTIVE", "PIPEWIRE SINK") {
+            at: 30, card_h / 2 + 7
             anchor: left center
             family: "SF Mono"
-            size: text_size_badge
+            size: 8
             weight: weight_medium
             color: if(is_active, hygge_clay, hygge_stone)
         }
 
-        text fps_text {
-            at: card_w - 16, 44
-            anchor: right center
-            family: "SF Mono"
-            size: text_size_badge
-            weight: weight_semibold
-            color: hygge_stone
+        ellipse {
+            at: card_w - 14, card_h / 2
+            radius: 2.5
+            color: if(is_active, hygge_clay, hygge_stone)
         }
 
-        on press card_hit { emit pick_evt(card_idx) }
+        on press card_hit { emit sel_evt(sink_id) }
     }
 }

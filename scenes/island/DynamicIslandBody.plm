@@ -1,4 +1,5 @@
-import "Theme.plm"
+import "../common/Theme.plm"
+import "../common/GlassBody.plm"
 
 library DynamicIslandBodyLib {
     component DynamicIslandBody(
@@ -10,22 +11,6 @@ library DynamicIslandBodyLib {
         shadow_alpha: number,
         base_color: color = glass_base_color
     ) {
-        body {
-            color: base_color
-            glass: 100%
-            frost: auto
-            smoke: glass_smoke
-            refraction: glass_refraction
-            dispersion: glass_dispersion
-            mirror: glass_mirror
-            highlight: glass_highlight
-            shadow: 0, 4, 10, shadow_alpha * shadow_base_opacity
-
-            box {
-                at: cx, cy
-                size: w, h
-                corner: corner
-            }
-        }
+        GlassBody(cx, cy, w, h, corner, shadow_alpha, base_color)
     }
 }

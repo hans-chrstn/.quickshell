@@ -1,4 +1,5 @@
-import "Theme.plm"
+import "../common/Theme.plm"
+import "../common/Primitives.plm"
 
 library CompactViewLib {
     component CompactView(
@@ -53,36 +54,19 @@ library CompactViewLib {
                 color: ink_secondary
             }
 
-            box {
-                at: cx + 56, cy
-                size: compact_eq_bar_w, compact_eq_h1 + w1
-                corner: compact_eq_bar_corner
-                color: accent
-            }
-            box {
-                at: cx + 64, cy
-                size: compact_eq_bar_w, compact_eq_h2 + w2
-                corner: compact_eq_bar_corner
-                color: accent
-            }
-            box {
-                at: cx + 72, cy
-                size: compact_eq_bar_w, compact_eq_h3 + w3
-                corner: compact_eq_bar_corner
-                color: accent
-            }
-            box {
-                at: cx + 80, cy
-                size: compact_eq_bar_w, compact_eq_h4 + w4
-                corner: compact_eq_bar_corner
-                color: accent
-            }
-            box {
-                at: cx + 88, cy
-                size: compact_eq_bar_w, compact_eq_h5 + w1
-                corner: compact_eq_bar_corner
-                color: accent
-            }
+            EqualizerBars(
+                cx + 72,
+                cy,
+                compact_eq_bar_w,
+                8,
+                compact_eq_bar_corner,
+                1.0,
+                w1,
+                w2,
+                w3,
+                w4,
+                accent
+            )
         }
     }
 }

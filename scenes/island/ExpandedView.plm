@@ -1,4 +1,5 @@
-import "Theme.plm"
+import "../common/Theme.plm"
+import "../common/Primitives.plm"
 
 library ExpandedViewLib {
     component ExpandedView(
@@ -38,36 +39,19 @@ library ExpandedViewLib {
                 color: accent
             }
 
-            box {
-                at: cx + 118, cy - 48
-                size: 2, 5 + w1 * 0.7
-                corner: 1
-                color: accent
-            }
-            box {
-                at: cx + 124, cy - 48
-                size: 2, 8 + w2 * 0.7
-                corner: 1
-                color: accent
-            }
-            box {
-                at: cx + 130, cy - 48
-                size: 2, 11 + w3 * 0.7
-                corner: 1
-                color: accent
-            }
-            box {
-                at: cx + 136, cy - 48
-                size: 2, 7 + w4 * 0.7
-                corner: 1
-                color: accent
-            }
-            box {
-                at: cx + 142, cy - 48
-                size: 2, 9 + w1 * 0.7
-                corner: 1
-                color: accent
-            }
+            EqualizerBars(
+                cx + 130,
+                cy - 48,
+                2,
+                6,
+                1,
+                0.7,
+                w1 * 0.7,
+                w2 * 0.7,
+                w3 * 0.7,
+                w4 * 0.7,
+                accent
+            )
 
             box {
                 at: cx - 124, cy - 14
