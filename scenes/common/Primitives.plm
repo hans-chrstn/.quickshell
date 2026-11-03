@@ -1,0 +1,73 @@
+import "Theme.plm"
+
+library PrimitivesLib {
+    component EscBadge(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        bg: color = badge_bg,
+        fg: color = ink_muted
+    ) {
+        box {
+            at: cx, cy
+            size: w, h
+            corner: corner
+            color: bg
+        }
+        text "ESC" {
+            at: cx, cy
+            anchor: center
+            family: "SF Mono"
+            size: text_size_badge
+            weight: weight_semibold
+            color: fg
+        }
+    }
+
+    component EqualizerBars(
+        cx: number,
+        cy: number,
+        bar_w: number,
+        gap: number,
+        bar_corner: number,
+        scale_val: number,
+        w1: number,
+        w2: number,
+        w3: number,
+        w4: number,
+        col: color = accent_primary
+    ) {
+        box {
+            at: cx - gap * 2, cy
+            size: bar_w, 7 * scale_val + w1
+            corner: bar_corner
+            color: col
+        }
+        box {
+            at: cx - gap, cy
+            size: bar_w, 12 * scale_val + w2
+            corner: bar_corner
+            color: col
+        }
+        box {
+            at: cx, cy
+            size: bar_w, 16 * scale_val + w3
+            corner: bar_corner
+            color: col
+        }
+        box {
+            at: cx + gap, cy
+            size: bar_w, 11 * scale_val + w4
+            corner: bar_corner
+            color: col
+        }
+        box {
+            at: cx + gap * 2, cy
+            size: bar_w, 8 * scale_val + w1
+            corner: bar_corner
+            color: col
+        }
+    }
+}

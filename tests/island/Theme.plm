@@ -1,0 +1,188 @@
+library Theme {
+    let ink_primary = #f4f6fa
+    let ink_secondary = #8c94a6
+    let ink_muted = #5e6678
+    let ink_white = #ffffff
+
+    let accent_primary = #38bdf8
+    let accent_secondary = #818cf8
+    let accent_emerald = #10b981
+    let accent_rose = #f43f5e
+    let accent_amber = #e8b072
+
+    let hygge_base = #161413
+    let hygge_card = #221e1a
+    let hygge_card_hover = #2b2520
+    let hygge_track = #342d27
+    let hygge_linen = #f7f2ea
+    let hygge_sand = #cec4b8
+    let hygge_stone = #877d73
+    let hygge_clay = #c97a56
+    let hygge_honey = #d49f6a
+    let hygge_sage = #889a84
+    let hygge_terracotta = #b45f3c
+    let hygge_flax = #dec8b0
+    let hygge_charcoal = #1c1916
+
+    let track_bg = #1a202c
+    let badge_bg = #121620
+    let search_item_hover = #182236
+
+    let glass_base_color = #0a0d14
+    let glass_amount = 1.0
+    let glass_smoke = 0.78
+    let glass_refraction = 1.0
+    let glass_dispersion = 1.0
+    let glass_mirror = 0.35
+    let glass_highlight = 0.65
+    let shadow_base_opacity = 0.35
+
+    let text_size_badge = 9
+    let text_size_caption = 11
+    let text_size_body = 13
+    let text_size_title = 14
+    let text_size_search_input = 14
+
+    let weight_bold = 700
+    let weight_semibold = 600
+    let weight_medium = 500
+    let weight_regular = 400
+
+    let title_max_width = 215
+
+    let dormant_w = 140
+    let dormant_h = 24
+    let dormant_y = 10
+    let dormant_corner = 12
+
+    let compact_w = 220
+    let compact_h = 38
+    let compact_y = 28
+    let compact_corner = 19
+    let compact_shadow_alpha = 0.50
+
+    let expanded_w = 340
+    let expanded_h = 136
+    let expanded_y = 78
+    let expanded_corner = 28
+    let expanded_shadow_alpha = 1.0
+
+    let search_w = 420
+    let search_h = 240
+    let search_y = 130
+    let search_corner = 28
+    let search_shadow_alpha = 1.0
+
+    let compact_badge_size = 20
+    let compact_badge_corner = 6
+    let compact_jewel_outer_r = 3.5
+    let compact_jewel_inner_r = 1.5
+    let compact_eq_bar_w = 3
+    let compact_eq_bar_corner = 1.5
+    let compact_eq_h1 = 7
+    let compact_eq_h2 = 12
+    let compact_eq_h3 = 16
+    let compact_eq_h4 = 11
+    let compact_eq_h5 = 8
+
+    let artwork_box_size = 38
+    let artwork_box_corner = 10
+    let scrubber_track_w = 284
+    let scrubber_track_h = 3
+    let scrubber_track_corner = 1.5
+    let scrubber_knob_r = 3.5
+    let play_button_r = 12
+    let pause_bar_w = 3
+    let pause_bar_h = 10
+    let pause_bar_corner = 1.5
+
+    let search_input_w = 330
+    let search_row_w = 384
+    let search_row_h = 32
+    let search_row_corner = 8
+    let search_icon_size = 20
+    let search_icon_corner = 5
+    let search_mag_glass_r = 5
+    let search_mag_glass_stroke = 2
+    let search_esc_badge_w = 28
+    let search_esc_badge_h = 16
+    let search_esc_badge_corner = 4
+    let search_divider_w = 384
+    let search_divider_h = 1
+
+    let wake_zone_w = 240
+    let wake_zone_h = 10
+    let wake_zone_y = 4
+
+    let grace_zone_w = 400
+    let grace_zone_h = 190
+    let grace_zone_y = 80
+    let grace_zone_corner = 36
+
+    let search_grace_w = 460
+    let search_grace_h = 300
+    let search_grace_y = 130
+
+    let scrub_hit_h = 18
+    let scrub_hit_corner = 9
+    let nav_btn_hit_size = 28
+    let nav_btn_hit_corner = 14
+    let play_btn_hit_r = 14
+
+    spring fluid = 150, 21
+    spring snappy = 240, 25
+    spring bouncy = 170, 16
+    spring calm = 120, 18
+    spring quick = 280, 30
+    spring wheel_spring = 220, 29
+
+    let wave_amp_1 = 3.5
+    let wave_speed_1 = 3.2
+    let wave_amp_2 = 5.0
+    let wave_speed_2 = 4.1
+    let wave_amp_3 = 4.2
+    let wave_speed_3 = 2.8
+    let wave_amp_4 = 2.8
+    let wave_speed_4 = 3.9
+
+    let util_pill_w = 44
+    let util_pill_h = 220
+    let util_pill_corner = 22
+    let util_active_x = 0
+    let util_dormant_x = 34
+    let util_flyout_w = 280
+    let util_flyout_h = 340
+    let util_flyout_corner = 26
+    let util_card_w = 248
+    let util_card_h = 76
+    let util_card_corner = 14
+
+    let pearl_size = 28
+    let pearl_corner = 14
+    let cluster_w = 40
+    let cluster_h = 180
+    let cluster_corner = 20
+    let popover_w = 260
+    let popover_h = 300
+    let popover_corner = 24
+
+    let strip_w = 56
+    let strip_h = 300
+    let strip_corner = 28
+    let fader_track_w = 12
+    let fader_track_h = 100
+    let fader_track_corner = 6
+    let fader_knob_size = 18
+    let fader_knob_corner = 9
+    let toggle_track_w = 36
+    let toggle_track_h = 20
+    let toggle_track_corner = 10
+    let toggle_knob_r = 7
+
+    let drum_slot_h = 44
+    let drum_center_size = 38
+    let drum_center_corner = 19
+    let drum_pill_w = 48
+    let drum_pill_h = 240
+    let drum_pill_corner = 24
+}

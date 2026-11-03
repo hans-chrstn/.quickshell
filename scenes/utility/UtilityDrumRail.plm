@@ -1,0 +1,69 @@
+import "../common/Theme.plm"
+import "../common/GlassBody.plm"
+import "SideUtilityView.plm"
+
+library UtilityDrumRailLib {
+    component UtilityDrumRail(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        rail_alpha: number,
+        shadow_alpha: number,
+        content_alpha: number,
+        drum_pos: number
+    ) {
+        group {
+            opacity: rail_alpha
+
+            GlassBody(
+                cx,
+                cy,
+                w,
+                h,
+                corner,
+                shadow_alpha,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: w, h
+                    corner: corner
+                }
+
+                box {
+                    at: cx, cy
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    color: hygge_card_hover
+                    opacity: 0.85 * content_alpha
+                }
+
+                box {
+                    at: cx, cy
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    stroke: 1.5
+                    color: hygge_clay
+                    opacity: 0.9 * content_alpha
+                }
+
+                group {
+                    opacity: content_alpha
+
+                    repeat i in 0..5 {
+                        let d = mod(i - drum_pos / 48 + 2, 5) - 2
+                        let y = cy + d * 48
+                        group {
+                            opacity: clamp(1.0 - abs(d) * 0.45, 0.05, 1.0)
+                            ToolIconVector(i, cx, y, abs(d) < 0.35)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

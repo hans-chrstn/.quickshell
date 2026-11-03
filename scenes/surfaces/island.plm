@@ -1,0 +1,202 @@
+part IslandSurface {
+    surface island {
+        size: full, 320
+        anchor: top
+        level: overlay
+        screens: each
+        keyboard: on_demand
+
+        group {
+            opacity: island_alpha
+
+            DynamicIslandBody(
+                cx,
+                cur_y,
+                cur_w,
+                cur_h,
+                cur_corner,
+                shadow_alpha,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: cx, cur_y
+                    size: cur_w, cur_h
+                    corner: cur_corner
+                }
+
+                CompactView(
+                    cx,
+                    cur_y,
+                    now.time,
+                    island_date,
+                    wave_1,
+                    wave_2,
+                    wave_3,
+                    wave_4,
+                    compact_alpha,
+                    ink_primary,
+                    accent_primary
+                )
+
+                ExpandedView(
+                    cx,
+                    cur_y,
+                    track_title,
+                    track_artist,
+                    time_elapsed,
+                    time_remaining,
+                    media_progress,
+                    wave_1,
+                    wave_2,
+                    wave_3,
+                    wave_4,
+                    expanded_alpha,
+                    playing,
+                    ink_primary,
+                    ink_secondary,
+                    ink_muted,
+                    accent_primary
+                )
+
+                SearchView(
+                    cx,
+                    cur_y,
+                    search_alpha,
+                    hits.count == 0,
+                    phase == 3
+                ) {
+                    column results {
+                        at: cx - 192, cur_y - 54
+                        gap: 4
+                        for h in hits {
+                            AppRow(h, sel, launch, select_hit, phase == 3)
+                        }
+                    }
+                }
+            }
+        }
+
+        zone box grace_area {
+            at: cx, if(phase == 3, search_grace_y, grace_zone_y)
+            size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
+            corner: grace_zone_corner
+            active: phase > 0
+        }
+
+        zone box wake_strip {
+            at: cx, wake_zone_y
+            size: wake_zone_w, wake_zone_h
+            corner: 5
+            cursor: pointer
+            active: phase == 0
+            label: "Wake Island"
+            role: button
+        }
+
+        zone box compact_btn {
+            at: cx, cur_y
+            size: cur_w, cur_h
+            corner: compact_corner
+            cursor: pointer
+            active: phase == 1
+            label: "Open Island"
+            role: button
+        }
+
+        zone box compact_search_btn {
+            at: cx - 88, cur_y
+            size: compact_badge_size + 10, compact_badge_size + 10
+            corner: compact_badge_corner
+            cursor: pointer
+            active: phase == 1
+            label: "Search Applications"
+            role: button
+        }
+
+        zone box expanded_card {
+            at: cx, cur_y
+            size: cur_w, cur_h
+            corner: expanded_corner
+            cursor: pointer
+            active: phase == 2
+            label: "Fold Island"
+            role: button
+        }
+
+        zone box scrub_track {
+            at: cx, cur_y + 16
+            size: scrubber_track_w, scrub_hit_h
+            corner: scrub_hit_corner
+            cursor: pointer
+            active: phase == 2
+            label: "Scrub Media"
+            role: slider
+        }
+
+        zone box prev_btn {
+            at: cx - 52, cur_y + 46
+            size: nav_btn_hit_size, nav_btn_hit_size
+            corner: nav_btn_hit_corner
+            cursor: pointer
+            active: phase == 2
+            label: "Previous Track"
+            role: button
+        }
+
+        zone ellipse play_btn {
+            at: cx, cur_y + 46
+            radius: play_btn_hit_r
+            cursor: pointer
+            active: phase == 2
+            label: "Play or Pause"
+            role: button
+        }
+
+        zone box next_btn {
+            at: cx + 52, cur_y + 46
+            size: nav_btn_hit_size, nav_btn_hit_size
+            corner: nav_btn_hit_corner
+            cursor: pointer
+            active: phase == 2
+            label: "Next Track"
+            role: button
+        }
+
+        zone box esc_btn {
+            at: cx + 174, cur_y - 86
+            size: 36, 22
+            corner: 4
+            cursor: pointer
+            active: phase == 3
+            label: "Close Search"
+            role: button
+        }
+
+        on enter wake_strip { phase = 1 }
+        on press wake_strip { phase = 1 }
+        on press compact_btn while phase == 1 and cur_h > 30 { phase = 2; emit open_wide }
+        on press right compact_btn while phase == 1 { phase = 3; focus query }
+        on press compact_search_btn while phase == 1 { phase = 3; focus query }
+        on pop_search { phase = 3; focus query }
+        on key Ctrl+Space { phase = 3; focus query }
+        on key Super+Space { phase = 3; focus query }
+        on press play_btn { emit media_toggle }
+        on press prev_btn { emit media_prev }
+        on press next_btn { emit media_next }
+        on press scrub_track { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
+        on drag scrub_track  { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
+        on press expanded_card while phase == 2 { phase = 1; emit fold_compact }
+        on press esc_btn while phase == 3 { phase = 1; blur }
+        on key Escape while phase == 3 { phase = 1; blur }
+        on key Escape while phase == 2 { phase = 1 }
+        on key Escape while phase == 1 { phase = 0 }
+        on key Down while phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
+        on key Up while phase == 3 { sel = max(sel - 1, 0) }
+        on select_hit(i) while phase == 3 { sel = i }
+        on leave grace_area while phase == 1 { phase = 0 }
+        on submit query while phase == 3 { emit launch(sel) }
+        on launch while phase == 3 { phase = 0; blur }
+    }
+}

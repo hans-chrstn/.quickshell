@@ -1,0 +1,438 @@
+language 0.9
+
+import "../island/Theme.plm"
+import "../island/DynamicIslandBody.plm"
+import "SideUtilityView.plm"
+
+scene SideUtilityTest {
+    surface {
+        size: 440, 520
+        margin: 0, -30, 0, 0
+        anchor: right
+        level: overlay
+        screens: "DP-1"
+        keyboard: on_demand
+    }
+
+    permissions {
+        services: "audio", "audio.*"
+    }
+
+    service audio as sound {
+        volume: number = 0.70
+        muted: bool = false
+        input: number = 0.50
+        input_muted: bool = false
+    }
+
+    fact phase = 0
+    fact center_tool = 1
+    fact grab_y = 0
+    fact selected_sink = 0
+    fact audio_volume = 70
+    fact audio_muted = false
+    fact mic_volume = 50
+    fact mic_muted = false
+
+    text tool_name = "AUDIO STUDIO"
+    text tool_sub = "ANALOG DAC · 96kHz"
+    text active_sink_name = "USB Audio Analog Stereo"
+    text audio_status_desc = "PIPEWIRE · 48kHz"
+    text volume_percent_text = "70%"
+    text mic_percent_text = "50%"
+    text audio_engine_status = "PIPEWIRE · WIREPLUMBER DIRECT"
+
+    model sinks max 4 {
+        id: number
+        name: text
+        is_default: bool
+    }
+
+    event select_tool ->
+    event toggle_drawer ->
+    event set_vol ->
+    event toggle_mute ->
+    event set_mic ->
+    event toggle_mic_mute ->
+    event pick_sink ->
+
+    let screen_edge_x = 410
+    let py = 260
+
+    let side_active_cx = screen_edge_x - 12 - drum_pill_w / 2
+    let side_dormant_cx = screen_edge_x - 4
+    let side_dormant_w = 24
+    let side_dormant_h = 140
+    let side_dormant_corner = 12
+
+    let flyout_cx = side_active_cx - drum_pill_w / 2 - 12 - util_flyout_w / 2
+    let flyout_card_h = 420
+
+    prop cur_x = 406 ~fluid
+    prop cur_w = 24 ~fluid
+    prop cur_h = 140 ~fluid
+    prop cur_corner = 12 ~fluid
+    prop rail_alpha = 0 ~fluid
+    prop shadow_alpha = 0 ~calm
+    prop drawer_alpha = 0 ~fluid
+    prop drawer_slide = 24 ~fluid
+    prop drum_pos = 48 ~wheel_spring
+
+    follow cur_x = if(phase > 0, side_active_cx, side_dormant_cx)
+    follow cur_w = if(phase > 0, drum_pill_w, side_dormant_w)
+    follow cur_h = if(phase > 0, drum_pill_h, side_dormant_h)
+    follow cur_corner = if(phase > 0, drum_pill_corner, side_dormant_corner)
+    follow rail_alpha = if(phase > 0, 1.0, 0.0)
+    follow shadow_alpha = if(phase > 0, compact_shadow_alpha, 0.0)
+    follow drawer_alpha = if(phase == 2, 1.0, 0.0)
+    follow drawer_slide = if(phase == 2, 0.0, 24.0)
+
+    let content_alpha = clamp((cur_w - 30) / 14, 0, 1)
+
+    zone box grace_area {
+        at: if(phase == 2, 220, 310), py
+        size: if(phase == 2, 400, 240), if(phase == 2, 500, 480)
+        active: phase > 0
+    }
+
+    zone box edge_wake {
+        at: screen_edge_x - 5, py
+        size: 20, drum_pill_h + 80
+        cursor: pointer
+        active: phase == 0
+        label: "Wake Rolling Utility"
+        role: button
+    }
+
+    zone box drum_rail_zone {
+        at: cur_x, py
+        size: cur_w, cur_h
+        cursor: pointer
+        active: phase > 0
+        label: "Drum Rail Scroll"
+        role: slider
+    }
+
+    zone box slot_above {
+        at: cur_x, py - 48
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase == 1
+        label: "Roll Slot Up"
+        role: button
+    }
+
+    zone box center_loupe_hit {
+        at: cur_x, py
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase > 0
+        label: "Activate Center Tool"
+        role: button
+    }
+
+    zone box slot_below {
+        at: cur_x, py + 48
+        size: cur_w, drum_slot_h
+        cursor: pointer
+        active: phase == 1
+        label: "Roll Slot Down"
+        role: button
+    }
+
+    zone box flyout_esc {
+        at: flyout_cx - drawer_slide + 104, py - 170
+        size: 32, 20
+        cursor: pointer
+        active: phase == 2
+        label: "Close Flyout"
+        role: button
+    }
+
+    group {
+        group {
+            opacity: drawer_alpha
+
+            DynamicIslandBody(
+                flyout_cx - drawer_slide,
+                py,
+                util_flyout_w,
+                flyout_card_h,
+                util_flyout_corner,
+                1.0,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: flyout_cx - drawer_slide, py
+                    size: util_flyout_w, flyout_card_h
+                    corner: util_flyout_corner
+                }
+
+                text tool_name {
+                    at: flyout_cx - drawer_slide - 104, py - 178
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 14
+                    weight: weight_bold
+                    color: hygge_linen
+                }
+
+                text tool_sub {
+                    at: flyout_cx - drawer_slide - 104, py - 162
+                    anchor: left center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_clay
+                }
+
+                box {
+                    at: flyout_cx - drawer_slide + 104, py - 170
+                    size: 32, 20
+                    corner: 4
+                    color: badge_bg
+                }
+
+                text "ESC" {
+                    at: flyout_cx - drawer_slide + 104, py - 170
+                    anchor: center
+                    family: "SF Mono"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_stone
+                }
+
+                text "MASTER VOLUME" {
+                    at: flyout_cx - drawer_slide - 104, py - 134
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                text volume_percent_text {
+                    at: flyout_cx - drawer_slide + 116, py - 134
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 12
+                    weight: weight_bold
+                    color: if(audio_muted, hygge_terracotta, hygge_honey)
+                }
+
+                AudioMuteBtn(
+                    flyout_cx - drawer_slide - 90,
+                    py - 106,
+                    audio_muted,
+                    toggle_mute
+                )
+
+                AudioSlider(
+                    flyout_cx - drawer_slide + 24,
+                    py - 106,
+                    176,
+                    8,
+                    audio_volume,
+                    audio_muted,
+                    set_vol
+                )
+
+                line {
+                    from: flyout_cx - drawer_slide - 110, py - 80
+                    to: flyout_cx - drawer_slide + 116, py - 80
+                    width: 1
+                    color: hygge_track
+                }
+
+                text "OUTPUT DEVICES" {
+                    at: flyout_cx - drawer_slide - 104, py - 62
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                column {
+                    at: flyout_cx - drawer_slide - 116, py - 46
+                    gap: 5
+                    for s in sinks {
+                        AudioSinkCard(
+                            s.id,
+                            s.name,
+                            s.is_default,
+                            util_card_w,
+                            36,
+                            pick_sink
+                        )
+                    }
+                }
+
+                line {
+                    from: flyout_cx - drawer_slide - 110, py + 86
+                    to: flyout_cx - drawer_slide + 116, py + 86
+                    width: 1
+                    color: hygge_track
+                }
+
+                text "INPUT MICROPHONE" {
+                    at: flyout_cx - drawer_slide - 104, py + 104
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_semibold
+                    color: hygge_sand
+                }
+
+                text mic_percent_text {
+                    at: flyout_cx - drawer_slide + 116, py + 104
+                    anchor: right center
+                    family: "SF Mono"
+                    size: 11
+                    weight: weight_semibold
+                    color: if(mic_muted, hygge_terracotta, hygge_stone)
+                }
+
+                AudioMuteBtn(
+                    flyout_cx - drawer_slide - 90,
+                    py + 132,
+                    mic_muted,
+                    toggle_mic_mute
+                )
+
+                AudioSlider(
+                    flyout_cx - drawer_slide + 24,
+                    py + 132,
+                    176,
+                    8,
+                    mic_volume,
+                    mic_muted,
+                    set_mic
+                )
+
+                text audio_engine_status {
+                    at: flyout_cx - drawer_slide, py + 172
+                    anchor: center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_stone
+                }
+            }
+        }
+
+        group {
+            opacity: rail_alpha
+
+            DynamicIslandBody(
+                cur_x,
+                py,
+                cur_w,
+                cur_h,
+                cur_corner,
+                shadow_alpha,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: cur_x, py
+                    size: cur_w, cur_h
+                    corner: cur_corner
+                }
+
+                box {
+                    at: cur_x, py
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    color: hygge_card_hover
+                    opacity: 0.85 * content_alpha
+                }
+
+                box {
+                    at: cur_x, py
+                    size: drum_center_size, drum_center_size
+                    corner: drum_center_corner
+                    stroke: 1.5
+                    color: hygge_clay
+                    opacity: 0.9 * content_alpha
+                }
+
+                group {
+                    opacity: content_alpha
+
+                    let d_0 = mod(0 - drum_pos / 48 + 2, 5) - 2
+                    let y_0 = py + d_0 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_0) * 0.45, 0.05, 1.0)
+                        ToolIconVector(0, cur_x, y_0, abs(d_0) < 0.35)
+                    }
+
+                    let d_1 = mod(1 - drum_pos / 48 + 2, 5) - 2
+                    let y_1 = py + d_1 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_1) * 0.45, 0.05, 1.0)
+                        ToolIconVector(1, cur_x, y_1, abs(d_1) < 0.35)
+                    }
+
+                    let d_2 = mod(2 - drum_pos / 48 + 2, 5) - 2
+                    let y_2 = py + d_2 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_2) * 0.45, 0.05, 1.0)
+                        ToolIconVector(2, cur_x, y_2, abs(d_2) < 0.35)
+                    }
+
+                    let d_3 = mod(3 - drum_pos / 48 + 2, 5) - 2
+                    let y_3 = py + d_3 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_3) * 0.45, 0.05, 1.0)
+                        ToolIconVector(3, cur_x, y_3, abs(d_3) < 0.35)
+                    }
+
+                    let d_4 = mod(4 - drum_pos / 48 + 2, 5) - 2
+                    let y_4 = py + d_4 * 48
+                    group {
+                        opacity: clamp(1.0 - abs(d_4) * 0.45, 0.05, 1.0)
+                        ToolIconVector(4, cur_x, y_4, abs(d_4) < 0.35)
+                    }
+                }
+            }
+        }
+    }
+
+    on enter edge_wake { phase = 1 }
+    on press edge_wake { phase = 1 }
+
+    on press slot_above { drum_pos: drum_pos - 48 ~snappy }
+    on press slot_below { drum_pos: drum_pos + 48 ~snappy }
+    on press center_loupe_hit { emit toggle_drawer }
+
+    on scroll drum_rail_zone {
+        drum_pos: round(drum_pos / 48) * 48 - wheel * 48
+    }
+
+    on press drum_rail_zone {
+        grab_y = drum_pos
+    }
+    on drag drum_rail_zone {
+        drum_pos: grab_y - drag.dy
+    }
+    on release drum_rail_zone {
+        drum_pos: round(drum_pos / 48) * 48 ~snappy
+    }
+
+    on change mod(round(drum_pos / 48), 5) {
+        emit select_tool(mod(round(drum_pos / 48), 5))
+    }
+
+    on press flyout_esc while phase == 2 { phase = 1 }
+    on key Escape while phase == 2 { phase = 1 }
+    on leave grace_area while phase == 1 { phase = 0 }
+
+    on key Up while phase > 0 { drum_pos: drum_pos - 48 ~snappy }
+    on key Down while phase > 0 { drum_pos: drum_pos + 48 ~snappy }
+    on key Right while phase == 1 { phase = 2 }
+    on key Left while phase == 2 { phase = 1 }
+}

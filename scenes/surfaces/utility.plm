@@ -1,0 +1,187 @@
+part UtilitySurface {
+    surface utility {
+        size: 440, 520
+        margin: 0, -30, 0, 0
+        anchor: right
+        level: overlay
+        screens: each
+        keyboard: on_demand
+
+        let util_screen_edge_x = 410
+        let util_py = 260
+
+        let util_side_active_cx = util_screen_edge_x - 12 - drum_pill_w / 2
+        let util_side_dormant_cx = util_screen_edge_x - 4
+        let util_side_dormant_w = 24
+        let util_side_dormant_h = 140
+        let util_side_dormant_corner = 12
+
+        let util_flyout_cx = util_side_active_cx - drum_pill_w / 2 - 12 - util_flyout_w / 2
+        let util_flyout_card_h = 420
+
+        prop util_cur_x = 406 ~fluid
+        prop util_cur_w = 24 ~fluid
+        prop util_cur_h = 140 ~fluid
+        prop util_cur_corner = 12 ~fluid
+        prop util_rail_alpha = 0 ~fluid
+        prop util_shadow_alpha = 0 ~calm
+        prop util_drawer_alpha = 0 ~fluid
+        prop util_drawer_slide = 24 ~fluid
+        prop util_drum_pos = 48 ~wheel_spring
+
+        follow util_cur_x = if(util_phase > 0, util_side_active_cx, util_side_dormant_cx)
+        follow util_cur_w = if(util_phase > 0, drum_pill_w, util_side_dormant_w)
+        follow util_cur_h = if(util_phase > 0, drum_pill_h, util_side_dormant_h)
+        follow util_cur_corner = if(util_phase > 0, drum_pill_corner, util_side_dormant_corner)
+        follow util_rail_alpha = if(util_phase > 0, 1.0, 0.0)
+        follow util_shadow_alpha = if(util_phase > 0, compact_shadow_alpha, 0.0)
+        follow util_drawer_alpha = if(util_phase == 2, 1.0, 0.0)
+        follow util_drawer_slide = if(util_phase == 2, 0.0, 24.0)
+
+        let util_content_alpha = clamp((util_cur_w - 30) / 14, 0, 1)
+
+        zone box util_grace_area {
+            at: if(util_phase == 2, 220, 310), util_py
+            size: if(util_phase == 2, 400, 240), if(util_phase == 2, 500, 480)
+            active: util_phase > 0
+        }
+
+        zone box util_edge_wake {
+            at: util_screen_edge_x - 5, util_py
+            size: 20, drum_pill_h + 80
+            cursor: pointer
+            active: util_phase == 0
+            label: "Wake Rolling Utility"
+            role: button
+        }
+
+        zone box util_drum_rail_zone {
+            at: util_cur_x, util_py
+            size: util_cur_w, util_cur_h
+            cursor: pointer
+            active: util_phase > 0
+            label: "Drum Rail Scroll"
+            role: slider
+        }
+
+        zone box util_slot_above {
+            at: util_cur_x, util_py - 48
+            size: util_cur_w, drum_slot_h
+            cursor: pointer
+            active: util_phase == 1
+            label: "Roll Slot Up"
+            role: button
+        }
+
+        zone box util_center_loupe_hit {
+            at: util_cur_x, util_py
+            size: util_cur_w, drum_slot_h
+            cursor: pointer
+            active: util_phase > 0
+            label: "Activate Center Tool"
+            role: button
+        }
+
+        zone box util_slot_below {
+            at: util_cur_x, util_py + 48
+            size: util_cur_w, drum_slot_h
+            cursor: pointer
+            active: util_phase == 1
+            label: "Roll Slot Down"
+            role: button
+        }
+
+        zone box util_flyout_esc {
+            at: util_flyout_cx - util_drawer_slide + 104, util_py - 170
+            size: 32, 20
+            cursor: pointer
+            active: util_phase == 2
+            label: "Close Flyout"
+            role: button
+        }
+
+        AudioStudioCard(
+            util_flyout_cx,
+            util_py,
+            util_flyout_w,
+            util_flyout_card_h,
+            util_flyout_corner,
+            util_drawer_slide,
+            util_drawer_alpha,
+            tool_name,
+            tool_sub,
+            audio_volume,
+            audio_muted,
+            volume_percent_text,
+            mic_volume,
+            mic_muted,
+            mic_percent_text,
+            audio_engine_status,
+            toggle_mute,
+            set_vol,
+            toggle_mic_mute,
+            set_mic
+        ) {
+            column {
+                at: util_flyout_cx - util_drawer_slide - 116, util_py - 46
+                gap: 5
+                for s in sinks {
+                    AudioSinkCard(
+                        s.id,
+                        s.name,
+                        s.is_default,
+                        util_card_w,
+                        36,
+                        pick_sink
+                    )
+                }
+            }
+        }
+
+        UtilityDrumRail(
+            util_cur_x,
+            util_py,
+            util_cur_w,
+            util_cur_h,
+            util_cur_corner,
+            util_rail_alpha,
+            util_shadow_alpha,
+            util_content_alpha,
+            util_drum_pos
+        )
+
+        on enter util_edge_wake { util_phase = 1 }
+        on press util_edge_wake { util_phase = 1 }
+
+        on press util_slot_above { util_drum_pos: util_drum_pos - 48 ~snappy }
+        on press util_slot_below { util_drum_pos: util_drum_pos + 48 ~snappy }
+        on press util_center_loupe_hit { emit toggle_util_drawer }
+
+        on scroll util_drum_rail_zone {
+            util_drum_pos: round(util_drum_pos / 48) * 48 - wheel * 48
+        }
+
+        on press util_drum_rail_zone {
+            util_grab_y = util_drum_pos
+        }
+        on drag util_drum_rail_zone {
+            util_drum_pos: util_grab_y - drag.dy
+        }
+        on release util_drum_rail_zone {
+            util_drum_pos: round(util_drum_pos / 48) * 48 ~snappy
+        }
+
+        on change mod(round(util_drum_pos / 48), 5) {
+            emit select_tool(mod(round(util_drum_pos / 48), 5))
+        }
+
+        on press util_flyout_esc while util_phase == 2 { util_phase = 1 }
+        on key Escape while util_phase == 2 { util_phase = 1 }
+        on leave util_grace_area while util_phase == 1 { util_phase = 0 }
+
+        on key Up while util_phase > 0 { util_drum_pos: util_drum_pos - 48 ~snappy }
+        on key Down while util_phase > 0 { util_drum_pos: util_drum_pos + 48 ~snappy }
+        on key Right while util_phase == 1 { util_phase = 2 }
+        on key Left while util_phase == 2 { util_phase = 1 }
+    }
+}

@@ -1,0 +1,38 @@
+part UtilityState {
+    fact util_phase = 0
+    fact util_center_tool = 1
+    fact util_grab_y = 0
+    fact selected_sink = 0
+    fact audio_volume = 0
+    fact audio_muted = false
+    fact mic_volume = 0
+    fact mic_muted = false
+
+    text tool_name = "AUDIO STUDIO"
+    text tool_sub = ""
+    text active_sink_name = ""
+    text audio_status_desc = ""
+    text volume_percent_text = ""
+    text mic_percent_text = ""
+    text audio_engine_status = ""
+
+    model sinks max 4 {
+        id: number
+        name: text
+        is_default: bool
+    }
+
+    model tools max 8 {
+        id: number
+        name: text
+        sub: text
+    }
+
+    event select_tool ->
+    event toggle_util_drawer ->
+    event set_vol ->
+    event toggle_mute ->
+    event set_mic ->
+    event toggle_mic_mute ->
+    event pick_sink ->
+}

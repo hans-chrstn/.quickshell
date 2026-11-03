@@ -1,160 +1,129 @@
 {
+  description = "Nacre, a Pleamar-powered desktop shell";
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    quickshell = {
-      url = "git+https://git.outfoxxed.me/outfoxxed/quickshell";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    qml-niri = {
-      url = "github:imiric/qml-niri/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.quickshell.follows = "quickshell";
-    };
+    pleamar.url = "github:k4ditano/pleamar";
+    pleamar.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = {
-    nixpkgs,
-    quickshell,
-    self,
-    qml-niri,
-  }: let
-    systems = ["x86_64-linux" "aarch64-linux"];
-    forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f system);
-  in {
-    packages = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-      qtMultimedia = pkgs.kdePackages.qtmultimedia;
-      qtImageFormats = pkgs.kdePackages.qtimageformats;
-      kirigami = pkgs.kdePackages.kirigami.unwrapped;
-      qmlNiri = qml-niri.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
-    in rec {
-      config = pkgs.stdenv.mkDerivation {
-        name = "quickshell-config";
-        src = ./.;
-        installPhase = ''
-          mkdir -p $out
-          cp -r * $out/
+  outputs =
+    {
+      self,
+      nixpkgs,
+      pleamar,
+    }:
+    let
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+      forAllSystems = function: nixpkgs.lib.genAttrs systems function;
+      checkTool =
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.writeShellApplication {
+          name = "nacre-check";
+          runtimeInputs = [
+            pleamar.packages.${system}.default
+            pkgs.luau-lsp
+            pkgs.findutils
+            pkgs.gnugrep
+          ];
+          text = ''
+            project_root="''${1:-.}"
+            checked_scenes=0
+            checked_logic=0
+            definitions_dir="$(mktemp -d)"
+            trap 'rm -r "$definitions_dir"' EXIT
+            pleamar --luau-types > "$definitions_dir/base.luau"
+
+            if [ -f "$project_root/Nacre.plm" ]; then
+              pleamar --check "$project_root/Nacre.plm"
+              pleamar --luau-types "$project_root/Nacre.plm" > "$definitions_dir/nacre.luau"
+              checked_scenes=$((checked_scenes + 1))
+            fi
+
+            for source_dir in "$project_root/scenes" "$project_root/tests"; do
+              if [ ! -d "$source_dir" ]; then
+                continue
+              fi
+
+              while IFS= read -r -d "" scene_file; do
+                if ! grep -Eq '^[[:space:]]*scene[[:space:]]+[[:alpha:]_]' "$scene_file"; then
+                  continue
+                fi
+
+                pleamar --check "$scene_file"
+                checked_scenes=$((checked_scenes + 1))
+              done < <(find "$source_dir" -type f -name '*.plm' -print0)
+            done
+
+            if [ -f "$project_root/Nacre.luau" ]; then
+              definitions="$definitions_dir/base.luau"
+              if [ -f "$definitions_dir/nacre.luau" ]; then
+                definitions="$definitions_dir/nacre.luau"
+              fi
+              luau-lsp analyze --platform standard --definitions="@pleamar=$definitions" "$project_root/Nacre.luau"
+              checked_logic=$((checked_logic + 1))
+            fi
+
+            for source_dir in "$project_root/logic" "$project_root/scenes" "$project_root/tests"; do
+              if [ ! -d "$source_dir" ]; then
+                continue
+              fi
+
+              while IFS= read -r -d "" logic_file; do
+                scene_file="''${logic_file%.luau}.plm"
+                definitions="$definitions_dir/base.luau"
+                if [ -f "$scene_file" ] && grep -Eq '^[[:space:]]*scene[[:space:]]+[[:alpha:]_]' "$scene_file"; then
+                  definitions="$definitions_dir/scene-$checked_logic.luau"
+                  pleamar --luau-types "$scene_file" > "$definitions"
+                elif [ -f "$definitions_dir/nacre.luau" ]; then
+                  definitions="$definitions_dir/nacre.luau"
+                fi
+                luau-lsp analyze --platform standard --definitions="@pleamar=$definitions" "$logic_file"
+                checked_logic=$((checked_logic + 1))
+              done < <(find "$source_dir" -type f -name '*.luau' -print0)
+            done
+
+            if [ "$checked_scenes" -eq 0 ]; then
+              echo "No Pleamar scenes found to check" >&2
+              exit 1
+            fi
+
+            echo "Nacre checks passed: $checked_scenes scene(s), $checked_logic Luau file(s)"
+          '';
+        };
+    in
+    {
+      packages = forAllSystems (system: {
+        pleamar = pleamar.packages.${system}.default;
+        default = self.packages.${system}.pleamar;
+      });
+
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program = "${self.packages.${system}.pleamar}/bin/pleamar";
+          meta.description = "Run the pinned Pleamar runtime";
+        };
+        check = {
+          type = "app";
+          program = "${checkTool system}/bin/nacre-check";
+          meta.description = "Check Nacre scenes and Luau logic";
+        };
+      });
+
+      checks = forAllSystems (system: {
+        project = nixpkgs.legacyPackages.${system}.runCommand "nacre-project-check" { } ''
+          ${checkTool system}/bin/nacre-check ${self}
+          touch "$out"
         '';
-      };
+      });
 
-      quickshell = pkgs.symlinkJoin {
-        name = "quickshell-wrapped";
-        paths = [qmlNiri];
-        nativeBuildInputs = [pkgs.makeWrapper];
-        postBuild = ''
-          for bin in $out/bin/*; do
-            wrapProgram "$bin" \
-              --prefix QML2_IMPORT_PATH : "${qtMultimedia}/lib/qt-6/qml" \
-              --prefix QML2_IMPORT_PATH : "${kirigami}/lib/qt-6/qml" \
-              --prefix QT_PLUGIN_PATH : "${qtMultimedia}/lib/qt-6/plugins" \
-              --prefix QT_PLUGIN_PATH : "${qtImageFormats}/lib/qt-6/plugins" \
-              --prefix XDG_DATA_DIRS : "${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}" \
-              --set QS_LOG_FILE /dev/stderr \
-              --add-flags "--verbose"
-          done
-        '';
-      };
-
-      default = quickshell;
-    });
-
-    nixosModules.default = {
-      pkgs,
-      lib,
-      config,
-      ...
-    }: let
-      cfg = config.services.quickshell-greeter;
-    in {
-      options.services.quickshell-greeter = {
-        enable = lib.mkEnableOption "Quickshell Greeter";
-        package = lib.mkOption {
-          type = lib.types.package;
-          default = self.packages.${pkgs.stdenv.hostPlatform.system}.quickshell;
-          description = "The wrapped quickshell package.";
-        };
-        configPackage = lib.mkOption {
-          type = lib.types.package;
-          default = self.packages.${pkgs.stdenv.hostPlatform.system}.config;
-          description = "The package containing greeter.qml and assets.";
-        };
-      };
-
-      config = lib.mkIf cfg.enable {
-        users.users.greeter.extraGroups = ["video" "input" "render" "seat"];
-        services.seatd.enable = true;
-
-        services.greetd = {
-          enable = true;
-          settings = {
-            terminal.vt = 1;
-            default_session = {
-              command = let
-                niriConfig = pkgs.writeText "greeter-niri.kdl" ''
-                  spawn-at-startup "sh" "-c" "stty -isig; ${cfg.package}/bin/quickshell --path ${cfg.configPackage}/greeter.qml; niri msg action quit --skip-confirmation"
-                  hotkey-overlay {
-                    skip-at-startup
-                  }
-                  layout {
-                    background-color "#000000"
-                  }
-                  window-rule {
-                    geometry-corner-radius 0
-                    draw-border-with-background false
-                  }
-                '';
-              in "${pkgs.dbus}/bin/dbus-run-session ${pkgs.niri}/bin/niri -c ${niriConfig}";
-              user = "greeter";
-            };
-          };
-        };
-
-        environment.systemPackages = [pkgs.niri cfg.package];
-        environment.variables.WLR_NO_HARDWARE_CURSORS = "1";
-
-        systemd.services.greetd.serviceConfig = {
-          Type = "idle";
-          StandardInput = "null";
-          StandardOutput = "journal";
-          StandardError = "journal";
-          TTYReset = true;
-          TTYVHangup = true;
-          TTYVTDisallocate = true;
-        };
-
-        services.gnome.gnome-keyring.enable = true;
-        security.pam.services.login.enableGnomeKeyring = true;
-        security.pam.services.greetd.enableGnomeKeyring = true;
-      };
+      formatter = forAllSystems (system: nixpkgs.legacyPackages.${system}.nixfmt);
     };
-
-    devShells = forAllSystems (system: let
-      pkgs = import nixpkgs {inherit system;};
-      kirigami = pkgs.kdePackages.kirigami.unwrapped;
-      qtMultimedia = pkgs.kdePackages.qtmultimedia;
-    in {
-      default = pkgs.mkShell {
-        nativeBuildInputs = [
-          qml-niri.packages.${pkgs.stdenv.hostPlatform.system}.quickshell
-          pkgs.libcava
-          pkgs.quickshell
-          pkgs.upower
-          pkgs.libnotify
-          pkgs.wf-recorder
-          pkgs.swww
-          qtMultimedia
-          kirigami
-          pkgs.kdePackages.sonnet
-          pkgs.kdePackages.qtimageformats
-          pkgs.kdePackages.kimageformats
-        ];
-
-        shellHook = ''
-          export QML2_IMPORT_PATH="${qtMultimedia}/lib/qt-6/qml:${kirigami}/lib/qt-6/qml:$QML2_IMPORT_PATH"
-        '';
-      };
-    });
-  };
 }

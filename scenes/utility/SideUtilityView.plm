@@ -1,0 +1,334 @@
+import "../common/Theme.plm"
+
+library SideUtilityLib {
+    component ToolIconVector(tool_id: number, cx: number, cy: number, is_center: bool) {
+        let pri_col = if(is_center, hygge_linen, hygge_sand)
+        let sec_col = if(is_center, hygge_sand, hygge_stone)
+
+        group {
+            show: tool_id == 0
+            box {
+                at: cx, cy
+                size: 18, 14
+                corner: 3
+                stroke: 1.5
+                color: if(is_center, hygge_clay, hygge_stone)
+            }
+            ellipse {
+                at: cx - 3, cy - 2
+                radius: 2.0
+                color: if(is_center, hygge_honey, hygge_stone)
+            }
+            path {
+                at: cx, cy + 3
+                color: if(is_center, hygge_sage, hygge_stone)
+                move -6, 2
+                line -2, -2
+                line 2, 1
+                line 5, -2
+                line 6, 2
+                close
+            }
+        }
+
+        group {
+            show: tool_id == 1
+            box {
+                at: cx - 4, cy
+                size: 5, 8
+                corner: 1.5
+                color: if(is_center, hygge_honey, sec_col)
+            }
+            path {
+                at: cx, cy
+                color: if(is_center, hygge_honey, sec_col)
+                move -2, -3
+                line 3, -6
+                line 3, 6
+                line -2, 3
+                close
+            }
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: pri_col
+            }
+            arc {
+                at: cx + 3, cy
+                radius: 7.5
+                span: 110deg
+                rotate: -90deg
+                width: 1.5
+                color: if(is_center, hygge_honey, sec_col)
+            }
+        }
+
+        group {
+            show: tool_id == 2
+            box {
+                at: cx, cy - 2
+                size: 16, 12
+                corner: 2.5
+                stroke: 1.5
+                color: if(is_center, hygge_sage, sec_col)
+            }
+            line {
+                from: cx, cy + 4
+                to: cx, cy + 7
+                width: 1.5
+                color: sec_col
+            }
+            box {
+                at: cx, cy + 7
+                size: 8, 1.5
+                corner: 0.5
+                color: sec_col
+            }
+            ellipse {
+                at: cx + 3, cy - 4
+                radius: 1.8
+                color: if(is_center, hygge_honey, pri_col)
+            }
+        }
+
+        group {
+            show: tool_id == 3
+            box {
+                at: cx - 1, cy
+                size: 17, 10
+                corner: 2.5
+                stroke: 1.5
+                color: if(is_center, hygge_terracotta, sec_col)
+            }
+            box {
+                at: cx + 8.5, cy
+                size: 2, 4
+                corner: 1
+                color: if(is_center, hygge_terracotta, sec_col)
+            }
+            path {
+                at: cx - 1, cy
+                color: if(is_center, hygge_honey, pri_col)
+                move 1, -3
+                line -2, 1
+                line 0, 1
+                line -1, 3
+                line 2, -1
+                line 0, -1
+                close
+            }
+        }
+
+        group {
+            show: tool_id == 4
+            ellipse {
+                at: cx, cy
+                radius: 6.0
+                stroke: 1.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            ellipse {
+                at: cx, cy
+                radius: 2.2
+                color: if(is_center, hygge_honey, pri_col)
+            }
+            box {
+                at: cx, cy - 7
+                size: 2.5, 2
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx, cy + 7
+                size: 2.5, 2
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx - 7, cy
+                size: 2, 2.5
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+            box {
+                at: cx + 7, cy
+                size: 2, 2.5
+                corner: 0.5
+                color: if(is_center, hygge_flax, sec_col)
+            }
+        }
+    }
+
+    component AudioSlider(cx: number, cy: number, w: number, h: number, val: number, is_muted: bool, seek_evt: event) {
+        let fill_w = max(w * clamp(val / 100, 0, 1), h)
+        let knob_x = cx - w / 2 + w * clamp(val / 100, 0, 1)
+
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: hygge_track
+        }
+
+        box {
+            from: cx - w / 2, cy - h / 2
+            size: fill_w, h
+            corner: h / 2
+            color: if(is_muted, hygge_stone, hygge_honey)
+            opacity: if(is_muted, 0.6, 1.0)
+        }
+
+        ellipse {
+            at: knob_x, cy
+            radius: h * 0.85
+            color: if(is_muted, hygge_sand, hygge_linen)
+        }
+
+        zone box slider_hit {
+            at: cx, cy
+            size: w, h + 16
+            cursor: pointer
+            role: slider
+            label: "Adjust Audio Level"
+        }
+
+        on press slider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+        on drag slider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+    }
+
+    component AudioMuteBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: if(is_muted, hygge_terracotta, hygge_card)
+            opacity: if(is_muted, 0.95, 0.85)
+        }
+
+        box {
+            at: cx - 4, cy
+            size: 4, 8
+            corner: 1
+            color: if(is_muted, hygge_linen, hygge_sand)
+        }
+
+        path {
+            at: cx, cy
+            color: if(is_muted, hygge_linen, hygge_sand)
+            move -2, -4
+            line 3, -7
+            line 3, 7
+            line -2, 4
+            close
+        }
+
+        group {
+            show: not is_muted
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: hygge_honey
+            }
+            arc {
+                at: cx + 3, cy
+                radius: 7.5
+                span: 110deg
+                rotate: -90deg
+                width: 1.5
+                color: hygge_honey
+            }
+        }
+
+        group {
+            show: is_muted
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: hygge_linen
+            }
+        }
+
+        zone box mute_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Audio Mute"
+        }
+
+        on press mute_hit { emit mute_evt }
+    }
+
+    component AudioSinkCard(sink_id: number, sink_name: text, is_active: bool, card_w: number, card_h: number, sel_evt: event) {
+        size: card_w, card_h
+
+        box card_hit {
+            from: 0, 0
+            size: card_w, card_h
+            corner: 10
+            color: if(is_active, hygge_card_hover, hygge_card)
+            opacity: if(is_active, 1.0, 0.70)
+            cursor: pointer
+        }
+
+        box {
+            from: 0, 6
+            size: 3, card_h - 12
+            corner: 1.5
+            color: hygge_clay
+            opacity: if(is_active, 1.0, 0.0)
+        }
+
+        box {
+            at: 16, card_h / 2
+            size: 3.5, 6
+            corner: 1
+            color: if(is_active, hygge_clay, hygge_stone)
+        }
+
+        path {
+            at: 19.5, card_h / 2
+            color: if(is_active, hygge_clay, hygge_stone)
+            move -2, -2.5
+            line 2.5, -5
+            line 2.5, 5
+            line -2, 2.5
+            close
+        }
+
+        text sink_name {
+            at: 30, card_h / 2 - 5
+            anchor: left center
+            family: "SF Pro"
+            size: 11
+            weight: if(is_active, weight_semibold, weight_medium)
+            color: if(is_active, hygge_linen, hygge_sand)
+            width: card_w - 56
+            lines: 1
+        }
+
+        text if(is_active, "DEFAULT OUTPUT · ACTIVE", "PIPEWIRE SINK") {
+            at: 30, card_h / 2 + 7
+            anchor: left center
+            family: "SF Mono"
+            size: 8
+            weight: weight_medium
+            color: if(is_active, hygge_clay, hygge_stone)
+        }
+
+        ellipse {
+            at: card_w - 14, card_h / 2
+            radius: 2.5
+            color: if(is_active, hygge_clay, hygge_stone)
+        }
+
+        on press card_hit { emit sel_evt(sink_id) }
+    }
+}
