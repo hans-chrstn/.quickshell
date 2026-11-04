@@ -7,8 +7,8 @@ part UtilitySurface {
         screens: each
         keyboard: on_demand
 
-        let util_screen_edge_x = 410
-        let util_py = 260
+        let util_screen_edge_x = utility_visible_edge_x
+        let util_py = utility_center_y
 
         let util_side_active_cx = util_screen_edge_x - 12 - drum_pill_w / 2
         let util_side_dormant_cx = util_screen_edge_x - 4
@@ -17,7 +17,7 @@ part UtilitySurface {
         let util_side_dormant_corner = 12
 
         let util_flyout_cx = util_side_active_cx - drum_pill_w / 2 - 12 - util_flyout_w / 2
-        let util_flyout_card_h = 420
+        let util_flyout_card_h = utility_flyout_h
 
         prop util_cur_x = 406 ~fluid
         prop util_cur_w = 24 ~fluid
@@ -27,7 +27,7 @@ part UtilitySurface {
         prop util_shadow_alpha = 0 ~calm
         prop util_drawer_alpha = 0 ~fluid
         prop util_drawer_slide = 24 ~fluid
-        prop util_drum_pos = 48 ~wheel_spring
+        prop util_drum_pos = 0 ~wheel_spring
 
         follow util_cur_x = if(util_phase > 0, util_side_active_cx, util_side_dormant_cx)
         follow util_cur_w = if(util_phase > 0, drum_pill_w, util_side_dormant_w)
@@ -47,8 +47,8 @@ part UtilitySurface {
         }
 
         zone box util_edge_wake {
-            at: util_screen_edge_x - 5, util_py
-            size: 20, drum_pill_h + 80
+            from: util_screen_edge_x - 30, 0
+            size: 30, 520
             cursor: pointer
             active: util_phase == 0
             label: "Wake Rolling Utility"
@@ -100,65 +100,131 @@ part UtilitySurface {
             role: button
         }
 
-        AudioStudioCard(
-            util_flyout_cx,
-            util_py,
-            util_flyout_w,
-            util_flyout_card_h,
-            util_flyout_corner,
-            util_drawer_slide,
-            util_drawer_alpha,
-            tool_name,
-            tool_sub,
-            audio_volume,
-            audio_muted,
-            volume_percent_text,
-            mic_volume,
-            mic_muted,
-            mic_percent_text,
-            audio_engine_status,
-            toggle_mute,
-            set_vol,
-            toggle_mic_mute,
-            set_mic
-        ) {
-            column {
-                at: util_flyout_cx - util_drawer_slide - 116, util_py - 46
-                gap: 5
-                for s in sinks {
-                    AudioSinkCard(
-                        s.id,
-                        s.name,
-                        s.is_default,
-                        util_card_w,
-                        36,
-                        pick_sink
-                    )
+        group {
+            show: util_phase == 2 and util_center_tool == 0
+
+            WallpaperStudioCard(
+                util_flyout_cx,
+                util_py,
+                util_flyout_w,
+                util_flyout_card_h,
+                util_flyout_corner,
+                util_drawer_slide,
+                util_drawer_alpha,
+                tool_name,
+                wall_dir_path,
+                wall_current_title,
+                wall_mode_label,
+                wall_mode == 1,
+                wall_count,
+                wall_current_idx,
+                picker_open,
+                picker_dir_text,
+                picker_status,
+                picker_page_text,
+                prev_wallpaper,
+                next_wallpaper,
+                toggle_wall_mode,
+                open_picker,
+                picker_select_item,
+                picker_nav_up,
+                picker_prev_page,
+                picker_next_page,
+                picker_choose,
+                picker_cancel
+            ) {
+                column {
+                    at: util_flyout_cx - util_drawer_slide - 110, util_py - 60
+                    gap: 4
+                    view: 220, 190
+                    step: 30
+                    for it in picker_items {
+                        group {
+                            size: 220, 26
+                            FilePickerRow(
+                                it.id,
+                                it.name,
+                                it.is_dir,
+                                220,
+                                26,
+                                picker_select_item,
+                                picker_open and util_center_tool == 0 and util_phase == 2
+                            )
+                        }
+                    }
                 }
             }
         }
 
-        UtilityDrumRail(
-            util_cur_x,
-            util_py,
-            util_cur_w,
-            util_cur_h,
-            util_cur_corner,
-            util_rail_alpha,
-            util_shadow_alpha,
-            util_content_alpha,
-            util_drum_pos
-        )
+        group {
+            show: util_phase == 2 and util_center_tool == 1
 
-        on enter util_edge_wake { util_phase = 1 }
-        on press util_edge_wake { util_phase = 1 }
+            AudioStudioCard(
+                util_flyout_cx,
+                util_py,
+                util_flyout_w,
+                util_flyout_card_h,
+                util_flyout_corner,
+                util_drawer_slide,
+                util_drawer_alpha,
+                tool_name,
+                tool_sub,
+                audio_volume,
+                audio_muted,
+                volume_percent_text,
+                mic_volume,
+                mic_muted,
+                mic_percent_text,
+                audio_engine_status,
+                toggle_mute,
+                set_vol,
+                toggle_mic_mute,
+                set_mic
+            ) {
+                column {
+                    at: util_flyout_cx - util_drawer_slide - 116, util_py - 46
+                    gap: 5
+                    for s in sinks {
+                        AudioSinkCard(
+                            s.id,
+                            s.name,
+                            s.is_default,
+                            util_card_w,
+                            36,
+                            pick_sink
+                        )
+                    }
+                }
+            }
+        }
 
-        on press util_slot_above { util_drum_pos: util_drum_pos - 48 ~snappy }
-        on press util_slot_below { util_drum_pos: util_drum_pos + 48 ~snappy }
-        on press util_center_loupe_hit { emit toggle_util_drawer }
+        group {
+            show: util_phase > 0
+
+            UtilityDrumRail(
+                util_cur_x,
+                util_py,
+                util_cur_w,
+                util_cur_h,
+                util_cur_corner,
+                util_rail_alpha,
+                util_shadow_alpha,
+                util_content_alpha,
+                util_drum_pos,
+                util_tool_count
+            )
+        }
+
+        on enter util_edge_wake while util_phase == 0 { util_phase = 1 }
+        on press util_edge_wake while util_phase == 0 { util_phase = 1 }
+
+        on press util_slot_above { util_drum_pos: util_drum_pos - drum_step ~snappy }
+        on press util_slot_below { util_drum_pos: util_drum_pos + drum_step ~snappy }
+        on press util_center_loupe_hit while util_phase == 1 { util_phase = 2 }
+        on press util_center_loupe_hit while util_phase == 2 { util_phase = 1 }
 
         on scroll util_drum_rail_zone {
-            util_drum_pos: round(util_drum_pos / 48) * 48 - wheel * 48
+            util_drum_pos: round(util_drum_pos / drum_step) * drum_step - wheel * drum_step
         }
 
         on press util_drum_rail_zone {
@@ -168,19 +234,26 @@ part UtilitySurface {
             util_drum_pos: util_grab_y - drag.dy
         }
         on release util_drum_rail_zone {
-            util_drum_pos: round(util_drum_pos / 48) * 48 ~snappy
+            util_drum_pos: round(util_drum_pos / drum_step) * drum_step ~snappy
         }
 
-        on change mod(round(util_drum_pos / 48), 5) {
-            emit select_tool(mod(round(util_drum_pos / 48), 5))
+        on change mod(round(util_drum_pos / drum_step), max(util_tool_count, 1)) {
+            util_center_tool = mod(round(util_drum_pos / drum_step), max(util_tool_count, 1))
+            emit select_tool(mod(round(util_drum_pos / drum_step), max(util_tool_count, 1)))
         }
 
-        on press util_flyout_esc while util_phase == 2 { util_phase = 1 }
-        on key Escape while util_phase == 2 { util_phase = 1 }
+        on open_picker { picker_open = true }
+        on picker_cancel { picker_open = false }
+        on picker_choose { picker_open = false }
+
+        on press util_flyout_esc while util_phase == 2 and picker_open { picker_open = false }
+        on press util_flyout_esc while util_phase == 2 and picker_open == false { util_phase = 1 }
+        on key Escape while util_phase == 2 and picker_open { picker_open = false }
+        on key Escape while util_phase == 2 and picker_open == false { util_phase = 1 }
         on leave util_grace_area while util_phase == 1 { util_phase = 0 }
 
-        on key Up while util_phase > 0 { util_drum_pos: util_drum_pos - 48 ~snappy }
-        on key Down while util_phase > 0 { util_drum_pos: util_drum_pos + 48 ~snappy }
+        on key Up while util_phase > 0 { util_drum_pos: util_drum_pos - drum_step ~snappy }
+        on key Down while util_phase > 0 { util_drum_pos: util_drum_pos + drum_step ~snappy }
         on key Right while util_phase == 1 { util_phase = 2 }
         on key Left while util_phase == 2 { util_phase = 1 }
     }

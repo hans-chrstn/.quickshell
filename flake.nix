@@ -5,6 +5,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     pleamar.url = "github:k4ditano/pleamar";
     pleamar.inputs.nixpkgs.follows = "nixpkgs";
+    pleamarWm.url = "github:k4ditano/pleamar-wm";
+    pleamarWm.inputs.nixpkgs.follows = "nixpkgs";
+    pleamarWm.inputs.pleamar.follows = "pleamar";
   };
 
   outputs =
@@ -12,6 +15,7 @@
       self,
       nixpkgs,
       pleamar,
+      pleamarWm,
     }:
     let
       systems = [
@@ -31,6 +35,7 @@
             pkgs.luau-lsp
             pkgs.findutils
             pkgs.gnugrep
+            pkgs.ripgrep
           ];
           text = ''
             project_root="''${1:-.}"
@@ -39,6 +44,16 @@
             definitions_dir="$(mktemp -d)"
             trap 'rm -r "$definitions_dir"' EXIT
             pleamar --luau-types > "$definitions_dir/base.luau"
+
+            production_paths=("$project_root/Nacre.plm" "$project_root/Nacre.luau" "$project_root/logic" "$project_root/scenes")
+            if rg -n '(/home/[[:alnum:]_.-]+|DP-[0-9]+|hyprctl|audio\.sink)' "''${production_paths[@]}" --glob '*.plm' --glob '*.luau'; then
+              echo "Production source contains a machine- or compositor-specific dependency" >&2
+              exit 1
+            fi
+            if rg -n '^[[:space:]]*(//|--)' "''${production_paths[@]}" --glob '*.plm' --glob '*.luau'; then
+              echo "Production Pleamar and Luau source must not contain code comments" >&2
+              exit 1
+            fi
 
             if [ -f "$project_root/Nacre.plm" ]; then
               pleamar --check "$project_root/Nacre.plm"
@@ -101,6 +116,7 @@
     {
       packages = forAllSystems (system: {
         pleamar = pleamar.packages.${system}.default;
+        pleamar-wm = pleamarWm.packages.${system}.default;
         default = self.packages.${system}.pleamar;
       });
 
@@ -109,6 +125,16 @@
           type = "app";
           program = "${self.packages.${system}.pleamar}/bin/pleamar";
           meta.description = "Run the pinned Pleamar runtime";
+        };
+        pleamar = {
+          type = "app";
+          program = "${self.packages.${system}.pleamar}/bin/pleamar";
+          meta.description = "Run the pinned Pleamar runtime";
+        };
+        pleamar-wm = {
+          type = "app";
+          program = "${self.packages.${system}.pleamar-wm}/bin/pleamar-wm";
+          meta.description = "Run the pinned pleamar-wm";
         };
         check = {
           type = "app";

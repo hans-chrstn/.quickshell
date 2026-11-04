@@ -1,0 +1,317 @@
+import "../common/Theme.plm"
+import "../common/Primitives.plm"
+import "../common/GlassBody.plm"
+import "../common/FilePicker.plm"
+
+library WallpaperStudioCardLib {
+    component WallpaperStudioCard(
+        cx: number,
+        cy: number,
+        card_w: number,
+        card_h: number,
+        corner: number,
+        slide_x: number,
+        alpha: number,
+        tool_title: text,
+        dir_path_text: text,
+        wall_title_text: text,
+        mode_label_text: text,
+        is_shader_mode: bool,
+        wall_count: number,
+        current_idx: number,
+        is_picker_open: bool,
+        picker_dir_text: text,
+        picker_status_text: text,
+        picker_page_text: text,
+        prev_evt: event,
+        next_evt: event,
+        toggle_mode_evt: event,
+        open_picker_evt: event,
+        picker_select_evt: event,
+        picker_up_evt: event,
+        picker_prev_page_evt: event,
+        picker_next_page_evt: event,
+        picker_choose_evt: event,
+        picker_cancel_evt: event
+    ) {
+        group {
+            opacity: alpha
+
+            GlassBody(
+                cx - slide_x,
+                cy,
+                card_w,
+                card_h,
+                corner,
+                1.0,
+                glass_base_color
+            )
+
+            group {
+                clip box {
+                    at: cx - slide_x, cy
+                    size: card_w, card_h
+                    corner: corner
+                }
+
+                EscBadge(
+                    cx - slide_x + 104,
+                    cy - 170,
+                    32,
+                    20,
+                    6
+                )
+
+                group {
+                    show: not is_picker_open
+
+                    text tool_title {
+                        at: cx - slide_x - 104, cy - 178
+                        anchor: left center
+                        family: "SF Pro"
+                        size: 14
+                        weight: weight_bold
+                        color: hygge_linen
+                    }
+
+                    text dir_path_text {
+                        at: cx - slide_x - 104, cy - 162
+                        anchor: left center
+                        family: "SF Pro"
+                        size: 10
+                        weight: weight_medium
+                        color: hygge_sand
+                    }
+
+                    group {
+                        move: cx - slide_x, cy - 80
+
+                        box {
+                            at: 0, 0
+                            size: 228, 100
+                            corner: 14
+                            color: hygge_card
+                            opacity: 0.8
+                        }
+
+                        text "ACTIVE WALLPAPER" {
+                            at: -100, -32
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: weight_bold
+                            color: hygge_flax
+                        }
+
+                        text wall_title_text {
+                            at: -100, -14
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 13
+                            weight: weight_semibold
+                            color: hygge_linen
+                        }
+
+                        text "{current_idx} / {wall_count}" {
+                            at: 100, -32
+                            anchor: right center
+                            family: "SF Pro"
+                            size: 10
+                            weight: weight_medium
+                            color: hygge_sand
+                        }
+
+                        group {
+                            move: -54, 24
+
+                            box {
+                                at: 0, 0
+                                size: 96, 28
+                                corner: 8
+                                color: hygge_base
+                                opacity: 0.8
+                            }
+
+                            text "< PREV" {
+                                at: 0, 0
+                                anchor: center
+                                family: "SF Pro"
+                                size: 10
+                                weight: weight_bold
+                                color: hygge_linen
+                            }
+
+                            zone box prev_hit {
+                                at: 0, 0
+                                size: 96, 28
+                                cursor: pointer
+                                active: alpha > 0.01 and not is_picker_open
+                                label: "Previous Wallpaper"
+                                role: button
+                            }
+
+                            on press prev_hit {
+                                emit prev_evt
+                            }
+                        }
+
+                        group {
+                            move: 54, 24
+
+                            box {
+                                at: 0, 0
+                                size: 96, 28
+                                corner: 8
+                                color: hygge_base
+                                opacity: 0.8
+                            }
+
+                            text "NEXT >" {
+                                at: 0, 0
+                                anchor: center
+                                family: "SF Pro"
+                                size: 10
+                                weight: weight_bold
+                                color: hygge_linen
+                            }
+
+                            zone box next_hit {
+                                at: 0, 0
+                                size: 96, 28
+                                cursor: pointer
+                                active: alpha > 0.01 and not is_picker_open
+                                label: "Next Wallpaper"
+                                role: button
+                            }
+
+                            on press next_hit {
+                                emit next_evt
+                            }
+                        }
+                    }
+
+                    group {
+                        move: cx - slide_x, cy + 10
+
+                        box {
+                            at: 0, 0
+                            size: 228, 54
+                            corner: 12
+                            color: hygge_card
+                            opacity: 0.6
+                        }
+
+                        text "ENGINE MODE" {
+                            at: -100, -12
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: weight_bold
+                            color: hygge_flax
+                        }
+
+                        text mode_label_text {
+                            at: -100, 8
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 11
+                            weight: weight_semibold
+                            color: if(is_shader_mode, hygge_terracotta, hygge_honey)
+                        }
+
+                        group {
+                            move: 68, 0
+
+                            box {
+                                at: 0, 0
+                                size: 76, 26
+                                corner: 6
+                                color: if(is_shader_mode, hygge_terracotta, hygge_track)
+                                opacity: 0.9
+                            }
+
+                            text "SWITCH" {
+                                at: 0, 0
+                                anchor: center
+                                family: "SF Pro"
+                                size: 10
+                                weight: weight_bold
+                                color: if(is_shader_mode, hygge_base, hygge_linen)
+                            }
+
+                            zone box switch_hit {
+                                at: 0, 0
+                                size: 76, 26
+                                cursor: pointer
+                                active: alpha > 0.01 and not is_picker_open
+                                label: "Toggle Wallpaper Engine Mode"
+                                role: button
+                            }
+
+                            on press switch_hit {
+                                emit toggle_mode_evt
+                            }
+                        }
+                    }
+
+                    group {
+                        move: cx - slide_x, cy + 76
+
+                        box {
+                            at: 0, 0
+                            size: 228, 44
+                            corner: 10
+                            color: hygge_track
+                            opacity: 0.8
+                        }
+
+                        text "BROWSE FOLDERS" {
+                            at: 0, 0
+                            anchor: center
+                            family: "SF Pro"
+                            size: 11
+                            weight: weight_bold
+                            color: hygge_flax
+                        }
+
+                        zone box browse_hit {
+                            at: 0, 0
+                            size: 228, 44
+                            cursor: pointer
+                            active: alpha > 0.01 and not is_picker_open
+                            label: "Browse Wallpaper Folders"
+                            role: button
+                        }
+
+                        on press browse_hit {
+                            emit open_picker_evt
+                        }
+                    }
+                }
+
+                group {
+                    show: is_picker_open
+
+                    FilePicker(
+                        cx - slide_x,
+                        cy,
+                        card_w - 16,
+                        card_h - 24,
+                        picker_dir_text,
+                        picker_status_text,
+                        picker_page_text,
+                        picker_select_evt,
+                        picker_up_evt,
+                        picker_prev_page_evt,
+                        picker_next_page_evt,
+                        picker_choose_evt,
+                        picker_cancel_evt,
+                        alpha > 0.01 and is_picker_open
+                    )
+
+                    children
+                }
+            }
+        }
+    }
+}

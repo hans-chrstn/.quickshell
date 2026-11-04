@@ -2,6 +2,7 @@ part IslandState {
     fact phase = 0
     fact playing = false
     fact media_progress = 0
+    fact media_can_seek = false
     fact sel = 0
 
     text track_title = ""

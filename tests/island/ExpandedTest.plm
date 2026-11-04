@@ -1,8 +1,8 @@
 language 0.9
 
-import "Theme.plm"
-import "DynamicIslandBody.plm"
-import "ExpandedView.plm"
+import "../../scenes/common/Theme.plm"
+import "../../scenes/island/DynamicIslandBody.plm"
+import "../../scenes/island/ExpandedView.plm"
 
 scene ExpandedTest {
     surface {
@@ -30,6 +30,7 @@ scene ExpandedTest {
 
     fact playing = false
     fact media_progress = 0
+    fact media_can_seek = false
 
     text track_title = ""
     text track_artist = ""

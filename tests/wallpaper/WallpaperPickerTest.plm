@@ -1,0 +1,115 @@
+language 0.9
+
+import "../../scenes/common/Theme.plm"
+import "../../scenes/utility/WallpaperStudioCard.plm"
+
+scene WallpaperPickerTest {
+    permissions {
+        run: "ls"
+        services: "files", "files.write", "env"
+    }
+
+    fact wall_mode = 0
+    fact wall_count = 55
+    fact wall_current_idx = 1
+    fact picker_open = false
+
+    text tool_name = "CANVAS & WALLPAPER"
+    text wall_dir_path = "~/.wallpapers"
+    text wall_current_title = "0.jpg"
+    text wall_mode_label = "STATIC CROSSFADE"
+    text picker_dir_text = "~/.wallpapers"
+    text picker_status = ""
+    text picker_page_text = ""
+
+    model picker_items max 8 {
+        id: number
+        name: text
+        is_dir: bool
+        path: text
+    }
+
+    event prev_wallpaper ->
+    event next_wallpaper ->
+    event toggle_wall_mode ->
+    event open_picker ->
+    event picker_select_item ->
+    event picker_nav_up ->
+    event picker_prev_page ->
+    event picker_next_page ->
+    event picker_choose ->
+    event picker_cancel ->
+
+    surface test_surface {
+        size: 500, 560
+        anchor: center
+        level: overlay
+        screens: each
+        keyboard: on_demand
+        rate: 60
+
+        WallpaperStudioCard(
+        250,
+        280,
+        260,
+        420,
+        20,
+        0,
+        1.0,
+        tool_name,
+        wall_dir_path,
+        wall_current_title,
+        wall_mode_label,
+        wall_mode == 1,
+        wall_count,
+        wall_current_idx,
+        picker_open,
+        picker_dir_text,
+        picker_status,
+        picker_page_text,
+        prev_wallpaper,
+        next_wallpaper,
+        toggle_wall_mode,
+        open_picker,
+        picker_select_item,
+        picker_nav_up,
+        picker_prev_page,
+        picker_next_page,
+        picker_choose,
+        picker_cancel
+        ) {
+            column {
+                at: 250 - 110, 280 - 60
+                gap: 4
+                view: 220, 190
+                step: 30
+                for it in picker_items {
+                    group {
+                        size: 220, 26
+                        FilePickerRow(
+                            it.id,
+                            it.name,
+                            it.is_dir,
+                            220,
+                            26,
+                            picker_select_item,
+                            picker_open
+                        )
+                    }
+                }
+            }
+        }
+
+        on open_picker {
+            picker_open = true
+        }
+
+        on picker_cancel {
+            picker_open = false
+        }
+
+        on picker_choose {
+            picker_open = false
+        }
+    }
+}

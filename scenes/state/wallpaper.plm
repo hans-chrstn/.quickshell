@@ -1,0 +1,38 @@
+part WallpaperState {
+    fact wall_mode = 0
+    fact wall_active_slot = 0
+    fact wall_count = 0
+    fact wall_current_idx = 0
+
+    prop wall_crossfade = 0.0 ~calm
+    follow wall_crossfade = if(wall_active_slot == 1, 1.0, 0.0)
+
+    text wall_a = ""
+    text wall_b = ""
+    text wall_current_title = "Loading wallpapers"
+    text wall_mode_label = "STATIC CROSSFADE"
+    text wall_dir_path = ""
+
+    fact picker_open = false
+    text picker_dir_text = ""
+    text picker_status = ""
+    text picker_page_text = ""
+
+    model picker_items max 8 {
+        id: number
+        name: text
+        is_dir: bool
+        path: text
+    }
+
+    event next_wallpaper ->
+    event prev_wallpaper ->
+    event toggle_wall_mode ->
+    event open_picker ->
+    event picker_select_item ->
+    event picker_nav_up ->
+    event picker_prev_page ->
+    event picker_next_page ->
+    event picker_choose ->
+    event picker_cancel ->
+}

@@ -12,6 +12,8 @@ library SearchViewLib {
             corner: search_row_corner
             cursor: pointer
             active: is_active
+            label: h.name
+            role: button
         }
 
         box {

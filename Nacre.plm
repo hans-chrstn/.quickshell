@@ -9,12 +9,14 @@ import "scenes/island/ExpandedView.plm"
 import "scenes/island/SearchView.plm"
 import "scenes/utility/SideUtilityView.plm"
 import "scenes/utility/AudioStudioCard.plm"
+import "scenes/utility/WallpaperStudioCard.plm"
 import "scenes/utility/UtilityDrumRail.plm"
+import "scenes/common/FilePicker.plm"
 
 scene Nacre {
     permissions {
-        run: "hyprctl"
-        services: "clock", "media", "media.*", "apps", "apps.launch", "audio", "audio.*"
+        run: "ls"
+        services: "clock", "media", "media.toggle", "media.previous", "media.next", "media.seek", "apps", "apps.launch", "audio", "audio.volume", "audio.mute", "audio.input", "audio.input_mute", "audio.default", "files", "files.write", "env"
     }
 
     service clock as now {
@@ -22,27 +24,10 @@ scene Nacre {
         date: text = ""
     }
 
-    service media as song {
-        playing: bool = false
-        title: text = ""
-        artist: text = ""
-        album: text = ""
-        length: number = 0
-        position: number = 0
-        rate: number = 1.0
-        can_seek: bool = false
-        player: text = ""
-    }
-
-    service audio as sound {
-        volume: number = 0.0
-        muted: bool = false
-        input: number = 0.0
-        input_muted: bool = false
-    }
-
     include "scenes/state/island.plm"
     include "scenes/state/utility.plm"
+    include "scenes/state/wallpaper.plm"
+    include "scenes/surfaces/wallpaper.plm"
     include "scenes/surfaces/island.plm"
     include "scenes/surfaces/utility.plm"
 }

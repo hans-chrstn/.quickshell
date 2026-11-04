@@ -35,7 +35,7 @@ return function()
             local list = {}
             local def_name = ""
             for idx, out in ipairs(st.outputs) do
-                if idx > 3 then break end
+                if idx > 4 then break end
                 local is_def = out.default == true
                 if is_def then
                     fact.selected_sink = out.id or idx
@@ -61,9 +61,13 @@ return function()
         end
     end
 
-    pcall(function()
+    local ok, err = pcall(function()
         sys.watch("audio", function(st)
             sync_audio_state(st)
         end)
     end)
+    if not ok then
+        text.audio_engine_status = "AUDIO SERVICE UNAVAILABLE"
+        log("audio: " .. tostring(err))
+    end
 end

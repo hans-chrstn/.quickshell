@@ -1,88 +1,113 @@
 return function()
     local current_pos = 0
     local total_len = 0
+    local playback_rate = 1
     local is_playing = false
     local is_scrubbing = false
+    local scrub_generation = 0
 
     local function format_time(sec)
         if not sec or sec <= 0 then
             return "0:00"
         end
-        local m = math.floor(sec / 60)
-        local s = math.floor(sec % 60)
-        return string.format("%d:%02d", m, s)
+        local minutes = math.floor(sec / 60)
+        local seconds = math.floor(sec % 60)
+        return string.format("%d:%02d", minutes, seconds)
     end
 
-    pcall(function()
-        sys.watch("media", function(m)
-            if not m or type(m) ~= "table" then return end
+    local function publish_position()
+        if total_len > 0 then
+            current_pos = math.clamp(current_pos, 0, total_len)
+            fact.media_progress = math.clamp(current_pos / total_len, 0, 1)
+            text.time_elapsed = format_time(current_pos)
+            text.time_remaining = "-" .. format_time(math.max(0, total_len - current_pos))
+        else
+            fact.media_progress = 0
+            text.time_elapsed = format_time(current_pos)
+            text.time_remaining = "--:--"
+        end
+    end
 
-            is_playing = m.playing == true
+    local watch_ok, watch_err = pcall(function()
+        sys.watch("media", function(media)
+            if type(media) ~= "table" then
+                return
+            end
+
+            is_playing = media.playing == true
             fact.playing = is_playing
+            fact.media_can_seek = media.can_seek == true
+            playback_rate = math.max(tonumber(media.rate) or 1, 0)
 
-            local title = m.title
-            local artist = m.artist
-
-            if not title or title == "" then
-                text.track_title = "Desktop Audio"
+            text.track_title = if type(media.title) == "string" and media.title ~= "" then media.title else "Desktop Audio"
+            if type(media.artist) == "string" and media.artist ~= "" then
+                text.track_artist = media.artist
+            elseif type(media.player) == "string" and media.player ~= "" then
+                text.track_artist = media.player
             else
-                text.track_title = title
-            end
-
-            if not artist or artist == "" then
                 text.track_artist = "Nacre Shell"
-            else
-                text.track_artist = artist
             end
 
-            total_len = tonumber(m.length) or 0
+            total_len = math.max(tonumber(media.length) or 0, 0)
             if not is_scrubbing then
-                current_pos = tonumber(m.position) or 0
-                if total_len > 0 then
-                    fact.media_progress = math.clamp(current_pos / total_len, 0, 1)
-                    local rem = math.max(0, total_len - current_pos)
-                    text.time_elapsed = format_time(current_pos)
-                    text.time_remaining = "-" .. format_time(rem)
-                else
-                    fact.media_progress = 0
-                    text.time_elapsed = format_time(current_pos)
-                    text.time_remaining = "--:--"
-                end
+                current_pos = math.max(tonumber(media.position) or 0, 0)
+                publish_position()
             end
         end)
     end)
+    if not watch_ok then
+        log("media: " .. tostring(watch_err))
+    end
+
+    every(1000, function()
+        if is_playing and total_len > 0 and not is_scrubbing then
+            current_pos = math.min(current_pos + playback_rate, total_len)
+            publish_position()
+        end
+    end)
+
+    local function call_media(operation: string, value: number?)
+        local ok, err = pcall(function()
+            if value == nil then
+                sys.call(operation)
+            else
+                sys.call(operation, value)
+            end
+        end)
+        if not ok then
+            log("media: " .. tostring(err))
+        end
+    end
 
     on("media_toggle", function()
-        pcall(function()
-            sys.call("media.toggle")
-        end)
+        call_media("media.toggle")
     end)
 
     on("media_prev", function()
-        pcall(function()
-            sys.call("media.previous")
-        end)
+        call_media("media.previous")
     end)
 
     on("media_next", function()
-        pcall(function()
-            sys.call("media.next")
-        end)
+        call_media("media.next")
     end)
 
     on("media_seek", function(ratio)
-        local r = tonumber(ratio) or 0
-        r = math.clamp(r, 0, 1)
-        fact.media_progress = r
-        if total_len > 0 then
-            local target_sec = r * total_len
-            current_pos = target_sec
-            text.time_elapsed = format_time(target_sec)
-            local rem = math.max(0, total_len - target_sec)
-            text.time_remaining = "-" .. format_time(rem)
-            pcall(function()
-                sys.call("media.seek", target_sec)
-            end)
+        if not fact.media_can_seek or total_len <= 0 then
+            return
         end
+
+        local normalized = math.clamp(tonumber(ratio) or 0, 0, 1)
+        scrub_generation += 1
+        local generation = scrub_generation
+        is_scrubbing = true
+        current_pos = normalized * total_len
+        publish_position()
+        call_media("media.seek", current_pos)
+
+        after(400, function()
+            if generation == scrub_generation then
+                is_scrubbing = false
+            end
+        end)
     end)
 end

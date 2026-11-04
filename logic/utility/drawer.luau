@@ -2,9 +2,6 @@ return function()
     local registry = {
         { id = 0, name = "CANVAS & WALLPAPER", sub = "HYGGE ENGINE" },
         { id = 1, name = "AUDIO STUDIO", sub = "OUTPUTS & INPUTS" },
-        { id = 2, name = "BLUETOOTH", sub = "CONTROLLER" },
-        { id = 3, name = "NETWORKS", sub = "CONNECTIONS" },
-        { id = 4, name = "MONITORS", sub = "DISPLAYS" },
     }
 
     local by_id = {}
@@ -12,6 +9,7 @@ return function()
         by_id[t.id] = t
     end
     model.tools = registry
+    fact.util_tool_count = #registry
 
     local function update_tool_display(id: number)
         local item = by_id[id]
@@ -19,6 +17,8 @@ return function()
             text.tool_name = item.name
             if id == 1 and text.active_sink_name and text.active_sink_name ~= "" then
                 text.tool_sub = text.active_sink_name
+            elseif id == 0 and text.wall_current_title and text.wall_current_title ~= "" then
+                text.tool_sub = text.wall_current_title
             else
                 text.tool_sub = item.sub
             end
@@ -34,7 +34,7 @@ return function()
     end)
 
     on("select_tool", function(idx)
-        local i = tonumber(idx) or 0
+        local i = math.clamp(math.floor(tonumber(idx) or 0), 0, math.max(#registry - 1, 0))
         fact.util_center_tool = i
         update_tool_display(i)
     end)

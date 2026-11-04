@@ -1,10 +1,10 @@
 language 0.9
 
-import "Theme.plm"
-import "DynamicIslandBody.plm"
-import "CompactView.plm"
-import "ExpandedView.plm"
-import "SearchView.plm"
+import "../../scenes/common/Theme.plm"
+import "../../scenes/island/DynamicIslandBody.plm"
+import "../../scenes/island/CompactView.plm"
+import "../../scenes/island/ExpandedView.plm"
+import "../../scenes/island/SearchView.plm"
 
 scene TransformTest {
     surface {
@@ -39,6 +39,7 @@ scene TransformTest {
     fact phase = 0
     fact playing = false
     fact media_progress = 0
+    fact media_can_seek = false
     fact sel = 0
 
     text track_title = ""
@@ -95,6 +96,15 @@ scene TransformTest {
     let search_alpha = if(phase == 3 and cur_h > 120, clamp((cur_h - 120) / 60, 0, 1), 0)
 
     let cx = 960
+
+    zone box grace_area {
+        at: cx, if(phase == 3, search_grace_y, grace_zone_y)
+        size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
+        corner: grace_zone_corner
+        active: phase > 0
+        label: "Island Interaction Area"
+        role: region
+    }
 
     group {
         opacity: island_alpha
@@ -216,13 +226,6 @@ scene TransformTest {
                 }
             }
         }
-    }
-
-    zone box grace_area {
-        at: cx, if(phase == 3, search_grace_y, grace_zone_y)
-        size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
-        corner: grace_zone_corner
-        active: phase > 0
     }
 
     zone box wake_strip {

@@ -180,9 +180,14 @@ library Theme {
     let toggle_knob_r = 7
 
     let drum_slot_h = 44
+    let drum_step = 48
     let drum_center_size = 38
     let drum_center_corner = 19
     let drum_pill_w = 48
     let drum_pill_h = 240
     let drum_pill_corner = 24
+
+    let utility_visible_edge_x = 410
+    let utility_center_y = 260
+    let utility_flyout_h = 420
 }

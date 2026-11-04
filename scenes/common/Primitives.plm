@@ -41,31 +41,31 @@ library PrimitivesLib {
     ) {
         box {
             at: cx - gap * 2, cy
-            size: bar_w, 7 * scale_val + w1
+            size: bar_w, compact_eq_h1 * scale_val + w1
             corner: bar_corner
             color: col
         }
         box {
             at: cx - gap, cy
-            size: bar_w, 12 * scale_val + w2
+            size: bar_w, compact_eq_h2 * scale_val + w2
             corner: bar_corner
             color: col
         }
         box {
             at: cx, cy
-            size: bar_w, 16 * scale_val + w3
+            size: bar_w, compact_eq_h3 * scale_val + w3
             corner: bar_corner
             color: col
         }
         box {
             at: cx + gap, cy
-            size: bar_w, 11 * scale_val + w4
+            size: bar_w, compact_eq_h4 * scale_val + w4
             corner: bar_corner
             color: col
         }
         box {
             at: cx + gap * 2, cy
-            size: bar_w, 8 * scale_val + w1
+            size: bar_w, compact_eq_h5 * scale_val + w1
             corner: bar_corner
             color: col
         }

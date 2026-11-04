@@ -1,11 +1,24 @@
 return function()
+    local function call_audio(operation: string, value)
+        local ok, err = pcall(function()
+            if value == nil then
+                sys.call(operation)
+            else
+                sys.call(operation, value)
+            end
+        end)
+        if not ok then
+            text.audio_engine_status = "AUDIO CONTROL UNAVAILABLE"
+            log("audio: " .. tostring(err))
+        end
+        return ok
+    end
+
     on("set_vol", function(v)
         local val = math.clamp(tonumber(v) or 0, 0, 100)
         fact.audio_volume = math.round(val)
         text.volume_percent_text = if fact.audio_muted then "MUTED" else `{fact.audio_volume}%`
-        pcall(function()
-            sys.call("audio.volume", val / 100.0)
-        end)
+        call_audio("audio.volume", val / 100.0)
     end)
 
     on("toggle_mute", function()
@@ -15,18 +28,14 @@ return function()
         else
             text.volume_percent_text = `{fact.audio_volume}%`
         end
-        pcall(function()
-            sys.call("audio.mute", fact.audio_muted)
-        end)
+        call_audio("audio.mute", fact.audio_muted)
     end)
 
     on("set_mic", function(v)
         local val = math.clamp(tonumber(v) or 0, 0, 100)
         fact.mic_volume = math.round(val)
         text.mic_percent_text = if fact.mic_muted then "MUTED" else `{fact.mic_volume}%`
-        pcall(function()
-            sys.call("audio.input", val / 100.0)
-        end)
+        call_audio("audio.input", val / 100.0)
     end)
 
     on("toggle_mic_mute", function()
@@ -36,26 +45,26 @@ return function()
         else
             text.mic_percent_text = `{fact.mic_volume}%`
         end
-        pcall(function()
-            sys.call("audio.input_mute", fact.mic_muted)
-        end)
+        call_audio("audio.input_mute", fact.mic_muted)
     end)
 
     on("pick_sink", function(id)
         local sid = tonumber(id) or 0
         fact.selected_sink = sid
-        local list = model.sinks
-        for idx, s in ipairs(list) do
-            local matched = s.id == sid or idx == sid
-            s.is_default = matched
+        local updated = {}
+        for _, sink in ipairs(model.sinks) do
+            local matched = sink.id == sid
+            updated[#updated + 1] = {
+                id = sink.id,
+                name = sink.name,
+                is_default = matched,
+            }
             if matched then
-                text.active_sink_name = s.name or ""
-                text.tool_sub = s.name or ""
+                text.active_sink_name = sink.name or ""
+                text.tool_sub = sink.name or ""
             end
         end
-        model.sinks = list
-        pcall(function()
-            sys.call("audio.sink", sid)
-        end)
+        model.sinks = updated
+        call_audio("audio.default", sid)
     end)
 end

@@ -1,0 +1,328 @@
+import "Theme.plm"
+
+library FilePickerLib {
+    component FilePickerRow(
+        id: number,
+        name: text,
+        is_dir: bool,
+        row_w: number,
+        row_h: number,
+        select_evt: event,
+        is_active: bool = true
+    ) {
+        size: row_w, row_h
+        group {
+            move: row_w / 2, row_h / 2
+
+            box {
+                at: 0, 0
+                size: row_w, row_h
+                corner: 8
+                color: hygge_card
+                opacity: 0.6
+            }
+
+            group {
+                show: is_dir
+                move: -row_w / 2 + 16, 0
+
+                path {
+                    color: hygge_honey
+                    move -6, -4
+                    line -2, -4
+                    line 0, -2
+                    line 6, -2
+                    line 6, 4
+                    line -6, 4
+                    close
+                }
+            }
+
+            group {
+                show: not is_dir
+                move: -row_w / 2 + 16, 0
+
+                box {
+                    at: 0, 0
+                    size: 10, 12
+                    corner: 1.5
+                    color: hygge_sand
+                    opacity: 0.8
+                }
+            }
+
+            text name {
+                at: -row_w / 2 + 28, 0
+                anchor: left center
+                family: "SF Pro"
+                size: 11
+                weight: weight_medium
+                color: hygge_linen
+                width: row_w - 52
+                lines: 1
+            }
+
+            group {
+                show: is_dir
+                move: row_w / 2 - 14, 0
+
+                path {
+                    color: hygge_stone
+                    move -2, -3
+                    line 2, 0
+                    line -2, 3
+                }
+            }
+
+            zone box hit {
+                at: 0, 0
+                size: row_w, row_h
+                cursor: pointer
+                active: is_active
+                label: name
+                role: button
+            }
+
+            on press hit {
+                emit select_evt(id)
+            }
+        }
+    }
+
+    component FilePicker(
+        cx: number,
+        cy: number,
+        card_w: number,
+        card_h: number,
+        current_dir_text: text,
+        status_text: text,
+        page_text: text,
+        select_item_evt: event,
+        nav_up_evt: event,
+        prev_page_evt: event,
+        next_page_evt: event,
+        choose_evt: event,
+        cancel_evt: event,
+        is_active: bool = true
+    ) {
+        group {
+            move: cx, cy
+
+            box {
+                at: 0, 0
+                size: card_w, card_h
+                corner: 16
+                color: hygge_base
+                opacity: 0.95
+            }
+
+            text "SELECT FOLDER" {
+                at: -card_w / 2 + 16, -card_h / 2 + 22
+                anchor: left center
+                family: "SF Pro"
+                size: 11
+                weight: weight_bold
+                color: hygge_flax
+            }
+
+            group {
+                move: -card_w / 2 + 16, -card_h / 2 + 46
+
+                box {
+                    at: (card_w - 76) / 2, 0
+                    size: card_w - 76, 26
+                    corner: 6
+                    color: hygge_track
+                    opacity: 0.8
+                }
+
+                text current_dir_text {
+                    at: 8, 0
+                    anchor: left center
+                    family: "SF Pro"
+                    size: 10
+                    weight: weight_medium
+                    color: hygge_linen
+                }
+
+                group {
+                    move: card_w - 52, 0
+
+                    box {
+                        at: 0, 0
+                        size: 26, 26
+                        corner: 6
+                        color: hygge_card
+                        opacity: 0.7
+                    }
+
+                    text "^" {
+                        at: 0, 1
+                        anchor: center
+                        family: "SF Pro"
+                        size: 12
+                        weight: weight_bold
+                        color: hygge_linen
+                    }
+
+                    zone box up_hit {
+                        at: 0, 0
+                        size: 26, 26
+                        cursor: pointer
+                        active: is_active
+                        label: "Parent Directory"
+                        role: button
+                    }
+
+                    on press up_hit {
+                        emit nav_up_evt
+                    }
+                }
+            }
+
+            group {
+                move: 0, card_h / 2 - 26
+
+                group {
+                    move: -card_w / 4 + 4, 0
+
+                    box {
+                        at: 0, 0
+                        size: card_w / 2 - 12, 30
+                        corner: 8
+                        color: hygge_sage
+                        opacity: 0.9
+                    }
+
+                    text "SELECT THIS" {
+                        at: 0, 0
+                        anchor: center
+                        family: "SF Pro"
+                        size: 10
+                        weight: weight_bold
+                        color: hygge_base
+                    }
+
+                    zone box select_hit {
+                        at: 0, 0
+                        size: card_w / 2 - 12, 30
+                        cursor: pointer
+                        active: is_active
+                        label: "Choose Current Directory"
+                        role: button
+                    }
+
+                    on press select_hit {
+                        emit choose_evt
+                    }
+                }
+
+                group {
+                    move: card_w / 4 - 4, 0
+
+                    box {
+                        at: 0, 0
+                        size: card_w / 2 - 12, 30
+                        corner: 8
+                        color: hygge_card
+                        opacity: 0.8
+                    }
+
+                    text "CANCEL" {
+                        at: 0, 0
+                        anchor: center
+                        family: "SF Pro"
+                        size: 10
+                        weight: weight_bold
+                        color: hygge_sand
+                    }
+
+                    zone box cancel_hit {
+                        at: 0, 0
+                        size: card_w / 2 - 12, 30
+                        cursor: pointer
+                        active: is_active
+                        label: "Cancel Directory Picker"
+                        role: button
+                    }
+
+                    on press cancel_hit {
+                        emit cancel_evt
+                    }
+                }
+            }
+
+            text status_text {
+                at: 0, card_h / 2 - 78
+                anchor: center
+                family: "SF Pro"
+                size: text_size_badge
+                weight: weight_medium
+                color: hygge_clay
+                width: card_w - 32
+                lines: 1
+            }
+
+            group {
+                move: 0, card_h / 2 - 54
+
+                text page_text {
+                    at: 0, 0
+                    anchor: center
+                    family: "SF Mono"
+                    size: text_size_badge
+                    weight: weight_medium
+                    color: hygge_stone
+                }
+
+                group {
+                    move: -42, 0
+
+                    path {
+                        color: hygge_sand
+                        move 2, -4
+                        line -2, 0
+                        line 2, 4
+                    }
+
+                    zone box previous_page_hit {
+                        at: 0, 0
+                        size: 28, 22
+                        cursor: pointer
+                        active: is_active
+                        label: "Previous Page"
+                        role: button
+                    }
+
+                    on press previous_page_hit {
+                        emit prev_page_evt
+                    }
+                }
+
+                group {
+                    move: 42, 0
+
+                    path {
+                        color: hygge_sand
+                        move -2, -4
+                        line 2, 0
+                        line -2, 4
+                    }
+
+                    zone box next_page_hit {
+                        at: 0, 0
+                        size: 28, 22
+                        cursor: pointer
+                        active: is_active
+                        label: "Next Page"
+                        role: button
+                    }
+
+                    on press next_page_hit {
+                        emit next_page_evt
+                    }
+                }
+            }
+        }
+    }
+}

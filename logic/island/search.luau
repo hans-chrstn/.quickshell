@@ -3,7 +3,6 @@ return function()
 
     local function filter_apps()
         local q = (text.query or ""):lower()
-        log("search: filter query='" .. q .. "' total_apps=" .. tostring(#all_apps))
         local matched = {}
         for _, app in ipairs(all_apps) do
             if app and type(app.name) == "string" then
@@ -18,10 +17,6 @@ return function()
                     end
                 end
             end
-        end
-        log("search: matched " .. tostring(#matched) .. " apps")
-        for k, v in ipairs(matched) do
-            log("search:   hit[" .. tostring(k) .. "] = " .. tostring(v.name) .. " (" .. tostring(v.exec) .. ")")
         end
         model.hits = matched
         fact.sel = 0
@@ -42,38 +37,27 @@ return function()
         if fact.phase ~= 3 then
             return
         end
-        local idx = (tonumber(i) or 0) + 1
+        local count = #model.hits
+        if count == 0 then
+            return
+        end
+        local selected = math.clamp(math.floor(tonumber(i) or 0), 0, count - 1)
+        local idx = selected + 1
         local hit = model.hits[idx]
-        log("launch: requested index=" .. tostring(i) .. " resolved_idx=" .. tostring(idx) .. " hit=" .. tostring(hit and hit.name or "none") .. " exec=" .. tostring(hit and hit.exec or "none"))
         if hit and hit.exec and hit.exec ~= "" then
-            log("launch: executing sys.call('apps.launch', '" .. tostring(hit.exec) .. "')")
-            local launched = false
-            local function do_launch()
-                if launched then
-                    return
-                end
-                launched = true
-                pcall(function()
-                    sys.call("apps.launch", hit.exec)
-                end)
-            end
-
-            local ok = pcall(function()
-                run("hyprctl", { "dispatch", "focusmonitor", "DP-1" }, function()
-                    do_launch()
-                end)
+            local ok, err = pcall(function()
+                sys.call("apps.launch", hit.exec)
             end)
             if not ok then
-                do_launch()
-            else
-                after(120, do_launch)
+                log("launcher: " .. tostring(err))
             end
         end
         fact.phase = 0
     end)
 
     on("select_hit", function(i)
-        fact.sel = tonumber(i) or 0
+        local count = #model.hits
+        fact.sel = if count > 0 then math.clamp(math.floor(tonumber(i) or 0), 0, count - 1) else 0
     end)
 
     on("fact:phase", function(phase)

@@ -1,8 +1,8 @@
 language 0.9
 
-import "Theme.plm"
-import "DynamicIslandBody.plm"
-import "CompactView.plm"
+import "../../scenes/common/Theme.plm"
+import "../../scenes/island/DynamicIslandBody.plm"
+import "../../scenes/island/CompactView.plm"
 
 scene CompactTest {
     surface {

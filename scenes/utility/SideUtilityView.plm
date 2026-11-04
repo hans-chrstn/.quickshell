@@ -276,6 +276,8 @@ library SideUtilityLib {
             color: if(is_active, hygge_card_hover, hygge_card)
             opacity: if(is_active, 1.0, 0.70)
             cursor: pointer
+            label: "Select Audio Sink"
+            role: button
         }
 
         box {

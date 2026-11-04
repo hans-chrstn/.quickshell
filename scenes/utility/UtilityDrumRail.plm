@@ -12,7 +12,8 @@ library UtilityDrumRailLib {
         rail_alpha: number,
         shadow_alpha: number,
         content_alpha: number,
-        drum_pos: number
+        drum_pos: number,
+        tool_count: number
     ) {
         group {
             opacity: rail_alpha
@@ -55,9 +56,10 @@ library UtilityDrumRailLib {
                     opacity: content_alpha
 
                     repeat i in 0..5 {
-                        let d = mod(i - drum_pos / 48 + 2, 5) - 2
-                        let y = cy + d * 48
+                        let d = mod(i - drum_pos / drum_step + tool_count / 2, max(tool_count, 1)) - tool_count / 2
+                        let y = cy + d * drum_step
                         group {
+                            show: i < tool_count
                             opacity: clamp(1.0 - abs(d) * 0.45, 0.05, 1.0)
                             ToolIconVector(i, cx, y, abs(d) < 0.35)
                         }

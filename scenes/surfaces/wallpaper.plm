@@ -1,0 +1,54 @@
+part WallpaperSurface {
+    surface wallpaper {
+        size: full, full
+        level: background
+        screens: each
+        keyboard: none
+        rate: 60
+
+        shader hygge_wall_bg = file "../../shaders/hygge_flow.wgsl"
+
+        image wall_img_a = from wall_a, 0, 0
+        image wall_img_b = from wall_b, 0, 0
+
+        group {
+            show: wall_mode == 0
+
+            image wall_img_a {
+                at: 0, 0
+                size: screen.width, screen.height
+                fit: cover
+                opacity: 1.0 - wall_crossfade
+            }
+
+            image wall_img_b {
+                at: 0, 0
+                size: screen.width, screen.height
+                fit: cover
+                opacity: wall_crossfade
+            }
+        }
+
+        group {
+            show: wall_mode == 1
+
+            shader hygge_wall_bg {
+                at: 0, 0
+                size: screen.width, screen.height
+                colors: hygge_base, hygge_terracotta
+            }
+        }
+
+        zone box wall_desk {
+            from: 0, 0
+            size: screen.width, screen.height
+            cursor: default
+            label: "Desktop Wallpaper"
+            role: region
+        }
+
+        on press right wall_desk {
+            emit next_wallpaper
+        }
+    }
+}

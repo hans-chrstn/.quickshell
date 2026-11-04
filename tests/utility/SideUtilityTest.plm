@@ -1,8 +1,8 @@
 language 0.9
 
-import "../island/Theme.plm"
-import "../island/DynamicIslandBody.plm"
-import "SideUtilityView.plm"
+import "../../scenes/common/Theme.plm"
+import "../../scenes/island/DynamicIslandBody.plm"
+import "../../scenes/utility/SideUtilityView.plm"
 
 scene SideUtilityTest {
     surface {

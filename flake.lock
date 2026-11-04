@@ -1,5 +1,30 @@
 {
   "nodes": {
+    "marea": {
+      "inputs": {
+        "nixpkgs": [
+          "pleamarWm",
+          "nixpkgs"
+        ],
+        "pleamar": [
+          "pleamarWm",
+          "pleamar"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791976862,
+        "narHash": "sha256-0Kw9crEPVwVuSBjOHLIEroX+QWdaAD8lSWF23ZjfyqI=",
+        "owner": "k4ditano",
+        "repo": "marea-plm",
+        "rev": "2b6a0649ec3a8d7d1122640c3f0d9b156bf56527",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k4ditano",
+        "repo": "marea-plm",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1793540411,
@@ -36,10 +61,35 @@
         "type": "github"
       }
     },
+    "pleamarWm": {
+      "inputs": {
+        "marea": "marea",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pleamar": [
+          "pleamar"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793749424,
+        "narHash": "sha256-7q12XKJO88Xlea9QQWYyyBKxEZZEoTGfPBJF5sEOoHM=",
+        "owner": "k4ditano",
+        "repo": "pleamar-wm",
+        "rev": "f2d65120a5662acfce302619cc4e2c00285b1125",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k4ditano",
+        "repo": "pleamar-wm",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "pleamar": "pleamar"
+        "pleamar": "pleamar",
+        "pleamarWm": "pleamarWm"
       }
     }
   },

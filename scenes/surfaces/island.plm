@@ -6,6 +6,15 @@ part IslandSurface {
         screens: each
         keyboard: on_demand
 
+        zone box grace_area {
+            at: cx, if(phase == 3, search_grace_y, grace_zone_y)
+            size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
+            corner: grace_zone_corner
+            active: phase > 0
+            label: "Island Interaction Area"
+            role: region
+        }
+
         group {
             opacity: island_alpha
 
@@ -78,13 +87,6 @@ part IslandSurface {
             }
         }
 
-        zone box grace_area {
-            at: cx, if(phase == 3, search_grace_y, grace_zone_y)
-            size: if(phase == 3, search_grace_w, grace_zone_w), if(phase == 3, search_grace_h, grace_zone_h)
-            corner: grace_zone_corner
-            active: phase > 0
-        }
-
         zone box wake_strip {
             at: cx, wake_zone_y
             size: wake_zone_w, wake_zone_h
@@ -130,7 +132,7 @@ part IslandSurface {
             size: scrubber_track_w, scrub_hit_h
             corner: scrub_hit_corner
             cursor: pointer
-            active: phase == 2
+            active: phase == 2 and media_can_seek
             label: "Scrub Media"
             role: slider
         }
@@ -185,8 +187,8 @@ part IslandSurface {
         on press play_btn { emit media_toggle }
         on press prev_btn { emit media_prev }
         on press next_btn { emit media_next }
-        on press scrub_track { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
-        on drag scrub_track  { emit media_seek(clamp((pointer.x - (cx - 142)) / 284, 0, 1)) }
+        on press scrub_track { emit media_seek(clamp((pointer.x - (cx - scrubber_track_w / 2)) / scrubber_track_w, 0, 1)) }
+        on drag scrub_track  { emit media_seek(clamp((pointer.x - (cx - scrubber_track_w / 2)) / scrubber_track_w, 0, 1)) }
         on press expanded_card while phase == 2 { phase = 1; emit fold_compact }
         on press esc_btn while phase == 3 { phase = 1; blur }
         on key Escape while phase == 3 { phase = 1; blur }

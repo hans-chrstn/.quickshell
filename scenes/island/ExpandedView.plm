@@ -105,20 +105,20 @@ library ExpandedViewLib {
             }
             let fill_w = clamp(progress_val * scrubber_track_w, 0, scrubber_track_w)
             box {
-                at: cx - 142 + fill_w / 2, cy + 16
+                at: cx - scrubber_track_w / 2 + fill_w / 2, cy + 16
                 size: fill_w, scrubber_track_h
                 corner: scrubber_track_corner
                 color: accent
             }
             ellipse {
-                at: cx - 142 + fill_w, cy + 16
+                at: cx - scrubber_track_w / 2 + fill_w, cy + 16
                 radius: scrubber_knob_r
                 color: ink_white
                 show: fill_w > 0
             }
 
             text time_elapsed {
-                at: cx - 142, cy + 28
+                at: cx - scrubber_track_w / 2, cy + 28
                 anchor: left center
                 family: "SF Mono"
                 size: text_size_badge
@@ -126,7 +126,7 @@ library ExpandedViewLib {
                 color: ink_mut
             }
             text time_remaining {
-                at: cx + 142, cy + 28
+                at: cx + scrubber_track_w / 2, cy + 28
                 anchor: right center
                 family: "SF Mono"
                 size: text_size_badge
