@@ -35,7 +35,7 @@ return function()
             local list = {}
             local def_name = ""
             for idx, out in ipairs(st.outputs) do
-                if idx > 4 then break end
+                if idx > 12 then break end
                 local is_def = out.default == true
                 if is_def then
                     fact.selected_sink = out.id or idx
@@ -51,13 +51,49 @@ return function()
             end
             if #list > 0 then
                 model.sinks = list
-                text.audio_engine_status = "PIPEWIRE · WIREPLUMBER DIRECT"
+                text.audio_engine_status = "PipeWire · live mixer"
                 if text.tool_sub == "" and list[1] then
                     text.tool_sub = list[1].name
                 end
             else
-                text.audio_engine_status = "NO OUTPUT DEVICES"
+                model.sinks = {}
+                text.audio_engine_status = "No output devices"
             end
+        end
+
+        if st.inputs and type(st.inputs) == "table" then
+            local list = {}
+            for idx, input in ipairs(st.inputs) do
+                if idx > 12 then break end
+                local is_def = input.default == true
+                if is_def then
+                    fact.selected_source = tonumber(input.id) or idx
+                end
+                list[#list + 1] = {
+                    id = tonumber(input.id) or idx,
+                    name = input.name or `Input {idx}`,
+                    is_default = is_def,
+                }
+            end
+            model.sources = list
+        end
+
+        if st.apps and type(st.apps) == "table" then
+            local list = {}
+            for idx, app in ipairs(st.apps) do
+                if idx > 16 then break end
+                list[#list + 1] = {
+                    id = tonumber(app.id) or idx,
+                    name = app.name or app.binary or `Application {idx}`,
+                    title = app.title or "Application audio",
+                    volume = math.clamp(math.round((tonumber(app.volume) or 0) * 100), 0, 100),
+                    muted = app.muted == true,
+                    playing = app.playing == true,
+                }
+            end
+            model.audio_apps = list
+        else
+            model.audio_apps = {}
         end
     end
 
@@ -67,7 +103,7 @@ return function()
         end)
     end)
     if not ok then
-        text.audio_engine_status = "AUDIO SERVICE UNAVAILABLE"
+        text.audio_engine_status = "Audio service unavailable"
         log("audio: " .. tostring(err))
     end
 end

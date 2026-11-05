@@ -1,16 +1,13 @@
 return function()
     local registry = {
-        { id = 0, name = "CANVAS & WALLPAPER", sub = "HYGGE ENGINE" },
-        { id = 1, name = "AUDIO STUDIO", sub = "OUTPUTS & INPUTS" },
+        { id = 0, name = "Canvas & Wallpaper", sub = "Hygge engine" },
+        { id = 1, name = "Audio Studio", sub = "Outputs & inputs" },
     }
 
     local by_id = {}
     for _, t in ipairs(registry) do
         by_id[t.id] = t
     end
-    model.tools = registry
-    fact.util_tool_count = #registry
-
     local function update_tool_display(id: number)
         local item = by_id[id]
         if item then

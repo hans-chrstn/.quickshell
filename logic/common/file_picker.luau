@@ -161,8 +161,6 @@ return function(cfg)
         fact.picker_open = false
     end)
 
-    load_dir(current_dir)
-
     return {
         load_dir = load_dir,
         get_dir = function() return current_dir end,

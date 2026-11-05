@@ -23,6 +23,15 @@
         "aarch64-linux"
       ];
       forAllSystems = function: nixpkgs.lib.genAttrs systems function;
+      pleamarWmPackage =
+        system:
+        pleamarWm.packages.${system}.default.overrideAttrs (old: {
+          postPatch = (old.postPatch or "") + ''
+            substituteInPlace examples/session.plm \
+              --replace-fail 'min(cz, (mg.Ws - 2 * gap) / max(fw.$i, 1), (mg.ah - gap) / max(fh.$i + bar, 1))' \
+              'min(cz, min((mg.Ws - 2 * gap) / max(fw.$i, 1), (mg.ah - gap) / max(fh.$i + bar, 1)))'
+          '';
+        });
       checkTool =
         system:
         let
@@ -112,11 +121,25 @@
             echo "Nacre checks passed: $checked_scenes scene(s), $checked_logic Luau file(s)"
           '';
         };
+      nacreApp =
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        pkgs.writeShellApplication {
+          name = "nacre";
+          text = ''
+            exec ${
+              pleamar.packages.${system}.default
+            }/bin/pleamar --stall 0 --scene ${self}/Nacre.plm --no-hud "$@"
+          '';
+        };
     in
     {
       packages = forAllSystems (system: {
+        nacre = nacreApp system;
         pleamar = pleamar.packages.${system}.default;
-        pleamar-wm = pleamarWm.packages.${system}.default;
+        pleamar-wm = pleamarWmPackage system;
         default = self.packages.${system}.pleamar;
       });
 
@@ -130,6 +153,11 @@
           type = "app";
           program = "${self.packages.${system}.pleamar}/bin/pleamar";
           meta.description = "Run the pinned Pleamar runtime";
+        };
+        nacre = {
+          type = "app";
+          program = "${self.packages.${system}.nacre}/bin/nacre";
+          meta.description = "Run Nacre without the diagnostic logic stall";
         };
         pleamar-wm = {
           type = "app";

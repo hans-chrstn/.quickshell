@@ -12,59 +12,41 @@ library UtilityDrumRailLib {
         rail_alpha: number,
         shadow_alpha: number,
         content_alpha: number,
-        drum_pos: number,
-        tool_count: number
+        selected_tool: number
     ) {
         group {
             opacity: rail_alpha
 
-            GlassBody(
-                cx,
-                cy,
-                w,
-                h,
-                corner,
-                shadow_alpha,
-                glass_base_color
-            )
+            UtilityGlassBody(cx, cy, w, h, corner, shadow_alpha)
+
+            box {
+                at: cx, cy - 26 + selected_tool * 52
+                size: 38, 38
+                corner: 19
+                color: hygge_card_hover
+                opacity: content_alpha
+            }
+
+            box {
+                at: cx, cy - 26 + selected_tool * 52
+                size: 38, 38
+                corner: 19
+                stroke: 1
+                color: hygge_honey
+                opacity: content_alpha * 0.52
+            }
 
             group {
-                clip box {
-                    at: cx, cy
-                    size: w, h
-                    corner: corner
-                }
+                opacity: content_alpha
+                ToolIconVector(0, cx, cy - 26, selected_tool == 0)
+                ToolIconVector(1, cx, cy + 26, selected_tool == 1)
+            }
 
-                box {
-                    at: cx, cy
-                    size: drum_center_size, drum_center_size
-                    corner: drum_center_corner
-                    color: hygge_card_hover
-                    opacity: 0.85 * content_alpha
-                }
-
-                box {
-                    at: cx, cy
-                    size: drum_center_size, drum_center_size
-                    corner: drum_center_corner
-                    stroke: 1.5
-                    color: hygge_clay
-                    opacity: 0.9 * content_alpha
-                }
-
-                group {
-                    opacity: content_alpha
-
-                    repeat i in 0..5 {
-                        let d = mod(i - drum_pos / drum_step + tool_count / 2, max(tool_count, 1)) - tool_count / 2
-                        let y = cy + d * drum_step
-                        group {
-                            show: i < tool_count
-                            opacity: clamp(1.0 - abs(d) * 0.45, 0.05, 1.0)
-                            ToolIconVector(i, cx, y, abs(d) < 0.35)
-                        }
-                    }
-                }
+            ellipse {
+                at: cx, cy + h / 2 - 11
+                radius: 2
+                color: hygge_stone
+                opacity: content_alpha * 0.58
             }
         }
     }

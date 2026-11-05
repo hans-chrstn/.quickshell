@@ -8,23 +8,76 @@ library GlassBodyLib {
         h: number,
         corner: number,
         shadow_alpha: number,
-        base_color: color = glass_base_color
+        base_color: color = glass_base_color,
+        lens_enabled: bool = true,
+        glass_strength: number = glass_amount,
+        smoke_amount: number = glass_smoke,
+        tint_amount: number = glass_tint,
+        refraction_amount: number = glass_refraction,
+        dispersion_amount: number = glass_dispersion,
+        mirror_amount: number = glass_mirror,
+        highlight_amount: number = glass_highlight,
+        rim_amount: number = glass_rim
     ) {
         body {
             color: base_color
-            glass: 100%
+            glass: glass_strength
+            lens: lens_enabled
             frost: auto
-            smoke: glass_smoke
-            refraction: glass_refraction
-            dispersion: glass_dispersion
-            mirror: glass_mirror
-            highlight: glass_highlight
+            smoke: smoke_amount
+            tint: tint_amount
+            refraction: refraction_amount
+            dispersion: dispersion_amount
+            mirror: mirror_amount
+            highlight: highlight_amount
+            rim: rim_amount
             shadow: 0, 4, 10, shadow_alpha * shadow_base_opacity
 
             box {
                 at: cx, cy
                 size: w, h
                 corner: corner
+            }
+        }
+    }
+
+    component UtilityGlassBody(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        shadow_alpha: number
+    ) {
+        group {
+            body {
+                color: utility_glass_base_color
+                opacity: 0.94
+                rim: utility_glass_rim
+                shadow: 0, 6, 18, shadow_alpha * shadow_base_opacity
+
+                box {
+                    at: cx, cy
+                    size: w, h
+                    corner: corner
+                }
+            }
+
+            box {
+                at: cx, cy
+                size: w - 2, h - 2
+                corner: max(corner - 1, 0)
+                stroke: 1
+                color: hygge_flax
+                opacity: 0.10
+            }
+
+            box {
+                at: cx, cy - h / 2 + 1
+                size: max(w - corner * 1.5, 8), 1
+                corner: 0.5
+                color: hygge_linen
+                opacity: 0.12
             }
         }
     }

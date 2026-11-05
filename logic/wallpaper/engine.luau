@@ -171,10 +171,10 @@ return function()
     on("toggle_wall_mode", function()
         if fact.wall_mode == 0 then
             fact.wall_mode = 1
-            text.wall_mode_label = "HYGGE WGSL"
+            text.wall_mode_label = "Hygge shader"
         else
             fact.wall_mode = 0
-            text.wall_mode_label = "STATIC CROSSFADE"
+            text.wall_mode_label = "Static crossfade"
         end
     end)
 

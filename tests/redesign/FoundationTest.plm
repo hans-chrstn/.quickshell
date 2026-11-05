@@ -1,0 +1,172 @@
+language 0.9
+
+import "Redesign.plm"
+
+scene FoundationTest {
+    surface {
+        size: 1920, 1080
+        anchor: top
+        level: overlay
+        screens: all
+    }
+
+    body {
+        color: #07090d
+        box { at: 960, 540; size: 1920, 1080 }
+        box { at: 480, 430; size: 900, 720; color: #1e3a5f; opacity: 0.85 }
+        box { at: 1360, 620; size: 1100, 800; color: #3a2a5f; opacity: 0.80 }
+        box { at: 960, 980; size: 1920, 200; color: #14324a; opacity: 0.70 }
+        ellipse { at: 320, 300; radius: 120; color: #38bdf8; opacity: 0.35 }
+        ellipse { at: 700, 640; radius: 90; color: #e8b072; opacity: 0.30 }
+        ellipse { at: 1250, 320; radius: 110; color: #818cf8; opacity: 0.35 }
+        ellipse { at: 1620, 660; radius: 100; color: #38bdf8; opacity: 0.30 }
+    }
+
+    text "Nacre 2.0 · foundation" {
+        at: 40, 44
+        anchor: left center
+        family: "SF Pro"
+        size: 20
+        weight: 600
+        color: nacre_ink
+    }
+    text "tokens + primitives · static, zero cost" {
+        at: 40, 70
+        anchor: left center
+        family: "SF Pro"
+        size: 12
+        weight: 400
+        color: nacre_ink_faint
+    }
+
+    GlassCard(520, 470, 660, 460, 28, 0.34)
+    GlassCard(1400, 470, 660, 460, 28, 0.34)
+
+    text "primitives" {
+        at: 220, 284
+        anchor: left center
+        family: "SF Pro"
+        size: 13
+        weight: 600
+        color: nacre_ink_soft
+    }
+
+    TickStrip(430, 330, 400, 5, 16, 0.42)
+    text "tick strip · media 42 %" {
+        at: 820, 330
+        anchor: right center
+        family: "SF Mono"
+        size: 11
+        weight: 500
+        color: nacre_ink_faint
+    }
+    TickStrip(430, 380, 400, 5, 16, 0.75, nacre_warm)
+    text "tick strip · day 75 %" {
+        at: 820, 380
+        anchor: right center
+        family: "SF Mono"
+        size: 11
+        weight: 500
+        color: nacre_ink_faint
+    }
+
+    Waveform(430, 480, 400, 72, 0.38)
+    text "waveform · 36 bars, symmetric" {
+        at: 220, 548
+        anchor: left center
+        family: "SF Pro"
+        size: 11
+        weight: 400
+        color: nacre_ink_faint
+    }
+
+    ToggleSwitch(240, 606, 44, 24, 0)
+    ToggleSwitch(350, 606, 44, 24, 0.5)
+    ToggleSwitch(460, 606, 44, 24, 1)
+    text "toggle · off / mid / on" {
+        at: 820, 606
+        anchor: right center
+        family: "SF Pro"
+        size: 11
+        weight: 400
+        color: nacre_ink_faint
+    }
+
+    CircleButton(240, 664, 17, false)
+    CircleButton(350, 664, 17, true)
+    text "circle button · play / pause" {
+        at: 820, 664
+        anchor: right center
+        family: "SF Pro"
+        size: 11
+        weight: 400
+        color: nacre_ink_faint
+    }
+
+    text "now playing · composition" {
+        at: 1120, 284
+        anchor: left center
+        family: "SF Pro"
+        size: 13
+        weight: 600
+        color: nacre_ink_soft
+    }
+
+    ArtSquircle(1190, 380, 120)
+    text "Desktop Audio" {
+        at: 1290, 356
+        anchor: left center
+        family: "SF Pro"
+        size: 17
+        weight: 600
+        color: nacre_ink
+    }
+    text "Nacre Shell" {
+        at: 1290, 384
+        anchor: left center
+        family: "SF Pro"
+        size: 12
+        weight: 500
+        color: nacre_ink_soft
+    }
+
+    Waveform(1400, 478, 420, 64, 0.38)
+    text "1:24" {
+        at: 1190, 528
+        anchor: left center
+        family: "SF Mono"
+        size: 10
+        weight: 500
+        color: nacre_ink_faint
+    }
+    text "-2:56" {
+        at: 1610, 528
+        anchor: right center
+        family: "SF Mono"
+        size: 10
+        weight: 500
+        color: nacre_ink_faint
+    }
+
+    SkipButton(1310, 590, 15, true)
+    CircleButton(1400, 590, 22, true)
+    SkipButton(1490, 590, 15, false)
+    text "transport" {
+        at: 1610, 590
+        anchor: right center
+        family: "SF Pro"
+        size: 11
+        weight: 400
+        color: nacre_ink_faint
+    }
+
+    ToggleSwitch(1180, 654, 44, 24, 1)
+    text "muted" {
+        at: 1610, 654
+        anchor: right center
+        family: "SF Pro"
+        size: 11
+        weight: 400
+        color: nacre_ink_faint
+    }
+}

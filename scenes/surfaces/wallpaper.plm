@@ -2,9 +2,9 @@ part WallpaperSurface {
     surface wallpaper {
         size: full, full
         level: background
-        screens: each
+        screens: each max 3
         keyboard: none
-        rate: 60
+        rate: 60, 30 while wall_mode == 1
 
         shader hygge_wall_bg = file "../../shaders/hygge_flow.wgsl"
 

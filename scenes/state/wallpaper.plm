@@ -10,7 +10,7 @@ part WallpaperState {
     text wall_a = ""
     text wall_b = ""
     text wall_current_title = "Loading wallpapers"
-    text wall_mode_label = "STATIC CROSSFADE"
+    text wall_mode_label = "Static crossfade"
     text wall_dir_path = ""
 
     fact picker_open = false

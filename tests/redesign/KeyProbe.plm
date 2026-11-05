@@ -1,0 +1,64 @@
+language 0.9
+
+scene KeyProbe {
+    fact phase = 0
+
+    surface island {
+        size: full, 320
+        anchor: top
+        level: overlay
+        screens: each max 3
+        keyboard: on_demand
+
+        on key Ctrl+space while phase > 0 { phase = 3 }
+        on key Escape while phase == 3 { phase = 1 }
+        on key Escape while phase == 2 { phase = 1 }
+        on key Escape while phase == 1 { phase = 0 }
+
+        on enter wake while phase == 0 { phase = 1 }
+        on press card while phase == 1 { phase = 2 }
+
+        zone box wake {
+            at: screen.width / 2, 8
+            size: 260, 16
+            corner: 5
+            active: phase == 0
+            label: "Wake"
+            role: button
+        }
+        zone box card {
+            at: screen.width / 2, 44
+            size: 320, 64
+            corner: 16
+            cursor: pointer
+            active: phase == 1
+            label: "Card"
+            role: button
+        }
+
+        box {
+            at: screen.width / 2, 44
+            size: 320, 64
+            color: #38bdf8
+            opacity: phase * 0.25
+        }
+        box {
+            at: screen.width / 2, 120
+            size: 200, 24
+            color: #f43f5e
+            opacity: if(phase == 1, 0.9, 0.06)
+        }
+        box {
+            at: screen.width / 2, 160
+            size: 200, 24
+            color: #38bdf8
+            opacity: if(phase == 2, 0.9, 0.06)
+        }
+        box {
+            at: screen.width / 2, 200
+            size: 200, 24
+            color: #10b981
+            opacity: if(phase == 3, 0.9, 0.06)
+        }
+    }
+}

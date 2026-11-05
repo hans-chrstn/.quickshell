@@ -1,0 +1,418 @@
+import "../../scenes/common/Theme.plm"
+
+library Nacre {
+    let nacre_glass_base = #0b0c11
+    let nacre_glass_amount = 0.94
+    let nacre_glass_smoke = 0.82
+    let nacre_glass_tint = 0.18
+    let nacre_glass_refraction = 0.28
+    let nacre_glass_dispersion = 0.03
+    let nacre_glass_mirror = 0.10
+    let nacre_glass_highlight = 0.30
+    let nacre_glass_rim = 0.08
+
+    let nacre_ink = #f5f7fa
+    let nacre_ink_soft = #a8b0bf
+    let nacre_ink_faint = #646c7c
+    let nacre_accent = #38bdf8
+    let nacre_warm = #e8b072
+
+    let nacre_tick_off_opacity = 0.16
+    let nacre_wave_off_opacity = 0.22
+
+    component GlassCard(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        shadow: number = 0.30
+    ) {
+        body {
+            color: nacre_glass_base
+            glass: nacre_glass_amount
+            lens: true
+            frost: auto
+            smoke: nacre_glass_smoke
+            tint: nacre_glass_tint
+            refraction: nacre_glass_refraction
+            dispersion: nacre_glass_dispersion
+            mirror: nacre_glass_mirror
+            highlight: nacre_glass_highlight
+            rim: nacre_glass_rim
+            shadow: 0, 8, 24, shadow
+
+            box {
+                at: cx, cy
+                size: w, h
+                corner: corner
+            }
+        }
+    }
+
+    component TickStrip(
+        cx: number,
+        cy: number,
+        w: number,
+        tick_w: number,
+        tick_h: number,
+        progress: number,
+        on: color = nacre_accent,
+        off: color = nacre_ink
+    ) {
+        let step = w / 24
+        repeat i in 0..23 {
+            let lit = i < progress * 24
+            box {
+                at: cx - w / 2 + step / 2 + i * step, cy
+                size: tick_w, tick_h
+                corner: tick_w / 2
+                color: mix(off, on, lit)
+                opacity: nacre_tick_off_opacity + (1 - nacre_tick_off_opacity) * lit
+            }
+        }
+    }
+
+    component Waveform(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        progress: number,
+        on: color = nacre_accent,
+        off: color = nacre_ink
+    ) {
+        let gap = 2
+        let bar_w = (w - 35 * gap) / 36
+        repeat i in 0..35 {
+            let hump = sin(180 * i / 35)
+            let lit = i / 36 < progress
+            box {
+                at: cx - w / 2 + bar_w / 2 + i * (bar_w + gap), cy
+                size: bar_w, max(h * (0.14 + 0.86 * hump), 2)
+                corner: bar_w / 2
+                color: mix(off, on, lit)
+                opacity: nacre_wave_off_opacity + (1 - nacre_wave_off_opacity) * lit
+            }
+        }
+    }
+
+    component ToggleSwitch(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        mix_val: number,
+        on: color = nacre_accent
+    ) {
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: mix(#2b303b, on, mix_val)
+        }
+        ellipse {
+            at: mix(cx - w / 2 + h / 2, cx + w / 2 - h / 2, mix_val), cy
+            radius: h / 2 - 2.5
+            color: nacre_ink
+        }
+    }
+
+    component CircleButton(
+        cx: number,
+        cy: number,
+        r: number,
+        playing: bool,
+        ink: color = nacre_ink
+    ) {
+        ellipse {
+            at: cx, cy
+            radius: r
+            color: nacre_ink
+            opacity: 0.12
+        }
+        ellipse {
+            at: cx, cy
+            radius: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.18
+        }
+        box {
+            at: cx - 3.2, cy
+            size: 2.6, 10
+            corner: 1.3
+            color: ink
+            opacity: if(playing, 1, 0)
+        }
+        box {
+            at: cx + 3.2, cy
+            size: 2.6, 10
+            corner: 1.3
+            color: ink
+            opacity: if(playing, 1, 0)
+        }
+        path {
+            at: cx + 1, cy
+            color: ink
+            opacity: if(playing, 0, 1)
+            move -3.4, -5.4
+            line 5.8, 0
+            line -3.4, 5.4
+            close
+        }
+    }
+
+    component SkipButton(
+        cx: number,
+        cy: number,
+        r: number,
+        prev: bool,
+        ink: color = nacre_ink
+    ) {
+        ellipse {
+            at: cx, cy
+            radius: r
+            color: nacre_ink
+            opacity: 0.12
+        }
+        path {
+            at: cx - 1, cy
+            color: ink
+            opacity: if(prev, 0, 1)
+            move -1.8, -4.6
+            line 4.6, 0
+            line -1.8, 4.6
+            close
+        }
+        path {
+            at: cx + 1, cy
+            color: ink
+            opacity: if(prev, 1, 0)
+            move 1.8, -4.6
+            line -4.6, 0
+            line 1.8, 4.6
+            close
+        }
+        box {
+            at: cx + if(prev, -4.2, 4.2), cy
+            size: 1.8, 8.4
+            corner: 0.9
+            color: ink
+        }
+    }
+
+    component Reveal(
+        cx: number,
+        shown: bool,
+        w: number,
+        h: number,
+        corner: number,
+        top: number = 12,
+        fade: number = 24,
+        shadow: number = 0.30
+    ) {
+        prop cur_h = 0 ~fluid
+        follow cur_h = if(shown, h, 0)
+
+        let cy = top + cur_h / 2
+        let c_corner = min(cur_h / 2, corner)
+        let alpha = clamp(cur_h / h, 0, 1)
+        let content_alpha = clamp((cur_h - (h - fade)) / fade, 0, 1)
+
+        group {
+            opacity: alpha
+            show: alpha > 0.01
+
+            GlassCard(cx, cy, w, cur_h, c_corner, shadow * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: w, cur_h
+                    corner: c_corner
+                }
+
+                group {
+                    opacity: content_alpha
+                    children
+                }
+            }
+        }
+    }
+
+    component TestDeco(title: text) {
+        box {
+            at: screen.width / 2, screen.height / 2
+            size: screen.width, screen.height
+            color: #07090d
+        }
+        ellipse {
+            at: screen.width * 0.22, screen.height * 0.28
+            radius: 120
+            color: #38bdf8
+            opacity: 0.35
+        }
+        ellipse {
+            at: screen.width * 0.82, screen.height * 0.62
+            radius: 100
+            color: #38bdf8
+            opacity: 0.30
+        }
+        text title {
+            at: 40, screen.height - 40
+            anchor: left center
+            family: "SF Pro"
+            size: 16
+            weight: 600
+            color: nacre_ink_soft
+        }
+    }
+
+    component Magnifier(x: number, y: number) {
+        ellipse {
+            at: x, y
+            radius: 7
+            color: nacre_ink_soft
+            stroke: 2
+        }
+        line {
+            from: x + 5, y + 5
+            to: x + 11, y + 11
+            width: 2
+            color: nacre_ink_soft
+        }
+    }
+
+    component EscBadge(cx: number, cy: number) {
+        box {
+            at: cx, cy
+            size: 36, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.08
+        }
+        text "ESC" {
+            at: cx, cy
+            anchor: center
+            family: "SF Mono"
+            size: 10
+            weight: 600
+            color: nacre_ink_soft
+        }
+    }
+
+    component AppRow(h: record, sel: number, launch_evt: event, select_evt: event, active: bool = true) {
+        let is_sel = sel == h.index
+        size: 420, 32
+
+        zone box hit {
+            from: 0, 0
+            size: 420, 32
+            corner: 10
+            cursor: pointer
+            active: active
+            label: h.name
+            role: button
+        }
+
+        box {
+            from: 0, 0
+            size: 420, 32
+            corner: 10
+            color: nacre_accent
+            opacity: if(is_sel, 0.12, 0)
+        }
+        box {
+            from: 8, 7
+            size: 3, 18
+            corner: 1.5
+            color: nacre_accent
+            opacity: if(is_sel, 0.9, 0)
+        }
+        box {
+            from: 12, 6
+            size: 20, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.10
+        }
+        image h.icon {
+            at: 22, 16
+            size: 20, 20
+        }
+
+        text h.name {
+            at: 44, 16
+            anchor: left center
+            family: "SF Pro"
+            size: 14
+            weight: if(is_sel, 600, 500)
+            color: if(is_sel, nacre_ink, nacre_ink_soft)
+            width: 330
+            lines: 1
+        }
+
+        on enter hit { emit select_evt(h.index) }
+        on press hit { emit launch_evt(h.index) }
+    }
+
+    component GhostRow(x: number, y: number, sel: bool, name_w: number) {
+        box {
+            from: x, y
+            size: 420, 32
+            corner: 10
+            color: nacre_accent
+            opacity: if(sel, 0.12, 0)
+        }
+        box {
+            from: x + 8, y + 7
+            size: 3, 18
+            corner: 1.5
+            color: nacre_accent
+            opacity: if(sel, 0.9, 0)
+        }
+        box {
+            from: x + 12, y + 6
+            size: 20, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.10
+        }
+        box {
+            at: x + 44 + name_w / 2, y + 16
+            size: name_w, 3
+            corner: 1.5
+            color: if(sel, nacre_ink, nacre_ink_faint)
+            opacity: 0.55
+        }
+    }
+
+    component ArtSquircle(
+        cx: number,
+        cy: number,
+        s: number,
+        accent: color = nacre_accent
+    ) {
+        box {
+            at: cx, cy
+            size: s, s
+            corner: s * 0.22
+            color: nacre_ink
+            opacity: 0.08
+        }
+        box {
+            at: cx + s * 0.14, cy - s * 0.08
+            size: 2.5, s * 0.32
+            corner: 1.2
+            color: accent
+            opacity: 0.9
+        }
+        ellipse {
+            at: cx + s * 0.05, cy + s * 0.08
+            radius: s * 0.085
+            color: accent
+            opacity: 0.9
+        }
+    }
+}

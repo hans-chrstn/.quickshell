@@ -3,7 +3,8 @@ part IslandSurface {
         size: full, 320
         anchor: top
         level: overlay
-        screens: each
+        screens: each max 3
+        rate: 60, 20 while phase == 0
         keyboard: on_demand
 
         zone box grace_area {

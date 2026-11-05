@@ -16,7 +16,7 @@ import "scenes/common/FilePicker.plm"
 scene Nacre {
     permissions {
         run: "ls"
-        services: "clock", "media", "media.toggle", "media.previous", "media.next", "media.seek", "apps", "apps.launch", "audio", "audio.volume", "audio.mute", "audio.input", "audio.input_mute", "audio.default", "files", "files.write", "env"
+        services: "clock", "media", "media.toggle", "media.previous", "media.next", "media.seek", "apps", "apps.launch", "audio", "audio.volume", "audio.mute", "audio.input", "audio.input_mute", "audio.default", "audio.app_volume", "audio.app_mute", "files", "files.write", "env"
     }
 
     service clock as now {

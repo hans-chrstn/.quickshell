@@ -259,10 +259,11 @@ scene SideUtilityTest {
                     at: flyout_cx - drawer_slide - 116, py - 46
                     gap: 5
                     for s in sinks {
-                        AudioSinkCard(
+                        AudioDeviceChip(
                             s.id,
                             s.name,
                             s.is_default,
+                            false,
                             util_card_w,
                             36,
                             pick_sink

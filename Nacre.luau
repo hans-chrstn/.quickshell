@@ -5,8 +5,11 @@ fact.media_can_seek = false
 fact.sel = 0
 
 fact.util_phase = 0
+fact.util_owner = -1
 fact.util_center_tool = 0
 fact.selected_sink = 0
+fact.selected_source = 0
+fact.audio_page = 0
 fact.audio_volume = 0
 fact.audio_muted = false
 fact.mic_volume = 0
@@ -30,7 +33,8 @@ text.picker_page_text = ""
 
 model.hits = {}
 model.sinks = {}
-model.tools = {}
+model.sources = {}
+model.audio_apps = {}
 model.picker_items = {}
 
 require("logic/island/search")()

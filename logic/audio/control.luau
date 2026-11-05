@@ -14,6 +14,21 @@ return function()
         return ok
     end
 
+    local function call_app_audio(operation: string, id: number, value)
+        local ok, err = pcall(function()
+            if value == nil then
+                sys.call(operation, id)
+            else
+                sys.call(operation, id, value)
+            end
+        end)
+        if not ok then
+            text.audio_engine_status = "Application audio control unavailable"
+            log("audio: " .. tostring(err))
+        end
+        return ok
+    end
+
     on("set_vol", function(v)
         local val = math.clamp(tonumber(v) or 0, 0, 100)
         fact.audio_volume = math.round(val)
@@ -66,5 +81,31 @@ return function()
         end
         model.sinks = updated
         call_audio("audio.default", sid)
+    end)
+
+    on("pick_source", function(id)
+        local source_id = tonumber(id) or 0
+        fact.selected_source = source_id
+        local updated = {}
+        for _, source in ipairs(model.sources) do
+            updated[#updated + 1] = {
+                id = source.id,
+                name = source.name,
+                is_default = source.id == source_id,
+            }
+        end
+        model.sources = updated
+        call_audio("audio.default", source_id)
+    end)
+
+    on("set_app_vol", function(payload)
+        local encoded = math.max(tonumber(payload) or 0, 0)
+        local app_id = math.floor(encoded / 1000)
+        local app_volume = math.clamp(encoded - app_id * 1000, 0, 100)
+        call_app_audio("audio.app_volume", app_id, app_volume / 100)
+    end)
+
+    on("toggle_app_mute", function(id)
+        call_app_audio("audio.app_mute", tonumber(id) or 0, nil)
     end)
 end

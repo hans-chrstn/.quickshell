@@ -12,6 +12,7 @@ library WallpaperStudioCardLib {
         corner: number,
         slide_x: number,
         alpha: number,
+        content_alpha: number,
         tool_title: text,
         dir_path_text: text,
         wall_title_text: text,
@@ -37,17 +38,18 @@ library WallpaperStudioCardLib {
         group {
             opacity: alpha
 
-            GlassBody(
+            UtilityGlassBody(
                 cx - slide_x,
                 cy,
                 card_w,
                 card_h,
                 corner,
-                1.0,
-                glass_base_color
+                1.0
             )
 
             group {
+                opacity: content_alpha
+
                 clip box {
                     at: cx - slide_x, cy
                     size: card_w, card_h
@@ -56,7 +58,7 @@ library WallpaperStudioCardLib {
 
                 EscBadge(
                     cx - slide_x + 104,
-                    cy - 170,
+                    cy - 130,
                     32,
                     20,
                     6
@@ -66,7 +68,7 @@ library WallpaperStudioCardLib {
                     show: not is_picker_open
 
                     text tool_title {
-                        at: cx - slide_x - 104, cy - 178
+                        at: cx - slide_x - 104, cy - 138
                         anchor: left center
                         family: "SF Pro"
                         size: 14
@@ -75,7 +77,7 @@ library WallpaperStudioCardLib {
                     }
 
                     text dir_path_text {
-                        at: cx - slide_x - 104, cy - 162
+                        at: cx - slide_x - 104, cy - 122
                         anchor: left center
                         family: "SF Pro"
                         size: 10
@@ -84,7 +86,7 @@ library WallpaperStudioCardLib {
                     }
 
                     group {
-                        move: cx - slide_x, cy - 80
+                        move: cx - slide_x, cy - 40
 
                         box {
                             at: 0, 0
@@ -94,7 +96,7 @@ library WallpaperStudioCardLib {
                             opacity: 0.8
                         }
 
-                        text "ACTIVE WALLPAPER" {
+                        text "Active wallpaper" {
                             at: -100, -32
                             anchor: left center
                             family: "SF Pro"
@@ -132,7 +134,7 @@ library WallpaperStudioCardLib {
                                 opacity: 0.8
                             }
 
-                            text "< PREV" {
+                            text "Previous" {
                                 at: 0, 0
                                 anchor: center
                                 family: "SF Pro"
@@ -145,7 +147,7 @@ library WallpaperStudioCardLib {
                                 at: 0, 0
                                 size: 96, 28
                                 cursor: pointer
-                                active: alpha > 0.01 and not is_picker_open
+                                active: content_alpha > 0.8 and not is_picker_open
                                 label: "Previous Wallpaper"
                                 role: button
                             }
@@ -166,7 +168,7 @@ library WallpaperStudioCardLib {
                                 opacity: 0.8
                             }
 
-                            text "NEXT >" {
+                            text "Next" {
                                 at: 0, 0
                                 anchor: center
                                 family: "SF Pro"
@@ -179,7 +181,7 @@ library WallpaperStudioCardLib {
                                 at: 0, 0
                                 size: 96, 28
                                 cursor: pointer
-                                active: alpha > 0.01 and not is_picker_open
+                                active: content_alpha > 0.8 and not is_picker_open
                                 label: "Next Wallpaper"
                                 role: button
                             }
@@ -191,7 +193,7 @@ library WallpaperStudioCardLib {
                     }
 
                     group {
-                        move: cx - slide_x, cy + 10
+                        move: cx - slide_x, cy + 50
 
                         box {
                             at: 0, 0
@@ -201,7 +203,7 @@ library WallpaperStudioCardLib {
                             opacity: 0.6
                         }
 
-                        text "ENGINE MODE" {
+                        text "Engine" {
                             at: -100, -12
                             anchor: left center
                             family: "SF Pro"
@@ -230,7 +232,7 @@ library WallpaperStudioCardLib {
                                 opacity: 0.9
                             }
 
-                            text "SWITCH" {
+                            text "Change mode" {
                                 at: 0, 0
                                 anchor: center
                                 family: "SF Pro"
@@ -243,7 +245,7 @@ library WallpaperStudioCardLib {
                                 at: 0, 0
                                 size: 76, 26
                                 cursor: pointer
-                                active: alpha > 0.01 and not is_picker_open
+                                active: content_alpha > 0.8 and not is_picker_open
                                 label: "Toggle Wallpaper Engine Mode"
                                 role: button
                             }
@@ -255,7 +257,7 @@ library WallpaperStudioCardLib {
                     }
 
                     group {
-                        move: cx - slide_x, cy + 76
+                        move: cx - slide_x, cy + 116
 
                         box {
                             at: 0, 0
@@ -265,7 +267,7 @@ library WallpaperStudioCardLib {
                             opacity: 0.8
                         }
 
-                        text "BROWSE FOLDERS" {
+                        text "Browse folders" {
                             at: 0, 0
                             anchor: center
                             family: "SF Pro"
@@ -278,7 +280,7 @@ library WallpaperStudioCardLib {
                             at: 0, 0
                             size: 228, 44
                             cursor: pointer
-                            active: alpha > 0.01 and not is_picker_open
+                            active: content_alpha > 0.8 and not is_picker_open
                             label: "Browse Wallpaper Folders"
                             role: button
                         }
@@ -306,7 +308,7 @@ library WallpaperStudioCardLib {
                         picker_next_page_evt,
                         picker_choose_evt,
                         picker_cancel_evt,
-                        alpha > 0.01 and is_picker_open
+                        content_alpha > 0.8 and is_picker_open
                     )
 
                     children

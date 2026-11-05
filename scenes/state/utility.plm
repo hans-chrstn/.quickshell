@@ -1,15 +1,16 @@
 part UtilityState {
     fact util_phase = 0
+    fact util_owner = -1
     fact util_center_tool = 0
-    fact util_tool_count = 1
-    fact util_grab_y = 0
     fact selected_sink = 0
+    fact selected_source = 0
+    fact audio_page = 0
     fact audio_volume = 0
     fact audio_muted = false
     fact mic_volume = 0
     fact mic_muted = false
 
-    text tool_name = "AUDIO STUDIO"
+    text tool_name = "Audio Studio"
     text tool_sub = ""
     text active_sink_name = ""
     text audio_status_desc = ""
@@ -17,16 +18,25 @@ part UtilityState {
     text mic_percent_text = ""
     text audio_engine_status = ""
 
-    model sinks max 4 {
+    model sinks max 12 {
         id: number
         name: text
         is_default: bool
     }
 
-    model tools max 8 {
+    model sources max 12 {
         id: number
         name: text
-        sub: text
+        is_default: bool
+    }
+
+    model audio_apps max 16 {
+        id: number
+        name: text
+        title: text
+        volume: number
+        muted: bool
+        playing: bool
     }
 
     event select_tool ->
@@ -36,4 +46,7 @@ part UtilityState {
     event set_mic ->
     event toggle_mic_mute ->
     event pick_sink ->
+    event pick_source ->
+    event set_app_vol ->
+    event toggle_app_mute ->
 }

@@ -266,7 +266,7 @@ library SideUtilityLib {
         on press mute_hit { emit mute_evt }
     }
 
-    component AudioSinkCard(sink_id: number, sink_name: text, is_active: bool, card_w: number, card_h: number, sel_evt: event) {
+    component AudioDeviceChip(device_id: number, device_name: text, is_active: bool, is_input: bool, card_w: number, card_h: number, sel_evt: event) {
         size: card_w, card_h
 
         box card_hit {
@@ -276,7 +276,7 @@ library SideUtilityLib {
             color: if(is_active, hygge_card_hover, hygge_card)
             opacity: if(is_active, 1.0, 0.70)
             cursor: pointer
-            label: "Select Audio Sink"
+            label: if(is_input, "Select Input Device", "Select Output Device")
             role: button
         }
 
@@ -289,14 +289,14 @@ library SideUtilityLib {
         }
 
         box {
-            at: 16, card_h / 2
+            at: 20, card_h / 2
             size: 3.5, 6
             corner: 1
             color: if(is_active, hygge_clay, hygge_stone)
         }
 
         path {
-            at: 19.5, card_h / 2
+            at: 23.5, card_h / 2
             color: if(is_active, hygge_clay, hygge_stone)
             move -2, -2.5
             line 2.5, -5
@@ -305,19 +305,19 @@ library SideUtilityLib {
             close
         }
 
-        text sink_name {
-            at: 30, card_h / 2 - 5
+        text device_name {
+            at: 38, card_h / 2 - 7
             anchor: left center
             family: "SF Pro"
-            size: 11
+            size: 12
             weight: if(is_active, weight_semibold, weight_medium)
             color: if(is_active, hygge_linen, hygge_sand)
-            width: card_w - 56
+            width: card_w - 76
             lines: 1
         }
 
-        text if(is_active, "DEFAULT OUTPUT · ACTIVE", "PIPEWIRE SINK") {
-            at: 30, card_h / 2 + 7
+        text pick(is_input * 2 + is_active, "OUTPUT", "ACTIVE OUTPUT", "INPUT", "ACTIVE INPUT") {
+            at: 38, card_h / 2 + 9
             anchor: left center
             family: "SF Mono"
             size: 8
@@ -326,11 +326,132 @@ library SideUtilityLib {
         }
 
         ellipse {
-            at: card_w - 14, card_h / 2
-            radius: 2.5
+            at: card_w - 20, card_h / 2
+            radius: 3
             color: if(is_active, hygge_clay, hygge_stone)
         }
 
-        on press card_hit { emit sel_evt(sink_id) }
+        on press card_hit { emit sel_evt(device_id) }
+    }
+
+    component AudioAppMixerRow(
+        app_id: number,
+        app_name: text,
+        app_title: text,
+        app_volume: number,
+        is_muted: bool,
+        is_playing: bool,
+        card_w: number,
+        card_h: number,
+        volume_evt: event,
+        mute_evt: event
+    ) {
+        size: card_w, card_h
+
+        box {
+            from: 0, 0
+            size: card_w, card_h
+            corner: 14
+            color: hygge_card
+            opacity: 0.76
+        }
+
+        box {
+            at: 22, card_h / 2
+            size: 32, 32
+            corner: 8
+            color: if(is_playing, hygge_card_hover, hygge_track)
+        }
+
+        ellipse {
+            at: 22, card_h / 2
+            radius: 4.5
+            color: if(is_playing, hygge_honey, hygge_stone)
+        }
+
+        text app_name {
+            at: 46, 17
+            anchor: left center
+            family: "SF Pro"
+            size: 12
+            weight: weight_semibold
+            color: hygge_linen
+            width: card_w - 146
+            lines: 1
+        }
+
+        text app_title {
+            at: 46, 34
+            anchor: left center
+            family: "SF Pro"
+            size: 9
+            weight: weight_regular
+            color: hygge_stone
+            width: card_w - 146
+            lines: 1
+        }
+
+        text number(app_volume, 0, "%") {
+            at: card_w - 56, 17
+            anchor: right center
+            family: "SF Mono"
+            size: 9
+            weight: weight_semibold
+            color: if(is_muted, hygge_terracotta, hygge_sand)
+        }
+
+        box {
+            from: 46, 50
+            size: card_w - 122, 5
+            corner: 2.5
+            color: hygge_track
+        }
+
+        box {
+            from: 46, 50
+            size: max((card_w - 122) * clamp(app_volume / 100, 0, 1), 5), 5
+            corner: 2.5
+            color: if(is_muted, hygge_stone, hygge_honey)
+        }
+
+        ellipse {
+            at: 46 + (card_w - 122) * clamp(app_volume / 100, 0, 1), 52.5
+            radius: 4.5
+            color: hygge_linen
+        }
+
+        zone box app_slider_hit {
+            from: 46, 42
+            size: card_w - 122, 20
+            cursor: pointer
+            label: "Adjust Application Volume"
+            role: slider
+        }
+
+        box app_mute_hit {
+            at: card_w - 26, card_h / 2
+            size: 32, 32
+            corner: 16
+            color: if(is_muted, hygge_terracotta, hygge_track)
+            opacity: 0.92
+            cursor: pointer
+            label: "Toggle Application Mute"
+            role: button
+        }
+
+        line {
+            from: card_w - 32, card_h / 2
+            to: card_w - 20, card_h / 2
+            width: 2
+            color: hygge_linen
+        }
+
+        on press app_slider_hit {
+            emit volume_evt(app_id * 1000 + clamp((pointer.x - 46) / (card_w - 122) * 100, 0, 100))
+        }
+        on drag app_slider_hit {
+            emit volume_evt(app_id * 1000 + clamp((pointer.x - 46) / (card_w - 122) * 100, 0, 100))
+        }
+        on press app_mute_hit { emit mute_evt(app_id) }
     }
 }

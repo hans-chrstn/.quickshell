@@ -1,0 +1,110 @@
+language 0.9
+
+import "Redesign.plm"
+
+scene SearchTest {
+    fact phase = 3
+    fact sel = 0
+    text query = ""
+
+    model hits max 5 {
+        name: text
+        icon: image 20, 20
+        exec: text
+    }
+
+    event launch ->
+    event select_hit
+
+    permissions {
+        services: "apps", "apps.launch"
+    }
+
+    surface {
+        size: full, full
+        anchor: top
+        level: background
+        screens: each
+    }
+
+    TestDeco("gate 8 · search")
+
+    surface search {
+        size: full, 320
+        anchor: top
+        level: overlay
+        keyboard: on_demand
+        screens: each max 3
+
+        SearchPanel
+
+        on key Escape while phase == 3 { phase = 1; blur }
+        on key Down while phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
+        on key Up while phase == 3 { sel = max(sel - 1, 0) }
+        on select_hit(i) while phase == 3 { sel = i }
+        on submit query while phase == 3 { emit launch(sel) }
+        on launch while phase == 3 { phase = 0; blur }
+    }
+
+    component SearchPanel {
+        let cx = screen.width / 2
+        let search_w = 460
+        let search_h = 260
+        let cy = 12 + search_h / 2
+        let corner = 28
+
+        Reveal(cx, phase == 3, search_w, search_h, corner) {
+            Magnifier(cx - 198, cy - 100)
+
+            input query {
+                at: cx - 178, cy - 100
+                width: 320
+                size: 15
+                family: "SF Pro"
+                weight: 500
+                color: nacre_ink
+                placeholder: "Search applications"
+                selection: nacre_accent
+            }
+
+            EscBadge(cx + 192, cy - 100)
+
+            box {
+                at: cx, cy - 70
+                size: 420, 1
+                color: nacre_ink
+                opacity: 0.10
+            }
+
+            column results {
+                at: cx - 210, cy - 58
+                gap: 4
+                for h in hits {
+                    AppRow(h, sel, launch, select_hit, phase == 3)
+                }
+            }
+
+            text "No applications found" {
+                at: cx, cy + 30
+                anchor: center
+                family: "SF Pro"
+                size: 13
+                weight: 400
+                color: nacre_ink_faint
+                show: hits.count == 0
+            }
+        }
+
+        zone box esc_btn {
+            at: cx + 192, cy - 100
+            size: 36, 20
+            corner: 6
+            cursor: pointer
+            active: phase == 3
+            label: "Close Search"
+            role: button
+        }
+
+        on press esc_btn while phase == 3 { phase = 1; blur }
+    }
+}

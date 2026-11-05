@@ -56,6 +56,7 @@ scene WallpaperPickerTest {
         20,
         0,
         1.0,
+        1.0,
         tool_name,
         wall_dir_path,
         wall_current_title,

@@ -1,0 +1,153 @@
+language 0.9
+
+import "Redesign.plm"
+
+scene NowPlayingTest {
+    fact playing = true
+    fact media_progress = 0.42
+    fact track_idx = 0
+    text time_elapsed = "2:14"
+    text time_remaining = "-4:46"
+
+    event media_toggle
+    event media_prev
+    event media_next
+    event media_seek
+
+    surface {
+        size: full, full
+        anchor: top
+        level: background
+        screens: each
+    }
+
+    TestDeco("gate 7 · now playing")
+
+    surface np {
+        size: full, 320
+        anchor: top
+        level: overlay
+        screens: each max 3
+        NPPanel
+    }
+
+    component NPPanel {
+        let cx = screen.width / 2
+        let panel_h = 224
+        let cy = 12 + panel_h / 2
+        let scrub_w = 280
+
+        Reveal(cx, true, 440, panel_h, 30) {
+            ArtSquircle(cx - 140, cy - 38, 96)
+
+            ellipse {
+                at: cx - 74, cy - 66
+                radius: 2.5
+                color: nacre_accent
+            }
+            text if(playing, "NOW PLAYING", "PAUSED") {
+                at: cx - 64, cy - 66
+                anchor: left center
+                family: "SF Pro"
+                size: 10
+                weight: 700
+                color: nacre_ink_faint
+            }
+            text pick(track_idx, "Nacre Shell", "Glasshouse", "Late Static") {
+                at: cx - 64, cy - 38
+                anchor: left center
+                family: "SF Pro"
+                size: 17
+                weight: 600
+                color: nacre_ink
+            }
+            text pick(track_idx, "Desktop Audio", "Slow Glass", "The Interiors") {
+                at: cx - 64, cy - 14
+                anchor: left center
+                family: "SF Pro"
+                size: 13
+                weight: 400
+                color: nacre_ink_soft
+            }
+
+            Waveform(cx, cy + 28, 376, 16, media_progress)
+
+            text time_elapsed {
+                at: cx - 188, cy + 54
+                anchor: left center
+                family: "SF Mono"
+                size: 11
+                weight: 500
+                color: nacre_ink_soft
+            }
+            box {
+                at: cx, cy + 54
+                size: scrub_w, 3
+                corner: 1.5
+                color: nacre_ink
+                opacity: 0.18
+            }
+            box {
+                at: cx - scrub_w / 2 + scrub_w / 2 * media_progress, cy + 54
+                size: scrub_w * media_progress, 3
+                corner: 1.5
+                color: nacre_accent
+            }
+            ellipse {
+                at: cx - scrub_w / 2 + scrub_w * media_progress, cy + 54
+                radius: 5
+                color: nacre_ink
+            }
+            text time_remaining {
+                at: cx + 188, cy + 54
+                anchor: right center
+                family: "SF Mono"
+                size: 11
+                weight: 500
+                color: nacre_ink_soft
+            }
+
+            SkipButton(cx - 44, cy + 80, 14, true)
+            CircleButton(cx, cy + 80, 16, playing)
+            SkipButton(cx + 44, cy + 80, 14, false)
+        }
+
+        zone box scrub_track {
+            at: cx, cy + 54
+            size: scrub_w, 18
+            corner: 9
+            cursor: pointer
+            label: "Scrub Media"
+            role: slider
+        }
+        zone box prev_btn {
+            at: cx - 44, cy + 80
+            size: 28, 28
+            corner: 14
+            cursor: pointer
+            label: "Previous Track"
+            role: button
+        }
+        zone ellipse play_btn {
+            at: cx, cy + 80
+            radius: 16
+            cursor: pointer
+            label: "Play or Pause"
+            role: button
+        }
+        zone box next_btn {
+            at: cx + 44, cy + 80
+            size: 28, 28
+            corner: 14
+            cursor: pointer
+            label: "Next Track"
+            role: button
+        }
+
+        on press scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
+        on drag scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
+        on press play_btn { playing = not playing; emit media_toggle }
+        on press prev_btn { track_idx = mod(track_idx + 2, 3); media_progress = 0; emit media_prev }
+        on press next_btn { track_idx = mod(track_idx + 1, 3); media_progress = 0; emit media_next }
+    }
+}
