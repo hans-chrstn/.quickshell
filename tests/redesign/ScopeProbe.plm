@@ -1,0 +1,42 @@
+language 0.9
+
+import "Redesign.plm"
+
+scene SlotProbe {
+    fact phase = 1
+
+    surface probe_wake {
+        size: 28, full
+        anchor: right
+        level: overlay
+        screens: each
+        keyboard: none
+
+        zone box wake_strip {
+            from: 0, 0
+            size: 28, screen.height
+            cursor: pointer
+            active: phase == 1
+            label: "wake strip"
+            role: button
+        }
+    }
+
+    surface probe_surface {
+        size: full, full
+        anchor: top
+        level: overlay
+        screens: each
+        keyboard: none
+
+        zone box big_zone {
+            at: 960, 540
+            size: 1920, 1080
+            corner: 0
+            cursor: pointer
+            active: phase == 2
+            label: "full screen zone"
+            role: region
+        }
+    }
+}

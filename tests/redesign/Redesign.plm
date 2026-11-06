@@ -241,6 +241,64 @@ library Nacre {
         }
     }
 
+    component RevealEdge(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        alpha: number,
+        shadow: number = 0.5
+    ) {
+        group {
+            opacity: alpha
+            show: alpha > 0.01
+
+            GlassCard(cx, cy, w, h, corner, shadow * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: w, h
+                    corner: corner
+                }
+                group {
+                    children
+                }
+            }
+        }
+    }
+
+    component NacChevron(cx: number, cy: number, r: number, left: bool, col: color = nacre_ink) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: nacre_ink
+            opacity: 0.07
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.12
+        }
+        line {
+            from: cx + if(left, 2.2, -2.2), cy - 4
+            to: cx + if(left, -2.2, 2.2), cy
+            width: 2
+            color: col
+        }
+        line {
+            from: cx + if(left, -2.2, 2.2), cy
+            to: cx + if(left, 2.2, -2.2), cy + 4
+            width: 2
+            color: col
+        }
+    }
+
     component TestDeco(title: text) {
         box {
             at: screen.width / 2, screen.height / 2
@@ -414,5 +472,457 @@ library Nacre {
             color: accent
             opacity: 0.9
         }
+    }
+
+    component NacGlyph(kind: number, cx: number, cy: number, col: color = nacre_ink) {
+        group {
+            show: kind == 0
+
+            box {
+                at: cx - 5, cy
+                size: 2.4, 8
+                corner: 1.2
+                color: col
+            }
+            box {
+                at: cx, cy
+                size: 2.4, 14
+                corner: 1.2
+                color: col
+            }
+            box {
+                at: cx + 5, cy
+                size: 2.4, 10
+                corner: 1.2
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 1
+
+            box {
+                at: cx - 5, cy
+                size: 4, 8
+                corner: 1
+                color: col
+            }
+            path {
+                at: cx, cy
+                color: col
+                move -3, -4
+                line 4, -7
+                line 4, 7
+                line -3, 4
+                close
+            }
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: col
+                opacity: 0.5
+            }
+            arc {
+                at: cx + 3, cy
+                radius: 7.5
+                span: 110deg
+                rotate: -90deg
+                width: 1.5
+                color: col
+                opacity: 0.3
+            }
+        }
+
+        group {
+            show: kind == 2
+
+            box {
+                at: cx, cy
+                size: 18, 14
+                corner: 3
+                stroke: 1.5
+                color: col
+            }
+            path {
+                at: cx, cy + 0.5
+                color: col
+                move -5, 3.5
+                line 3, -4
+                line 1.5, 2
+                line 2.5, -3
+                line 3, 5
+                close
+            }
+            ellipse {
+                at: cx + 2.5, cy - 2.5
+                radius: 1.3
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 3
+
+            box {
+                at: cx, cy - 1.5
+                size: 5, 9
+                corner: 2.5
+                color: col
+            }
+            box {
+                at: cx, cy + 4
+                size: 1.6, 3
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx, cy + 6.2
+                size: 5.5, 1.6
+                corner: 0.8
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 4
+
+            line {
+                from: cx - 4, cy + 2
+                to: cx, cy - 2
+                width: 1.8
+                color: col
+            }
+            line {
+                from: cx, cy - 2
+                to: cx + 4, cy + 2
+                width: 1.8
+                color: col
+            }
+        }
+    }
+
+    component NacIcon(cx: number, cy: number, r: number, glyph_kind: number, is_active: bool) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: nacre_ink
+            opacity: if(is_active, 0.16, 0.08)
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.14
+        }
+        NacGlyph(glyph_kind, cx, cy, if(is_active, nacre_accent, nacre_ink_soft))
+    }
+
+    component NacIconBtn(
+        cx: number,
+        cy: number,
+        r: number,
+        glyph_kind: number,
+        btn_label: text,
+        is_active: bool,
+        btn_evt: event
+    ) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: nacre_ink
+            opacity: if(is_active, 0.16, 0.08)
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.14
+        }
+        NacGlyph(glyph_kind, cx, cy, if(is_active, nacre_accent, nacre_ink_soft))
+
+        zone box nicon_hit {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            cursor: pointer
+            role: button
+            label: btn_label
+        }
+
+        on press nicon_hit { emit btn_evt }
+    }
+
+    component NacSlider(cx: number, cy: number, w: number, h: number, val: number, muted: bool, seek_evt: event) {
+        let frac = clamp(val / 100, 0, 1)
+        let fill_w = max(w * frac, h)
+
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: nacre_ink
+            opacity: 0.12
+        }
+        box {
+            from: cx - w / 2, cy - h / 2
+            size: fill_w, h
+            corner: h / 2
+            color: if(muted, nacre_warm, nacre_accent)
+            opacity: if(muted, 0.55, 1)
+        }
+        ellipse {
+            at: cx - w / 2 + w * frac, cy
+            radius: h * 0.85
+            color: if(muted, nacre_ink_soft, nacre_ink)
+        }
+
+        zone box nslider_hit {
+            at: cx, cy
+            size: w, h + 16
+            cursor: pointer
+            role: slider
+            label: "Adjust Audio Level"
+        }
+
+        on press nslider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+        on drag nslider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+    }
+
+    component NacMuteBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: if(is_muted, nacre_warm, nacre_ink)
+            opacity: if(is_muted, 0.22, 0.08)
+        }
+        box {
+            at: cx - 5, cy
+            size: 4, 8
+            corner: 1
+            color: if(is_muted, nacre_warm, nacre_ink)
+        }
+        path {
+            at: cx, cy
+            color: if(is_muted, nacre_warm, nacre_ink)
+            move -3, -4
+            line 4, -7
+            line 4, 7
+            line -3, 4
+            close
+        }
+        group {
+            show: not is_muted
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: nacre_accent
+            }
+        }
+        group {
+            show: is_muted
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: nacre_warm
+            }
+        }
+
+        zone box nmute_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Audio Mute"
+        }
+
+        on press nmute_hit { emit mute_evt }
+    }
+
+    component NacMicBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: if(is_muted, nacre_warm, nacre_ink)
+            opacity: if(is_muted, 0.22, 0.08)
+        }
+        NacGlyph(3, cx, cy, if(is_muted, nacre_warm, nacre_ink))
+
+        group {
+            show: is_muted
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: nacre_warm
+            }
+        }
+
+        zone box nmic_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Microphone Mute"
+        }
+
+        on press nmic_hit { emit mute_evt }
+    }
+
+    component NacTab(x: number, y: number, w: number, tab_label: text, is_on: bool, tab_evt: event) {
+        box {
+            at: x, y
+            size: w, 28
+            corner: 14
+            color: nacre_ink
+            opacity: if(is_on, 0.10, 0.03)
+        }
+        text tab_label {
+            at: x, y
+            anchor: center
+            family: "SF Pro"
+            size: 10
+            weight: 700
+            color: if(is_on, nacre_ink, nacre_ink_faint)
+        }
+
+        zone box ntab_hit {
+            at: x, y
+            size: w, 28
+            corner: 14
+            cursor: pointer
+            role: button
+            label: tab_label
+        }
+
+        on press ntab_hit { emit tab_evt }
+    }
+
+    component NacChip(dev: record, w: number, is_active: bool, sel_evt: event) {
+        move: w / 2, 24
+
+        box {
+            at: 0, 0
+            size: w, 48
+            corner: 12
+            color: nacre_accent
+            opacity: if(is_active, 0.12, 0.04)
+        }
+        box {
+            at: 0, 0
+            size: w, 48
+            corner: 12
+            stroke: 1
+            color: if(is_active, nacre_accent, nacre_ink)
+            opacity: if(is_active, 0.4, 0.12)
+        }
+        NacGlyph(1, -w / 2 + 24, 0, if(is_active, nacre_accent, nacre_ink_soft))
+        text dev.name {
+            at: -w / 2 + 42, 0
+            anchor: left center
+            family: "SF Pro"
+            size: 12
+            weight: 500
+            color: if(is_active, nacre_ink, nacre_ink_soft)
+            width: w - 96
+            lines: 1
+        }
+        group {
+            show: is_active
+            text "ACTIVE" {
+                at: w / 2 - 14, 0
+                anchor: right center
+                family: "SF Mono"
+                size: 9
+                weight: 700
+                color: nacre_accent
+            }
+        }
+
+        zone box nchip_hit {
+            from: -w / 2, -24
+            size: w, 48
+            corner: 12
+            cursor: pointer
+            role: button
+            label: dev.name
+        }
+
+        on press nchip_hit { emit sel_evt(dev.id) }
+    }
+
+    component NacFileRow(it_id: number, it_name: text, it_is_dir: bool, w: number, pick_evt: event) {
+        size: w, 40
+
+        box {
+            from: 0, 0
+            size: w, 40
+            corner: 10
+            color: nacre_ink
+            opacity: 0.05
+        }
+
+        group {
+            show: it_is_dir
+            move: 18, 20
+            path {
+                color: nacre_warm
+                move -6, -4
+                line -2, -4
+                line 0, -2
+                line 6, -2
+                line 6, 4
+                line -6, 4
+                close
+            }
+        }
+
+        group {
+            show: not it_is_dir
+            move: 18, 20
+            box {
+                at: 0, 0
+                size: 10, 12
+                corner: 1.5
+                color: nacre_ink_soft
+                opacity: 0.8
+            }
+        }
+
+        text it_name {
+            at: 36, 20
+            anchor: left center
+            family: "SF Pro"
+            size: 13
+            weight: 500
+            color: if(it_is_dir, nacre_warm, nacre_ink_soft)
+            width: w - 52
+            lines: 1
+        }
+
+        zone box nrow_hit {
+            from: 0, 0
+            size: w, 40
+            corner: 10
+            cursor: pointer
+            role: button
+            label: it_name
+        }
+
+        on press nrow_hit { emit pick_evt(it_id) }
     }
 }

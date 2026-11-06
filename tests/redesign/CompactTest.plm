@@ -14,7 +14,7 @@ scene CompactTest {
     text time_remaining = "-4:46"
     text query = ""
 
-    model hits max 5 {
+    model hits max 16 {
         name: text
         icon: image 20, 20
         exec: text
@@ -97,8 +97,10 @@ scene CompactTest {
         prop cur_h = 0 ~fluid
         prop cur_w = 180 ~fluid
         prop media_show = 0 ~fluid
+        prop np_reach = 0 ~fluid
 
         follow media_show = if(media_active, 1, 0)
+        follow np_reach = if(isl.$screen.phase == 2, 1, 0)
         follow cur_h = if(isl.$screen.phase == 0, 0, if(isl.$screen.phase == 1, compact_h, if(isl.$screen.phase == 2, np_h, search_h)))
         follow cur_w = if(isl.$screen.phase == 1, 180 + 140 * media_show, if(isl.$screen.phase == 2, np_w, if(isl.$screen.phase == 3, search_w, 180 + 140 * media_show)))
 
@@ -121,7 +123,7 @@ scene CompactTest {
 
         zone box grace_area {
             at: cx, (cur_h + 80) / 2
-            size: compact_w + 60, cur_h + 80
+            size: cur_w + 60, cur_h + 80
             corner: 40
             active: isl.$screen.phase > 0
             label: "Island Interaction Area"
@@ -199,7 +201,7 @@ scene CompactTest {
                 }
 
                 group {
-                    opacity: np_alpha
+                    opacity: np_alpha * np_reach
 
                     ArtSquircle(cx - 140, cy - 38, 96)
 
@@ -303,6 +305,8 @@ scene CompactTest {
                     column results {
                         at: cx - 210, cy - 58
                         gap: 4
+                        view: 420, 174
+                        step: 36
                         for h in hits {
                             AppRow(h, sel, launch, select_hit, isl.$screen.phase == 3)
                         }
@@ -368,8 +372,7 @@ scene CompactTest {
 
         on enter wake_strip while isl.$screen.phase == 0 { isl.$screen.phase = 1; awake_count = awake_count + 1 }
         on press wake_strip while isl.$screen.phase == 0 { isl.$screen.phase = 1; awake_count = awake_count + 1 }
-        on press compact_btn while isl.$screen.phase == 1 and media_active == 1 and cur_h > 30 { isl.$screen.phase = 2 }
-        on press compact_btn while isl.$screen.phase == 1 and media_active == 0 and cur_h > 30 { isl.$screen.phase = 3 }
+        on press compact_btn while isl.$screen.phase == 1 and cur_h > 30 { isl.$screen.phase = 2 }
         on press np_btn while isl.$screen.phase == 2 { isl.$screen.phase = 1 }
         on press search_btn while isl.$screen.phase == 3 { isl.$screen.phase = 1; blur }
         on leave grace_area while isl.$screen.phase == 1 { isl.$screen.phase = 0; awake_count = awake_count - 1 }

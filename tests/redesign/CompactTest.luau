@@ -31,7 +31,7 @@ local function filter_apps()
                     icon = app.icon,
                     exec = app.exec or ""
                 }
-                if #matched >= 5 then
+                if #matched >= 16 then
                     break
                 end
             end
