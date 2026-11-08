@@ -54,27 +54,7 @@ scene SearchTest {
         let corner = 28
 
         Reveal(cx, phase == 3, search_w, search_h, corner) {
-            Magnifier(cx - 198, cy - 100)
-
-            input query {
-                at: cx - 178, cy - 100
-                width: 320
-                size: 15
-                family: "SF Pro"
-                weight: 500
-                color: nacre_ink
-                placeholder: "Search applications"
-                selection: nacre_accent
-            }
-
-            EscBadge(cx + 192, cy - 100)
-
-            box {
-                at: cx, cy - 70
-                size: 420, 1
-                color: nacre_ink
-                opacity: 0.10
-            }
+            SearchHeader(cx, cy - 100)
 
             column results {
                 at: cx - 210, cy - 58

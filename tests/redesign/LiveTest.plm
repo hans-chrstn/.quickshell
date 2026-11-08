@@ -1,0 +1,103 @@
+language 0.9
+
+import "Redesign.plm"
+
+scene LiveTest {
+    fact phase = 3
+    fact sel = 0
+    text query = ""
+
+    model hits max 96 {
+        name: text
+        icon: image 20, 20
+        exec: text
+    }
+
+    event launch ->
+    event select_hit
+
+    permissions {
+        services: "apps", "apps.launch"
+    }
+
+    surface island {
+        size: 480, 640
+        kind: window
+        title: "Live · nacre launcher"
+        keyboard: on_demand
+
+        on key Escape while phase == 3 { phase = 1; blur }
+        on key Escape while phase == 1 { phase = 0 }
+        on key Escape while phase == 0 { phase = 1 }
+        on key Down while phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
+        on key Up while phase == 3 { sel = max(sel - 1, 0) }
+        on select_hit(i) while phase == 3 { sel = i }
+        on submit query while phase == 3 { emit launch(sel) }
+        on launch while phase == 3 { phase = 0; blur }
+
+        LiveIsland
+    }
+
+    component LiveIsland {
+        let cx = screen.width / 2
+        let search_w = 460
+        let list_max = 10 * 36
+        let max_list_h = screen.height - 24 - 86
+        let view_h = min(max(24, results.content), min(list_max, max_list_h))
+        let search_h = 86 + view_h
+        let sel_top = sel * 36
+        let top_edge = 12
+
+        prop cur_h = 0 ~fluid
+        follow cur_h = if(phase == 0, 0, if(phase == 1, 64, search_h))
+
+        let cur_w = if(phase == 3, search_w, 180)
+        let cy = top_edge + cur_h / 2
+        let corner = min(cur_h / 2, 30)
+        let alpha = clamp(cur_h / 64, 0, 1)
+        let search_alpha = clamp((cur_h - 95) / 30, 0, 1)
+
+        group {
+            opacity: alpha
+
+            GlassCard(cx, cy, cur_w, cur_h, corner, 0.5 * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: cur_w, cur_h
+                    corner: corner
+                }
+
+                group {
+                    opacity: search_alpha
+
+                    SearchHeader(cx, top_edge + 30)
+
+                    column results {
+                        at: cx - 210, top_edge + 72
+                        gap: 4
+                        view: 420, view_h
+                        step: 36
+                        for h in hits {
+                            AppRow(h, sel, launch, select_hit, phase == 3)
+                        }
+                    }
+
+                    text "No applications found" {
+                        at: cx, top_edge + 88
+                        anchor: center
+                        family: "SF Pro"
+                        size: 13
+                        weight: 400
+                        color: nacre_ink_faint
+                        show: hits.count == 0
+                    }
+                }
+            }
+        }
+
+        on change phase while phase == 3 { results.scroll: 0 ~0ms }
+        on change sel while phase == 3 { results.scroll: min(max(0, max(results.scroll, sel_top + 32 - view_h)), sel_top) ~quick }
+    }
+}

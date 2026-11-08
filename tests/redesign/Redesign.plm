@@ -360,6 +360,30 @@ library Nacre {
         }
     }
 
+    component SearchHeader(cx: number, y: number) {
+        Magnifier(cx - 198, y)
+
+        input query {
+            at: cx - 178, y
+            width: 320
+            size: 15
+            family: "SF Pro"
+            weight: 500
+            color: nacre_ink
+            placeholder: "Search applications"
+            selection: nacre_accent
+        }
+
+        EscBadge(cx + 192, y)
+
+        box {
+            at: cx, y + 30
+            size: 420, 1
+            color: nacre_ink
+            opacity: 0.10
+        }
+    }
+
     component AppRow(h: record, sel: number, launch_evt: event, select_evt: event, active: bool = true) {
         let is_sel = sel == h.index
         size: 420, 32
@@ -396,7 +420,7 @@ library Nacre {
             opacity: 0.10
         }
         image h.icon {
-            at: 22, 16
+            at: 12, 6
             size: 20, 20
         }
 
@@ -604,6 +628,342 @@ library Nacre {
         }
     }
 
+    component NacWeatherGlyph(kind: number, cx: number, cy: number, col: color = nacre_ink_soft) {
+        group {
+            show: kind == 1
+
+            box {
+                at: cx, cy
+                size: 9, 9
+                corner: 4.5
+                color: col
+            }
+            box {
+                at: cx, cy - 7.6
+                size: 1.7, 3.4
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx, cy + 7.6
+                size: 1.7, 3.4
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx - 7.6, cy
+                size: 3.4, 1.7
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx + 7.6, cy
+                size: 3.4, 1.7
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx - 5.3, cy - 5.3
+                size: 2.5, 2.5
+                corner: 1.3
+                color: col
+            }
+            box {
+                at: cx + 5.3, cy - 5.3
+                size: 2.5, 2.5
+                corner: 1.3
+                color: col
+            }
+            box {
+                at: cx - 5.3, cy + 5.3
+                size: 2.5, 2.5
+                corner: 1.3
+                color: col
+            }
+            box {
+                at: cx + 5.3, cy + 5.3
+                size: 2.5, 2.5
+                corner: 1.3
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 2
+
+            box {
+                at: cx - 3.9, cy - 3.6
+                size: 6.2, 6.2
+                corner: 3.1
+                color: col
+            }
+            box {
+                at: cx - 3.9, cy - 9.5
+                size: 1.5, 2.8
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx - 10.1, cy - 3.6
+                size: 2.8, 1.5
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx - 8.1, cy - 8.1
+                size: 2.1, 2.1
+                corner: 1
+                color: col
+            }
+            ellipse {
+                at: cx - 1.7, cy + 1.7
+                radius: 3.4
+                color: col
+            }
+            ellipse {
+                at: cx + 1.7, cy
+                radius: 4.2
+                color: col
+            }
+            ellipse {
+                at: cx + 5, cy + 1.7
+                radius: 3.1
+                color: col
+            }
+            box {
+                at: cx + 1.7, cy + 3.4
+                size: 14, 3.9
+                corner: 2
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 3
+
+            ellipse {
+                at: cx - 3.4, cy
+                radius: 3.9
+                color: col
+            }
+            ellipse {
+                at: cx + 0.3, cy - 2
+                radius: 4.8
+                color: col
+            }
+            ellipse {
+                at: cx + 4.5, cy
+                radius: 3.6
+                color: col
+            }
+            box {
+                at: cx + 0.3, cy + 3.1
+                size: 15.4, 4.5
+                corner: 2.2
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 4
+
+            box {
+                at: cx, cy - 4.2
+                size: 15.4, 2.2
+                corner: 1.1
+                color: col
+            }
+            box {
+                at: cx - 0.8, cy - 0.6
+                size: 11.2, 2.2
+                corner: 1.1
+                color: col
+            }
+            box {
+                at: cx + 0.8, cy + 3.1
+                size: 14, 2.2
+                corner: 1.1
+                color: col
+            }
+            box {
+                at: cx - 0.6, cy + 6.7
+                size: 8.4, 2.2
+                corner: 1.1
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 5
+
+            ellipse {
+                at: cx - 2.5, cy - 2
+                radius: 2.8
+                color: col
+            }
+            ellipse {
+                at: cx + 0.6, cy - 3.6
+                radius: 3.5
+                color: col
+            }
+            ellipse {
+                at: cx + 3.6, cy - 2
+                radius: 2.7
+                color: col
+            }
+            box {
+                at: cx + 0.3, cy - 0.3
+                size: 11.9, 3.6
+                corner: 1.8
+                color: col
+            }
+            ellipse {
+                at: cx - 4.2, cy + 5
+                radius: 1.3
+                color: col
+            }
+            ellipse {
+                at: cx, cy + 6.4
+                radius: 1.3
+                color: col
+            }
+            ellipse {
+                at: cx + 4.2, cy + 5
+                radius: 1.3
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 6
+
+            ellipse {
+                at: cx - 2.5, cy - 2
+                radius: 2.8
+                color: col
+            }
+            ellipse {
+                at: cx + 0.6, cy - 3.6
+                radius: 3.5
+                color: col
+            }
+            ellipse {
+                at: cx + 3.6, cy - 2
+                radius: 2.7
+                color: col
+            }
+            box {
+                at: cx + 0.3, cy - 0.3
+                size: 11.9, 3.6
+                corner: 1.8
+                color: col
+            }
+            box {
+                at: cx - 4.5, cy + 4.5
+                size: 1.7, 4.2
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx, cy + 6.2
+                size: 1.7, 4.2
+                corner: 0.8
+                color: col
+            }
+            box {
+                at: cx + 4.5, cy + 4.5
+                size: 1.7, 4.2
+                corner: 0.8
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 7
+
+            ellipse {
+                at: cx - 2.5, cy - 2
+                radius: 2.8
+                color: col
+            }
+            ellipse {
+                at: cx + 0.6, cy - 3.6
+                radius: 3.5
+                color: col
+            }
+            ellipse {
+                at: cx + 3.6, cy - 2
+                radius: 2.7
+                color: col
+            }
+            box {
+                at: cx + 0.3, cy - 0.3
+                size: 11.9, 3.6
+                corner: 1.8
+                color: col
+            }
+            ellipse {
+                at: cx - 4.5, cy + 5
+                radius: 1.5
+                color: col
+            }
+            ellipse {
+                at: cx, cy + 6.7
+                radius: 1.5
+                color: col
+            }
+            ellipse {
+                at: cx + 4.5, cy + 5
+                radius: 1.5
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 8
+
+            ellipse {
+                at: cx - 2.5, cy - 2
+                radius: 2.8
+                color: col
+            }
+            ellipse {
+                at: cx + 0.6, cy - 3.6
+                radius: 3.5
+                color: col
+            }
+            ellipse {
+                at: cx + 3.6, cy - 2
+                radius: 2.7
+                color: col
+            }
+            box {
+                at: cx + 0.3, cy - 0.3
+                size: 11.9, 3.6
+                corner: 1.8
+                color: col
+            }
+            box {
+                at: cx - 0.8, cy + 3.9
+                size: 2.5, 2.8
+                corner: 0.7
+                color: col
+            }
+            box {
+                at: cx + 1.3, cy + 6.4
+                size: 2.5, 2.8
+                corner: 0.7
+                color: col
+            }
+            box {
+                at: cx - 0.3, cy + 8.7
+                size: 2.5, 2.2
+                corner: 0.7
+                color: col
+            }
+        }
+    }
+
     component NacIcon(cx: number, cy: number, r: number, glyph_kind: number, is_active: bool) {
         box {
             at: cx, cy
@@ -662,7 +1022,11 @@ library Nacre {
     }
 
     component NacSlider(cx: number, cy: number, w: number, h: number, val: number, muted: bool, seek_evt: event) {
-        let frac = clamp(val / 100, 0, 1)
+        prop val_s = 0 ~calm
+        prop mut_s = 0 ~calm
+        follow val_s = val
+        follow mut_s = if(muted, 1, 0)
+        let frac = clamp(val_s / 100, 0, 1)
         let fill_w = max(w * frac, h)
 
         box {
@@ -676,13 +1040,13 @@ library Nacre {
             from: cx - w / 2, cy - h / 2
             size: fill_w, h
             corner: h / 2
-            color: if(muted, nacre_warm, nacre_accent)
-            opacity: if(muted, 0.55, 1)
+            color: mix(nacre_accent, nacre_warm, mut_s)
+            opacity: 1 - 0.45 * mut_s
         }
         ellipse {
             at: cx - w / 2 + w * frac, cy
             radius: h * 0.85
-            color: if(muted, nacre_ink_soft, nacre_ink)
+            color: mix(nacre_ink, nacre_ink_soft, mut_s)
         }
 
         zone box nslider_hit {
@@ -698,22 +1062,25 @@ library Nacre {
     }
 
     component NacMuteBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        prop mut_s = 0 ~lively
+        follow mut_s = if(is_muted, 1, 0)
+
         box {
             at: cx, cy
             size: 32, 32
             corner: 16
-            color: if(is_muted, nacre_warm, nacre_ink)
-            opacity: if(is_muted, 0.22, 0.08)
+            color: mix(nacre_ink, nacre_warm, mut_s)
+            opacity: 0.08 + 0.14 * mut_s
         }
         box {
             at: cx - 5, cy
             size: 4, 8
             corner: 1
-            color: if(is_muted, nacre_warm, nacre_ink)
+            color: mix(nacre_ink, nacre_warm, mut_s)
         }
         path {
             at: cx, cy
-            color: if(is_muted, nacre_warm, nacre_ink)
+            color: mix(nacre_ink, nacre_warm, mut_s)
             move -3, -4
             line 4, -7
             line 4, 7
@@ -721,7 +1088,8 @@ library Nacre {
             close
         }
         group {
-            show: not is_muted
+            show: mut_s < 0.5
+            opacity: 1 - mut_s
             arc {
                 at: cx + 1, cy
                 radius: 4.5
@@ -732,7 +1100,8 @@ library Nacre {
             }
         }
         group {
-            show: is_muted
+            show: mut_s > 0.5
+            opacity: mut_s
             line {
                 from: cx - 7, cy - 7
                 to: cx + 7, cy + 7
@@ -753,17 +1122,21 @@ library Nacre {
     }
 
     component NacMicBtn(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        prop mut_s = 0 ~lively
+        follow mut_s = if(is_muted, 1, 0)
+
         box {
             at: cx, cy
             size: 32, 32
             corner: 16
-            color: if(is_muted, nacre_warm, nacre_ink)
-            opacity: if(is_muted, 0.22, 0.08)
+            color: mix(nacre_ink, nacre_warm, mut_s)
+            opacity: 0.08 + 0.14 * mut_s
         }
-        NacGlyph(3, cx, cy, if(is_muted, nacre_warm, nacre_ink))
+        NacGlyph(3, cx, cy, mix(nacre_ink, nacre_warm, mut_s))
 
         group {
-            show: is_muted
+            show: mut_s > 0.5
+            opacity: mut_s
             line {
                 from: cx - 7, cy - 7
                 to: cx + 7, cy + 7
@@ -784,12 +1157,15 @@ library Nacre {
     }
 
     component NacTab(x: number, y: number, w: number, tab_label: text, is_on: bool, tab_evt: event) {
+        prop on_s = 0 ~lively
+        follow on_s = if(is_on, 1, 0)
+
         box {
             at: x, y
             size: w, 28
             corner: 14
             color: nacre_ink
-            opacity: if(is_on, 0.10, 0.03)
+            opacity: 0.03 + 0.08 * on_s + 0.04 * (1 - on_s) * ntab_hit.hover
         }
         text tab_label {
             at: x, y
@@ -797,7 +1173,14 @@ library Nacre {
             family: "SF Pro"
             size: 10
             weight: 700
-            color: if(is_on, nacre_ink, nacre_ink_faint)
+            color: mix(nacre_ink_faint, nacre_ink, on_s)
+        }
+        box {
+            at: x, y + 10
+            size: max(24 * on_s, 0.01), 2
+            corner: 1
+            color: nacre_accent
+            opacity: on_s
         }
 
         zone box ntab_hit {
@@ -813,48 +1196,13 @@ library Nacre {
     }
 
     component NacChip(dev: record, w: number, is_active: bool, sel_evt: event) {
-        move: w / 2, 24
+        size: w, 48
 
-        box {
-            at: 0, 0
-            size: w, 48
-            corner: 12
-            color: nacre_accent
-            opacity: if(is_active, 0.12, 0.04)
-        }
-        box {
-            at: 0, 0
-            size: w, 48
-            corner: 12
-            stroke: 1
-            color: if(is_active, nacre_accent, nacre_ink)
-            opacity: if(is_active, 0.4, 0.12)
-        }
-        NacGlyph(1, -w / 2 + 24, 0, if(is_active, nacre_accent, nacre_ink_soft))
-        text dev.name {
-            at: -w / 2 + 42, 0
-            anchor: left center
-            family: "SF Pro"
-            size: 12
-            weight: 500
-            color: if(is_active, nacre_ink, nacre_ink_soft)
-            width: w - 96
-            lines: 1
-        }
-        group {
-            show: is_active
-            text "ACTIVE" {
-                at: w / 2 - 14, 0
-                anchor: right center
-                family: "SF Mono"
-                size: 9
-                weight: 700
-                color: nacre_accent
-            }
-        }
+        prop act_s = 0 ~lively
+        follow act_s = if(is_active, 1, 0)
 
         zone box nchip_hit {
-            from: -w / 2, -24
+            from: 0, 0
             size: w, 48
             corner: 12
             cursor: pointer
@@ -862,7 +1210,166 @@ library Nacre {
             label: dev.name
         }
 
+        box {
+            from: 0, 0
+            size: w, 48
+            corner: 12
+            color: nacre_accent
+            opacity: (0.04 + 0.08 * act_s) * (1 - 0.6 * nchip_hit.pressed) + 0.05 * nchip_hit.hover
+        }
+        box {
+            from: 0, 0
+            size: w, 48
+            corner: 12
+            stroke: 1
+            color: mix(nacre_ink, nacre_accent, act_s)
+            opacity: 0.12 + 0.28 * act_s
+        }
+        NacGlyph(1, 24, 24, mix(nacre_ink_soft, nacre_accent, act_s))
+        text dev.name {
+            at: 42, 24
+            anchor: left center
+            family: "SF Pro"
+            size: 12
+            weight: 500
+            color: mix(nacre_ink_soft, nacre_ink, act_s)
+            width: w - 96
+            lines: 1
+        }
+        group {
+            show: act_s > 0.5
+            opacity: act_s
+            box {
+                at: w - 16, 24
+                size: 6, 6
+                corner: 3
+                color: nacre_accent
+            }
+        }
+
         on press nchip_hit { emit sel_evt(dev.id) }
+    }
+
+    component NacMeter(cx: number, cy: number, w: number, h: number, lvl: number, on: color = nacre_accent) {
+        prop lvl_s = 0 ~slow
+        follow lvl_s = lvl
+        let bw = (w - 15 * 3) / 16
+        repeat i in 0..15 {
+            let t = clamp(lvl_s * 16 - i, 0, 1)
+            box {
+                at: cx - w / 2 + bw / 2 + i * (bw + 3), cy
+                size: bw, h
+                corner: bw / 2
+                color: mix(nacre_ink, on, t)
+                opacity: 0.16 + 0.84 * t
+            }
+        }
+    }
+
+    component NacMixRow(m: record, vol_evt: event, mute_evt: event, route_evt: event) {
+        size: 408, 56
+        let is_play = m.kind == 0
+        let dev_col = if(m.routed, nacre_accent, nacre_ink_soft)
+
+        box {
+            from: 0, 0
+            size: 408, 56
+            corner: 14
+            color: nacre_ink
+            opacity: 0.05 + 0.05 * max(max(mixrow_vol.hover, mixrow_mute.hover), mixrow_route.hover)
+        }
+        NacGlyph(if(is_play, 1, 3), 20, 28, nacre_ink_soft)
+
+        text m.name {
+            at: 42, 20
+            anchor: left center
+            family: "SF Pro"
+            size: 12
+            weight: 600
+            color: nacre_ink
+            width: 150
+            lines: 1
+        }
+        group {
+            show: is_play
+            text m.title {
+                at: 42, 44
+                anchor: left center
+                family: "SF Pro"
+                size: 9
+                weight: 400
+                color: nacre_ink_faint
+                width: 150
+                lines: 1
+            }
+        }
+        group {
+            show: not is_play
+            box {
+                at: 200, 28
+                size: 6, 6
+                corner: 3
+                color: nacre_warm
+            }
+        }
+
+        group {
+            show: is_play
+            NacSlider(258, 20, 96, 5, m.volume, m.muted, vol_evt)
+            NacMuteBtn(386, 20, m.muted, mute_evt)
+        }
+
+        group {
+            show: m.routed
+            box {
+                at: 200, if(is_play, 44, 28)
+                size: 6, 6
+                corner: 3
+                color: dev_col
+            }
+        }
+
+        text m.device {
+            at: 262, if(is_play, 44, 28)
+            anchor: center
+            family: "SF Mono"
+            size: 9
+            weight: 500
+            color: dev_col
+            width: 150
+            lines: 1
+        }
+
+        zone box mixrow_vol {
+            at: 258, 20
+            size: 96, 21
+            active: is_play
+            cursor: pointer
+            role: slider
+            label: "Adjust application volume"
+        }
+
+        zone box mixrow_mute {
+            at: 386, 20
+            size: 32, 32
+            active: is_play
+            cursor: pointer
+            role: button
+            label: "Mute application"
+        }
+
+        zone box mixrow_route {
+            at: 262, if(is_play, 44, 28)
+            size: 150, 20
+            cursor: pointer
+            role: button
+            label: "Route to another device"
+        }
+
+        on press mixrow_vol { emit vol_evt(m.id * 1000 + clamp((local.x - 210) / 96 * 100, 0, 100)) }
+        on drag mixrow_vol { emit vol_evt(m.id * 1000 + clamp((local.x - 210) / 96 * 100, 0, 100)) }
+        on press mixrow_mute { emit mute_evt(m.id) }
+        on press mixrow_route { emit route_evt(m.kind * 1000 + m.id) }
     }
 
     component NacFileRow(it_id: number, it_name: text, it_is_dir: bool, w: number, pick_evt: event) {

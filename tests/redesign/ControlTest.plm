@@ -17,6 +17,10 @@ scene ControlTest {
     fact selected_sink = 0
     fact selected_source = 0
     fact has_sink = false
+    fact has_source = false
+    fact out_level = 0
+    fact pick_kind = 0
+    fact pick_row = 0
     fact wall_idx = 1
     fact wall_count = 0
     fact picker_open = false
@@ -24,18 +28,19 @@ scene ControlTest {
     text volume_percent_text = "70%"
     text mic_percent_text = "50%"
     text active_sink_name = ""
+    text active_source_name = ""
     text wall_title = ""
     text wall_preview_path = ""
     text picker_dir_text = "~/.wallpapers"
     text picker_status = ""
 
-    model sinks max 4 {
+    model sinks max 8 {
         id: number
         name: text
         is_default: bool
     }
 
-    model sources max 4 {
+    model sources max 8 {
         id: number
         name: text
         is_default: bool
@@ -46,6 +51,28 @@ scene ControlTest {
         name: text
         is_dir: bool
         path: text
+    }
+
+    model play_rows max 8 {
+        id: number
+        kind: number
+        name: text
+        title: text
+        volume: number
+        muted: bool
+        routed: bool
+        device: text
+    }
+
+    model rec_rows max 4 {
+        id: number
+        kind: number
+        name: text
+        title: text
+        volume: number
+        muted: bool
+        routed: bool
+        device: text
     }
 
     event cc_mute ->
@@ -61,12 +88,20 @@ scene ControlTest {
     event picker_nav_up ->
     event picker_choose ->
     event picker_cancel ->
-    event cc_tab_mix
-    event cc_tab_dev
+    event cc_tab_levels
+    event cc_tab_out
+    event cc_tab_in
+    event cc_tab_apps
+    event cc_app_vol ->
+    event cc_app_mute ->
+    event cc_route_open ->
+    event cc_route_pick ->
+    event cc_route_cancel
+    event cc_wake_evt ->
 
     permissions {
-        run: "ls"
-        services: "audio", "audio.volume", "audio.mute", "audio.input", "audio.input_mute", "audio.default", "env"
+        run: "ls", "pactl"
+        services: "audio", "audio.level", "files.read", "files.write", "env"
     }
 
     service audio as sound {
@@ -101,8 +136,8 @@ scene ControlTest {
             role: button
         }
 
-        on enter cc_wake_strip while cc.$screen.phase == 0 { cc.$screen.phase = 1; cc_awake = cc_awake + 1 }
-        on press cc_wake_strip while cc.$screen.phase == 0 { cc.$screen.phase = 1; cc_awake = cc_awake + 1 }
+        on enter cc_wake_strip while cc.$screen.phase == 0 { cc.$screen.phase = 1; cc_awake = cc_awake + 1; emit cc_wake_evt(1) }
+        on press cc_wake_strip while cc.$screen.phase == 0 { cc.$screen.phase = 1; cc_awake = cc_awake + 1; emit cc_wake_evt(1) }
     }
 
     surface cc_surface {
@@ -115,12 +150,16 @@ scene ControlTest {
 
         image wall_prev = from wall_preview_path, 0, 0
 
+        on key Escape while cc.$screen.phase == 2 and pick_kind > 0 { pick_kind = 0; pick_row = 0 }
         on key Escape while cc.$screen.phase > 1 and picker_open { picker_open = false }
         on key Escape while cc.$screen.phase == 3 { cc.$screen.phase = 1 }
         on key Escape while cc.$screen.phase == 2 { cc.$screen.phase = 1 }
-        on key Escape while cc.$screen.phase == 1 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1) }
-        on cc_tab_mix { cc_page = 0 }
-        on cc_tab_dev { cc_page = 1 }
+        on key Escape while cc.$screen.phase == 1 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
+        on cc_tab_levels { cc_page = 0; pick_kind = 0; pick_row = 0 }
+        on cc_tab_out { cc_page = 1; pick_kind = 0; pick_row = 0 }
+        on cc_tab_in { cc_page = 2; pick_kind = 0; pick_row = 0 }
+        on cc_tab_apps { cc_page = 3; pick_kind = 0; pick_row = 0 }
+        on cc_route_cancel { pick_kind = 0; pick_row = 0 }
 
         ControlBody
     }
@@ -129,7 +168,7 @@ scene ControlTest {
         let rail_w = 80
         let rail_h = 168
         let audio_w = 440
-        let audio_h = 420
+        let audio_h = 600
         let wall_w = 440
         let wall_h = 420
         let right_edge = screen.width - 16
@@ -140,11 +179,21 @@ scene ControlTest {
         prop cur_h = 0 ~fluid
         prop audio_show = 0 ~fluid
         prop wall_show = 0 ~fluid
+        prop pick_show = 0 ~lively
+        prop pg0 = 0 ~calm
+        prop pg1 = 0 ~calm
+        prop pg2 = 0 ~calm
+        prop pg3 = 0 ~calm
 
         follow cur_w = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_w, if(cc.$screen.phase == 2, audio_w, wall_w)))
         follow cur_h = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_h, if(cc.$screen.phase == 2, audio_h, wall_h)))
         follow audio_show = if(cc.$screen.phase == 2, 1, 0)
         follow wall_show = if(cc.$screen.phase == 3, 1, 0)
+        follow pick_show = if(pick_kind > 0, 1, 0)
+        follow pg0 = if(cc_page == 0, 1, 0)
+        follow pg1 = if(cc_page == 1, 1, 0)
+        follow pg2 = if(cc_page == 2, 1, 0)
+        follow pg3 = if(cc_page == 3, 1, 0)
 
         let cx = right_edge - cur_w / 2
         let corner = min(cur_h / 2, 28)
@@ -161,7 +210,7 @@ scene ControlTest {
             role: region
         }
 
-        on leave grace_area while cc.$screen.phase == 1 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1) }
+        on leave grace_area while cc.$screen.phase == 1 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
         on leave grace_area while cc.$screen.phase == 2 { cc.$screen.phase = 1 }
         on leave grace_area while cc.$screen.phase == 3 { cc.$screen.phase = 1 }
 
@@ -189,130 +238,71 @@ scene ControlTest {
                     opacity: sheet_alpha * audio_show
 
                     text "Audio" {
-                        at: sheet_cx - 204, cy - 178
+                        at: sheet_cx - 204, cy - 272
                         anchor: left center
                         family: "SF Pro"
                         size: 16
                         weight: 600
                         color: nacre_ink
                     }
-                    EscBadge(sheet_cx + 192, cy - 178)
+                    EscBadge(sheet_cx + 192, cy - 272)
 
                     box {
-                        at: sheet_cx, cy - 154
+                        at: sheet_cx, cy - 248
                         size: 408, 1
                         color: nacre_ink
                         opacity: 0.10
                     }
 
-                    text active_sink_name {
-                        at: sheet_cx - 204, cy - 128
-                        anchor: left center
-                        family: "SF Pro"
-                        size: 12
-                        weight: 500
-                        color: nacre_ink_soft
-                        width: 408
-                        lines: 1
-                        show: has_sink
-                    }
-                    text "PipeWire · no default output" {
-                        at: sheet_cx - 204, cy - 128
-                        anchor: left center
-                        family: "SF Pro"
-                        size: 12
-                        weight: 500
-                        color: nacre_ink_soft
-                        width: 408
-                        lines: 1
-                        show: not has_sink
-                    }
-
-                    NacTab(sheet_cx - 102, cy - 96, 88, "MIXER", cc_page == 0, cc_tab_mix)
-                    NacTab(sheet_cx + 102, cy - 96, 88, "DEVICES", cc_page == 1, cc_tab_dev)
+                    NacTab(sheet_cx - 144, cy - 216, 84, "LEVELS", cc_page == 0, cc_tab_levels)
+                    NacTab(sheet_cx - 48, cy - 216, 84, "OUTPUT", cc_page == 1, cc_tab_out)
+                    NacTab(sheet_cx + 48, cy - 216, 84, "INPUT", cc_page == 2, cc_tab_in)
+                    NacTab(sheet_cx + 144, cy - 216, 84, "APPS", cc_page == 3, cc_tab_apps)
 
                     group {
-                        show: cc_page == 0
+                        show: pg0 > 0.01
+                        opacity: pg0
+                        move: 0, 10 * (1 - pg0)
 
                         box {
-                            at: sheet_cx, cy - 30
-                            size: 408, 56
+                            at: sheet_cx, cy - 40
+                            size: 408, 140
                             corner: 14
                             color: nacre_ink
                             opacity: 0.05
                         }
-                        NacMuteBtn(sheet_cx - 172, cy - 30, audio_muted, cc_mute)
+                        NacMuteBtn(sheet_cx - 172, cy - 74, audio_muted, cc_mute)
                         text "Output" {
-                            at: sheet_cx - 144, cy - 30
+                            at: sheet_cx - 144, cy - 74
                             anchor: left center
                             family: "SF Pro"
                             size: 13
                             weight: 500
                             color: nacre_ink
                         }
-                        NacSlider(sheet_cx + 64, cy - 30, 170, 6, audio_volume, audio_muted, cc_vol)
+                        NacSlider(sheet_cx + 64, cy - 74, 170, 6, audio_volume, audio_muted, cc_vol)
                         text volume_percent_text {
-                            at: sheet_cx + 184, cy - 30
+                            at: sheet_cx + 184, cy - 74
                             anchor: right center
                             family: "SF Mono"
                             size: 11
                             weight: 500
                             color: nacre_ink_soft
                         }
-
-                        box {
-                            at: sheet_cx, cy + 42
-                            size: 408, 56
-                            corner: 14
-                            color: nacre_ink
-                            opacity: 0.05
-                        }
-                        NacMicBtn(sheet_cx - 172, cy + 42, mic_muted, cc_mic_mute)
-                        text "Microphone" {
-                            at: sheet_cx - 144, cy + 42
-                            anchor: left center
-                            family: "SF Pro"
-                            size: 13
-                            weight: 500
-                            color: nacre_ink
-                        }
-                        NacSlider(sheet_cx + 64, cy + 42, 170, 6, mic_volume, mic_muted, cc_mic)
-                        text mic_percent_text {
-                            at: sheet_cx + 184, cy + 42
-                            anchor: right center
-                            family: "SF Mono"
-                            size: 11
-                            weight: 500
-                            color: nacre_ink_soft
-                        }
-
-                        box {
-                            at: sheet_cx, cy + 108
-                            size: 408, 1
-                            color: nacre_ink
-                            opacity: 0.10
-                        }
-                        text "DEFAULT OUTPUT" {
-                            at: sheet_cx - 204, cy + 136
-                            anchor: left center
-                            family: "SF Pro"
-                            size: 9
-                            weight: 700
-                            color: nacre_ink_faint
-                        }
+                        NacMeter(sheet_cx, cy - 34, 368, 8, out_level)
                         text active_sink_name {
-                            at: sheet_cx - 204, cy + 160
+                            at: sheet_cx - 172, cy - 2
                             anchor: left center
                             family: "SF Mono"
                             size: 11
                             weight: 500
                             color: nacre_ink_soft
-                            width: 408
+                            width: 376
                             lines: 1
                             show: has_sink
                         }
-                        text "None" {
-                            at: sheet_cx - 204, cy + 160
+                        text "No default output" {
+                            at: sheet_cx - 172, cy - 2
                             anchor: left center
                             family: "SF Mono"
                             size: 11
@@ -320,62 +310,316 @@ scene ControlTest {
                             color: nacre_ink_faint
                             show: not has_sink
                         }
+
+                        box {
+                            at: sheet_cx, cy + 108
+                            size: 408, 108
+                            corner: 14
+                            color: nacre_ink
+                            opacity: 0.05
+                        }
+                        NacMicBtn(sheet_cx - 172, cy + 74, mic_muted, cc_mic_mute)
+                        text "Microphone" {
+                            at: sheet_cx - 144, cy + 74
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 13
+                            weight: 500
+                            color: nacre_ink
+                        }
+                        NacSlider(sheet_cx + 64, cy + 74, 170, 6, mic_volume, mic_muted, cc_mic)
+                        text mic_percent_text {
+                            at: sheet_cx + 184, cy + 74
+                            anchor: right center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_soft
+                        }
+                        text active_source_name {
+                            at: sheet_cx - 172, cy + 142
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_soft
+                            width: 376
+                            lines: 1
+                            show: has_source
+                        }
+                        text "No default input" {
+                            at: sheet_cx - 172, cy + 142
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_faint
+                            show: not has_source
+                        }
+
+                        box {
+                            at: sheet_cx, cy + 186
+                            size: 408, 1
+                            color: nacre_ink
+                            opacity: 0.10
+                        }
+                        text "DEFAULT OUTPUT" {
+                            at: sheet_cx - 102, cy + 210
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
+                        text "DEFAULT INPUT" {
+                            at: sheet_cx + 102, cy + 210
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
+                        text active_sink_name {
+                            at: sheet_cx - 102, cy + 234
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_soft
+                            width: 180
+                            lines: 1
+                            show: has_sink
+                        }
+                        text "None" {
+                            at: sheet_cx - 102, cy + 234
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_faint
+                            show: not has_sink
+                        }
+                        text active_source_name {
+                            at: sheet_cx + 102, cy + 234
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_soft
+                            width: 92
+                            lines: 1
+                            show: has_source
+                        }
+                        text "None" {
+                            at: sheet_cx + 102, cy + 234
+                            anchor: left center
+                            family: "SF Mono"
+                            size: 11
+                            weight: 500
+                            color: nacre_ink_faint
+                            show: not has_source
+                        }
                     }
 
                     group {
-                        show: cc_page == 1
+                        show: pg1 > 0.01
+                        opacity: pg1
+                        move: 0, 10 * (1 - pg1)
 
                         text "OUTPUTS" {
-                            at: sheet_cx - 204, cy - 64
+                            at: sheet_cx - 204, cy - 164
                             anchor: left center
                             family: "SF Pro"
                             size: 9
                             weight: 700
                             color: nacre_ink_faint
                         }
-                        text "INPUTS" {
-                            at: sheet_cx + 8, cy - 64
-                            anchor: left center
-                            family: "SF Pro"
-                            size: 9
-                            weight: 700
-                            color: nacre_ink_faint
-                        }
-
-                        column sinks_grid {
-                            at: sheet_cx - 204, cy - 44
-                            gap: 6
-                            view: 196, 216
-                            step: 54
+                        column out_grid {
+                            at: sheet_cx - 204, cy - 140
+                            gap: 8
+                            view: 408, 420
+                            step: 56
                             for d in sinks {
-                                group {
-                                    size: 196, 48
-                                    NacChip(d, 196, selected_sink == d.id, cc_pick_sink)
-                                }
+                                NacChip(d, 408, selected_sink == d.id, cc_pick_sink)
                             }
                         }
-                        column sources_grid {
-                            at: sheet_cx + 8, cy - 44
-                            gap: 6
-                            view: 196, 216
-                            step: 54
+                        group {
+                            show: sinks.count == 0
+                            text "No output devices" {
+                                at: sheet_cx - 204, cy - 136
+                                anchor: left center
+                                family: "SF Mono"
+                                size: 11
+                                weight: 500
+                                color: nacre_ink_faint
+                            }
+                        }
+                    }
+
+                    group {
+                        show: pg2 > 0.01
+                        opacity: pg2
+                        move: 0, 10 * (1 - pg2)
+
+                        text "INPUTS" {
+                            at: sheet_cx - 204, cy - 164
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
+                        column in_grid {
+                            at: sheet_cx - 204, cy - 140
+                            gap: 8
+                            view: 408, 420
+                            step: 56
                             for s in sources {
-                                group {
-                                    size: 196, 48
-                                    NacChip(s, 196, selected_source == s.id, cc_pick_source)
-                                }
+                                NacChip(s, 408, selected_source == s.id, cc_pick_source)
+                            }
+                        }
+                        group {
+                            show: sources.count == 0
+                            text "No input devices" {
+                                at: sheet_cx - 204, cy - 136
+                                anchor: left center
+                                family: "SF Mono"
+                                size: 11
+                                weight: 500
+                                color: nacre_ink_faint
+                            }
+                        }
+                    }
+
+                    group {
+                        show: pg3 > 0.01
+                        opacity: pg3
+                        move: 0, 10 * (1 - pg3)
+
+                        text "PLAYING" {
+                            at: sheet_cx - 204, cy - 168
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
+                        group {
+                            show: play_rows.count == 0
+                            text "Nothing is playing" {
+                                at: sheet_cx - 204, cy - 136
+                                anchor: left center
+                                family: "SF Mono"
+                                size: 11
+                                weight: 500
+                                color: nacre_ink_faint
+                            }
+                        }
+                        column play_grid {
+                            at: sheet_cx - 204, cy - 152
+                            gap: 8
+                            view: 408, 280
+                            step: 64
+                            for p in play_rows {
+                                NacMixRow(p, cc_app_vol, cc_app_mute, cc_route_open)
                             }
                         }
 
+                        text "RECORDING" {
+                            at: sheet_cx - 204, cy + 164
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
                         group {
-                            show: sinks.count == 0 and sources.count == 0
-                            text "No audio devices detected" {
-                                at: sheet_cx, cy + 40
-                                anchor: center
-                                family: "SF Pro"
-                                size: 12
-                                weight: 400
+                            show: rec_rows.count == 0
+                            text "No apps are recording" {
+                                at: sheet_cx - 204, cy + 196
+                                anchor: left center
+                                family: "SF Mono"
+                                size: 11
+                                weight: 500
                                 color: nacre_ink_faint
+                            }
+                        }
+                        column rec_grid {
+                            at: sheet_cx - 204, cy + 180
+                            gap: 8
+                            view: 408, 104
+                            step: 64
+                            for r in rec_rows {
+                                NacMixRow(r, cc_app_vol, cc_app_mute, cc_route_open)
+                            }
+                        }
+                    }
+
+                    group {
+                        show: pick_show > 0.01
+                        opacity: pick_show
+                        move: 0, 14 * (1 - pick_show)
+
+                        box {
+                            at: sheet_cx, cy + 20
+                            size: 424, 448
+                            corner: 16
+                            color: nacre_glass_base
+                            opacity: 0.55
+                        }
+                        box {
+                            at: sheet_cx, cy - 6
+                            size: 424, 392
+                            corner: 16
+                            color: nacre_glass_base
+                            opacity: 0.65
+                        }
+                        box {
+                            at: sheet_cx, cy - 6
+                            size: 424, 392
+                            corner: 16
+                            stroke: 1
+                            color: nacre_ink
+                            opacity: 0.18
+                        }
+                        text "SEND TO" {
+                            at: sheet_cx - 188, cy - 158
+                            anchor: left center
+                            family: "SF Pro"
+                            size: 9
+                            weight: 700
+                            color: nacre_ink_faint
+                        }
+                        text "Cancel" {
+                            at: sheet_cx + 188, cy - 158
+                            anchor: right center
+                            family: "SF Pro"
+                            size: 11
+                            weight: 600
+                            color: nacre_ink_soft
+                        }
+                        group {
+                            show: pick_kind == 1
+                            column pick_out_grid {
+                                at: sheet_cx - 204, cy - 136
+                                gap: 8
+                                view: 408, 318
+                                step: 56
+                                for d in sinks {
+                                    NacChip(d, 408, false, cc_route_pick)
+                                }
+                            }
+                        }
+                        group {
+                            show: pick_kind == 2
+                            column pick_in_grid {
+                                at: sheet_cx - 204, cy - 136
+                                gap: 8
+                                view: 408, 318
+                                step: 56
+                                for s in sources {
+                                    NacChip(s, 408, false, cc_route_pick)
+                                }
                             }
                         }
                     }
@@ -553,7 +797,7 @@ scene ControlTest {
         on press rail_wall_hit { cc.$screen.phase = 3 }
 
         zone box a_close {
-            at: sheet_cx + 192, cy - 178
+            at: sheet_cx + 192, cy - 272
             size: 36, 20
             corner: 6
             cursor: pointer
@@ -573,6 +817,17 @@ scene ControlTest {
             role: button
         }
         on press w_close { cc.$screen.phase = 1 }
+
+        zone box pick_cancel {
+            at: sheet_cx + 188, cy - 158
+            size: 72, 24
+            corner: 12
+            cursor: pointer
+            active: cc.$screen.phase == 2 and pick_kind > 0
+            label: "Cancel Device Picker"
+            role: button
+        }
+        on press pick_cancel { emit cc_route_cancel }
 
         zone box w_prev {
             at: sheet_cx + 160, cy + 52
