@@ -1,0 +1,103 @@
+part ControlState {
+    repeat i in 0..8 {
+        fact cc.$i.phase = 0
+        fact cc.$i.grace_in = 0
+    }
+    fact cc_awake = 0
+    fact cc_settling = 0
+    fact cc_page = 0
+    fact audio_volume = 70
+    fact audio_muted = false
+    fact mic_volume = 50
+    fact mic_muted = false
+    fact selected_sink = 0
+    fact selected_source = 0
+    fact has_sink = false
+    fact has_source = false
+    fact out_level = 0
+    fact pick_kind = 0
+    fact pick_row = 0
+    fact wall_idx = 1
+    fact wall_count = 0
+    fact wall_applied = false
+    fact picker_open = false
+    text volume_percent_text = "70%"
+    text mic_percent_text = "50%"
+    text active_sink_name = ""
+    text active_source_name = ""
+    text wall_title = ""
+    text wall_preview_path = ""
+    text wall_applied_path = ""
+    text picker_dir_text = "~/.wallpapers"
+    text picker_status = ""
+    model sinks max 8 {
+        id: number
+        name: text
+        is_default: bool
+    }
+
+    model sources max 8 {
+        id: number
+        name: text
+        is_default: bool
+    }
+
+    model picker_items max 16 {
+        id: number
+        name: text
+        is_dir: bool
+        path: text
+    }
+
+    model play_rows max 8 {
+        id: number
+        kind: number
+        name: text
+        title: text
+        volume: number
+        muted: bool
+        routed: bool
+        device: text
+    }
+
+    model rec_rows max 4 {
+        id: number
+        kind: number
+        name: text
+        title: text
+        volume: number
+        muted: bool
+        routed: bool
+        device: text
+    }
+    event cc_mute ->
+    event cc_vol ->
+    event cc_mic_mute ->
+    event cc_mic ->
+    event cc_pick_sink ->
+    event cc_pick_source ->
+    event cc_wall_prev ->
+    event cc_wall_next ->
+    event cc_wall_apply ->
+    event cc_browse ->
+    event picker_select_item ->
+    event picker_nav_up ->
+    event picker_choose ->
+    event picker_cancel ->
+    event cc_tab_levels
+    event cc_tab_out
+    event cc_tab_in
+    event cc_tab_apps
+    event cc_app_vol ->
+    event cc_app_mute ->
+    event cc_route_open ->
+    event cc_route_pick ->
+    event cc_route_cancel
+    event cc_wake_evt ->
+    service audio as sound {
+        volume: number = 0.70
+        muted: bool = false
+        input: number = 0.50
+        input_muted: bool = false
+    }
+}

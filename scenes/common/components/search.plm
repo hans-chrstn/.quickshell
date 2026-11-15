@@ -1,0 +1,175 @@
+import "../Theme.plm"
+
+library SearchLib {
+    component Magnifier(x: number, y: number) {
+        ellipse {
+            at: x, y
+            radius: 7
+            color: nacre_ink_soft
+            stroke: 2
+        }
+        line {
+            from: x + 5, y + 5
+            to: x + 11, y + 11
+            width: 2
+            color: nacre_ink_soft
+        }
+    }
+
+    component EscBadge(cx: number, cy: number) {
+        box {
+            at: cx, cy
+            size: 36, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.08
+        }
+        text "ESC" {
+            at: cx, cy
+            anchor: center
+            family: "SF Mono"
+            size: nacre_fs10
+            weight: nacre_w600
+            color: nacre_ink_soft
+        }
+    }
+
+    component SearchHeader(cx: number, y: number) {
+        Magnifier(cx - 198, y)
+
+        input query {
+            at: cx - 178, y
+            width: 320
+            size: nacre_fs15
+            family: "SF Pro"
+            weight: nacre_w500
+            color: nacre_ink
+            placeholder: "Search applications"
+            selection: nacre_accent
+        }
+
+        EscBadge(cx + 192, y)
+
+        box {
+            at: cx, y + 30
+            size: 420, 1
+            color: nacre_ink
+            opacity: 0.10
+        }
+    }
+
+    component AppRow(h: record, sel: number, launch_evt: event, select_evt: event, active: bool = true) {
+        let is_sel = sel == h.index
+        size: 420, 32
+
+        zone box hit {
+            from: 0, 0
+            size: 420, 32
+            corner: 10
+            cursor: pointer
+            active: active
+            label: h.name
+            role: button
+        }
+
+        box {
+            from: 0, 0
+            size: 420, 32
+            corner: 10
+            color: nacre_accent
+            opacity: if(is_sel, 0.12, 0)
+        }
+        box {
+            from: 8, 7
+            size: 3, 18
+            corner: 1.5
+            color: nacre_accent
+            opacity: if(is_sel, 0.9, 0)
+        }
+        box {
+            from: 12, 6
+            size: 20, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.10
+        }
+        image h.icon {
+            at: 12, 6
+            size: 20, 20
+        }
+
+        text h.name {
+            at: 44, 16
+            anchor: left center
+            family: "SF Pro"
+            size: nacre_fs14
+            weight: if(is_sel, 600, 500)
+            color: if(is_sel, nacre_ink, nacre_ink_soft)
+            width: 330
+            lines: 1
+        }
+
+        on enter hit { emit select_evt(h.index) }
+        on press hit { emit launch_evt(h.index) }
+    }
+
+    component GhostRow(x: number, y: number, sel: bool, name_w: number) {
+        box {
+            from: x, y
+            size: 420, 32
+            corner: 10
+            color: nacre_accent
+            opacity: if(sel, 0.12, 0)
+        }
+        box {
+            from: x + 8, y + 7
+            size: 3, 18
+            corner: 1.5
+            color: nacre_accent
+            opacity: if(sel, 0.9, 0)
+        }
+        box {
+            from: x + 12, y + 6
+            size: 20, 20
+            corner: 6
+            color: nacre_ink
+            opacity: 0.10
+        }
+        box {
+            at: x + 44 + name_w / 2, y + 16
+            size: name_w, 3
+            corner: 1.5
+            color: if(sel, nacre_ink, nacre_ink_faint)
+            opacity: 0.55
+        }
+    }
+
+    component ArtSquircle(
+        cx: number,
+        cy: number,
+        s: number,
+        accent: color = nacre_accent
+    ) {
+        box {
+            at: cx, cy
+            size: s, s
+            corner: s * 0.22
+            color: nacre_ink
+            opacity: 0.08
+        }
+        box {
+            at: cx + s * 0.14, cy - s * 0.08
+            size: 2.5, s * 0.32
+            corner: 1.2
+            color: accent
+            opacity: 0.9
+        }
+        ellipse {
+            at: cx + s * 0.05, cy + s * 0.08
+            radius: s * 0.085
+            color: accent
+            opacity: 0.9
+        }
+    }
+
+}

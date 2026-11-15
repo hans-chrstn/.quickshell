@@ -1,0 +1,207 @@
+import "../Theme.plm"
+import "glass.plm"
+
+library ControlsLib {
+    component ToggleSwitch(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        mix_val: number,
+        on: color = nacre_accent
+    ) {
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: mix(#2b303b, on, mix_val)
+        }
+        ellipse {
+            at: mix(cx - w / 2 + h / 2, cx + w / 2 - h / 2, mix_val), cy
+            radius: h / 2 - 2.5
+            color: nacre_ink
+        }
+    }
+
+    component CircleButton(
+        cx: number,
+        cy: number,
+        r: number,
+        playing: bool,
+        ink: color = nacre_ink
+    ) {
+        ellipse {
+            at: cx, cy
+            radius: r
+            color: nacre_ink
+            opacity: 0.12
+        }
+        ellipse {
+            at: cx, cy
+            radius: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.18
+        }
+        box {
+            at: cx - 3.2, cy
+            size: 2.6, 10
+            corner: 1.3
+            color: ink
+            opacity: if(playing, 1, 0)
+        }
+        box {
+            at: cx + 3.2, cy
+            size: 2.6, 10
+            corner: 1.3
+            color: ink
+            opacity: if(playing, 1, 0)
+        }
+        path {
+            at: cx + 1, cy
+            color: ink
+            opacity: if(playing, 0, 1)
+            move -3.4, -5.4
+            line 5.8, 0
+            line -3.4, 5.4
+            close
+        }
+    }
+
+    component SkipButton(
+        cx: number,
+        cy: number,
+        r: number,
+        prev: bool,
+        ink: color = nacre_ink
+    ) {
+        ellipse {
+            at: cx, cy
+            radius: r
+            color: nacre_ink
+            opacity: 0.12
+        }
+        path {
+            at: cx - 1, cy
+            color: ink
+            opacity: if(prev, 0, 1)
+            move -1.8, -4.6
+            line 4.6, 0
+            line -1.8, 4.6
+            close
+        }
+        path {
+            at: cx + 1, cy
+            color: ink
+            opacity: if(prev, 1, 0)
+            move 1.8, -4.6
+            line -4.6, 0
+            line 1.8, 4.6
+            close
+        }
+        box {
+            at: cx + if(prev, -4.2, 4.2), cy
+            size: 1.8, 8.4
+            corner: 0.9
+            color: ink
+        }
+    }
+
+    component Reveal(
+        cx: number,
+        shown: bool,
+        w: number,
+        h: number,
+        corner: number,
+        top: number = 12,
+        fade: number = 24,
+        shadow: number = 0.30
+    ) {
+        prop cur_h = 0 ~fluid
+        follow cur_h = if(shown, h, 0)
+
+        let cy = top + cur_h / 2
+        let c_corner = min(cur_h / 2, corner)
+        let alpha = clamp(cur_h / h, 0, 1)
+        let content_alpha = clamp((cur_h - (h - fade)) / fade, 0, 1)
+
+        group {
+            opacity: alpha
+            show: alpha > 0.01
+
+            GlassCard(cx, cy, w, cur_h, c_corner, shadow * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: w, cur_h
+                    corner: c_corner
+                }
+
+                group {
+                    opacity: content_alpha
+                    children
+                }
+            }
+        }
+    }
+
+    component RevealEdge(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        alpha: number,
+        shadow: number = 0.5
+    ) {
+        group {
+            opacity: alpha
+            show: alpha > 0.01
+
+            GlassCard(cx, cy, w, h, corner, shadow * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: w, h
+                    corner: corner
+                }
+                group {
+                    children
+                }
+            }
+        }
+    }
+
+    component NacChevron(cx: number, cy: number, r: number, left: bool, col: color = nacre_ink) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: nacre_ink
+            opacity: 0.07
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: nacre_ink
+            opacity: 0.12
+        }
+        line {
+            from: cx + if(left, 2.2, -2.2), cy - 4
+            to: cx + if(left, -2.2, 2.2), cy
+            width: 2
+            color: col
+        }
+        line {
+            from: cx + if(left, -2.2, 2.2), cy
+            to: cx + if(left, 2.2, -2.2), cy + 4
+            width: 2
+            color: col
+        }
+    }
+
+}

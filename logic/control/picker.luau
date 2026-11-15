@@ -1,47 +1,38 @@
-return function(cfg)
-    local on_choose = cfg and cfg.on_choose
-    local on_cancel = cfg and cfg.on_cancel
-    local on_select_file = cfg and cfg.on_select_file
-    local home_dir = cfg and cfg.home_dir or ""
-    local current_dir = cfg and cfg.initial_dir or home_dir
-    local raw_items = {}
-    local request_generation = 0
-    local page = 0
-    local page_size = 6
+return function(store)
+    local picker_current_dir = store.wall_dir
+    local picker_raw_items = {}
+    local picker_generation = 0
+    local picker_max_items = 16
 
-    local function publish_page(requested_page: number)
-        local page_count = math.max(math.ceil(#raw_items / page_size), 1)
-        page = math.clamp(math.floor(requested_page), 0, page_count - 1)
-        local first = page * page_size + 1
-        local visible = {}
-        for idx = first, math.min(first + page_size - 1, #raw_items) do
-            visible[#visible + 1] = raw_items[idx]
+    local function picker_publish()
+        local items = {}
+        for idx = 1, math.min(#picker_raw_items, picker_max_items) do
+            items[#items + 1] = picker_raw_items[idx]
         end
-        model.picker_items = visible
-        text.picker_page_text = string.format("%d / %d", page + 1, page_count)
+        model.picker_items = items
     end
 
-    local function normalize_path(path: string): string
+    local function picker_normalize_path(path)
         if path == "~" then
-            return home_dir
+            return store.home_dir
         end
         if path:sub(1, 2) == "~/" then
-            return home_dir .. path:sub(2)
+            return store.home_dir .. path:sub(2)
         end
         return path
     end
 
-    local function display_path(path: string): string
-        if home_dir ~= "" and path == home_dir then
+    local function picker_display_path(path)
+        if store.home_dir ~= "" and path == store.home_dir then
             return "~"
         end
-        if home_dir ~= "" and path:sub(1, #home_dir + 1) == home_dir .. "/" then
-            return "~" .. path:sub(#home_dir + 1)
+        if store.home_dir ~= "" and path:sub(1, #store.home_dir + 1) == store.home_dir .. "/" then
+            return "~" .. path:sub(#store.home_dir + 1)
         end
         return path
     end
 
-    local function parent_dir(path: string): string
+    local function picker_parent_dir(path)
         local cleaned = path:gsub("/+$", "")
         local parent = cleaned:match("^(.*)/[^/]+$")
         if not parent or parent == "" then
@@ -50,15 +41,15 @@ return function(cfg)
         return parent
     end
 
-    local function load_dir(dir_path: string)
-        local target = normalize_path(dir_path)
-        request_generation += 1
-        local generation = request_generation
+    local function picker_load_dir(dir_path)
+        local target = picker_normalize_path(dir_path)
+        picker_generation += 1
+        local generation = picker_generation
         text.picker_status = "Loading"
 
         local ok, err = pcall(function()
             run("ls", { "-1pA", target }, function(out, code)
-                if generation ~= request_generation then
+                if generation ~= picker_generation then
                     return
                 end
                 if code ~= 0 or type(out) ~= "string" then
@@ -107,11 +98,11 @@ return function(cfg)
                     }
                 end
 
-                current_dir = target
-                raw_items = combined
-                text.picker_dir_text = display_path(target)
+                picker_current_dir = target
+                picker_raw_items = combined
+                text.picker_dir_text = picker_display_path(target)
                 text.picker_status = if #combined == 0 then "This folder is empty" else ""
-                publish_page(0)
+                picker_publish()
             end)
         end)
         if not ok then
@@ -122,47 +113,56 @@ return function(cfg)
 
     on("picker_select_item", function(id_val)
         local idx = (tonumber(id_val) or -1) + 1
-        local item = raw_items[idx]
+        local item = picker_raw_items[idx]
         if not item then
             text.picker_status = "That item is no longer available"
             return
         end
         if item.is_dir then
-            load_dir(item.path)
-        elseif on_select_file then
-            on_select_file(item.path)
+            picker_load_dir(item.path)
+            return
         end
+        fact.picker_open = false
+        if not store.is_image(store.wall_basename(item.path)) then
+            return
+        end
+        local found = 0
+        for i = 1, #store.wall_files do
+            if store.wall_files[i] == item.path then
+                found = i
+            end
+        end
+        if found == 0 then
+            store.wall_files[#store.wall_files + 1] = item.path
+            table.sort(store.wall_files)
+            for i = 1, #store.wall_files do
+                if store.wall_files[i] == item.path then
+                    found = i
+                end
+            end
+            fact.wall_count = #store.wall_files
+        end
+        fact.wall_idx = found
+        store.sync_wall_title()
     end)
 
     on("picker_nav_up", function()
-        load_dir(parent_dir(current_dir))
-    end)
-
-    on("picker_prev_page", function()
-        publish_page(page - 1)
-    end)
-
-    on("picker_next_page", function()
-        publish_page(page + 1)
+        picker_load_dir(picker_parent_dir(picker_current_dir))
     end)
 
     on("picker_choose", function()
-        if on_choose then
-            on_choose(current_dir)
-        end
+        store.wall_dir = picker_current_dir
         fact.picker_open = false
+        store.load_wall_list()
     end)
 
     on("picker_cancel", function()
-        request_generation += 1
-        if on_cancel then
-            on_cancel()
-        end
+        picker_generation += 1
         fact.picker_open = false
     end)
 
-    return {
-        load_dir = load_dir,
-        get_dir = function() return current_dir end,
-    }
+    on("cc_browse", function()
+        fact.picker_open = true
+        picker_load_dir(picker_current_dir)
+    end)
 end

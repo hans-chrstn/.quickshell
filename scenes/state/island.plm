@@ -1,62 +1,73 @@
 part IslandState {
-    fact phase = 0
-    fact playing = false
-    fact media_progress = 0
-    fact media_can_seek = false
-    fact sel = 0
+    repeat i in 0..8 {
+        fact isl.$i.phase = 0
+        fact isl.$i.grace_in = 0
+    }
 
-    text track_title = ""
-    text track_artist = ""
+    fact awake_count = 0
+    fact isl_settling = 0
+    fact mon.0.here = 0
+    fact mon.1.here = 0
+    fact mon.2.here = 0
+    fact mon.3.here = 0
+    fact mon.4.here = 0
+    fact mon.5.here = 0
+    fact mon.6.here = 0
+    fact mon.7.here = 0
+    fact mon.0.index = 0
+    fact mon.1.index = 1
+    fact mon.2.index = 2
+    fact mon.3.index = 3
+    fact mon.4.index = 4
+    fact mon.5.index = 5
+    fact mon.6.index = 6
+    fact mon.7.index = 7
+    fact media_active = 0
+    fact media_progress = 0
+    fact playing = false
+    fact art_present = 0
+    fact sel = 0
+    fact weather = 0
+    fact nc_flash = 0
+
+    text clock_time = ""
+    text clock_date = ""
     text time_elapsed = ""
     text time_remaining = ""
-    text island_date = ""
+    text media_title = ""
+    text media_artist = ""
+    text media_art = ""
     text query = ""
+    text nc_count = ""
+    text nc_pop_title = ""
+    text nc_pop_body = ""
+    text nc_pop_icon = ""
+    text nc_pop_app = ""
 
-    model hits max 5 {
+    image art_img = from media_art, 96, 96
+    image nc_icon_img = from nc_pop_icon, 48, 48
+
+    model hits max 96 {
         name: text
         icon: image 20, 20
         exec: text
     }
 
-    event open_wide ->
-    event fold_compact ->
-    event dismiss ->
+    model nc max 24 {
+        app: text
+        badge: text
+        title: text
+        body: text
+        time: text
+        open: number
+    }
+
     event media_toggle ->
     event media_prev ->
     event media_next ->
     event media_seek ->
     event launch ->
-    event pop_search ->
-    event search_closed ->
     event select_hit
-
-    prop cur_y = 10 ~fluid
-    prop cur_w = 140 ~fluid
-    prop cur_h = 24 ~fluid
-    prop cur_corner = 12 ~fluid
-    prop island_alpha = 0 ~fluid
-    prop shadow_alpha = 0 ~calm
-
-    prop wave_1 = 0
-    prop wave_2 = 0
-    prop wave_3 = 0
-    prop wave_4 = 0
-
-    wave wave_1 = if(phase > 0, 3.5, 0) at 3.2
-    wave wave_2 = if(phase > 0, 5.0, 0) at 4.1
-    wave wave_3 = if(phase > 0, 4.2, 0) at 2.8
-    wave wave_4 = if(phase > 0, 2.8, 0) at 3.9
-
-    follow cur_y = if(phase == 3, search_y, if(phase == 2, expanded_y, if(phase == 1, compact_y, dormant_y)))
-    follow cur_w = if(phase == 3, search_w, if(phase == 2, expanded_w, if(phase == 1, compact_w, dormant_w)))
-    follow cur_h = if(phase == 3, search_h, if(phase == 2, expanded_h, if(phase == 1, compact_h, dormant_h)))
-    follow cur_corner = if(phase == 3, search_corner, if(phase == 2, expanded_corner, if(phase == 1, compact_corner, dormant_corner)))
-    follow shadow_alpha = if(phase == 3, search_shadow_alpha, if(phase == 2, expanded_shadow_alpha, if(phase == 1, compact_shadow_alpha, 0.0)))
-    follow island_alpha = if(phase > 0, 1.0, 0.0)
-
-    let compact_alpha = if(phase == 1 and cur_h < 60, clamp((cur_h - 25) / 11, 0, 1) * clamp(1 - (cur_h - 38) / 18, 0, 1), 0)
-    let expanded_alpha = if(phase == 2 and cur_h > 85, clamp((cur_h - 85) / 35, 0, 1), 0)
-    let search_alpha = if(phase == 3 and cur_h > 120, clamp((cur_h - 120) / 60, 0, 1), 0)
-
-    let cx = screen.width / 2
+    event nc_row_evt ->
+    event nc_clear_evt ->
 }

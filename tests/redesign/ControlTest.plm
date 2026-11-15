@@ -118,8 +118,6 @@ scene ControlTest {
         screens: each
     }
 
-    TestDeco("gate 9 · control centre")
-
     surface cc_wake {
         size: 28, full
         anchor: right

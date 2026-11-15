@@ -23,15 +23,6 @@
         "aarch64-linux"
       ];
       forAllSystems = function: nixpkgs.lib.genAttrs systems function;
-      pleamarWmPackage =
-        system:
-        pleamarWm.packages.${system}.default.overrideAttrs (old: {
-          postPatch = (old.postPatch or "") + ''
-            substituteInPlace examples/session.plm \
-              --replace-fail 'min(cz, (mg.Ws - 2 * gap) / max(fw.$i, 1), (mg.ah - gap) / max(fh.$i + bar, 1))' \
-              'min(cz, min((mg.Ws - 2 * gap) / max(fw.$i, 1), (mg.ah - gap) / max(fh.$i + bar, 1)))'
-          '';
-        });
       checkTool =
         system:
         let
@@ -139,7 +130,7 @@
       packages = forAllSystems (system: {
         nacre = nacreApp system;
         pleamar = pleamar.packages.${system}.default;
-        pleamar-wm = pleamarWmPackage system;
+        pleamar-wm = pleamarWm.packages.${system}.default;
         default = self.packages.${system}.pleamar;
       });
 
