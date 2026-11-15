@@ -1,0 +1,35 @@
+language 0.9
+
+import "scenes/common/Theme.plm"
+import "scenes/common/components/glass.plm"
+import "scenes/common/components/wave.plm"
+import "scenes/common/components/controls.plm"
+import "scenes/common/components/search.plm"
+import "scenes/common/components/glyphs.plm"
+import "scenes/common/components/nac-controls.plm"
+import "scenes/island/IslandBody.plm"
+import "scenes/utility/ControlBody.plm"
+
+scene Nacre {
+    permissions {
+        run: "curl", "ls", "pactl"
+        services: "clock", "apps", "apps.launch", "media", "media.toggle", "media.previous", "media.next", "media.seek", "env", "notifications", "notification_history", "notifications.clear", "notifications.clear_history", "audio", "audio.level", "files.read", "files.write"
+    }
+
+    service clock as now {
+        hour: number = 0
+        minute: number = 0
+        second: number = 0
+        day: number = 0
+        month: number = 0
+        year: number = 0
+        weekday: number = 0
+        time: text = "--:--"
+        date: text = ""
+    }
+
+    include "scenes/state/island.plm"
+    include "scenes/state/control.plm"
+    include "scenes/surfaces/island.plm"
+    include "scenes/surfaces/control.plm"
+}

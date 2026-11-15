@@ -1,0 +1,73 @@
+part IslandState {
+    repeat i in 0..8 {
+        fact isl.$i.phase = 0
+        fact isl.$i.grace_in = 0
+    }
+
+    fact awake_count = 0
+    fact isl_settling = 0
+    fact mon.0.here = 0
+    fact mon.1.here = 0
+    fact mon.2.here = 0
+    fact mon.3.here = 0
+    fact mon.4.here = 0
+    fact mon.5.here = 0
+    fact mon.6.here = 0
+    fact mon.7.here = 0
+    fact mon.0.index = 0
+    fact mon.1.index = 1
+    fact mon.2.index = 2
+    fact mon.3.index = 3
+    fact mon.4.index = 4
+    fact mon.5.index = 5
+    fact mon.6.index = 6
+    fact mon.7.index = 7
+    fact media_active = 0
+    fact media_progress = 0
+    fact playing = false
+    fact art_present = 0
+    fact sel = 0
+    fact weather = 0
+    fact nc_flash = 0
+
+    text clock_time = ""
+    text clock_date = ""
+    text time_elapsed = ""
+    text time_remaining = ""
+    text media_title = ""
+    text media_artist = ""
+    text media_art = ""
+    text query = ""
+    text nc_count = ""
+    text nc_pop_title = ""
+    text nc_pop_body = ""
+    text nc_pop_icon = ""
+    text nc_pop_app = ""
+
+    image art_img = from media_art, 96, 96
+    image nc_icon_img = from nc_pop_icon, 48, 48
+
+    model hits max 96 {
+        name: text
+        icon: image 20, 20
+        exec: text
+    }
+
+    model nc max 24 {
+        app: text
+        badge: text
+        title: text
+        body: text
+        time: text
+        open: number
+    }
+
+    event media_toggle ->
+    event media_prev ->
+    event media_next ->
+    event media_seek ->
+    event launch ->
+    event select_hit
+    event nc_row_evt ->
+    event nc_clear_evt ->
+}

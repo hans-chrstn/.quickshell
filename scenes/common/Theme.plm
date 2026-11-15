@@ -1,0 +1,58 @@
+library Theme {
+    let nacre_glass_base = #0b0c11
+    let nacre_glass_amount = 0.94
+    let nacre_glass_smoke = 0.82
+    let nacre_glass_tint = 0.18
+    let nacre_glass_refraction = 0.28
+    let nacre_glass_dispersion = 0.03
+    let nacre_glass_mirror = 0.10
+    let nacre_glass_highlight = 0.30
+    let nacre_glass_rim = 0.08
+
+    let nacre_ink = #f5f7fa
+    let nacre_ink_soft = #a8b0bf
+    let nacre_ink_faint = #646c7c
+    let nacre_accent = #38bdf8
+    let nacre_warm = #e8b072
+
+    let nacre_tick_off_opacity = 0.16
+    let nacre_wave_off_opacity = 0.22
+
+    spring fluid = 150, 21
+    spring calm = 120, 18
+    spring quick = 280, 30
+
+    let nacre_w400 = 400
+    let nacre_w500 = 500
+    let nacre_w600 = 600
+    let nacre_w700 = 700
+
+    let nacre_fs9 = 9
+    let nacre_fs10 = 10
+    let nacre_fs11 = 11
+    let nacre_fs12 = 12
+    let nacre_fs13 = 13
+    let nacre_fs14 = 14
+    let nacre_fs15 = 15
+    let nacre_fs16 = 16
+    let nacre_fs17 = 17
+    let nacre_fs18 = 18
+    let nacre_fs21 = 21
+
+    let nacre_island_top_edge = 12
+    let nacre_island_compact_h = 64
+    let nacre_island_np_w = 440
+    let nacre_island_np_h = 224
+    let nacre_island_search_w = 460
+    let nacre_island_nc_w = 380
+    let nacre_island_card_w = 360
+    let nacre_island_card_h = 92
+    let nacre_island_scrub_w = 280
+
+    let nacre_cc_rail_w = 80
+    let nacre_cc_rail_h = 168
+    let nacre_cc_audio_w = 440
+    let nacre_cc_audio_h = 600
+    let nacre_cc_wall_w = 440
+    let nacre_cc_wall_h = 420
+}

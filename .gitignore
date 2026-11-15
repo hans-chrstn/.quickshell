@@ -1,5 +1,8 @@
-**/temp/
-**/.direnv/
-/notes/
-**/.envrc
-**/result
+temp/
+.direnv/
+.envrc
+result
+target/
+notes/
+.look/
+result.pleamar

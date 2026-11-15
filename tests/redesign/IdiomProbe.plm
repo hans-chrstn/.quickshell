@@ -1,0 +1,24 @@
+language 0.9
+
+scene T {
+    repeat i in 0..4 {
+        fact isl.$i.phase = 0
+    }
+
+    surface {
+        size: 100, 100
+        anchor: top
+        screens: each max 3
+    }
+
+    component C {
+        prop cur = 0
+        follow cur = isl.$screen.phase
+        box { at: 50, 50; size: 10, 10; opacity: cur }
+        zone box z { at: 50, 70; size: 20, 20; active: isl.$screen.phase == 0 }
+        on press z while isl.$screen.phase == 0 { isl.$screen.phase = 1 }
+        on key Escape while isl.$screen.phase == 1 { isl.$screen.phase = 0 }
+    }
+
+    C
+}

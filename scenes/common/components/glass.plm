@@ -1,0 +1,34 @@
+import "../Theme.plm"
+
+library GlassLib {
+    component GlassCard(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        corner: number,
+        shadow: number = 0.30
+    ) {
+        body {
+            color: nacre_glass_base
+            glass: nacre_glass_amount
+            lens: true
+            frost: auto
+            smoke: nacre_glass_smoke
+            tint: nacre_glass_tint
+            refraction: nacre_glass_refraction
+            dispersion: nacre_glass_dispersion
+            mirror: nacre_glass_mirror
+            highlight: nacre_glass_highlight
+            rim: nacre_glass_rim
+            shadow: 0, 8, 24, shadow
+
+            box {
+                at: cx, cy
+                size: w, h
+                corner: corner
+            }
+        }
+    }
+
+}

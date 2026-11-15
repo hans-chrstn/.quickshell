@@ -1,0 +1,591 @@
+import "../common/Theme.plm"
+import "../common/components/glass.plm"
+import "../common/components/wave.plm"
+import "../common/components/controls.plm"
+import "../common/components/search.plm"
+import "../common/components/glyphs.plm"
+
+library IslandBodyLib {
+    component FluidWave(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        progress: number,
+        on: color = nacre_accent,
+        off: color = nacre_ink
+    ) {
+        let gap = 2
+        let bar_w = (w - 35 * gap) / 36
+        repeat i in 0..35 {
+            let hump = sin(180 * i / 35)
+            let wob = 0.5 + 0.5 * noise(time * 0.8 + i * 0.61)
+            let lit = i / 36 < progress
+            box {
+                at: cx - w / 2 + bar_w / 2 + i * (bar_w + gap), cy
+                size: bar_w, max(h * (0.14 + 0.86 * hump) * (0.55 + 0.45 * wob), 2)
+                corner: bar_w / 2
+                color: mix(off, on, lit)
+                opacity: nacre_wave_off_opacity + (1 - nacre_wave_off_opacity) * lit
+            }
+        }
+    }
+
+    component NcRow(r: record, press_evt: event, active: bool = true) {
+        let w = 356
+        let h = 46 + 54 * r.open
+        size: w, h
+
+        zone box hit {
+            from: 0, 0
+            size: w, h
+            corner: 10
+            cursor: pointer
+            active: active
+            label: r.title
+            role: button
+        }
+
+        box {
+            from: 0, 0
+            size: w, h
+            corner: 10
+            color: nacre_accent
+            opacity: if(r.open, 0.10, 0)
+        }
+        box {
+            from: 10, 12
+            size: 3, 22
+            corner: 1.5
+            color: nacre_accent
+            opacity: if(r.open, 0.9, 0)
+        }
+
+        text r.app {
+            at: 22, 14
+            anchor: left center
+            family: "SF Pro"
+            size: nacre_fs10
+            weight: nacre_w600
+            color: nacre_ink_faint
+            width: 220
+            lines: 1
+        }
+        text r.time {
+            at: w - 12, 14
+            anchor: right center
+            family: "SF Mono"
+            size: nacre_fs10
+            weight: nacre_w500
+            color: nacre_ink_faint
+        }
+        text r.title {
+            at: 22, 33
+            anchor: left center
+            family: "SF Pro"
+            size: nacre_fs14
+            weight: nacre_w500
+            color: nacre_ink
+            width: w - 60
+            lines: 1
+        }
+        text r.badge {
+            at: w - 12, 33
+            anchor: right center
+            family: "SF Mono"
+            size: nacre_fs11
+            weight: nacre_w600
+            color: nacre_accent
+        }
+
+        text r.body {
+            at: 22, 52
+            anchor: left top
+            family: "SF Pro"
+            size: nacre_fs12
+            weight: nacre_w400
+            color: nacre_ink_soft
+            width: w - 44
+            lines: 3
+            show: r.open
+        }
+
+        on press hit { emit press_evt(r.index) }
+    }
+
+    component IslandCopy {
+        let cx = screen.width / 2
+        let compact_h = 64
+        let np_w = 440
+        let np_h = 224
+        let search_w = 460
+        let list_max = 10 * 36
+        let max_list_h = screen.height - 24 - 86
+        let view_h = min(max(24, results.content), min(list_max, max_list_h))
+        let search_h = 86 + view_h
+        let sel_top = sel * 36
+        let top_edge = 12
+        let scrub_w = 280
+        let nc_w = 380
+        let nc_view_h = min(max(56, nclist.content), min(280, max_list_h))
+        let nc_h = 64 + nc_view_h
+        let card_h = 92
+        let card_w = 360
+        let card_cy = top_edge + card_h / 2
+        let icon_cx = cx - card_w / 2 + 40
+        let pop_x = cx - card_w / 2 + 80
+        let mon_total = mon.0.here + mon.1.here + mon.2.here + mon.3.here + mon.4.here + mon.5.here + mon.6.here + mon.7.here
+        let mon_home = (1 - min(mon_total, 1)) * if(mon.$screen.index == 0, 1, 0)
+        let mon_gate = max(mon.$screen.here, mon_home)
+
+        prop cur_h = 0 ~900ms
+        prop cur_w = 180 ~900ms
+        prop media_show = 0 ~fluid
+        prop np_reach = 0 ~fluid
+        prop search_reach = 0 ~fluid
+        prop nc_reach = 0 ~fluid
+        prop weather_show = 0 ~fluid
+        prop art_show = 0 ~fluid
+        prop pill_flash = 0 ~gentle
+
+        follow media_show = if(media_active, 1, 0)
+        follow np_reach = if(isl.$screen.phase == 2, 1, 0)
+        follow search_reach = if(isl.$screen.phase == 3, 1, 0)
+        follow nc_reach = if(isl.$screen.phase == 4, 1, 0)
+        follow weather_show = if(weather > 0 and media_active == 0, 1, 0)
+        follow art_show = art_present
+        follow pill_flash = nc_flash
+        follow cur_h = if(isl.$screen.phase == 4, nc_h, if(isl.$screen.phase == 2, np_h, if(isl.$screen.phase == 3, search_h, if(nc_flash * mon_gate > 0.5, card_h, if(nc_flash > 0.5, 0, if(isl.$screen.phase == 0, 0, compact_h))))))
+        follow cur_w = if(isl.$screen.phase == 4, nc_w, if(isl.$screen.phase == 2, np_w, if(isl.$screen.phase == 3, search_w, if(nc_flash * mon_gate > 0.5, card_w, if(nc_flash > 0.5, 0, 180 + 140 * media_show + 24 * weather_show)))))
+
+        let cy = top_edge + cur_h / 2
+        let corner = min(cur_h / 2, 30)
+        let alpha = clamp(cur_h / compact_h, 0, 1)
+        let edge_depart = -(compact_h + top_edge + 12) * (1 - alpha)
+        let compact_alpha = clamp(1 - max(0, cur_h - 70) / 30, 0, 1)
+        let np_alpha = clamp((cur_h - 95) / 30, 0, 1) * clamp(1 - max(0, cur_h - 232) / 16, 0, 1)
+
+        zone box wake_strip {
+            at: cx, 8
+            size: 260, 16
+            corner: 5
+            cursor: pointer
+            active: isl.$screen.phase == 0
+            label: "Wake Island"
+            role: button
+        }
+
+        zone box grace_area {
+            at: cx, (cur_h + 80) / 2
+            size: cur_w + 60, cur_h + 80
+            corner: 40
+            active: isl.$screen.phase > 0
+            label: "Island Interaction Area"
+            role: region
+        }
+
+        zone box compact_btn {
+            at: cx, cy
+            size: cur_w, cur_h
+            corner: corner
+            cursor: pointer
+            active: isl.$screen.phase == 1 and alpha > 0.85
+            label: "Open Island"
+            role: button
+        }
+
+        zone box np_btn {
+            at: cx, cy
+            size: cur_w, cur_h
+            corner: corner
+            cursor: pointer
+            active: isl.$screen.phase == 2
+            label: "Fold Island"
+            role: button
+        }
+
+        zone box search_btn {
+            at: cx, cy
+            size: cur_w, cur_h
+            corner: corner
+            cursor: pointer
+            active: isl.$screen.phase == 3
+            label: "Close Search"
+            role: button
+        }
+
+        group {
+            opacity: alpha
+            move: 0, edge_depart
+
+            GlassCard(cx, cy, cur_w, cur_h, corner, 0.5 * alpha)
+
+            group {
+                clip box {
+                    at: cx, cy
+                    size: cur_w, cur_h
+                    corner: corner
+                }
+
+                group {
+                    opacity: compact_alpha
+
+                    group {
+                        opacity: 1 - pill_flash
+
+                        group {
+                            opacity: media_show
+
+                            CircleButton(cx - 126, cy, 16, playing)
+                            TickStrip(cx + 61, cy, 150, 3, 16, media_progress, nacre_accent)
+                        }
+
+                        text clock_time {
+                            at: cx - 58 - 40 * media_show, cy - 7 * media_show
+                            anchor: left center
+                            family: "SF Pro"
+                            size: nacre_fs21
+                            weight: nacre_w600
+                            color: nacre_ink
+                        }
+                        text clock_date {
+                            at: cx - 98 * media_show, cy + 15 * media_show
+                            anchor: left center
+                            family: "SF Pro"
+                            size: nacre_fs11
+                            weight: nacre_w500
+                            color: nacre_ink_soft
+                        }
+
+                        group {
+                            opacity: weather_show * compact_alpha
+
+                            NacWeatherGlyph(weather, cx + 78 - 12 * weather_show, cy, nacre_ink_soft)
+                        }
+                    }
+                }
+
+                group {
+                    opacity: pill_flash * (1 - np_reach) * (1 - search_reach) * (1 - nc_reach) * mon_gate
+
+                    group {
+                        clip box {
+                            at: icon_cx, card_cy
+                            size: 48, 48
+                            corner: 12
+                        }
+                        box {
+                            at: icon_cx, card_cy
+                            size: 48, 48
+                            color: nacre_ink
+                            opacity: 0.05
+                        }
+                        image nc_icon_img {
+                            at: icon_cx - 24, card_cy - 24
+                            size: 48, 48
+                            fit: cover
+                        }
+                    }
+
+                    text nc_pop_app {
+                        at: pop_x, card_cy - 18
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs10
+                        weight: nacre_w600
+                        color: nacre_ink_faint
+                        width: card_w - 104
+                        lines: 1
+                    }
+                    text nc_pop_title {
+                        at: pop_x, card_cy - 1
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs14
+                        weight: nacre_w600
+                        color: nacre_ink
+                        width: card_w - 104
+                        lines: 1
+                    }
+                    text nc_pop_body {
+                        at: pop_x, card_cy + 16
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs11
+                        weight: nacre_w500
+                        color: nacre_ink_soft
+                        width: card_w - 104
+                        lines: 1
+                    }
+                }
+
+                group {
+                    opacity: np_alpha * np_reach
+
+                    group {
+                        opacity: 1 - art_show
+
+                        ArtSquircle(cx - 140, cy - 38, 96)
+                    }
+                    group {
+                        opacity: art_show
+
+                        clip box {
+                            at: cx - 140, cy - 38
+                            size: 96, 96
+                            corner: 21
+                        }
+                        image art_img {
+                            at: cx - 188, cy - 86
+                            size: 96, 96
+                            fit: cover
+                        }
+                    }
+
+                    ellipse {
+                        at: cx - 74, cy - 66
+                        radius: 2.5
+                        color: nacre_accent
+                    }
+                    text if(playing, "NOW PLAYING", "PAUSED") {
+                        at: cx - 64, cy - 66
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs10
+                        weight: nacre_w700
+                        color: nacre_ink_faint
+                    }
+                    text media_title {
+                        at: cx - 64, cy - 38
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs17
+                        weight: nacre_w600
+                        color: nacre_ink
+                    }
+                    text media_artist {
+                        at: cx - 64, cy - 14
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs13
+                        weight: nacre_w400
+                        color: nacre_ink_soft
+                    }
+
+                    FluidWave(cx, cy + 28, 376, 16, media_progress)
+
+                    text time_elapsed {
+                        at: cx - 188, cy + 54
+                        anchor: left center
+                        family: "SF Mono"
+                        size: nacre_fs11
+                        weight: nacre_w500
+                        color: nacre_ink_soft
+                    }
+                    box {
+                        at: cx, cy + 54
+                        size: scrub_w, 3
+                        corner: 1.5
+                        color: nacre_ink
+                        opacity: 0.18
+                    }
+                    box {
+                        at: cx - scrub_w / 2 + scrub_w / 2 * media_progress, cy + 54
+                        size: scrub_w * media_progress, 3
+                        corner: 1.5
+                        color: nacre_accent
+                    }
+                    ellipse {
+                        at: cx - scrub_w / 2 + scrub_w * media_progress, cy + 54
+                        radius: 5
+                        color: nacre_ink
+                    }
+                    text time_remaining {
+                        at: cx + 188, cy + 54
+                        anchor: right center
+                        family: "SF Mono"
+                        size: nacre_fs11
+                        weight: nacre_w500
+                        color: nacre_ink_soft
+                    }
+
+                    SkipButton(cx - 44, cy + 80, 14, true)
+                    CircleButton(cx, cy + 80, 16, playing)
+                    SkipButton(cx + 44, cy + 80, 14, false)
+                }
+
+                group {
+                    opacity: search_reach
+
+                    SearchHeader(cx, top_edge + 30)
+
+                    column results {
+                        at: cx - 210, top_edge + 72
+                        gap: 4
+                        view: 420, view_h
+                        step: 36
+                        for h in hits {
+                            AppRow(h, sel, launch, select_hit, isl.$screen.phase == 3)
+                        }
+                    }
+
+                    text "No applications found" {
+                        at: cx, top_edge + 88
+                        anchor: center
+                        family: "SF Pro"
+                        size: nacre_fs13
+                        weight: nacre_w400
+                        color: nacre_ink_faint
+                        show: hits.count == 0
+                    }
+                }
+
+                group {
+                    opacity: nc_reach
+
+                    text "Notifications" {
+                        at: cx - nc_w / 2 + 20, top_edge + 26
+                        anchor: left center
+                        family: "SF Pro"
+                        size: nacre_fs15
+                        weight: nacre_w600
+                        color: nacre_ink
+                    }
+                    text nc_count {
+                        at: cx - nc_w / 2 + 118, top_edge + 26
+                        anchor: left center
+                        family: "SF Mono"
+                        size: nacre_fs11
+                        weight: nacre_w500
+                        color: nacre_ink_faint
+                    }
+                    text "Clear" {
+                        at: cx + nc_w / 2 - 66, top_edge + 26
+                        anchor: center
+                        family: "SF Pro"
+                        size: nacre_fs12
+                        weight: nacre_w600
+                        color: nacre_accent
+                    }
+                    text "×" {
+                        at: cx + nc_w / 2 - 20, top_edge + 26
+                        anchor: center
+                        family: "SF Pro"
+                        size: nacre_fs18
+                        weight: nacre_w400
+                        color: nacre_ink_soft
+                    }
+
+                    column nclist {
+                        at: cx - nc_w / 2 + 12, top_edge + 54
+                        gap: 3
+                        view: nc_w - 24, nc_view_h
+                        step: 46
+                        for r in nc {
+                            NcRow(r, nc_row_evt, isl.$screen.phase == 4)
+                        }
+                    }
+
+                    text "No notifications" {
+                        at: cx, top_edge + 84
+                        anchor: center
+                        family: "SF Pro"
+                        size: nacre_fs13
+                        weight: nacre_w400
+                        color: nacre_ink_faint
+                        show: nc.count == 0
+                    }
+                }
+            }
+        }
+
+        zone box scrub_track {
+            at: cx, cy + 54
+            size: scrub_w, 18
+            corner: 9
+            cursor: pointer
+            active: isl.$screen.phase == 2
+            label: "Scrub Media"
+            role: slider
+        }
+        zone box prev_btn {
+            at: cx - 44, cy + 80
+            size: 28, 28
+            corner: 14
+            cursor: pointer
+            active: isl.$screen.phase == 2
+            label: "Previous Track"
+            role: button
+        }
+        zone ellipse play_btn {
+            at: cx, cy + 80
+            radius: 16
+            cursor: pointer
+            active: isl.$screen.phase == 2
+            label: "Play or Pause"
+            role: button
+        }
+        zone box next_btn {
+            at: cx + 44, cy + 80
+            size: 28, 28
+            corner: 14
+            cursor: pointer
+            active: isl.$screen.phase == 2
+            label: "Next Track"
+            role: button
+        }
+        zone box esc_btn {
+            at: cx + 192, top_edge + 30
+            size: 36, 20
+            corner: 6
+            cursor: pointer
+            active: isl.$screen.phase == 3
+            label: "Close Search"
+            role: button
+        }
+        zone box clear_btn {
+            at: cx + nc_w / 2 - 66, top_edge + 26
+            size: 52, 24
+            corner: 6
+            cursor: pointer
+            active: isl.$screen.phase == 4
+            label: "Clear Notifications"
+            role: button
+        }
+        zone box nc_x_btn {
+            at: cx + nc_w / 2 - 20, top_edge + 26
+            size: 28, 24
+            corner: 6
+            cursor: pointer
+            active: isl.$screen.phase == 4
+            label: "Close Notifications"
+            role: button
+        }
+
+        on enter wake_strip while isl.$screen.phase == 0 { isl.$screen.grace_in = 0; isl.$screen.phase = 1; awake_count = awake_count + 1 }
+        on press wake_strip while isl.$screen.phase == 0 { isl.$screen.grace_in = 0; isl.$screen.phase = 1; awake_count = awake_count + 1 }
+        on press compact_btn while isl.$screen.phase == 1 and cur_h > 30 { isl.$screen.phase = 2 }
+        on press np_btn while isl.$screen.phase == 2 { isl.$screen.phase = 1 }
+        on press search_btn while isl.$screen.phase == 3 { isl.$screen.phase = 1; blur }
+        on enter grace_area { isl.$screen.grace_in = 1 }
+        on leave grace_area { isl.$screen.grace_in = 0 }
+        on leave grace_area while isl.$screen.phase > 0 { isl.$screen.phase = 0; awake_count = max(0, awake_count - 1); blur }
+        on press scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
+        on drag scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
+        on press play_btn { playing = not playing; emit media_toggle }
+        on press prev_btn { media_progress = 0; emit media_prev }
+        on press next_btn { media_progress = 0; emit media_next }
+        on press esc_btn { isl.$screen.phase = 1; blur }
+        on press right compact_btn while isl.$screen.phase == 1 { isl.$screen.phase = 4 }
+        on press clear_btn { emit nc_clear_evt }
+        on press nc_x_btn { isl.$screen.phase = 1 }
+
+        on change isl.$screen.phase while isl.$screen.phase == 3 { results.scroll: 0 ~0ms }
+        on change isl.$screen.phase while isl.$screen.phase == 4 { nclist.scroll: 0 ~0ms }
+        on change sel while isl.$screen.phase == 3 { results.scroll: min(max(0, max(results.scroll, sel_top + 32 - view_h)), sel_top) ~quick }
+
+        on change cur_h { isl_settling = 1 }
+        on still cur_h for 120ms { isl_settling = 0 }
+    }
+
+}

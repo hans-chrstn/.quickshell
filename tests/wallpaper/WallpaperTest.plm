@@ -1,0 +1,13 @@
+language 0.9
+
+import "../../scenes/common/Theme.plm"
+
+scene WallpaperTest {
+    permissions {
+        run: "ls"
+        services: "env"
+    }
+
+    include "../../scenes/state/wallpaper.plm"
+    include "../../scenes/surfaces/wallpaper.plm"
+}

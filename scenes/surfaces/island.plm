@@ -1,0 +1,48 @@
+part IslandSurface {
+    surface {
+        size: full, full
+        anchor: top
+        screens: each
+    }
+
+    surface island {
+        size: full, 520
+        anchor: top
+        level: overlay
+        screens: each max 8
+        rate: 60, 20 while awake_count == 0 and isl_settling == 0
+        keyboard: on_demand
+
+        on key Ctrl+space while isl.$screen.phase > 0 { isl.$screen.phase = 3; focus query }
+        on key Super+space while isl.$screen.phase > 0 { isl.$screen.phase = 3; focus query }
+        on key Escape while isl.$screen.phase == 4 { isl.$screen.phase = 1 }
+        on key Escape while isl.$screen.phase == 3 { isl.$screen.phase = 1; blur }
+        on key Escape while isl.$screen.phase == 2 { isl.$screen.phase = 1 }
+        on key Escape while isl.$screen.phase == 1 { isl.$screen.phase = 0; awake_count = awake_count - 1 }
+        every 2s while isl.$screen.phase > 0 and isl.$screen.grace_in == 0 { isl.$screen.phase = 0; awake_count = max(0, awake_count - 1); blur }
+        on key Down while isl.$screen.phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
+        on key Up while isl.$screen.phase == 3 { sel = max(sel - 1, 0) }
+        on select_hit(i) while isl.$screen.phase == 3 { sel = i }
+        on submit query while isl.$screen.phase == 3 { emit launch(sel) }
+        on launch while isl.$screen.phase == 3 { isl.$screen.phase = 0; awake_count = awake_count - 1; blur }
+
+        IslandCopy
+    }
+
+    surface mon_tracker {
+        size: full, full
+        anchor: top
+        level: bottom
+        screens: each max 8
+        keyboard: none
+
+        zone box mon_track {
+            at: screen.width / 2, screen.height / 2
+            size: screen.width, screen.height
+            yields: true
+        }
+
+        on enter mon_track { mon.$screen.here = 1 }
+        on leave mon_track { mon.$screen.here = 0 }
+    }
+}

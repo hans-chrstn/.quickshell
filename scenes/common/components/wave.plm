@@ -1,0 +1,51 @@
+import "../Theme.plm"
+
+library WaveLib {
+    component TickStrip(
+        cx: number,
+        cy: number,
+        w: number,
+        tick_w: number,
+        tick_h: number,
+        progress: number,
+        on: color = nacre_accent,
+        off: color = nacre_ink
+    ) {
+        let step = w / 24
+        repeat i in 0..23 {
+            let lit = i < progress * 24
+            box {
+                at: cx - w / 2 + step / 2 + i * step, cy
+                size: tick_w, tick_h
+                corner: tick_w / 2
+                color: mix(off, on, lit)
+                opacity: nacre_tick_off_opacity + (1 - nacre_tick_off_opacity) * lit
+            }
+        }
+    }
+
+    component Waveform(
+        cx: number,
+        cy: number,
+        w: number,
+        h: number,
+        progress: number,
+        on: color = nacre_accent,
+        off: color = nacre_ink
+    ) {
+        let gap = 2
+        let bar_w = (w - 35 * gap) / 36
+        repeat i in 0..35 {
+            let hump = sin(180 * i / 35)
+            let lit = i / 36 < progress
+            box {
+                at: cx - w / 2 + bar_w / 2 + i * (bar_w + gap), cy
+                size: bar_w, max(h * (0.14 + 0.86 * hump), 2)
+                corner: bar_w / 2
+                color: mix(off, on, lit)
+                opacity: nacre_wave_off_opacity + (1 - nacre_wave_off_opacity) * lit
+            }
+        }
+    }
+
+}
