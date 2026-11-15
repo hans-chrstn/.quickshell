@@ -1,0 +1,15 @@
+library EdgeIntentLib {
+    component EdgeIntent(cx: number, cy: number, w: number, h: number, radius: number, label_text: text, enabled: bool, allow_press: bool, wake_evt: event) {
+        zone box wake_hit {
+            at: cx, cy
+            size: w, h
+            corner: radius
+            cursor: pointer
+            active: enabled
+            label: label_text
+            role: button
+        }
+        on hover wake_hit for 170ms while enabled { emit wake_evt(screen.index) }
+        on press wake_hit while allow_press and enabled { emit wake_evt(screen.index) }
+    }
+}

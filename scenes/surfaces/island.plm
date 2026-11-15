@@ -19,7 +19,7 @@ part IslandSurface {
         on key Escape while isl.$screen.phase == 3 { isl.$screen.phase = 1; blur }
         on key Escape while isl.$screen.phase == 2 { isl.$screen.phase = 1 }
         on key Escape while isl.$screen.phase == 1 { isl.$screen.phase = 0; awake_count = awake_count - 1 }
-        every 2s while isl.$screen.phase > 0 and isl.$screen.grace_in == 0 { isl.$screen.phase = 0; awake_count = max(0, awake_count - 1); blur }
+        every 400ms while isl.$screen.phase > 0 and isl.$screen.grace_in == 0 and nc_flash == 0 { isl.$screen.phase = 0; awake_count = max(0, awake_count - 1); blur }
         on key Down while isl.$screen.phase == 3 { sel = min(sel + 1, max(hits.count - 1, 0)) }
         on key Up while isl.$screen.phase == 3 { sel = max(sel - 1, 0) }
         on select_hit(i) while isl.$screen.phase == 3 { sel = i }

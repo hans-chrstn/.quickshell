@@ -17,22 +17,25 @@ part ControlSurface {
     }
 
     surface cc_wake {
-        size: 28, 168
+        size: 28, 288
         anchor: right
         level: overlay
         screens: each max 8
         keyboard: none
 
-        zone box cc_wake_strip {
-            at: 14, 84
-            size: 20, 168
-            cursor: pointer
-            active: cc.$screen.phase == 0
-            label: "Open Control Centre"
-            role: button
+        EdgeIntent(14, 144, 20, 288, 0, "Open Control Centre", cc.$screen.phase == 0, false, wake_control)
+
+        zone box cc_keep_strip {
+            at: 14, 144
+            size: 28, 288
+            active: cc.$screen.phase > 0
+            label: "Control Centre Edge"
+            role: region
         }
 
-        on hover cc_wake_strip for 360ms while cc.$screen.phase == 0 { cc.$screen.grace_in = 0; cc.$screen.phase = 1; cc_awake = cc_awake + 1; emit cc_wake_evt(1) }
+        on wake_control(i) while i == screen.index and cc.$screen.phase == 0 { cc.$screen.grace_in = 1; cc.$screen.phase = 1; cc_awake = cc_awake + 1; emit cc_wake_evt(1) }
+        on enter cc_keep_strip { cc.$screen.grace_in = 1 }
+        on leave cc_keep_strip { cc.$screen.grace_in = 0 }
     }
 
     surface cc_surface {
@@ -43,20 +46,22 @@ part ControlSurface {
         rate: 60, 20 while cc_awake == 0 and cc_settling == 0
         keyboard: on_demand
 
-        image wall_prev = from wall_preview_path, 408, 168
+        image wall_prev = from wall_preview_path, 0, 0
 
         on key Escape while cc.$screen.phase == 2 and pick_kind > 0 { pick_kind = 0; pick_row = 0 }
         on key Escape while cc.$screen.phase > 1 and picker_open { picker_open = false }
         on key Escape while cc.$screen.phase == 3 { cc.$screen.phase = 1 }
+        on key Escape while cc.$screen.phase == 4 { cc.$screen.phase = 1 }
+        on key Escape while cc.$screen.phase == 5 { cc.$screen.phase = 1; task_selected = -1; task_close_confirm = false }
         on key Escape while cc.$screen.phase == 2 { cc.$screen.phase = 1 }
         on key Escape while cc.$screen.phase == 1 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
-        every 1.5s while cc.$screen.phase > 0 and cc.$screen.grace_in == 0 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
+        every 400ms while cc.$screen.phase > 0 and cc.$screen.grace_in == 0 and cc_settling == 0 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
         on cc_tab_levels { cc_page = 0; pick_kind = 0; pick_row = 0 }
         on cc_tab_out { cc_page = 1; pick_kind = 0; pick_row = 0 }
         on cc_tab_in { cc_page = 2; pick_kind = 0; pick_row = 0 }
         on cc_tab_apps { cc_page = 3; pick_kind = 0; pick_row = 0 }
         on cc_route_cancel { pick_kind = 0; pick_row = 0 }
 
-        ControlBody
+        ControlBody(screen.name)
     }
 }

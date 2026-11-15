@@ -82,6 +82,7 @@ return function(search)
         end
         local rows = {}
         local flat = {}
+        local kept = 0
         for _, app in ipairs(order) do
             local items = by_app[app]
             if #items > 5 then
@@ -100,10 +101,11 @@ return function(search)
                 title = "Notification"
             end
             local count = #items
+            kept = kept + count
             if nc_expanded[app] and count > 1 then
-                rows[#rows + 1] = { app = app, badge = "", title = title, body = "", time = rel_time(newest.time), open = 0 }
+                rows[#rows + 1] = { app = app, badge = "−", title = title, body = "", time = rel_time(newest.time), open = 0, kind = 1 }
                 flat[#flat + 1] = { type = "group", app = app }
-                for _, n in ipairs(items) do
+                for item_index, n in ipairs(items) do
                     local body = nstr(n.body)
                     local ti = nstr(n.title)
                     if ti == "" then
@@ -112,16 +114,17 @@ return function(search)
                     if ti == "" then
                         ti = "Notification"
                     end
-                    local id = n.id
+                    local key = app .. ":" .. tostring(n.id or item_index)
                     rows[#rows + 1] = {
                         app = app,
                         badge = "",
                         title = ti,
                         body = body,
                         time = rel_time(n.time),
-                        open = if id ~= nil and id == nc_open_id then 1 else 0
+                        open = if key == nc_open_id then 1 else 0,
+                        kind = 2
                     }
-                    flat[#flat + 1] = { type = "item", app = app, id = id }
+                    flat[#flat + 1] = { type = "item", app = app, key = key }
                 end
             else
                 rows[#rows + 1] = {
@@ -130,9 +133,10 @@ return function(search)
                     title = title,
                     body = nstr(newest.body),
                     time = rel_time(newest.time),
-                    open = if count == 1 and newest.id ~= nil and newest.id == nc_open_id then 1 else 0
+                    open = if count == 1 and (app .. ":" .. tostring(newest.id or 1)) == nc_open_id then 1 else 0,
+                    kind = if count > 1 then 3 else 0
                 }
-                flat[#flat + 1] = { type = if count > 1 then "group" else "single", app = app, id = newest.id }
+                flat[#flat + 1] = { type = if count > 1 then "group" else "single", app = app, key = app .. ":" .. tostring(newest.id or 1) }
             end
             if #rows >= 20 then
                 break
@@ -140,7 +144,7 @@ return function(search)
         end
         nc_flat = flat
         model.nc = rows
-        text.nc_count = if #rows > 0 then #rows .. " kept" else ""
+        text.nc_count = if kept > 0 then kept .. " kept" else ""
     end
     
     local function any_awake()
@@ -178,13 +182,17 @@ return function(search)
     end
     
     local function auto_pop()
-        local target = 0
+        fact.nc_pop_only = 1
+        after(3200, function() fact.nc_pop_only = 0 end)
+        local target = -1
         for i = 0, 7 do
             if fact["mon." .. i .. ".here"] == 1 then
                 target = i
                 break
             end
         end
+        if target < 0 then target = tonumber(fact.focused_monitor) or -1 end
+        if target < 0 or target > 7 then target = 0 end
         if not auto_woke[target] and fact["isl." .. target .. ".phase"] == 0 then
             fact["isl." .. target .. ".phase"] = 1
             auto_woke[target] = true
@@ -193,7 +201,7 @@ return function(search)
         if auto_id ~= 0 then
             cancel(auto_id)
         end
-        auto_id = after(2400, function()
+        auto_id = after(2050, function()
             auto_id = 0
             auto_fold_check()
         end)
@@ -278,11 +286,11 @@ return function(search)
                 nc_open_id = nil
             end
         else
-            local id = node.id
-            if id ~= nil and id == nc_open_id then
+            local key = node.key
+            if key == nc_open_id then
                 nc_open_id = nil
             else
-                nc_open_id = id
+                nc_open_id = key
             end
         end
         nc_rebuild()

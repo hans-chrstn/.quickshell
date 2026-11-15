@@ -5,14 +5,14 @@ library SearchLib {
         ellipse {
             at: x, y
             radius: 7
-            color: nacre_ink_soft
+            color: theme_ink_soft
             stroke: 2
         }
         line {
             from: x + 5, y + 5
             to: x + 11, y + 11
             width: 2
-            color: nacre_ink_soft
+            color: theme_ink_soft
         }
     }
 
@@ -21,16 +21,16 @@ library SearchLib {
             at: cx, cy
             size: 36, 20
             corner: 6
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.08
         }
         text "ESC" {
             at: cx, cy
             anchor: center
-            family: "SF Mono"
-            size: nacre_fs10
-            weight: nacre_w600
-            color: nacre_ink_soft
+            family: theme_font_mono
+            size: theme_font_size_10
+            weight: theme_font_weight_600
+            color: theme_ink_soft
         }
     }
 
@@ -40,12 +40,12 @@ library SearchLib {
         input query {
             at: cx - 178, y
             width: 320
-            size: nacre_fs15
-            family: "SF Pro"
-            weight: nacre_w500
-            color: nacre_ink
+            size: theme_font_size_15
+            family: theme_font_ui
+            weight: theme_font_weight_500
+            color: theme_ink
             placeholder: "Search applications"
-            selection: nacre_accent
+            selection: theme_accent
         }
 
         EscBadge(cx + 192, y)
@@ -53,7 +53,7 @@ library SearchLib {
         box {
             at: cx, y + 30
             size: 420, 1
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.10
         }
     }
@@ -76,21 +76,21 @@ library SearchLib {
             from: 0, 0
             size: 420, 32
             corner: 10
-            color: nacre_accent
+            color: theme_accent
             opacity: if(is_sel, 0.12, 0)
         }
         box {
             from: 8, 7
             size: 3, 18
             corner: 1.5
-            color: nacre_accent
+            color: theme_accent
             opacity: if(is_sel, 0.9, 0)
         }
         box {
             from: 12, 6
             size: 20, 20
             corner: 6
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.10
         }
         image h.icon {
@@ -101,10 +101,10 @@ library SearchLib {
         text h.name {
             at: 44, 16
             anchor: left center
-            family: "SF Pro"
-            size: nacre_fs14
+            family: theme_font_ui
+            size: theme_font_size_14
             weight: if(is_sel, 600, 500)
-            color: if(is_sel, nacre_ink, nacre_ink_soft)
+            color: if(is_sel, theme_ink, theme_ink_soft)
             width: 330
             lines: 1
         }
@@ -118,28 +118,28 @@ library SearchLib {
             from: x, y
             size: 420, 32
             corner: 10
-            color: nacre_accent
+            color: theme_accent
             opacity: if(sel, 0.12, 0)
         }
         box {
             from: x + 8, y + 7
             size: 3, 18
             corner: 1.5
-            color: nacre_accent
+            color: theme_accent
             opacity: if(sel, 0.9, 0)
         }
         box {
             from: x + 12, y + 6
             size: 20, 20
             corner: 6
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.10
         }
         box {
             at: x + 44 + name_w / 2, y + 16
             size: name_w, 3
             corner: 1.5
-            color: if(sel, nacre_ink, nacre_ink_faint)
+            color: if(sel, theme_ink, theme_ink_faint)
             opacity: 0.55
         }
     }
@@ -148,13 +148,13 @@ library SearchLib {
         cx: number,
         cy: number,
         s: number,
-        accent: color = nacre_accent
+        accent: color = theme_accent
     ) {
         box {
             at: cx, cy
             size: s, s
             corner: s * 0.22
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.08
         }
         box {

@@ -6,14 +6,15 @@ import "scenes/common/components/wave.plm"
 import "scenes/common/components/controls.plm"
 import "scenes/common/components/search.plm"
 import "scenes/common/components/glyphs.plm"
-import "scenes/common/components/nac-controls.plm"
+import "scenes/common/components/control-components.plm"
+import "scenes/common/components/edge-intent.plm"
 import "scenes/island/IslandBody.plm"
 import "scenes/utility/ControlBody.plm"
 
 scene Nacre {
     permissions {
-        run: "curl", "ls", "pactl"
-        services: "clock", "apps", "apps.launch", "media", "media.toggle", "media.previous", "media.next", "media.seek", "env", "notifications", "notification_history", "notifications.clear", "notifications.clear_history", "audio", "audio.level", "files.read", "files.write"
+        run: "curl", "ls", "pactl", "grim", "satty", "wf-recorder", "xdg-user-dir", "mkdir"
+        services: "clock", "apps", "apps.launch", "media", "media.toggle", "media.previous", "media.next", "media.seek", "env", "notifications", "notification_history", "notifications.clear", "notifications.clear_history", "audio", "audio.level", "brightness", "files", "files.write", "window", "window.restore", "window.minimize", "window.activate", "window.close"
     }
 
     service clock as now {
@@ -28,8 +29,11 @@ scene Nacre {
         date: text = ""
     }
 
+    include "scenes/state/theme.plm"
     include "scenes/state/island.plm"
     include "scenes/state/control.plm"
+    include "scenes/state/osd.plm"
     include "scenes/surfaces/island.plm"
     include "scenes/surfaces/control.plm"
+    include "scenes/surfaces/osd.plm"
 }

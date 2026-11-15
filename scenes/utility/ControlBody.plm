@@ -2,39 +2,41 @@ import "../common/Theme.plm"
 import "../common/components/controls.plm"
 import "../common/components/search.plm"
 import "../common/components/glyphs.plm"
-import "../common/components/nac-controls.plm"
+import "../common/components/control-components.plm"
 
 library ControlBodyLib {
-    component ControlBody {
+    component ControlBody(output_name: text) {
         let rail_w = 80
-        let rail_h = 168
+        let rail_h = 288
         let audio_w = 440
-        let device_count = if(cc_page == 1, sinks.count, sources.count)
         let play_visible = min(4, play_rows.count)
-        let rec_visible = min(2, rec_rows.count)
         let picker_count = if(pick_kind == 1, sinks.count, sources.count)
         let picker_h = clamp(88 + max(1, picker_count) * 56, 200, 448)
-        let apps_h = if(pick_kind > 0, 600, clamp(320 + max(1, play_visible) * 64 + max(1, rec_visible) * 64, 448, 600))
-        let audio_h = if(cc_page == 1 or cc_page == 2, clamp(240 + max(1, device_count) * 56, 360, 600), if(cc_page == 3, apps_h, 600))
+        let audio_h = 600
         let wall_w = 440
-        let wall_h = 420
+        let wall_h = 500
+        let capture_h = 460
         let right_edge = screen.width - 16
         let cy = 340
 
         prop cur_w = 0 ~900ms
         prop cur_h = 0 ~900ms
-        prop audio_show = 0 ~fluid
-        prop wall_show = 0 ~fluid
-        prop pick_show = 0 ~lively
-        prop pg0 = 0 ~calm
-        prop pg1 = 0 ~calm
-        prop pg2 = 0 ~calm
-        prop pg3 = 0 ~calm
+        prop audio_show = 0 ~600ms
+        prop wall_show = 0 ~600ms
+        prop capture_show = 0 ~600ms
+        prop task_show = 0 ~600ms
+        prop pick_show = 0 ~600ms
+        prop pg0 = 0 ~600ms
+        prop pg1 = 0 ~600ms
+        prop pg2 = 0 ~600ms
+        prop pg3 = 0 ~600ms
 
-        follow cur_w = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_w, if(cc.$screen.phase == 2, audio_w, wall_w)))
-        follow cur_h = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_h, if(cc.$screen.phase == 2, audio_h, wall_h)))
+        follow cur_w = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_w, audio_w))
+        follow cur_h = if(cc.$screen.phase == 0, 0, if(cc.$screen.phase == 1, rail_h, if(cc.$screen.phase == 2, audio_h, if(cc.$screen.phase == 4, capture_h, wall_h))))
         follow audio_show = if(cc.$screen.phase == 2, 1, 0)
         follow wall_show = if(cc.$screen.phase == 3, 1, 0)
+        follow capture_show = if(cc.$screen.phase == 4, 1, 0)
+        follow task_show = if(cc.$screen.phase == 5, 1, 0)
         follow pick_show = if(pick_kind > 0, 1, 0)
         follow pg0 = if(cc_page == 0, 1, 0)
         follow pg1 = if(cc_page == 1, 1, 0)
@@ -44,15 +46,19 @@ library ControlBodyLib {
         let alpha = clamp(cur_h / rail_h, 0, 1)
         let edge_depart = (rail_w + 40) * (1 - alpha)
         let cx = right_edge - cur_w / 2 + edge_depart
-        let sheet_cx = right_edge - 220 + edge_depart
+        let sheet_cx = right_edge - audio_w / 2
         let sheet_top = cy - cur_h / 2
         let corner = min(cur_h / 2, 28)
-        let rail_alpha = clamp(1 - max(0, cur_w - 84) / 60, 0, 1)
-        let sheet_alpha = clamp((cur_w - 96) / 64, 0, 1)
+        let rail_alpha = clamp(1 - max(0, cur_w - 84) / 220, 0, 1)
+        let sheet_alpha = clamp((cur_w - 145) / 270, 0, 1)
+        let task_cx = sheet_cx
+        let task_alpha = sheet_alpha * task_show
+        let grace_w = max(rail_w, cur_w) + 60
+        let grace_cx = right_edge - max(rail_w, cur_w) / 2
 
         zone box grace_area {
-            at: cx, cy
-            size: cur_w + 60, cur_h + 80
+            at: grace_cx, cy
+            size: grace_w, max(rail_h, cur_h) + 80
             corner: 44
             active: cc.$screen.phase > 0
             label: "Control Centre Area"
@@ -61,7 +67,6 @@ library ControlBodyLib {
 
         on enter grace_area { cc.$screen.grace_in = 1 }
         on leave grace_area { cc.$screen.grace_in = 0 }
-        on leave grace_area while cc.$screen.phase > 0 { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
 
         zone box sheet_fold_btn {
             at: cx, cy
@@ -74,233 +79,91 @@ library ControlBodyLib {
         }
         on press sheet_fold_btn { cc.$screen.phase = 1 }
 
-        RevealEdge(cx, cy, cur_w, cur_h, corner, alpha, 0.5 * alpha) {
+        group {
+            show: alpha > 0.01
+            opacity: clamp((alpha - 0.18) / 0.82, 0, 1)
+            GlassCard(cx, cy, max(1, cur_w), max(1, cur_h), corner, 0.4 * alpha, false, theme_glass_motion_shade)
             group {
                 opacity: rail_alpha
 
-                NacIcon(cx, cy - 28, 24, 1, cc.$screen.phase == 2)
-                NacIcon(cx, cy + 28, 24, 2, cc.$screen.phase == 3)
+                IconBadge(cx, cy - 96, 22, 1, cc.$screen.phase == 2)
+                IconBadge(cx, cy - 32, 22, 2, cc.$screen.phase == 3)
+                IconBadge(cx, cy + 32, 22, 5, cc.$screen.phase == 4 or capture_recording)
+                IconBadge(cx, cy + 96, 22, 9, cc.$screen.phase == 5)
             }
 
                 group {
-                    show: audio_show > 0.5
+                    show: audio_show > 0.01
                     opacity: sheet_alpha * audio_show
+                    clip box { at: cx, cy; size: max(1, cur_w), max(1, cur_h); corner: corner }
 
                     text "Audio" {
                         at: sheet_cx - 204, sheet_top + 28
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs16
-                        weight: nacre_w600
-                        color: nacre_ink
+                        family: theme_font_display
+                        size: theme_font_size_18
+                        weight: theme_font_weight_600
+                        color: theme_ink
                     }
                     EscBadge(sheet_cx + 192, sheet_top + 28)
 
                     box {
                         at: sheet_cx, sheet_top + 52
                         size: 408, 1
-                        color: nacre_ink
+                        color: theme_ink
                         opacity: 0.10
                     }
 
-                    NacTab(sheet_cx - 144, sheet_top + 84, 84, "LEVELS", cc_page == 0, cc_tab_levels)
-                    NacTab(sheet_cx - 48, sheet_top + 84, 84, "OUTPUT", cc_page == 1, cc_tab_out)
-                    NacTab(sheet_cx + 48, sheet_top + 84, 84, "INPUT", cc_page == 2, cc_tab_in)
-                    NacTab(sheet_cx + 144, sheet_top + 84, 84, "APPS", cc_page == 3, cc_tab_apps)
+                    SectionTab(sheet_cx - 144, sheet_top + 84, 84, "Levels", cc_page == 0, cc_tab_levels)
+                    SectionTab(sheet_cx - 48, sheet_top + 84, 84, "Output", cc_page == 1, cc_tab_out)
+                    SectionTab(sheet_cx + 48, sheet_top + 84, 84, "Input", cc_page == 2, cc_tab_in)
+                    SectionTab(sheet_cx + 144, sheet_top + 84, 84, "Apps", cc_page == 3, cc_tab_apps)
 
                     group {
                         show: pg0 > 0.01
                         opacity: pg0
                         move: 0, 10 * (1 - pg0)
 
-                        box {
-                            at: sheet_cx, cy - 40
-                            size: 408, 140
-                            corner: 14
-                            color: nacre_ink
-                            opacity: 0.05
-                        }
-                        NacMuteBtn(sheet_cx - 172, cy - 74, audio_muted, cc_mute)
-                        text "Output" {
-                            at: sheet_cx - 144, cy - 74
-                            anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs13
-                            weight: nacre_w500
-                            color: nacre_ink
-                        }
-                        NacSlider(sheet_cx + 64, cy - 74, 170, 6, audio_volume, audio_muted, cc_vol)
-                        text volume_percent_text {
-                            at: sheet_cx + 184, cy - 74
-                            anchor: right center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                        }
-                        NacMeter(sheet_cx, cy - 34, 368, 8, out_level)
-                        text active_sink_name {
-                            at: sheet_cx - 172, cy - 2
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                            width: 376
-                            lines: 1
-                            show: has_sink
-                        }
-                        text "No default output" {
-                            at: sheet_cx - 172, cy - 2
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_faint
-                            show: not has_sink
-                        }
-
-                        box {
-                            at: sheet_cx, cy + 108
-                            size: 408, 108
-                            corner: 14
-                            color: nacre_ink
-                            opacity: 0.05
-                        }
-                        NacMicBtn(sheet_cx - 172, cy + 74, mic_muted, cc_mic_mute)
-                        text "Microphone" {
-                            at: sheet_cx - 144, cy + 74
-                            anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs13
-                            weight: nacre_w500
-                            color: nacre_ink
-                        }
-                        NacSlider(sheet_cx + 64, cy + 74, 170, 6, mic_volume, mic_muted, cc_mic)
-                        text mic_percent_text {
-                            at: sheet_cx + 184, cy + 74
-                            anchor: right center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                        }
-                        text active_source_name {
-                            at: sheet_cx - 172, cy + 142
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                            width: 376
-                            lines: 1
-                            show: has_source
-                        }
-                        text "No default input" {
-                            at: sheet_cx - 172, cy + 142
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_faint
-                            show: not has_source
-                        }
-
-                        box {
-                            at: sheet_cx, cy + 186
-                            size: 408, 1
-                            color: nacre_ink
-                            opacity: 0.10
-                        }
-                        text "DEFAULT OUTPUT" {
-                            at: sheet_cx - 102, cy + 210
-                            anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
-                        }
-                        text "DEFAULT INPUT" {
-                            at: sheet_cx + 102, cy + 210
-                            anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
-                        }
-                        text active_sink_name {
-                            at: sheet_cx - 102, cy + 234
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                            width: 180
-                            lines: 1
-                            show: has_sink
-                        }
-                        text "None" {
-                            at: sheet_cx - 102, cy + 234
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_faint
-                            show: not has_sink
-                        }
-                        text active_source_name {
-                            at: sheet_cx + 102, cy + 234
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                            width: 92
-                            lines: 1
-                            show: has_source
-                        }
-                        text "None" {
-                            at: sheet_cx + 102, cy + 234
-                            anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_faint
-                            show: not has_source
-                        }
+                        text "System levels" { at: sheet_cx - 204, sheet_top + 133; anchor: left center; family: theme_font_ui; size: theme_font_size_12; weight: theme_font_weight_600; color: theme_ink_soft }
+                        AudioDeviceHero(sheet_cx, sheet_top + 225, "OUTPUT", active_sink_name, volume_percent_text, audio_volume, audio_muted, has_sink, false, cc_vol, cc_mute)
+                        LevelMeter(sheet_cx, sheet_top + 286, 356, 5, out_level)
+                        AudioDeviceHero(sheet_cx, sheet_top + 398, "INPUT", active_source_name, mic_percent_text, mic_volume, mic_muted, has_source, true, cc_mic, cc_mic_mute)
+                        text "Output and microphone levels follow your default devices." { at: sheet_cx, sheet_top + 510; anchor: center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft }
                     }
 
                     group {
                         show: pg1 > 0.01
                         opacity: pg1
                         move: 0, 10 * (1 - pg1)
+                        AudioDeviceHero(sheet_cx, sheet_top + 212, "DEFAULT OUTPUT", active_sink_name, volume_percent_text, audio_volume, audio_muted, has_sink, false, cc_vol, cc_mute)
 
                         text "OUTPUTS" {
-                            at: sheet_cx - 204, sheet_top + 136
+                            at: sheet_cx - 204, sheet_top + 318
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_9
+                            weight: theme_font_weight_700
+                            color: theme_ink_faint
                         }
+                        InsetPanel(sheet_cx, sheet_top + 444, 408, 212, 20)
                         column out_grid {
-                            at: sheet_cx - 204, sheet_top + 160
-                            gap: 8
-                            view: 408, audio_h - 184
-                            step: 56
+                            at: sheet_cx - 192, sheet_top + 350
+                            gap: 10
+                            view: 384, 188
+                            step: 58
                             for d in sinks {
-                                NacChip(d, 408, selected_sink == d.id, cc_pick_sink)
+                                DeviceChip(d, 384, selected_sink == d.id, cc_pick_sink)
                             }
                         }
                         group {
                             show: sinks.count == 0
                             text "No output devices" {
-                                at: sheet_cx - 204, sheet_top + 164
+                                at: sheet_cx - 184, sheet_top + 380
                                 anchor: left center
-                                family: "SF Mono"
-                                size: nacre_fs11
-                                weight: nacre_w500
-                                color: nacre_ink_faint
+                                family: theme_font_mono
+                                size: theme_font_size_11
+                                weight: theme_font_weight_500
+                                color: theme_ink_faint
                             }
                         }
                     }
@@ -309,33 +172,35 @@ library ControlBodyLib {
                         show: pg2 > 0.01
                         opacity: pg2
                         move: 0, 10 * (1 - pg2)
+                        AudioDeviceHero(sheet_cx, sheet_top + 212, "DEFAULT INPUT", active_source_name, mic_percent_text, mic_volume, mic_muted, has_source, true, cc_mic, cc_mic_mute)
 
                         text "INPUTS" {
-                            at: sheet_cx - 204, sheet_top + 136
+                            at: sheet_cx - 204, sheet_top + 318
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_9
+                            weight: theme_font_weight_700
+                            color: theme_ink_faint
                         }
+                        InsetPanel(sheet_cx, sheet_top + 444, 408, 212, 20)
                         column in_grid {
-                            at: sheet_cx - 204, sheet_top + 160
-                            gap: 8
-                            view: 408, audio_h - 184
-                            step: 56
+                            at: sheet_cx - 192, sheet_top + 350
+                            gap: 10
+                            view: 384, 188
+                            step: 58
                             for s in sources {
-                                NacChip(s, 408, selected_source == s.id, cc_pick_source, true)
+                                DeviceChip(s, 384, selected_source == s.id, cc_pick_source, true)
                             }
                         }
                         group {
                             show: sources.count == 0
                             text "No input devices" {
-                                at: sheet_cx - 204, sheet_top + 164
+                                at: sheet_cx - 184, sheet_top + 380
                                 anchor: left center
-                                family: "SF Mono"
-                                size: nacre_fs11
-                                weight: nacre_w500
-                                color: nacre_ink_faint
+                                family: theme_font_mono
+                                size: theme_font_size_11
+                                weight: theme_font_weight_500
+                                color: theme_ink_faint
                             }
                         }
                     }
@@ -345,23 +210,23 @@ library ControlBodyLib {
                         opacity: pg3
                         move: 0, 10 * (1 - pg3)
 
-                        text "PLAYING" {
+                        text "Playing audio" {
                             at: sheet_cx - 204, sheet_top + 132
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_12
+                            weight: theme_font_weight_600
+                            color: theme_ink_soft
                         }
                         group {
                             show: play_rows.count == 0
                             text "Nothing is playing" {
                                 at: sheet_cx - 204, sheet_top + 164
                                 anchor: left center
-                                family: "SF Mono"
-                                size: nacre_fs11
-                                weight: nacre_w500
-                                color: nacre_ink_faint
+                                family: theme_font_mono
+                                size: theme_font_size_11
+                                weight: theme_font_weight_500
+                                color: theme_ink_faint
                             }
                         }
                         column play_grid {
@@ -370,27 +235,27 @@ library ControlBodyLib {
                             view: 408, 280
                             step: 64
                             for p in play_rows {
-                                NacMixRow(p, cc_app_vol, cc_app_mute, cc_route_open)
+                                AppAudioRow(p, cc_app_vol, cc_app_mute, cc_route_open)
                             }
                         }
 
-                        text "RECORDING" {
+                        text "Using microphone" {
                             at: sheet_cx - 204, sheet_top + 208 + max(1, play_visible) * 64
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_12
+                            weight: theme_font_weight_600
+                            color: theme_ink_soft
                         }
                         group {
                             show: rec_rows.count == 0
                             text "No apps are recording" {
                                 at: sheet_cx - 204, sheet_top + 240 + max(1, play_visible) * 64
                                 anchor: left center
-                                family: "SF Mono"
-                                size: nacre_fs11
-                                weight: nacre_w500
-                                color: nacre_ink_faint
+                                family: theme_font_mono
+                                size: theme_font_size_11
+                                weight: theme_font_weight_500
+                                color: theme_ink_faint
                             }
                         }
                         column rec_grid {
@@ -399,7 +264,7 @@ library ControlBodyLib {
                             view: 408, 104
                             step: 64
                             for r in rec_rows {
-                                NacMixRow(r, cc_app_vol, cc_app_mute, cc_route_open)
+                                AppAudioRow(r, cc_app_vol, cc_app_mute, cc_route_open)
                             }
                         }
                     }
@@ -421,14 +286,14 @@ library ControlBodyLib {
                             at: sheet_cx, cy
                             size: 440, 600
                             corner: 28
-                            color: nacre_glass_base
+                            color: theme_glass_base
                             opacity: 0.58
                         }
                         box {
                             at: sheet_cx, cy - 200 + picker_h / 2
                             size: 424, picker_h
                             corner: 16
-                            color: nacre_glass_base
+                            color: theme_glass_base
                             opacity: 0.995
                         }
                         box {
@@ -436,34 +301,34 @@ library ControlBodyLib {
                             size: 424, picker_h
                             corner: 16
                             stroke: 1
-                            color: nacre_ink
+                            color: theme_ink
                             opacity: 0.18
                         }
                         text "SEND TO" {
                             at: sheet_cx - 188, cy - 158
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_9
+                            weight: theme_font_weight_700
+                            color: theme_ink_faint
                             show: pick_kind == 1
                         }
                         text "RECORD FROM" {
                             at: sheet_cx - 188, cy - 158
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs9
-                            weight: nacre_w700
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_9
+                            weight: theme_font_weight_700
+                            color: theme_ink_faint
                             show: pick_kind == 2
                         }
                         text "Cancel" {
                             at: sheet_cx + 188, cy - 158
                             anchor: right center
-                            family: "SF Pro"
-                            size: nacre_fs11
-                            weight: nacre_w600
-                            color: nacre_ink_soft
+                            family: theme_font_ui
+                            size: theme_font_size_11
+                            weight: theme_font_weight_600
+                            color: theme_ink_soft
                         }
                         group {
                             show: pick_kind == 1
@@ -473,7 +338,7 @@ library ControlBodyLib {
                                 view: 408, picker_h - 80
                                 step: 56
                                 for d in sinks {
-                                    NacChip(d, 408, false, cc_route_pick)
+                                    DeviceChip(d, 408, false, cc_route_pick)
                                 }
                             }
                         }
@@ -485,7 +350,7 @@ library ControlBodyLib {
                                 view: 408, picker_h - 80
                                 step: 56
                                 for s in sources {
-                                    NacChip(s, 408, false, cc_route_pick, true)
+                                    DeviceChip(s, 408, false, cc_route_pick, true)
                                 }
                             }
                         }
@@ -493,23 +358,24 @@ library ControlBodyLib {
                 }
 
                 group {
-                    show: wall_show > 0.5
+                    show: wall_show > 0.01
                     opacity: sheet_alpha * wall_show
+                    clip box { at: cx, cy; size: max(1, cur_w), max(1, cur_h); corner: corner }
 
                     text "Wallpaper" {
-                        at: sheet_cx - 204, cy - 178
+                        at: sheet_cx - 204, cy - 228
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs16
-                        weight: nacre_w600
-                        color: nacre_ink
+                        family: theme_font_ui
+                        size: theme_font_size_16
+                        weight: theme_font_weight_600
+                        color: theme_ink
                     }
-                    EscBadge(sheet_cx + 192, cy - 178)
+                    EscBadge(sheet_cx + 192, cy - 228)
 
                     box {
-                        at: sheet_cx, cy - 154
+                        at: sheet_cx, cy - 204
                         size: 408, 1
-                        color: nacre_ink
+                        color: theme_ink
                         opacity: 0.10
                         show: not picker_open
                     }
@@ -519,92 +385,100 @@ library ControlBodyLib {
 
                         group {
                             clip box {
-                                at: sheet_cx, cy - 62
-                                size: 408, 168
-                                corner: 12
+                                at: sheet_cx, cy - 74
+                                size: 408, 216
+                                corner: 18
                             }
                             box {
-                                at: sheet_cx, cy - 62
-                                size: 408, 168
-                                color: nacre_ink
+                                at: sheet_cx, cy - 74
+                                size: 408, 216
+                                color: theme_ink
                                 opacity: 0.06
                             }
                             group {
                                 show: wall_count > 0
                                 image wall_prev {
-                                    at: sheet_cx - 204, cy - 146
-                                    size: 408, 168
+                                    at: sheet_cx - 204, cy - 182
+                                    size: 408, 216
                                     fit: cover
                                 }
                             }
                             group {
                                 show: wall_count == 0
-                                NacGlyph(2, sheet_cx, cy - 74, nacre_warm)
+                                Glyph(2, sheet_cx, cy - 90, theme_warm)
                                 text "No wallpapers found" {
-                                    at: sheet_cx, cy - 44
+                                    at: sheet_cx, cy - 58
                                     anchor: center
-                                    family: "SF Pro"
-                                    size: nacre_fs12
-                                    weight: nacre_w400
-                                    color: nacre_ink_faint
+                                    family: theme_font_ui
+                                    size: theme_font_size_12
+                                    weight: theme_font_weight_400
+                                    color: theme_ink_faint
                                 }
                             }
                         }
+                        box {
+                            at: sheet_cx, cy - 74
+                            size: 408, 216
+                            corner: 18
+                            stroke: 1
+                            color: theme_ink
+                            opacity: theme_inset_rim_opacity
+                        }
 
                         text wall_title {
-                            at: sheet_cx - 204, cy + 52
+                            at: sheet_cx - 204, cy + 65
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs14
-                            weight: nacre_w600
-                            color: nacre_ink
+                            family: theme_font_ui
+                            size: theme_font_size_14
+                            weight: theme_font_weight_600
+                            color: theme_ink
                             width: 300
                             lines: 1
                         }
                         text if(wall_count > 0, "Library", "No wallpapers found") {
-                            at: sheet_cx - 204, cy + 78
+                            at: sheet_cx - 204, cy + 91
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs11
-                            weight: nacre_w400
-                            color: nacre_ink_faint
+                            family: theme_font_ui
+                            size: theme_font_size_11
+                            weight: theme_font_weight_400
+                            color: theme_ink_faint
                         }
 
                         box {
-                            at: sheet_cx + 120, cy + 132
+                            at: sheet_cx + 120, cy + 177
                             size: 96, 36
                             corner: 18
-                            color: nacre_accent
+                            color: theme_accent
                             opacity: 0.14
                             show: wall_count > 0
                         }
                         text "Set" {
-                            at: sheet_cx + 120, cy + 132
+                            at: sheet_cx + 120, cy + 177
                             anchor: center
-                            family: "SF Pro"
-                            size: nacre_fs12
-                            weight: nacre_w600
-                            color: nacre_accent
+                            family: theme_font_ui
+                            size: theme_font_size_12
+                            weight: theme_font_weight_600
+                            color: theme_accent
                             show: wall_count > 0
                         }
 
-                        NacChevron(sheet_cx + 160, cy + 52, 13, true)
-                        NacChevron(sheet_cx + 196, cy + 52, 13, false)
+                        Chevron(sheet_cx + 160, cy + 65, 13, true)
+                        Chevron(sheet_cx + 196, cy + 65, 13, false)
 
                         box {
-                            at: sheet_cx - 160, cy + 132
+                            at: sheet_cx - 160, cy + 177
                             size: 96, 36
                             corner: 18
-                            color: nacre_accent
+                            color: theme_accent
                             opacity: 0.14
                         }
                         text "Browse" {
-                            at: sheet_cx - 160, cy + 132
+                            at: sheet_cx - 160, cy + 177
                             anchor: center
-                            family: "SF Pro"
-                            size: nacre_fs12
-                            weight: nacre_w600
-                            color: nacre_accent
+                            family: theme_font_ui
+                            size: theme_font_size_12
+                            weight: theme_font_weight_600
+                            color: theme_accent
                         }
                     }
 
@@ -612,56 +486,157 @@ library ControlBodyLib {
                         show: picker_open
 
                         box {
-                            at: sheet_cx - 192, cy - 128
+                            at: sheet_cx - 192, cy - 167
                             size: 24, 24
                             corner: 12
-                            color: nacre_ink
+                            color: theme_ink
                             opacity: 0.08
                         }
-                        NacGlyph(4, sheet_cx - 192, cy - 128, nacre_ink)
+                        Glyph(4, sheet_cx - 192, cy - 167, theme_ink)
 
                         text picker_dir_text {
-                            at: sheet_cx - 176, cy - 128
+                            at: sheet_cx - 176, cy - 167
                             anchor: left center
-                            family: "SF Mono"
-                            size: nacre_fs12
-                            weight: nacre_w500
-                            color: nacre_ink_soft
-                            width: 240
+                            family: theme_font_ui
+                            size: theme_font_size_14
+                            weight: theme_font_weight_600
+                            color: theme_ink
+                            width: 250
                             lines: 1
                         }
 
                         box {
-                            at: sheet_cx + 164, cy - 128
+                            at: sheet_cx + 164, cy - 167
                             size: 72, 24
                             corner: 12
-                            color: nacre_ink
+                            color: theme_ink
                             opacity: 0.08
                         }
                         text "Cancel" {
-                            at: sheet_cx + 164, cy - 128
+                            at: sheet_cx + 164, cy - 167
                             anchor: center
-                            family: "SF Pro"
-                            size: nacre_fs11
-                            weight: nacre_w600
-                            color: nacre_ink_soft
+                            family: theme_font_ui
+                            size: theme_font_size_11
+                            weight: theme_font_weight_600
+                            color: theme_ink_soft
                         }
 
                         column picker_grid {
-                            at: sheet_cx - 204, cy - 100
-                            gap: 6
-                            view: 408, 248
-                            step: 46
+                            at: sheet_cx - 204, cy - 125
+                            gap: 7
+                            view: 408, 311
+                            step: 53
                             for it in picker_items {
-                                NacFileRow(it.id, it.name, it.is_dir, 408, picker_select_item)
+                                FilePickerRow(it.id, it.name, it.is_dir, 408, picker_select_item)
                             }
                         }
+                        group {
+                            show: picker_items.count == 0
+                            Glyph(2, sheet_cx, cy + 36, theme_ink_soft)
+                            text "No image files here" { at: sheet_cx, cy + 72; anchor: center; family: theme_font_ui; size: theme_font_size_13; weight: theme_font_weight_600; color: theme_ink_soft }
+                        }
+                        text "Select an image, or use this folder for the library." { at: sheet_cx, cy + 155; anchor: center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft; show: picker_items.count < 4 }
+                        text picker_page_text { at: sheet_cx - 204, cy + 202; anchor: left center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft }
+                        text picker_status { at: sheet_cx - 204, cy + 222; anchor: left center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft }
+                        Chevron(sheet_cx + 64, cy + 207, 14, true)
+                        Chevron(sheet_cx + 100, cy + 207, 14, false)
+                        OptionChip(sheet_cx + 157, cy + 207, 94, "Use Folder", true)
+                    }
+                }
+
+                group {
+                    show: capture_show > 0.01
+                    opacity: sheet_alpha * capture_show
+                    clip box { at: cx, cy; size: max(1, cur_w), max(1, cur_h); corner: corner }
+
+                    text "Capture" {
+                        at: sheet_cx - 204, cy - 202
+                        anchor: left center
+                        family: theme_font_ui
+                        size: theme_font_size_18
+                        weight: theme_font_weight_600
+                        color: theme_ink
+                    }
+                    EscBadge(sheet_cx + 192, cy - 202)
+                    box {
+                        at: sheet_cx, cy - 176
+                        size: 408, 1
+                        color: theme_ink
+                        opacity: 0.10
+                    }
+                    text "DISPLAY" {
+                        at: sheet_cx - 204, cy - 152
+                        anchor: left center
+                        family: theme_font_ui
+                        size: theme_font_size_9
+                        weight: theme_font_weight_700
+                        color: theme_ink_faint
+                    }
+                    text if(capture_recording, capture_target, output_name) {
+                        at: sheet_cx + 204, cy - 152
+                        anchor: right center
+                        family: theme_font_mono
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: theme_ink_soft
+                    }
+                    CaptureActionTile(sheet_cx - 104, cy - 70, "Screenshot", "Annotate in Satty", 5, theme_accent, capture_shot_hit.hover)
+                    CaptureActionTile(sheet_cx + 104, cy - 70, if(capture_recording, "Stop video", "Record video"), if(capture_recording, "Save recording", "Screen to MP4"), 6, theme_capture_record, capture_record_hit.hover)
+                    text "SCREENSHOT" { at: sheet_cx - 204, cy + 16; family: theme_font_ui; size: theme_font_size_11; weight: theme_font_weight_600; color: theme_ink_soft }
+                    text "RECORDING" { at: sheet_cx + 4, cy + 16; family: theme_font_ui; size: theme_font_size_11; weight: theme_font_weight_600; color: theme_ink_soft }
+                    OptionChip(sheet_cx - 156, cy + 58, 96, "PNG", not capture_jpeg)
+                    OptionChip(sheet_cx - 52, cy + 58, 96, "JPEG", capture_jpeg)
+                    OptionChip(sheet_cx + 52, cy + 58, 96, "30 fps", not capture_fps60)
+                    OptionChip(sheet_cx + 156, cy + 58, 96, "60 fps", capture_fps60)
+                    OptionChip(sheet_cx - 104, cy + 106, 200, if(capture_cursor, "Pointer included", "Pointer hidden"), capture_cursor)
+                    OptionChip(sheet_cx + 104, cy + 106, 200, if(capture_audio, "Desktop audio on", "Desktop audio off"), capture_audio)
+                    box { at: sheet_cx, cy + 150; size: 408, 1; color: theme_ink; opacity: 0.10 }
+                    ellipse {
+                        at: sheet_cx - 198, cy + 182
+                        radius: 3
+                        color: if(capture_recording, theme_capture_record, theme_accent)
+                        opacity: if(capture_recording or capture_busy, 1, 0.5)
+                    }
+                    text capture_status {
+                        at: sheet_cx - 186, cy + 182
+                        anchor: left center
+                        family: theme_font_ui
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: if(capture_recording, theme_capture_record, theme_ink_soft)
                     }
                 }
         }
 
+        group {
+            show: task_show > 0.01
+            opacity: task_alpha
+            clip box { at: cx, cy; size: max(1, cur_w), max(1, cur_h); corner: corner }
+            box { at: task_cx, cy; size: 408, 468; corner: 25; color: theme_accent; opacity: 0.03 }
+            text "Windows" { at: task_cx - 168, cy - 216; anchor: left center; family: theme_font_display; size: theme_font_size_18; weight: theme_font_weight_600; color: theme_ink }
+            text "Open and minimized apps" { at: task_cx - 168, cy - 191; anchor: left center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft }
+            EscBadge(task_cx + 192, cy - 216)
+            box { at: task_cx, cy - 170; size: 336, 1; color: theme_ink; opacity: 0.12 }
+            text "No windows are open" { at: task_cx, cy - 68; anchor: center; family: theme_font_ui; size: theme_font_size_13; color: theme_ink_soft; show: task_rows.count == 0 }
+            column task_grid {
+                at: task_cx - 168, cy - 150
+                gap: 7
+                view: 336, 254
+                step: 57
+                for item in task_rows { TaskRow(item, task_selected == item.id, cc_task_select) }
+            }
+            box { at: task_cx, cy + 142; size: 336, 1; color: theme_ink; opacity: 0.12 }
+            text if(task_selected >= 0, task_selected_title, "Select an app for actions") { at: task_cx - 168, cy + 163; anchor: left center; family: theme_font_ui; size: theme_font_size_12; weight: theme_font_weight_600; color: theme_ink_soft; width: 330; lines: 1 }
+            group {
+                show: task_selected >= 0
+                OptionChip(task_cx - 112, cy + 194, 104, "Open", true)
+                OptionChip(task_cx, cy + 194, 104, "Minimize", false)
+                OptionChip(task_cx + 112, cy + 194, 104, if(task_close_confirm, "Confirm", "Close"), task_close_confirm)
+            }
+        }
+
         zone box rail_audio_hit {
-            at: cx, cy - 28
+            at: cx, cy - 96
             size: 48, 48
             corner: 24
             cursor: pointer
@@ -670,7 +645,7 @@ library ControlBodyLib {
             role: button
         }
         zone box rail_wall_hit {
-            at: cx, cy + 28
+            at: cx, cy - 32
             size: 48, 48
             corner: 24
             cursor: pointer
@@ -680,6 +655,75 @@ library ControlBodyLib {
         }
         on press rail_audio_hit { cc.$screen.phase = 2 }
         on press rail_wall_hit { cc.$screen.phase = 3 }
+
+        zone box rail_capture_hit {
+            at: cx, cy + 32
+            size: 48, 48
+            corner: 24
+            cursor: pointer
+            active: cc.$screen.phase == 1
+            label: "Open Capture Controls"
+            role: button
+        }
+        on press rail_capture_hit { cc.$screen.phase = 4 }
+
+        zone box rail_task_hit { at: cx, cy + 96; size: 48, 48; corner: 24; cursor: pointer; active: cc.$screen.phase == 1; role: button; label: "Open Windows" }
+        on press rail_task_hit { cc.$screen.phase = 5 }
+        zone box task_fold_hit { at: task_cx + 192, cy - 216; size: 36, 20; cursor: pointer; active: cc.$screen.phase == 5; role: button; label: "Close Windows" }
+        on press task_fold_hit { cc.$screen.phase = 1; task_selected = -1; task_close_confirm = false }
+        zone box task_open_hit { at: task_cx - 112, cy + 194; size: 104, 34; cursor: pointer; active: cc.$screen.phase == 5 and task_selected >= 0; role: button; label: "Open Selected Window" }
+        on press task_open_hit { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0); emit cc_task_focus }
+        zone box task_minimize_hit { at: task_cx, cy + 194; size: 104, 34; cursor: pointer; active: cc.$screen.phase == 5 and task_selected >= 0; role: button; label: "Minimize Selected Window" }
+        on press task_minimize_hit { emit cc_task_minimize }
+        zone box task_close_hit { at: task_cx + 112, cy + 194; size: 104, 34; cursor: pointer; active: cc.$screen.phase == 5 and task_selected >= 0; role: button; label: "Close Selected Window" }
+        on press task_close_hit { emit cc_task_close }
+
+        zone box capture_close {
+            at: sheet_cx + 192, cy - 202
+            size: 36, 20
+            corner: 6
+            cursor: pointer
+            active: cc.$screen.phase == 4
+            label: "Close Capture Controls"
+            role: button
+        }
+        on press capture_close { cc.$screen.phase = 1 }
+
+        zone box capture_shot_hit {
+            at: sheet_cx - 104, cy - 70
+            size: 192, 124
+            corner: 28
+            cursor: pointer
+            active: cc.$screen.phase == 4 and not capture_busy
+            label: "Take Screenshot and Open Satty"
+            role: button
+        }
+        on press capture_shot_hit { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0); emit cc_screenshot(screen.index) }
+
+        zone box capture_record_hit {
+            at: sheet_cx + 104, cy - 70
+            size: 192, 124
+            corner: 28
+            cursor: pointer
+            active: cc.$screen.phase == 4 and not capture_busy
+            label: if(capture_recording, "Stop Screen Recording", "Start Screen Recording")
+            role: button
+        }
+        on press capture_record_hit while not capture_recording { cc.$screen.phase = 0; cc_awake = max(0, cc_awake - 1); emit cc_wake_evt(0) }
+        on press capture_record_hit { emit cc_capture_record(screen.index) }
+
+        zone box capture_png_hit { at: sheet_cx - 156, cy + 58; size: 96, 34; cursor: pointer; active: cc.$screen.phase == 4; role: button; label: "Screenshot as PNG" }
+        on press capture_png_hit { emit cc_capture_format(0) }
+        zone box capture_jpeg_hit { at: sheet_cx - 52, cy + 58; size: 96, 34; cursor: pointer; active: cc.$screen.phase == 4; role: button; label: "Screenshot as JPEG" }
+        on press capture_jpeg_hit { emit cc_capture_format(1) }
+        zone box capture_30_hit { at: sheet_cx + 52, cy + 58; size: 96, 34; cursor: pointer; active: cc.$screen.phase == 4 and not capture_recording; role: button; label: "Record at 30 Frames Per Second" }
+        on press capture_30_hit { emit cc_capture_fps(30) }
+        zone box capture_60_hit { at: sheet_cx + 156, cy + 58; size: 96, 34; cursor: pointer; active: cc.$screen.phase == 4 and not capture_recording; role: button; label: "Record at 60 Frames Per Second" }
+        on press capture_60_hit { emit cc_capture_fps(60) }
+        zone box capture_cursor_hit { at: sheet_cx - 104, cy + 106; size: 200, 34; cursor: pointer; active: cc.$screen.phase == 4; role: button; label: "Toggle Screenshot Pointer" }
+        on press capture_cursor_hit { emit cc_capture_cursor }
+        zone box capture_audio_hit { at: sheet_cx + 104, cy + 106; size: 200, 34; cursor: pointer; active: cc.$screen.phase == 4 and not capture_recording; role: button; label: "Toggle Desktop Recording Audio" }
+        on press capture_audio_hit { emit cc_capture_audio }
 
         zone box a_close {
             at: sheet_cx + 192, sheet_top + 28
@@ -693,7 +737,7 @@ library ControlBodyLib {
         on press a_close { cc.$screen.phase = 1 }
 
         zone box w_close {
-            at: sheet_cx + 192, cy - 178
+            at: sheet_cx + 192, cy - 228
             size: 36, 20
             corner: 6
             cursor: pointer
@@ -715,7 +759,7 @@ library ControlBodyLib {
         on press pick_cancel { emit cc_route_cancel }
 
         zone box w_prev {
-            at: sheet_cx + 160, cy + 52
+            at: sheet_cx + 160, cy + 65
             size: 30, 30
             corner: 15
             cursor: pointer
@@ -724,7 +768,7 @@ library ControlBodyLib {
             role: button
         }
         zone box w_next {
-            at: sheet_cx + 196, cy + 52
+            at: sheet_cx + 196, cy + 65
             size: 30, 30
             corner: 15
             cursor: pointer
@@ -736,7 +780,7 @@ library ControlBodyLib {
         on press w_next { emit cc_wall_next }
 
         zone box w_apply {
-            at: sheet_cx + 120, cy + 132
+            at: sheet_cx + 120, cy + 177
             size: 96, 36
             corner: 18
             cursor: pointer
@@ -747,7 +791,7 @@ library ControlBodyLib {
         on press w_apply { emit cc_wall_apply }
 
         zone box w_browse {
-            at: sheet_cx - 160, cy + 132
+            at: sheet_cx - 160, cy + 177
             size: 96, 36
             corner: 18
             cursor: pointer
@@ -758,7 +802,7 @@ library ControlBodyLib {
         on press w_browse { emit cc_browse }
 
         zone box p_up {
-            at: sheet_cx - 192, cy - 128
+            at: sheet_cx - 192, cy - 167
             size: 24, 24
             corner: 12
             cursor: pointer
@@ -769,7 +813,7 @@ library ControlBodyLib {
         on press p_up { emit picker_nav_up }
 
         zone box p_cancel {
-            at: sheet_cx + 164, cy - 128
+            at: sheet_cx + 164, cy - 167
             size: 72, 24
             corner: 12
             cursor: pointer
@@ -778,6 +822,13 @@ library ControlBodyLib {
             role: button
         }
         on press p_cancel { emit picker_cancel }
+
+        zone box p_prev_page { at: sheet_cx + 64, cy + 207; size: 28, 28; cursor: pointer; active: cc.$screen.phase == 3 and picker_open and picker_has_prev; role: button; label: "Previous Files" }
+        on press p_prev_page { emit picker_prev_page }
+        zone box p_next_page { at: sheet_cx + 100, cy + 207; size: 28, 28; cursor: pointer; active: cc.$screen.phase == 3 and picker_open and picker_has_next; role: button; label: "Next Files" }
+        on press p_next_page { emit picker_next_page }
+        zone box p_choose { at: sheet_cx + 157, cy + 207; size: 94, 34; cursor: pointer; active: cc.$screen.phase == 3 and picker_open; role: button; label: "Use This Wallpaper Folder" }
+        on press p_choose { emit picker_choose }
 
         on change cur_w { cc_settling = 1 }
         on still cur_w for 120ms { cc_settling = 0 }

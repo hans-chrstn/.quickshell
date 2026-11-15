@@ -4,6 +4,7 @@ import "../common/components/wave.plm"
 import "../common/components/controls.plm"
 import "../common/components/search.plm"
 import "../common/components/glyphs.plm"
+import "../common/components/edge-intent.plm"
 
 library IslandBodyLib {
     component FluidWave(
@@ -12,8 +13,8 @@ library IslandBodyLib {
         w: number,
         h: number,
         progress: number,
-        on: color = nacre_accent,
-        off: color = nacre_ink
+        on: color = theme_accent,
+        off: color = theme_ink
     ) {
         let gap = 2
         let bar_w = (w - 35 * gap) / 36
@@ -26,88 +27,88 @@ library IslandBodyLib {
                 size: bar_w, max(h * (0.14 + 0.86 * hump) * (0.55 + 0.45 * wob), 2)
                 corner: bar_w / 2
                 color: mix(off, on, lit)
-                opacity: nacre_wave_off_opacity + (1 - nacre_wave_off_opacity) * lit
+                opacity: theme_wave_off_opacity + (1 - theme_wave_off_opacity) * lit
             }
         }
     }
 
     component NcRow(r: record, press_evt: event, active: bool = true) {
         let w = 356
-        let h = 46 + 54 * r.open
+        prop reveal = 0 ~600ms
+        follow reveal = r.open
+        let h = 54 + 68 * reveal
         size: w, h
 
         zone box hit {
             from: 0, 0
             size: w, h
-            corner: 10
+            corner: 16
             cursor: pointer
             active: active
             label: r.title
             role: button
         }
 
+        box { from: 8, 5; size: w - 16, h - 8; corner: 16; color: theme_ink; opacity: if(r.kind == 3, 0.06, 0) }
+        box { from: 4, 3; size: w - 8, h - 6; corner: 16; color: theme_ink; opacity: if(r.kind == 3, 0.08, 0) }
+        box { from: 0, 0; size: w, h - 2; corner: 16; color: theme_ink; opacity: 0.07 + 0.05 * reveal }
+        box { from: 0, 0; size: w, h - 2; corner: 16; stroke: 1; color: theme_ink; opacity: theme_inset_rim_opacity + 0.10 * reveal }
         box {
-            from: 0, 0
-            size: w, h
-            corner: 10
-            color: nacre_accent
-            opacity: if(r.open, 0.10, 0)
-        }
-        box {
-            from: 10, 12
-            size: 3, 22
+            from: 10, 14
+            size: 3, 24
             corner: 1.5
-            color: nacre_accent
-            opacity: if(r.open, 0.9, 0)
+            color: theme_accent
+            opacity: reveal
         }
 
         text r.app {
-            at: 22, 14
+            at: if(r.kind == 2, 32, 22), 16
             anchor: left center
-            family: "SF Pro"
-            size: nacre_fs10
-            weight: nacre_w600
-            color: nacre_ink_faint
+            family: theme_font_ui
+            size: theme_font_size_10
+            weight: theme_font_weight_600
+            color: theme_ink_faint
             width: 220
             lines: 1
         }
         text r.time {
-            at: w - 12, 14
+            at: w - 18, 16
             anchor: right center
-            family: "SF Mono"
-            size: nacre_fs10
-            weight: nacre_w500
-            color: nacre_ink_faint
+            family: theme_font_mono
+            size: theme_font_size_10
+            weight: theme_font_weight_500
+            color: theme_ink_faint
         }
         text r.title {
-            at: 22, 33
+            at: if(r.kind == 2, 32, 22), 37
             anchor: left center
-            family: "SF Pro"
-            size: nacre_fs14
-            weight: nacre_w500
-            color: nacre_ink
+            family: theme_font_ui
+            size: theme_font_size_14
+            weight: theme_font_weight_500
+            color: theme_ink
             width: w - 60
             lines: 1
         }
         text r.badge {
-            at: w - 12, 33
+            at: w - 18, 37
             anchor: right center
-            family: "SF Mono"
-            size: nacre_fs11
-            weight: nacre_w600
-            color: nacre_accent
+            family: theme_font_mono
+            size: theme_font_size_11
+            weight: theme_font_weight_600
+            color: theme_accent
         }
 
         text r.body {
-            at: 22, 52
+            at: if(r.kind == 2, 32, 22), 63
             anchor: left top
-            family: "SF Pro"
-            size: nacre_fs12
-            weight: nacre_w400
-            color: nacre_ink_soft
+            family: theme_font_ui
+            size: theme_font_size_12
+            weight: theme_font_weight_400
+            color: theme_ink_soft
             width: w - 44
             lines: 3
-            show: r.open
+            show: reveal > 0.01
+            opacity: reveal
         }
 
         on press hit { emit press_evt(r.index) }
@@ -127,7 +128,7 @@ library IslandBodyLib {
         let top_edge = 12
         let scrub_w = 280
         let nc_w = 380
-        let nc_view_h = min(max(56, nclist.content), min(280, max_list_h))
+        let nc_view_h = min(max(62, nclist.content), min(320, max_list_h))
         let nc_h = 64 + nc_view_h
         let card_h = 92
         let card_w = 360
@@ -136,7 +137,8 @@ library IslandBodyLib {
         let pop_x = cx - card_w / 2 + 80
         let mon_total = mon.0.here + mon.1.here + mon.2.here + mon.3.here + mon.4.here + mon.5.here + mon.6.here + mon.7.here
         let mon_home = (1 - min(mon_total, 1)) * if(mon.$screen.index == 0, 1, 0)
-        let mon_gate = max(mon.$screen.here, mon_home)
+        let focused_gate = if(mon_total == 0 and focused_monitor == mon.$screen.index, 1, 0)
+        let mon_gate = max(mon.$screen.here, max(focused_gate, mon_home * if(focused_monitor < 0, 1, 0)))
 
         prop cur_h = 0 ~900ms
         prop cur_w = 180 ~900ms
@@ -165,15 +167,7 @@ library IslandBodyLib {
         let compact_alpha = clamp(1 - max(0, cur_h - 70) / 30, 0, 1)
         let np_alpha = clamp((cur_h - 95) / 30, 0, 1) * clamp(1 - max(0, cur_h - 232) / 16, 0, 1)
 
-        zone box wake_strip {
-            at: cx, 8
-            size: 260, 16
-            corner: 5
-            cursor: pointer
-            active: isl.$screen.phase == 0
-            label: "Wake Island"
-            role: button
-        }
+        EdgeIntent(cx, 8, 260, 16, 5, "Wake Island", isl.$screen.phase == 0, true, wake_island)
 
         zone box grace_area {
             at: cx, (cur_h + 80) / 2
@@ -228,7 +222,7 @@ library IslandBodyLib {
                 }
 
                 group {
-                    opacity: compact_alpha
+                    opacity: compact_alpha * (1 - nc_pop_only)
 
                     group {
                         opacity: 1 - pill_flash
@@ -237,30 +231,30 @@ library IslandBodyLib {
                             opacity: media_show
 
                             CircleButton(cx - 126, cy, 16, playing)
-                            TickStrip(cx + 61, cy, 150, 3, 16, media_progress, nacre_accent)
+                            TickStrip(cx + 61, cy, 150, 3, 16, media_progress, theme_accent)
                         }
 
                         text clock_time {
                             at: cx - 58 - 40 * media_show, cy - 7 * media_show
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs21
-                            weight: nacre_w600
-                            color: nacre_ink
+                            family: theme_font_ui
+                            size: theme_font_size_21
+                            weight: theme_font_weight_600
+                            color: theme_ink
                         }
                         text clock_date {
                             at: cx - 98 * media_show, cy + 15 * media_show
                             anchor: left center
-                            family: "SF Pro"
-                            size: nacre_fs11
-                            weight: nacre_w500
-                            color: nacre_ink_soft
+                            family: theme_font_ui
+                            size: theme_font_size_11
+                            weight: theme_font_weight_500
+                            color: theme_ink_soft
                         }
 
                         group {
                             opacity: weather_show * compact_alpha
 
-                            NacWeatherGlyph(weather, cx + 78 - 12 * weather_show, cy, nacre_ink_soft)
+                            WeatherGlyph(weather, cx + 78 - 12 * weather_show, cy, theme_ink_soft)
                         }
                     }
                 }
@@ -277,7 +271,7 @@ library IslandBodyLib {
                         box {
                             at: icon_cx, card_cy
                             size: 48, 48
-                            color: nacre_ink
+                            color: theme_ink
                             opacity: 0.05
                         }
                         image nc_icon_img {
@@ -290,30 +284,30 @@ library IslandBodyLib {
                     text nc_pop_app {
                         at: pop_x, card_cy - 18
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs10
-                        weight: nacre_w600
-                        color: nacre_ink_faint
+                        family: theme_font_ui
+                        size: theme_font_size_10
+                        weight: theme_font_weight_600
+                        color: theme_ink_faint
                         width: card_w - 104
                         lines: 1
                     }
                     text nc_pop_title {
                         at: pop_x, card_cy - 1
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs14
-                        weight: nacre_w600
-                        color: nacre_ink
+                        family: theme_font_ui
+                        size: theme_font_size_14
+                        weight: theme_font_weight_600
+                        color: theme_ink
                         width: card_w - 104
                         lines: 1
                     }
                     text nc_pop_body {
                         at: pop_x, card_cy + 16
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs11
-                        weight: nacre_w500
-                        color: nacre_ink_soft
+                        family: theme_font_ui
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: theme_ink_soft
                         width: card_w - 104
                         lines: 1
                     }
@@ -345,31 +339,31 @@ library IslandBodyLib {
                     ellipse {
                         at: cx - 74, cy - 66
                         radius: 2.5
-                        color: nacre_accent
+                        color: theme_accent
                     }
                     text if(playing, "NOW PLAYING", "PAUSED") {
                         at: cx - 64, cy - 66
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs10
-                        weight: nacre_w700
-                        color: nacre_ink_faint
+                        family: theme_font_ui
+                        size: theme_font_size_10
+                        weight: theme_font_weight_700
+                        color: theme_ink_faint
                     }
                     text media_title {
                         at: cx - 64, cy - 38
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs17
-                        weight: nacre_w600
-                        color: nacre_ink
+                        family: theme_font_ui
+                        size: theme_font_size_17
+                        weight: theme_font_weight_600
+                        color: theme_ink
                     }
                     text media_artist {
                         at: cx - 64, cy - 14
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs13
-                        weight: nacre_w400
-                        color: nacre_ink_soft
+                        family: theme_font_ui
+                        size: theme_font_size_13
+                        weight: theme_font_weight_400
+                        color: theme_ink_soft
                     }
 
                     FluidWave(cx, cy + 28, 376, 16, media_progress)
@@ -377,36 +371,36 @@ library IslandBodyLib {
                     text time_elapsed {
                         at: cx - 188, cy + 54
                         anchor: left center
-                        family: "SF Mono"
-                        size: nacre_fs11
-                        weight: nacre_w500
-                        color: nacre_ink_soft
+                        family: theme_font_mono
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: theme_ink_soft
                     }
                     box {
                         at: cx, cy + 54
                         size: scrub_w, 3
                         corner: 1.5
-                        color: nacre_ink
+                        color: theme_ink
                         opacity: 0.18
                     }
                     box {
                         at: cx - scrub_w / 2 + scrub_w / 2 * media_progress, cy + 54
                         size: scrub_w * media_progress, 3
                         corner: 1.5
-                        color: nacre_accent
+                        color: theme_accent
                     }
                     ellipse {
                         at: cx - scrub_w / 2 + scrub_w * media_progress, cy + 54
                         radius: 5
-                        color: nacre_ink
+                        color: theme_ink
                     }
                     text time_remaining {
                         at: cx + 188, cy + 54
                         anchor: right center
-                        family: "SF Mono"
-                        size: nacre_fs11
-                        weight: nacre_w500
-                        color: nacre_ink_soft
+                        family: theme_font_mono
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: theme_ink_soft
                     }
 
                     SkipButton(cx - 44, cy + 80, 14, true)
@@ -432,10 +426,10 @@ library IslandBodyLib {
                     text "No applications found" {
                         at: cx, top_edge + 88
                         anchor: center
-                        family: "SF Pro"
-                        size: nacre_fs13
-                        weight: nacre_w400
-                        color: nacre_ink_faint
+                        family: theme_font_ui
+                        size: theme_font_size_13
+                        weight: theme_font_weight_400
+                        color: theme_ink_faint
                         show: hits.count == 0
                     }
                 }
@@ -446,41 +440,41 @@ library IslandBodyLib {
                     text "Notifications" {
                         at: cx - nc_w / 2 + 20, top_edge + 26
                         anchor: left center
-                        family: "SF Pro"
-                        size: nacre_fs15
-                        weight: nacre_w600
-                        color: nacre_ink
+                        family: theme_font_ui
+                        size: theme_font_size_15
+                        weight: theme_font_weight_600
+                        color: theme_ink
                     }
                     text nc_count {
                         at: cx - nc_w / 2 + 118, top_edge + 26
                         anchor: left center
-                        family: "SF Mono"
-                        size: nacre_fs11
-                        weight: nacre_w500
-                        color: nacre_ink_faint
+                        family: theme_font_mono
+                        size: theme_font_size_11
+                        weight: theme_font_weight_500
+                        color: theme_ink_faint
                     }
                     text "Clear" {
                         at: cx + nc_w / 2 - 66, top_edge + 26
                         anchor: center
-                        family: "SF Pro"
-                        size: nacre_fs12
-                        weight: nacre_w600
-                        color: nacre_accent
+                        family: theme_font_ui
+                        size: theme_font_size_12
+                        weight: theme_font_weight_600
+                        color: theme_accent
                     }
                     text "×" {
                         at: cx + nc_w / 2 - 20, top_edge + 26
                         anchor: center
-                        family: "SF Pro"
-                        size: nacre_fs18
-                        weight: nacre_w400
-                        color: nacre_ink_soft
+                        family: theme_font_ui
+                        size: theme_font_size_18
+                        weight: theme_font_weight_400
+                        color: theme_ink_soft
                     }
 
-                    column nclist {
+                    column nclist ~calm {
                         at: cx - nc_w / 2 + 12, top_edge + 54
-                        gap: 3
+                        gap: 6
                         view: nc_w - 24, nc_view_h
-                        step: 46
+                        step: 60
                         for r in nc {
                             NcRow(r, nc_row_evt, isl.$screen.phase == 4)
                         }
@@ -489,10 +483,10 @@ library IslandBodyLib {
                     text "No notifications" {
                         at: cx, top_edge + 84
                         anchor: center
-                        family: "SF Pro"
-                        size: nacre_fs13
-                        weight: nacre_w400
-                        color: nacre_ink_faint
+                        family: theme_font_ui
+                        size: theme_font_size_13
+                        weight: theme_font_weight_400
+                        color: theme_ink_faint
                         show: nc.count == 0
                     }
                 }
@@ -562,14 +556,12 @@ library IslandBodyLib {
             role: button
         }
 
-        on enter wake_strip while isl.$screen.phase == 0 { isl.$screen.grace_in = 0; isl.$screen.phase = 1; awake_count = awake_count + 1 }
-        on press wake_strip while isl.$screen.phase == 0 { isl.$screen.grace_in = 0; isl.$screen.phase = 1; awake_count = awake_count + 1 }
+        on wake_island(i) while i == screen.index and isl.$screen.phase == 0 { isl.$screen.grace_in = 1; isl.$screen.phase = 1; awake_count = awake_count + 1 }
         on press compact_btn while isl.$screen.phase == 1 and cur_h > 30 { isl.$screen.phase = 2 }
         on press np_btn while isl.$screen.phase == 2 { isl.$screen.phase = 1 }
         on press search_btn while isl.$screen.phase == 3 { isl.$screen.phase = 1; blur }
         on enter grace_area { isl.$screen.grace_in = 1 }
         on leave grace_area { isl.$screen.grace_in = 0 }
-        on leave grace_area while isl.$screen.phase > 0 { isl.$screen.phase = 0; awake_count = max(0, awake_count - 1); blur }
         on press scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
         on drag scrub_track { media_progress = clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1); emit media_seek(clamp((pointer.x - (cx - scrub_w / 2)) / scrub_w, 0, 1)) }
         on press play_btn { playing = not playing; emit media_toggle }

@@ -21,6 +21,25 @@ part ControlState {
     fact wall_count = 0
     fact wall_applied = false
     fact picker_open = false
+    fact picker_has_prev = false
+    fact picker_has_next = false
+    fact capture_recording = false
+    fact capture_busy = false
+    fact capture_cursor = false
+    fact capture_jpeg = false
+    fact capture_fps60 = true
+    fact capture_audio = false
+    fact task_selected = -1
+    fact task_close_confirm = false
+    text task_selected_title = ""
+    model task_rows max 32 {
+        id: number
+        title: text
+        app: text
+        monitor: text
+        active: bool
+        minimized: bool
+    }
     text volume_percent_text = "70%"
     text mic_percent_text = "50%"
     text active_sink_name = ""
@@ -30,6 +49,9 @@ part ControlState {
     text wall_applied_path = ""
     text picker_dir_text = "~/.wallpapers"
     text picker_status = ""
+    text picker_page_text = ""
+    text capture_status = "Ready to capture"
+    text capture_target = ""
     model sinks max 8 {
         id: number
         name: text
@@ -84,6 +106,8 @@ part ControlState {
     event picker_nav_up ->
     event picker_choose ->
     event picker_cancel ->
+    event picker_prev_page ->
+    event picker_next_page ->
     event cc_tab_levels
     event cc_tab_out
     event cc_tab_in
@@ -94,6 +118,17 @@ part ControlState {
     event cc_route_pick ->
     event cc_route_cancel
     event cc_wake_evt ->
+    event wake_control
+    event cc_screenshot ->
+    event cc_capture_record ->
+    event cc_capture_cursor ->
+    event cc_capture_format ->
+    event cc_capture_fps ->
+    event cc_capture_audio ->
+    event cc_task_select ->
+    event cc_task_focus ->
+    event cc_task_minimize ->
+    event cc_task_close ->
     service audio as sound {
         volume: number = 0.70
         muted: bool = false

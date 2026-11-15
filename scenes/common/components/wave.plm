@@ -8,8 +8,8 @@ library WaveLib {
         tick_w: number,
         tick_h: number,
         progress: number,
-        on: color = nacre_accent,
-        off: color = nacre_ink
+        on: color = theme_accent,
+        off: color = theme_ink
     ) {
         let step = w / 24
         repeat i in 0..23 {
@@ -19,7 +19,7 @@ library WaveLib {
                 size: tick_w, tick_h
                 corner: tick_w / 2
                 color: mix(off, on, lit)
-                opacity: nacre_tick_off_opacity + (1 - nacre_tick_off_opacity) * lit
+                opacity: theme_tick_off_opacity + (1 - theme_tick_off_opacity) * lit
             }
         }
     }
@@ -30,8 +30,8 @@ library WaveLib {
         w: number,
         h: number,
         progress: number,
-        on: color = nacre_accent,
-        off: color = nacre_ink
+        on: color = theme_accent,
+        off: color = theme_ink
     ) {
         let gap = 2
         let bar_w = (w - 35 * gap) / 36
@@ -43,7 +43,7 @@ library WaveLib {
                 size: bar_w, max(h * (0.14 + 0.86 * hump), 2)
                 corner: bar_w / 2
                 color: mix(off, on, lit)
-                opacity: nacre_wave_off_opacity + (1 - nacre_wave_off_opacity) * lit
+                opacity: theme_wave_off_opacity + (1 - theme_wave_off_opacity) * lit
             }
         }
     }

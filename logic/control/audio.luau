@@ -1,12 +1,9 @@
-return function()
+return function(settings, osd)
     local function level_text(v, muted)
         return if muted then "MUTED" else `{math.round(v)}%`
     end
     
-    local PREF_FILE = "audio-apps.json"
-    
-    local prefs = {}
-    local save_timer = 0
+    local prefs = settings.section("audio_apps")
     
     local sink_rows = {}
     local source_rows = {}
@@ -26,18 +23,6 @@ return function()
     local recs = {}
     local rec_order = {}
     
-    local function queue_save()
-        if save_timer ~= 0 then
-            pcall(cancel, save_timer)
-        end
-        save_timer = after(600, function()
-            save_timer = 0
-            pcall(function()
-                sys.call("files.write", PREF_FILE, prefs)
-            end)
-        end)
-    end
-    
     local function set_pref(key, fields)
         local pref = prefs[key]
         if not pref then
@@ -47,7 +32,7 @@ return function()
         for k, v in pairs(fields) do
             pref[k] = v
         end
-        queue_save()
+        settings.put("audio_apps", key, pref, false)
     end
     
     local function play_key(s)
@@ -587,6 +572,7 @@ return function()
         if type(st) ~= "table" then
             return
         end
+        osd.audio(st)
         service_default_sink = ""
         service_default_source = ""
         service_sink_index = nil
@@ -611,14 +597,6 @@ return function()
         request_devices()
     end
     
-    local function load_prefs()
-        local ok, val = pcall(sys.ask, "files.read", PREF_FILE, "json")
-        if ok and type(val) == "table" then
-            prefs = val
-        end
-    end
-    
-    load_prefs()
     request_devices()
     request_stream_devices()
     

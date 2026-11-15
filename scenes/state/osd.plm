@@ -1,0 +1,9 @@
+part OsdState {
+    fact osd_visible = 0
+    fact osd_target = 0
+    fact osd_kind = 0
+    fact osd_level = 0
+    fact osd_muted = false
+    fact focused_monitor = -1
+    text osd_percent = "0%"
+}

@@ -1,0 +1,5 @@
+part ThemeState {
+    text theme_font_ui = "SF Pro"
+    text theme_font_display = "SF Pro Display"
+    text theme_font_mono = "SF Mono"
+}

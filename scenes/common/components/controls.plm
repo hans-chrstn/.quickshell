@@ -8,18 +8,18 @@ library ControlsLib {
         w: number,
         h: number,
         mix_val: number,
-        on: color = nacre_accent
+        on: color = theme_accent
     ) {
         box {
             at: cx, cy
             size: w, h
             corner: h / 2
-            color: mix(#2b303b, on, mix_val)
+            color: mix(theme_panel_fill, on, mix_val)
         }
         ellipse {
             at: mix(cx - w / 2 + h / 2, cx + w / 2 - h / 2, mix_val), cy
             radius: h / 2 - 2.5
-            color: nacre_ink
+            color: theme_ink
         }
     }
 
@@ -28,19 +28,19 @@ library ControlsLib {
         cy: number,
         r: number,
         playing: bool,
-        ink: color = nacre_ink
+        ink: color = theme_ink
     ) {
         ellipse {
             at: cx, cy
             radius: r
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.12
         }
         ellipse {
             at: cx, cy
             radius: r
             stroke: 1
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.18
         }
         box {
@@ -73,12 +73,12 @@ library ControlsLib {
         cy: number,
         r: number,
         prev: bool,
-        ink: color = nacre_ink
+        ink: color = theme_ink
     ) {
         ellipse {
             at: cx, cy
             radius: r
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.12
         }
         path {
@@ -174,12 +174,12 @@ library ControlsLib {
         }
     }
 
-    component NacChevron(cx: number, cy: number, r: number, left: bool, col: color = nacre_ink) {
+    component Chevron(cx: number, cy: number, r: number, left: bool, col: color = theme_ink) {
         box {
             at: cx, cy
             size: r * 2, r * 2
             corner: r
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.07
         }
         box {
@@ -187,7 +187,7 @@ library ControlsLib {
             size: r * 2, r * 2
             corner: r
             stroke: 1
-            color: nacre_ink
+            color: theme_ink
             opacity: 0.12
         }
         line {

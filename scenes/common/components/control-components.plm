@@ -1,0 +1,557 @@
+import "../Theme.plm"
+import "glyphs.plm"
+
+library ControlComponents {
+    component InsetPanel(cx: number, cy: number, w: number, h: number, radius: number = 16) {
+        box {
+            at: cx, cy
+            size: w, h
+            corner: radius
+            color: theme_ink
+            opacity: theme_inset_fill_opacity
+        }
+        box {
+            at: cx, cy
+            size: w, h
+            corner: radius
+            stroke: 1
+            color: theme_ink
+            opacity: theme_inset_rim_opacity
+        }
+    }
+
+    component CaptureActionTile(cx: number, cy: number, title: text, detail: text, glyph_kind: number, accent: color, hovered: number) {
+        box {
+            at: cx, cy
+            size: 192, 124
+            corner: 28
+            color: theme_ink
+            opacity: theme_inset_fill_opacity + 0.06 * hovered
+        }
+        box {
+            at: cx, cy
+            size: 192, 124
+            corner: 28
+            stroke: 1
+            color: theme_ink
+            opacity: theme_inset_rim_opacity + 0.14 * hovered
+        }
+        box {
+            at: cx, cy - 28
+            size: 48, 48
+            corner: 24
+            color: accent
+            opacity: 0.16 + 0.06 * hovered
+        }
+        Glyph(glyph_kind, cx, cy - 28, accent)
+        text title {
+            at: cx, cy + 13
+            anchor: center
+            family: theme_font_ui
+            size: theme_font_size_14
+            weight: theme_font_weight_600
+            color: theme_ink
+        }
+        text detail {
+            at: cx, cy + 39
+            anchor: center
+            family: theme_font_ui
+            size: theme_font_size_11
+            weight: theme_font_weight_400
+            color: theme_ink_soft
+        }
+    }
+
+    component OptionChip(cx: number, cy: number, w: number, title: text, selected: bool) {
+        box {
+            at: cx, cy
+            size: w, 34
+            corner: 17
+            color: if(selected, theme_accent, theme_ink)
+            opacity: if(selected, 0.20, 0.07)
+        }
+        box {
+            at: cx, cy
+            size: w, 34
+            corner: 17
+            stroke: 1
+            color: if(selected, theme_accent, theme_ink)
+            opacity: if(selected, 0.38, 0.12)
+        }
+        text title {
+            at: cx, cy
+            anchor: center
+            family: theme_font_ui
+            size: theme_font_size_12
+            weight: theme_font_weight_600
+            color: if(selected, theme_ink, theme_ink_soft)
+        }
+    }
+
+    component TaskRow(item: record, chosen: bool, select_evt: event) {
+        size: 336, 50
+        box { from: 0, 0; size: 336, 50; corner: 15; color: if(chosen, theme_accent, theme_ink); opacity: if(chosen, 0.16, 0.055 + 0.05 * task_hit.hover) }
+        box { from: 0, 0; size: 336, 50; corner: 15; stroke: 1; color: if(chosen, theme_accent, theme_ink); opacity: if(chosen, 0.34, 0.10) }
+        box { at: 24, 25; size: 34, 34; corner: 11; color: theme_accent; opacity: 0.12 }
+        Glyph(9, 24, 25, theme_accent)
+        text item.title { at: 49, 17; anchor: left center; family: theme_font_ui; size: theme_font_size_13; weight: theme_font_weight_600; color: theme_ink; width: 267; lines: 1 }
+        text item.app { at: 49, 36; anchor: left center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft; width: 200; lines: 1 }
+        text "Minimized" { at: 314, 36; anchor: right center; family: theme_font_ui; size: theme_font_size_10; color: theme_warm; show: item.minimized }
+        text "Active" { at: 314, 36; anchor: right center; family: theme_font_ui; size: theme_font_size_10; color: theme_accent; show: item.active and not item.minimized }
+        text "Open" { at: 314, 36; anchor: right center; family: theme_font_ui; size: theme_font_size_10; color: theme_ink_faint; show: not item.active and not item.minimized }
+        zone box task_hit { from: 0, 0; size: 336, 50; corner: 15; cursor: pointer; role: button; label: item.title }
+        on press task_hit { emit select_evt(item.id) }
+    }
+
+    component AudioDeviceHero(
+        cx: number, cy: number, title: text, device_name: text, percent: text,
+        level: number, muted: bool, present: bool, input_device: bool,
+        level_evt: event, mute_evt: event
+    ) {
+        InsetPanel(cx, cy, 408, 156, 24)
+        box {
+            at: cx - 174, cy - 29
+            size: 42, 42
+            corner: 21
+            color: theme_accent
+            opacity: 0.14
+        }
+        Glyph(if(input_device, 3, 1), cx - 174, cy - 29, theme_accent)
+        text title {
+            at: cx - 142, cy - 49
+            anchor: left center
+            family: theme_font_ui
+            size: theme_font_size_9
+            weight: theme_font_weight_700
+            color: theme_ink_faint
+        }
+        text if(present, device_name, "No device selected") {
+            at: cx - 142, cy - 24
+            anchor: left center
+            family: theme_font_ui
+            size: theme_font_size_15
+            weight: theme_font_weight_600
+            color: theme_ink
+            width: 310
+            lines: 1
+        }
+        group {
+            show: not input_device
+            SpeakerMuteButton(cx - 174, cy + 36, muted, mute_evt)
+        }
+        group {
+            show: input_device
+            MicrophoneMuteButton(cx - 174, cy + 36, muted, mute_evt)
+        }
+        LevelSlider(cx + 30, cy + 36, 280, 6, level, muted, level_evt)
+        text percent {
+            at: cx + 188, cy + 36
+            anchor: right center
+            family: theme_font_mono
+            size: theme_font_size_11
+            weight: theme_font_weight_500
+            color: theme_ink_soft
+        }
+    }
+
+    component IconBadge(cx: number, cy: number, r: number, glyph_kind: number, is_active: bool) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: theme_ink
+            opacity: if(is_active, 0.16, 0.08)
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: theme_ink
+            opacity: 0.14
+        }
+        Glyph(glyph_kind, cx, cy, if(is_active, theme_accent, theme_ink_soft))
+    }
+
+    component IconButton(
+        cx: number,
+        cy: number,
+        r: number,
+        glyph_kind: number,
+        btn_label: text,
+        is_active: bool,
+        btn_evt: event
+    ) {
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            color: theme_ink
+            opacity: if(is_active, 0.16, 0.08)
+        }
+        box {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            stroke: 1
+            color: theme_ink
+            opacity: 0.14
+        }
+        Glyph(glyph_kind, cx, cy, if(is_active, theme_accent, theme_ink_soft))
+
+        zone box nicon_hit {
+            at: cx, cy
+            size: r * 2, r * 2
+            corner: r
+            cursor: pointer
+            role: button
+            label: btn_label
+        }
+
+        on press nicon_hit { emit btn_evt }
+    }
+
+    component LevelSlider(cx: number, cy: number, w: number, h: number, val: number, muted: bool, seek_evt: event) {
+        prop val_s = 0 ~calm
+        prop mut_s = 0 ~calm
+        follow val_s = val
+        follow mut_s = if(muted, 1, 0)
+        let frac = clamp(val_s / 100, 0, 1)
+        let fill_w = max(w * frac, h)
+
+        box {
+            at: cx, cy
+            size: w, h
+            corner: h / 2
+            color: theme_ink
+            opacity: 0.12
+        }
+        box {
+            from: cx - w / 2, cy - h / 2
+            size: fill_w, h
+            corner: h / 2
+            color: mix(theme_accent, theme_warm, mut_s)
+            opacity: 1 - 0.45 * mut_s
+        }
+        ellipse {
+            at: cx - w / 2 + w * frac, cy
+            radius: h * 0.85
+            color: mix(theme_ink, theme_ink_soft, mut_s)
+        }
+
+        zone box nslider_hit {
+            at: cx, cy
+            size: w, h + 16
+            cursor: pointer
+            role: slider
+            label: "Adjust Audio Level"
+        }
+
+        on press nslider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+        on drag nslider_hit { emit seek_evt(clamp((pointer.x - (cx - w / 2)) / w * 100, 0, 100)) }
+    }
+
+    component SpeakerMuteButton(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        prop mut_s = 0 ~lively
+        follow mut_s = if(is_muted, 1, 0)
+
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: mix(theme_ink, theme_warm, mut_s)
+            opacity: 0.08 + 0.14 * mut_s
+        }
+        box {
+            at: cx - 5, cy
+            size: 4, 8
+            corner: 1
+            color: mix(theme_ink, theme_warm, mut_s)
+        }
+        path {
+            at: cx, cy
+            color: mix(theme_ink, theme_warm, mut_s)
+            move -3, -4
+            line 4, -7
+            line 4, 7
+            line -3, 4
+            close
+        }
+        group {
+            show: mut_s < 0.5
+            opacity: 1 - mut_s
+            arc {
+                at: cx + 1, cy
+                radius: 4.5
+                span: 120deg
+                rotate: -90deg
+                width: 1.5
+                color: theme_accent
+            }
+        }
+        group {
+            show: mut_s > 0.5
+            opacity: mut_s
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: theme_warm
+            }
+        }
+
+        zone box nmute_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Audio Mute"
+        }
+
+        on press nmute_hit { emit mute_evt }
+    }
+
+    component MicrophoneMuteButton(cx: number, cy: number, is_muted: bool, mute_evt: event) {
+        prop mut_s = 0 ~lively
+        follow mut_s = if(is_muted, 1, 0)
+
+        box {
+            at: cx, cy
+            size: 32, 32
+            corner: 16
+            color: mix(theme_ink, theme_warm, mut_s)
+            opacity: 0.08 + 0.14 * mut_s
+        }
+        Glyph(3, cx, cy, mix(theme_ink, theme_warm, mut_s))
+
+        group {
+            show: mut_s > 0.5
+            opacity: mut_s
+            line {
+                from: cx - 7, cy - 7
+                to: cx + 7, cy + 7
+                width: 1.8
+                color: theme_warm
+            }
+        }
+
+        zone box nmic_hit {
+            at: cx, cy
+            size: 32, 32
+            cursor: pointer
+            role: button
+            label: "Toggle Microphone Mute"
+        }
+
+        on press nmic_hit { emit mute_evt }
+    }
+
+    component SectionTab(x: number, y: number, w: number, tab_label: text, is_on: bool, tab_evt: event) {
+        prop on_s = 0 ~lively
+        follow on_s = if(is_on, 1, 0)
+
+        box {
+            at: x, y
+            size: w, 28
+            corner: 14
+            color: theme_ink
+            opacity: 0.04 + 0.13 * on_s + 0.05 * (1 - on_s) * ntab_hit.hover
+        }
+        box {
+            at: x, y
+            size: w, 28
+            corner: 14
+            stroke: 1
+            color: theme_ink
+            opacity: 0.14 * on_s
+        }
+        text tab_label {
+            at: x, y
+            anchor: center
+            family: theme_font_ui
+            size: theme_font_size_12
+            weight: theme_font_weight_600
+            color: mix(theme_ink_soft, theme_ink, on_s)
+        }
+
+        zone box ntab_hit {
+            at: x, y
+            size: w, 28
+            corner: 14
+            cursor: pointer
+            role: button
+            label: tab_label
+        }
+
+        on press ntab_hit { emit tab_evt }
+    }
+
+    component DeviceChip(dev: record, w: number, is_active: bool, sel_evt: event, is_input: bool = false) {
+        size: w, 48
+
+        prop act_s = 0 ~lively
+        follow act_s = if(is_active, 1, 0)
+
+        zone box nchip_hit {
+            from: 0, 0
+            size: w, 48
+            corner: 12
+            cursor: pointer
+            role: button
+            label: dev.name
+        }
+
+        box {
+            from: 0, 0
+            size: w, 48
+            corner: 12
+            color: theme_accent
+            opacity: (0.04 + 0.08 * act_s) * (1 - 0.6 * nchip_hit.pressed) + 0.05 * nchip_hit.hover
+        }
+        box {
+            from: 0, 0
+            size: w, 48
+            corner: 12
+            stroke: 1
+            color: mix(theme_ink, theme_accent, act_s)
+            opacity: 0.12 + 0.28 * act_s
+        }
+        Glyph(if(is_input, 3, 1), 24, 24, mix(theme_ink_soft, theme_accent, act_s))
+        text dev.name {
+            at: 42, 24
+            anchor: left center
+            family: theme_font_ui
+            size: theme_font_size_12
+            weight: theme_font_weight_500
+            color: mix(theme_ink_soft, theme_ink, act_s)
+            width: w - 96
+            lines: 1
+        }
+        group {
+            show: act_s > 0.5
+            opacity: act_s
+            box {
+                at: w - 16, 24
+                size: 6, 6
+                corner: 3
+                color: theme_accent
+            }
+        }
+
+        on press nchip_hit { emit sel_evt(dev.id) }
+    }
+
+    component LevelMeter(cx: number, cy: number, w: number, h: number, lvl: number, on: color = theme_accent) {
+        prop lvl_s = 0 ~slow
+        follow lvl_s = lvl
+        let bw = (w - 15 * 3) / 16
+        repeat i in 0..15 {
+            let t = clamp(lvl_s * 16 - i, 0, 1)
+            box {
+                at: cx - w / 2 + bw / 2 + i * (bw + 3), cy
+                size: bw, h
+                corner: bw / 2
+                color: mix(theme_ink, on, t)
+                opacity: 0.16 + 0.84 * t
+            }
+        }
+    }
+
+    component AppAudioRow(m: record, vol_evt: event, mute_evt: event, route_evt: event) {
+        size: 408, 60
+        let is_play = m.kind == 0
+
+        InsetPanel(204, 30, 408, 60, 17)
+        box { from: 0, 0; size: 408, 60; corner: 17; color: theme_ink; opacity: 0.045 * max(max(mixrow_vol.hover, mixrow_mute.hover), mixrow_route.hover) }
+        box { at: 27, 30; size: 36, 36; corner: 13; color: if(is_play, theme_accent, theme_warm); opacity: 0.14 }
+        Glyph(if(is_play, 1, 3), 27, 30, if(is_play, theme_accent, theme_warm))
+        text m.name { at: 54, 21; anchor: left center; family: theme_font_ui; size: theme_font_size_13; weight: theme_font_weight_600; color: theme_ink; width: 142; lines: 1 }
+        text m.title { at: 54, 43; anchor: left center; family: theme_font_ui; size: theme_font_size_11; color: theme_ink_soft; width: 142; lines: 1; show: is_play }
+        group {
+            show: is_play
+            box { at: 252, 21; size: 100, 6; corner: 3; color: theme_ink; opacity: 0.15 }
+            box { from: 202, 18; size: max(6, m.volume), 6; corner: 3; color: if(m.muted, theme_ink_soft, theme_accent) }
+            ellipse { at: 202 + m.volume, 21; radius: 5; color: theme_ink }
+            box { at: 380, 21; size: 30, 30; corner: 15; color: if(m.muted, theme_warm, theme_ink); opacity: if(m.muted, 0.16, 0.08) }
+            Glyph(1, 380, 21, if(m.muted, theme_warm, theme_ink_soft))
+            line { from: 373, 14; to: 387, 28; width: 1.7; color: theme_warm; show: m.muted }
+        }
+        box { at: 296, if(is_play, 44, 30); size: 184, 22; corner: 11; color: theme_accent; opacity: if(m.routed, 0.14, 0.06) }
+        text m.device { at: 296, if(is_play, 44, 30); anchor: center; family: theme_font_ui; size: theme_font_size_11; weight: theme_font_weight_500; color: if(m.routed, theme_ink, theme_ink_soft); width: 166; lines: 1 }
+        zone box mixrow_vol { at: 252, 21; size: 100, 24; active: is_play; cursor: pointer; role: slider; label: "Adjust application volume" }
+        zone box mixrow_mute { at: 380, 21; size: 32, 32; active: is_play; cursor: pointer; role: button; label: "Mute application" }
+        zone box mixrow_route { at: 296, if(is_play, 44, 30); size: 184, 22; cursor: pointer; role: button; label: "Route to another device" }
+        on press mixrow_vol { emit vol_evt(m.id * 1000 + clamp((local.x - 202) / 100 * 100, 0, 100)) }
+        on drag mixrow_vol { emit vol_evt(m.id * 1000 + clamp((local.x - 202) / 100 * 100, 0, 100)) }
+        on press mixrow_mute { emit mute_evt(m.id) }
+        on press mixrow_route { emit route_evt(if(is_play, m.id, -m.id - 1)) }
+    }
+
+    component FilePickerRow(it_id: number, it_name: text, it_is_dir: bool, w: number, pick_evt: event) {
+        size: w, 46
+
+        box {
+            from: 0, 0
+            size: w, 46
+            corner: 14
+            color: theme_ink
+            opacity: 0.055 + 0.06 * nrow_hit.hover
+        }
+        box {
+            from: 0, 0
+            size: w, 46
+            corner: 14
+            stroke: 1
+            color: theme_ink
+            opacity: 0.10 + 0.10 * nrow_hit.hover
+        }
+        box {
+            at: 25, 23
+            size: 30, 30
+            corner: 10
+            color: if(it_is_dir, theme_warm, theme_accent)
+            opacity: 0.14
+        }
+
+        group {
+            show: it_is_dir
+            move: 25, 23
+            path {
+                color: theme_warm
+                move -6, -4
+                line -2, -4
+                line 0, -2
+                line 6, -2
+                line 6, 4
+                line -6, 4
+                close
+            }
+        }
+
+        group { show: not it_is_dir; Glyph(2, 25, 23, theme_accent) }
+
+        text it_name {
+            at: 50, 23
+            anchor: left center
+            family: theme_font_ui
+            size: theme_font_size_13
+            weight: theme_font_weight_600
+            color: theme_ink
+            width: w - 78
+            lines: 1
+        }
+        Glyph(10, w - 22, 23, theme_ink_soft)
+
+        zone box nrow_hit {
+            from: 0, 0
+            size: w, 46
+            corner: 14
+            cursor: pointer
+            role: button
+            label: it_name
+        }
+
+        on press nrow_hit { emit pick_evt(it_id) }
+    }
+
+}

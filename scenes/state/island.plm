@@ -29,6 +29,7 @@ part IslandState {
     fact sel = 0
     fact weather = 0
     fact nc_flash = 0
+    fact nc_pop_only = 0
 
     text clock_time = ""
     text clock_date = ""
@@ -60,6 +61,7 @@ part IslandState {
         body: text
         time: text
         open: number
+        kind: number
     }
 
     event media_toggle ->
@@ -70,4 +72,5 @@ part IslandState {
     event select_hit
     event nc_row_evt ->
     event nc_clear_evt ->
+    event wake_island
 }

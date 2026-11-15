@@ -7,20 +7,22 @@ library GlassLib {
         w: number,
         h: number,
         corner: number,
-        shadow: number = 0.30
+        shadow: number = 0.30,
+        lens_enabled: bool = true,
+        shade: number = 0
     ) {
         body {
-            color: nacre_glass_base
-            glass: nacre_glass_amount
-            lens: true
+            color: theme_glass_base
+            glass: theme_glass_amount
+            lens: lens_enabled
             frost: auto
-            smoke: nacre_glass_smoke
-            tint: nacre_glass_tint
-            refraction: nacre_glass_refraction
-            dispersion: nacre_glass_dispersion
-            mirror: nacre_glass_mirror
-            highlight: nacre_glass_highlight
-            rim: nacre_glass_rim
+            smoke: theme_glass_smoke
+            tint: theme_glass_tint
+            refraction: theme_glass_refraction
+            dispersion: theme_glass_dispersion
+            mirror: theme_glass_mirror
+            highlight: theme_glass_highlight
+            rim: theme_glass_rim
             shadow: 0, 8, 24, shadow
 
             box {
@@ -28,6 +30,13 @@ library GlassLib {
                 size: w, h
                 corner: corner
             }
+        }
+        box {
+            at: cx, cy
+            size: w, h
+            corner: corner
+            color: theme_glass_base
+            opacity: shade
         }
     }
 

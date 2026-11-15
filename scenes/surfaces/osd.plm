@@ -1,0 +1,64 @@
+part OsdSurface {
+    surface osd {
+        size: full, 116
+        anchor: bottom
+        level: overlay
+        screens: each max 8
+        keyboard: none
+        rate: 60, 1 while osd_visible == 0
+
+        prop reveal = 0 ~fluid
+        prop fill = 0 ~calm
+        follow reveal = if(osd_visible == 1 and osd_target == screen.index, 1, 0)
+        follow fill = osd_level
+
+        let cx = screen.width / 2
+        let cy = 60 + 28 * (1 - reveal)
+        group {
+            show: reveal > 0.01
+            opacity: reveal
+            GlassCard(cx, cy, 284, 68, 28, 0.20 * reveal)
+            InsetPanel(cx - 107, cy, 42, 42, 16)
+            group {
+                show: osd_kind == 1
+                Glyph(1, cx - 107, cy, theme_ink)
+            }
+            group {
+                show: osd_kind == 2
+                ellipse { at: cx - 107, cy; radius: 6; color: theme_warm }
+                repeat i in 0..8 {
+                    line {
+                        from: cx - 107 + 11 * cos(i * 45), cy + 11 * sin(i * 45)
+                        to: cx - 107 + 15 * cos(i * 45), cy + 15 * sin(i * 45)
+                        width: 1.5
+                        color: theme_warm
+                    }
+                }
+            }
+            text if(osd_kind == 1, "VOLUME", "BRIGHTNESS") {
+                at: cx - 76, cy - 16
+                anchor: left center
+                family: theme_font_ui
+                size: theme_font_size_10
+                weight: theme_font_weight_700
+                color: theme_ink_soft
+            }
+            text osd_percent {
+                at: cx + 122, cy - 16
+                anchor: right center
+                family: theme_font_mono
+                size: theme_font_size_11
+                weight: theme_font_weight_600
+                color: theme_ink
+            }
+            box { at: cx + 26, cy + 12; size: 200, 5; corner: 2.5; color: theme_ink; opacity: theme_tick_off_opacity }
+            box {
+                at: cx - 74 + 100 * fill, cy + 12
+                size: max(1, 200 * fill), 5
+                corner: 2.5
+                color: if(osd_kind == 1, theme_accent, theme_warm)
+                opacity: if(osd_muted, 0.35, 1)
+            }
+        }
+    }
+}

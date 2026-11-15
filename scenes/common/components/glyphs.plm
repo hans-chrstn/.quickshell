@@ -1,7 +1,56 @@
 import "../Theme.plm"
 
 library GlyphsLib {
-    component NacGlyph(kind: number, cx: number, cy: number, col: color = nacre_ink) {
+    component Glyph(kind: number, cx: number, cy: number, col: color = theme_ink) {
+        group {
+            show: kind == 9
+            box { at: cx - 2, cy - 2; size: 17, 13; corner: 3; stroke: 1.5; color: col }
+            box { at: cx + 3, cy + 3; size: 17, 13; corner: 3; stroke: 1.5; color: col }
+        }
+        group {
+            show: kind == 10
+            line { from: cx - 2, cy - 5; to: cx + 3, cy; width: 1.8; color: col }
+            line { from: cx + 3, cy; to: cx - 2, cy + 5; width: 1.8; color: col }
+        }
+        group {
+            show: kind == 5
+
+            box {
+                at: cx, cy + 1
+                size: 19, 13
+                corner: 3
+                stroke: 1.6
+                color: col
+            }
+            box {
+                at: cx - 4, cy - 7
+                size: 7, 3
+                corner: 1
+                color: col
+            }
+            ellipse {
+                at: cx, cy + 1
+                radius: 3.1
+                stroke: 1.5
+                color: col
+            }
+        }
+
+        group {
+            show: kind == 6
+            ellipse {
+                at: cx, cy
+                radius: 7
+                stroke: 1.5
+                color: col
+            }
+            ellipse {
+                at: cx, cy
+                radius: 3.5
+                color: col
+            }
+        }
+
         group {
             show: kind == 0
 
@@ -131,7 +180,7 @@ library GlyphsLib {
         }
     }
 
-    component NacWeatherGlyph(kind: number, cx: number, cy: number, col: color = nacre_ink_soft) {
+    component WeatherGlyph(kind: number, cx: number, cy: number, col: color = theme_ink_soft) {
         group {
             show: kind == 1
 
