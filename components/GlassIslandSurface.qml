@@ -41,7 +41,7 @@ Item {
         anchors.fill: parent
         bodyRadius: root.surfaceRadius
         fillColor: "transparent"
-        strokeColor: Theme.surfaceEdgeLight
+        strokeColor: Theme.glassPanelStroke
         strokeWidth: 1
         opacity: 0.44 + 0.18 * root.expansionProgress
     }
@@ -54,7 +54,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Theme.surfaceEdgeLight
+            strokeColor: Theme.glassPanelStroke
             strokeWidth: 1
             startX: 0
             startY: 0
@@ -70,7 +70,7 @@ Item {
 
         ShapePath {
             fillColor: "transparent"
-            strokeColor: Theme.surfaceEdgeLight
+            strokeColor: Theme.glassPanelStroke
             strokeWidth: 1
             startX: root.width - root.wingCurveSize
             startY: root.wingCurveSize

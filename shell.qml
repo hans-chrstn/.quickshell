@@ -7,8 +7,11 @@ import Quickshell.Hyprland
 import qs.components.lifecycle
 import qs.panels
 import qs.services.audio
+import qs.services.settings
+import qs.services.shell
 import qs.services.ipc
 import qs.services.config
+import qs.services.controlcenter
 import qs.services.display
 import qs.services.island
 import qs.services.launcher
@@ -31,6 +34,16 @@ ShellRoot {
     AudioNotificationBridge {}
 
     NotificationDaemon {}
+
+    Connections {
+        target: TransientUiCoordinator
+        function onCloseAllRequested(reason) {
+            LauncherService.close();
+            SettingsService.close();
+            SessionService.close();
+            ControlCenterService.close();
+        }
+    }
 
     WallpaperAutomationActivator {}
 
@@ -74,6 +87,15 @@ ShellRoot {
         model: Quickshell.screens
 
         delegate: IslandWindow {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        delegate: RightRailWindow {
             required property var modelData
             screen: modelData
         }

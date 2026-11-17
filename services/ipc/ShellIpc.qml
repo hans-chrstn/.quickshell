@@ -5,11 +5,13 @@ import qs.services.analytics
 import qs.services.audio
 import qs.services.cache
 import qs.services.config
+import qs.services.controlcenter
 import qs.services.display
 import qs.services.hardware
 import qs.services.island
 import qs.services.launcher
 import qs.services.lifecycle
+import qs.services.media
 import qs.services.notifications
 import qs.services.jobs
 import qs.services.power
@@ -29,8 +31,20 @@ IpcHandler {
     function launcherOpen(query: string): void {
         LauncherService.open(query);
     }
+    function launcherOpenOnScreen(query: string, screenName: string): void {
+        LauncherService.open(query, screenName);
+    }
     function launcherClose(): void {
         LauncherService.close();
+    }
+    function launcherStatus(): string {
+        return JsonFormat.stringify(LauncherService.snapshot());
+    }
+    function launcherExecuteResult(id: string): bool {
+        return LauncherService.executeResult(id);
+    }
+    function launcherExecuteAction(id: string, actionId: string): bool {
+        return LauncherService.executeAction(id, actionId);
     }
     function session(): void {
         SessionService.toggle();
@@ -107,6 +121,18 @@ IpcHandler {
     function islandZenStatus(): string {
         return JsonFormat.stringify(IslandPresentationService.snapshot());
     }
+    function islandRouteStatus(): string {
+        return JsonFormat.stringify(TopIslandCommandService.snapshot());
+    }
+    function islandOpenMedia(screenName: string, expanded: bool): bool {
+        return TopIslandCommandService.openMedia(screenName, expanded);
+    }
+    function islandOpenRoute(screenName: string, route: string, expanded: bool): bool {
+        return TopIslandCommandService.openRoute(screenName, route, expanded);
+    }
+    function islandHide(screenName: string): bool {
+        return TopIslandCommandService.hide(screenName);
+    }
     function islandZenSet(screenName: string, enabled: bool): bool {
         return IslandPresentationService.setZenEnabled(screenName, enabled);
     }
@@ -118,6 +144,18 @@ IpcHandler {
     }
     function notificationStatus(): string {
         return JsonFormat.stringify(NotificationService.snapshot());
+    }
+    function notificationHistoryStatus(lockSafe: bool): string {
+        return JsonFormat.stringify(NotificationService.historySnapshot(lockSafe));
+    }
+    function notificationDndSet(enabled: bool): bool {
+        return NotificationService.setDoNotDisturb(enabled);
+    }
+    function notificationHistoryClear(): void {
+        NotificationService.clearHistory();
+    }
+    function notificationHistoryRemove(id: string): bool {
+        return NotificationService.removeHistory(id);
     }
     function notificationTestPush(severity: string, title: string, message: string, screen: string): bool {
         if (Quickshell.env("QS_TEST_MODE") !== "1")
@@ -141,6 +179,33 @@ IpcHandler {
     }
     function audioStatus(): string {
         return JsonFormat.stringify(AudioService.snapshot());
+    }
+    function mediaStatus(): string {
+        return JsonFormat.stringify(PlayerService.snapshot());
+    }
+    function mediaSelectPlayer(id: string): bool {
+        return PlayerService.selectPlayer(id);
+    }
+    function mediaToggle(): bool {
+        return PlayerService.togglePlaying();
+    }
+    function mediaPrevious(): bool {
+        return PlayerService.previous();
+    }
+    function mediaNext(): bool {
+        return PlayerService.next();
+    }
+    function mediaSeekTo(seconds: real): bool {
+        return PlayerService.seekTo(seconds);
+    }
+    function mediaSeekBy(seconds: real): bool {
+        return PlayerService.seekBy(seconds);
+    }
+    function mediaShuffleToggle(): bool {
+        return PlayerService.toggleShuffle();
+    }
+    function mediaRepeatCycle(): bool {
+        return PlayerService.cycleRepeat();
     }
     function audioPresentationStatus(): string {
         return JsonFormat.stringify(AudioHudService.snapshot());
@@ -192,6 +257,15 @@ IpcHandler {
     }
     function audioClose(): bool {
         return AudioPanelService.close();
+    }
+    function controlCenterStatus(): string {
+        return JsonFormat.stringify(ControlCenterService.snapshot());
+    }
+    function controlCenterOpen(itemId: string, screenName: string): bool {
+        return ControlCenterService.openItem(itemId, screenName);
+    }
+    function controlCenterClose(): bool {
+        return ControlCenterService.close();
     }
     function audioPanelSelectPage(pageId: string): bool {
         return AudioPanelService.selectPage(pageId);

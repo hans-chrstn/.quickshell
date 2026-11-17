@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.core
 import qs.services.launcher
+import qs.services.shell
 import qs.services
 
 Singleton {
@@ -79,15 +80,56 @@ Singleton {
 
     function executeSelected() {
         if (selectedIndex < 0 || selectedIndex >= results.length)
-            return;
-        const result = results[selectedIndex];
+            return false;
+        return executeResult(results[selectedIndex].id);
+    }
+
+    function executeResult(id) {
+        const result = results.find(entry => entry.id === id);
+        if (!result)
+            return false;
         for (let i = 0; i < providers.length; ++i) {
             if (providers[i].providerId === result.providerId) {
                 providers[i].execute(result);
                 close();
-                return;
+                TransientUiCoordinator.closeAll("app-launched");
+                return true;
             }
         }
+        return false;
+    }
+
+    function executeAction(id, actionId) {
+        const result = results.find(entry => entry.id === id);
+        if (!result || !actionId)
+            return false;
+        for (const provider of providers) {
+            if (provider.providerId === result.providerId && provider.executeAction?.(result, actionId)) {
+                close();
+                TransientUiCoordinator.closeAll("app-action-launched");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function snapshot() {
+        return {
+            opened: opened,
+            query: query,
+            targetScreenName: targetScreenName,
+            selectedIndex: selectedIndex,
+            resultCount: results.length,
+            catalogSize: DesktopAppProvider.catalogSize,
+            selected: selectedIndex >= 0 && selectedIndex < results.length ? {
+                id: results[selectedIndex].id,
+                title: results[selectedIndex].title,
+                actions: results[selectedIndex].actions.map(action => ({
+                            id: action.id,
+                            name: action.name
+                        }))
+            } : null
+        };
     }
 
     Timer {

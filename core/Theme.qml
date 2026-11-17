@@ -13,6 +13,10 @@ Singleton {
     readonly property color surfaceSheen: "#0affffff"
     readonly property color surfaceEdgeLight: "#2effffff"
     readonly property color surfaceDepthEdge: "#72000000"
+    readonly property color glassPanelCompact: "#df111116"
+    readonly property color glassPanelExpanded: "#ed0d0d12"
+    readonly property color glassPanelStroke: "#38ffffff"
+    readonly property color glassPanelHighlight: "#48ffffff"
 
     readonly property color interactionRest: "transparent"
     readonly property color interactionHover: "#0dffffff"

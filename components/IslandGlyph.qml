@@ -128,6 +128,178 @@ Canvas {
             ctx.lineTo(7.1, 12.0);
             ctx.lineTo(13.7, 5.0);
             ctx.stroke();
+        } else if (root.name === "search") {
+            ctx.beginPath();
+            ctx.arc(7.2, 7.2, 4.3, 0, Math.PI * 2);
+            ctx.moveTo(10.5, 10.5);
+            ctx.lineTo(14.4, 14.4);
+            ctx.stroke();
+        } else if (root.name === "more") {
+            ctx.beginPath();
+            ctx.arc(3.8, 8.5, 1.25, 0, Math.PI * 2);
+            ctx.arc(8.5, 8.5, 1.25, 0, Math.PI * 2);
+            ctx.arc(13.2, 8.5, 1.25, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (root.name === "wifi") {
+            ctx.beginPath();
+            ctx.arc(8.5, 12.4, 0.9, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(8.5, 13.8, 4.6, Math.PI * 1.22, Math.PI * 1.78);
+            ctx.arc(8.5, 13.8, 8.2, Math.PI * 1.22, Math.PI * 1.78);
+            ctx.stroke();
+        } else if (root.name === "bluetooth") {
+            ctx.beginPath();
+            ctx.moveTo(8.2, 2.0);
+            ctx.lineTo(12.1, 5.6);
+            ctx.lineTo(4.7, 12.2);
+            ctx.moveTo(8.2, 15.0);
+            ctx.lineTo(12.1, 11.4);
+            ctx.lineTo(4.7, 4.8);
+            ctx.moveTo(8.2, 2.0);
+            ctx.lineTo(8.2, 15.0);
+            ctx.stroke();
+        } else if (root.name === "lock") {
+            ctx.strokeRect(4.2, 7.7, 8.6, 6.9);
+            ctx.beginPath();
+            ctx.arc(8.5, 7.7, 3.0, Math.PI, 0);
+            ctx.stroke();
+        } else if (root.name === "music") {
+            ctx.beginPath();
+            ctx.moveTo(7.0, 12.0);
+            ctx.lineTo(7.0, 4.2);
+            ctx.lineTo(13.3, 2.8);
+            ctx.lineTo(13.3, 10.3);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(4.8, 11.0, 3.8, 2.6, -0.2, 0, Math.PI * 2);
+            ctx.ellipse(11.1, 9.3, 3.8, 2.6, -0.2, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (root.name === "skipPrevious" || root.name === "skipNext") {
+            const previous = root.name === "skipPrevious";
+            ctx.fillRect(previous ? 3.1 : 12.5, 3.4, 1.5, 10.2);
+            ctx.beginPath();
+            if (previous) {
+                ctx.moveTo(13.1, 3.4);
+                ctx.lineTo(5.2, 8.5);
+                ctx.lineTo(13.1, 13.6);
+            } else {
+                ctx.moveTo(3.9, 3.4);
+                ctx.lineTo(11.8, 8.5);
+                ctx.lineTo(3.9, 13.6);
+            }
+            ctx.closePath();
+            ctx.fill();
+        } else if (root.name === "launch") {
+            ctx.beginPath();
+            ctx.moveTo(3.0, 9.8);
+            ctx.lineTo(3.0, 14.0);
+            ctx.lineTo(11.1, 14.0);
+            ctx.lineTo(11.1, 9.8);
+            ctx.moveTo(7.0, 10.0);
+            ctx.lineTo(14.0, 3.0);
+            ctx.moveTo(8.5, 3.0);
+            ctx.lineTo(14.0, 3.0);
+            ctx.lineTo(14.0, 8.5);
+            ctx.stroke();
+        } else if (root.name === "bell" || root.name === "bellOff") {
+            ctx.beginPath();
+            ctx.moveTo(4.1, 11.6);
+            ctx.bezierCurveTo(5.2, 10.6, 5.4, 9.3, 5.4, 7.1);
+            ctx.bezierCurveTo(5.4, 4.8, 6.6, 3.2, 8.5, 3.2);
+            ctx.bezierCurveTo(10.4, 3.2, 11.6, 4.8, 11.6, 7.1);
+            ctx.bezierCurveTo(11.6, 9.3, 11.8, 10.6, 12.9, 11.6);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(8.5, 12.8, 1.3, 0, Math.PI);
+            ctx.stroke();
+            if (root.name === "bellOff") {
+                ctx.beginPath();
+                ctx.moveTo(2.7, 14.3);
+                ctx.lineTo(14.3, 2.7);
+                ctx.stroke();
+            }
+        } else if (root.name === "trash") {
+            ctx.beginPath();
+            ctx.moveTo(4.5, 4.7);
+            ctx.lineTo(12.5, 4.7);
+            ctx.lineTo(11.9, 14.0);
+            ctx.lineTo(5.1, 14.0);
+            ctx.closePath();
+            ctx.moveTo(3.5, 4.7);
+            ctx.lineTo(13.5, 4.7);
+            ctx.moveTo(6.3, 3.1);
+            ctx.lineTo(10.7, 3.1);
+            ctx.stroke();
+        } else if (root.name === "sun" || root.name === "moon" || root.name === "cloud" || root.name === "rain" || root.name === "snow" || root.name === "fog" || root.name === "storm" || root.name === "weatherUnavailable") {
+            if (root.name === "sun") {
+                ctx.beginPath();
+                ctx.arc(8.5, 8.5, 3.1, 0, Math.PI * 2);
+                ctx.stroke();
+                for (let ray = 0; ray < 8; ++ray) {
+                    const angle = ray * Math.PI / 4;
+                    ctx.beginPath();
+                    ctx.moveTo(8.5 + Math.cos(angle) * 5.2, 8.5 + Math.sin(angle) * 5.2);
+                    ctx.lineTo(8.5 + Math.cos(angle) * 6.9, 8.5 + Math.sin(angle) * 6.9);
+                    ctx.stroke();
+                }
+            } else if (root.name === "moon") {
+                ctx.beginPath();
+                ctx.arc(8.3, 8.5, 5.2, -1.1, 1.9);
+                ctx.bezierCurveTo(7.4, 12.5, 7.5, 6.8, 12.9, 4.1);
+                ctx.stroke();
+            } else if (root.name === "snow") {
+                for (let arm = 0; arm < 3; ++arm) {
+                    const angle = arm * Math.PI / 3;
+                    ctx.beginPath();
+                    ctx.moveTo(8.5 - Math.cos(angle) * 5.7, 8.5 - Math.sin(angle) * 5.7);
+                    ctx.lineTo(8.5 + Math.cos(angle) * 5.7, 8.5 + Math.sin(angle) * 5.7);
+                    ctx.stroke();
+                }
+            } else if (root.name === "fog") {
+                for (let line = 0; line < 3; ++line) {
+                    ctx.beginPath();
+                    ctx.moveTo(2.7, 5.2 + line * 3.3);
+                    ctx.lineTo(14.3, 5.2 + line * 3.3);
+                    ctx.stroke();
+                }
+            } else if (root.name === "storm") {
+                ctx.beginPath();
+                ctx.moveTo(9.5, 2.4);
+                ctx.lineTo(5.8, 9.2);
+                ctx.lineTo(9.1, 9.2);
+                ctx.lineTo(7.5, 14.6);
+                ctx.lineTo(12.1, 7.3);
+                ctx.lineTo(8.8, 7.3);
+                ctx.closePath();
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(4.3, 12.1);
+                ctx.bezierCurveTo(2.6, 12.1, 2.0, 10.8, 2.0, 9.5);
+                ctx.bezierCurveTo(2.0, 8.0, 3.2, 6.8, 4.7, 6.8);
+                ctx.bezierCurveTo(5.4, 4.3, 8.4, 3.3, 10.6, 4.7);
+                ctx.bezierCurveTo(12.3, 4.7, 13.4, 5.8, 13.6, 7.3);
+                ctx.bezierCurveTo(15.1, 7.8, 15.5, 9.2, 14.8, 10.5);
+                ctx.bezierCurveTo(14.2, 11.6, 13.2, 12.1, 11.8, 12.1);
+                ctx.closePath();
+                ctx.stroke();
+                if (root.name === "rain") {
+                    ctx.beginPath();
+                    ctx.moveTo(6.3, 13.0);
+                    ctx.lineTo(5.3, 15.0);
+                    ctx.moveTo(10.8, 13.0);
+                    ctx.lineTo(9.8, 15.0);
+                    ctx.stroke();
+                }
+                if (root.name === "weatherUnavailable") {
+                    ctx.beginPath();
+                    ctx.moveTo(2.5, 14.5);
+                    ctx.lineTo(14.5, 2.5);
+                    ctx.stroke();
+                }
+            }
         } else if (root.name === "play" || root.name === "pause") {
             if (root.name === "play") {
                 ctx.beginPath();
@@ -152,6 +324,23 @@ Canvas {
                 ctx.arc(knobs[index], levels[index], 1.45, 0, Math.PI * 2);
                 ctx.fill();
             }
+        } else if (root.name === "shuffle") {
+            ctx.beginPath();
+            ctx.moveTo(2.8, 4.7);
+            ctx.lineTo(4.8, 4.7);
+            ctx.bezierCurveTo(7.5, 4.7, 9.0, 12.3, 12.2, 12.3);
+            ctx.lineTo(14.1, 12.3);
+            ctx.moveTo(11.8, 10.4);
+            ctx.lineTo(14.2, 12.3);
+            ctx.lineTo(11.8, 14.2);
+            ctx.moveTo(2.8, 12.3);
+            ctx.lineTo(4.8, 12.3);
+            ctx.bezierCurveTo(7.5, 12.3, 9.0, 4.7, 12.2, 4.7);
+            ctx.lineTo(14.1, 4.7);
+            ctx.moveTo(11.8, 2.8);
+            ctx.lineTo(14.2, 4.7);
+            ctx.lineTo(11.8, 6.6);
+            ctx.stroke();
         } else if (root.name === "repeat") {
             ctx.beginPath();
             ctx.moveTo(3.0, 6.0);

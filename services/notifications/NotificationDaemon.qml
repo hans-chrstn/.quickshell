@@ -32,6 +32,10 @@ Item {
             notification.dismiss();
             return;
         }
+        if (NotificationService.doNotDisturb) {
+            notification.dismiss();
+            return;
+        }
         const lease = nativeLease.createObject(root, {
             nativeNotification: notification,
             noticeId: noticeId,

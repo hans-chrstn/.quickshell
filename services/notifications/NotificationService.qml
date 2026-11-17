@@ -2,14 +2,22 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.core
 import qs.services
 import "NotificationModel.js" as NotificationModel
+import "NotificationHistory.js" as NotificationHistory
 
 Singleton {
     id: root
 
     property var queue: []
+    property var history: []
+    property bool doNotDisturb: false
+    property bool historyLoaded: false
+    property bool historyClearedBeforeLoad: false
+    property bool dndChangedBeforeLoad: false
+    property string historyError: ""
     property int sequence: 0
     property bool presentationVisible: false
     property var presentedScreens: ({})
@@ -19,17 +27,30 @@ Singleton {
     property int remainingDurationMs: 0
     readonly property var current: queue.length > 0 ? queue[0] : null
     readonly property bool hasPresentation: current !== null
+    readonly property var historyGroups: NotificationHistory.groups(history)
     signal closureRequested(string noticeId, string reason)
 
     function submit(request) {
         sequence += 1;
         const source = Object.assign({}, request || ({}));
         source.screenName = ScreenService.resolve(source.screenName || "");
+        if (doNotDisturb) {
+            const notice = NotificationModel.normalize(source, Date.now(), sequence);
+            if (!notice)
+                return "";
+            history = NotificationHistory.insert(history, notice, Date.now());
+            if (historyLoaded)
+                saveTimer.restart();
+            return notice.id;
+        }
         const result = NotificationModel.enqueue(queue, source, Date.now(), sequence);
         if (!result.accepted)
             return "";
         const becomesCurrent = result.queue[0]?.id === result.notice.id;
         queue = result.queue;
+        history = NotificationHistory.insert(history, result.notice, Date.now());
+        if (historyLoaded)
+            saveTimer.restart();
         if (!presentationVisible) {
             closeTimer.stop();
             presentationVisible = true;
@@ -60,6 +81,9 @@ Singleton {
         const next = queue.slice();
         next[index] = updated;
         queue = next;
+        history = NotificationHistory.insert(history, updated, Date.now());
+        if (historyLoaded)
+            saveTimer.restart();
         if (index === 0 && presentationVisible && viewPresented && !hovered)
             beginExpiry(true);
         return true;
@@ -210,6 +234,47 @@ Singleton {
         remainingDurationMs = 0;
     }
 
+    function clearHistory() {
+        clear();
+        history = [];
+        if (!historyLoaded)
+            historyClearedBeforeLoad = true;
+        if (historyLoaded)
+            saveTimer.restart();
+    }
+
+    function removeHistory(noticeId) {
+        if (!history.some(item => item.id === noticeId))
+            return false;
+        history = NotificationHistory.remove(history, noticeId);
+        if (historyLoaded)
+            saveTimer.restart();
+        return true;
+    }
+
+    function setDoNotDisturb(value) {
+        const next = Boolean(value);
+        if (next === doNotDisturb)
+            return false;
+        if (next)
+            clear();
+        if (!historyLoaded)
+            dndChangedBeforeLoad = true;
+        doNotDisturb = next;
+        if (historyLoaded)
+            saveTimer.restart();
+        return true;
+    }
+
+    function historySnapshot(lockSafe) {
+        return {
+            doNotDisturb: doNotDisturb,
+            count: history.length,
+            error: historyError,
+            entries: lockSafe ? NotificationHistory.lockSafe(history) : history.slice()
+        };
+    }
+
     function snapshot() {
         return {
             queueLength: queue.length,
@@ -219,8 +284,59 @@ Singleton {
             hovered: hovered,
             expiresAtMs: expiresAtMs,
             remainingDurationMs: remainingDurationMs,
-            current: current ? Object.assign({}, current) : null
+            current: current ? Object.assign({}, current) : null,
+            historyCount: history.length,
+            doNotDisturb: doNotDisturb
         };
+    }
+
+    Timer {
+        id: saveTimer
+        interval: 250
+        onTriggered: {
+            historyData.entries = root.history;
+            historyData.doNotDisturb = root.doNotDisturb;
+            historyFile.writeAdapter();
+        }
+    }
+
+    FileView {
+        id: historyFile
+        path: Quickshell.statePath("notification-history.json")
+        printErrors: false
+        onLoaded: {
+            try {
+                const stored = JSON.parse(text());
+                if (stored.schemaVersion !== 1 || !Array.isArray(stored.entries))
+                    throw new Error("Unsupported notification history format");
+                if (!root.historyClearedBeforeLoad)
+                    root.history = NotificationHistory.merge(stored.entries, root.history, Date.now());
+                if (!root.dndChangedBeforeLoad) {
+                    if (stored.doNotDisturb === true)
+                        root.clear();
+                    root.doNotDisturb = stored.doNotDisturb === true;
+                }
+                root.historyError = "";
+            } catch (exception) {
+                root.historyError = "Notification history could not be loaded";
+            }
+            root.historyLoaded = true;
+            if (root.history.length > 0 || root.dndChangedBeforeLoad || root.historyClearedBeforeLoad)
+                saveTimer.restart();
+        }
+        onLoadFailed: failure => {
+            root.historyLoaded = true;
+            root.historyError = failure === FileViewError.FileNotFound ? "" : "Notification history could not be loaded";
+            if (root.history.length > 0 || root.doNotDisturb || root.historyClearedBeforeLoad)
+                saveTimer.restart();
+        }
+
+        JsonAdapter {
+            id: historyData
+            property int schemaVersion: 1
+            property var entries: []
+            property bool doNotDisturb: false
+        }
     }
 
     Timer {

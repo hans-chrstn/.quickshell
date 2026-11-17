@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.island
 import qs.core
@@ -25,6 +26,12 @@ PanelWindow {
     aboveWindows: true
     focusable: island.keyboardRequested
 
+    HyprlandFocusGrab {
+        active: !island.hidden && !island.compact && !island.ipcPinned
+        windows: [root]
+        onCleared: island.dispatch("outside")
+    }
+
     BackgroundEffect.blurRegion: Region {
         Region {
             item: blurParkingTarget
@@ -32,10 +39,10 @@ PanelWindow {
 
         Region {
             item: (island.hidden || !SettingsService.enableBlur) ? null : island.blurTarget
-            topLeftRadius: 0
-            topRightRadius: 0
-            bottomLeftRadius: Design.bodyRadius + (Design.expandedBodyRadius - Design.bodyRadius) * island.expansionProgress
-            bottomRightRadius: bottomLeftRadius
+            topLeftRadius: island.cornerRadius
+            topRightRadius: island.cornerRadius
+            bottomLeftRadius: island.cornerRadius
+            bottomRightRadius: island.cornerRadius
         }
     }
 
@@ -71,10 +78,9 @@ PanelWindow {
         }
     }
 
-    DynamicIsland {
+    TopIsland {
         id: island
 
-        anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         backdropAvailable: SettingsService.enableBlur
         zenMode: root.zenMode
