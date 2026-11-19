@@ -41,6 +41,8 @@ Singleton {
     readonly property int motionStateDuration: motionDuration(140)
     readonly property int motionControlDuration: motionDuration(170)
     readonly property int motionTravelDuration: motionDuration(190)
+    readonly property int settingsRowStagger: motionDuration(34)
+    readonly property int settingsRowEntrance: motionDuration(300)
     readonly property int motionExitDuration: motionDuration(220)
     readonly property int motionStandardEasing: Easing.OutCubic
     readonly property int motionSpatialEasing: Easing.InOutCubic
@@ -98,7 +100,13 @@ Singleton {
     readonly property int controlBodyWidth: 650
     readonly property int controlBodyHeight: 520
     readonly property int controlRailHideDelay: 620
-    readonly property int controlPageRevealDelay: motionDuration(220)
+    readonly property int controlPageRevealDelay: motionDuration(420)
+    readonly property int controlPageCollapseDelay: motionDuration(240)
+    readonly property int osdWidth: 296
+    readonly property int osdHeight: 72
+    readonly property int osdBottomGap: 28
+    readonly property int osdHoldDuration: 3000
+    readonly property int osdRetireDuration: 520
 
     readonly property int wing: SettingsService.islandWing
     readonly property int collapsedWidth: SettingsService.islandCollapsedWidth

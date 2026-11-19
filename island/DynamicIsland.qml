@@ -8,7 +8,6 @@ import qs.modules.editor
 import qs.modules.launcher
 import qs.modules.notifications
 import qs.modules.session
-import qs.modules.settings
 import qs.services.island
 import "../core/IslandSizing.js" as IslandSizing
 import "IslandInteraction.js" as IslandInteraction
@@ -42,9 +41,6 @@ Item {
             AudioPrivacyModuleSpec {
                 screenName: root.screenName
             },
-            AudioHudModuleSpec {
-                screenName: root.screenName
-            },
             AudioControlModuleSpec {
                 screenName: root.screenName
             },
@@ -55,9 +51,6 @@ Item {
                 screenName: root.screenName
             },
             LauncherModuleSpec {
-                screenName: root.screenName
-            },
-            SettingsModuleSpec {
                 screenName: root.screenName
             },
             SessionModuleSpec {

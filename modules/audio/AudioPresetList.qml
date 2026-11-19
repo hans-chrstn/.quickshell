@@ -101,22 +101,15 @@ Item {
                 }
             }
 
-            Rectangle {
+            IconMark {
                 anchors.left: parent.left
                 anchors.leftMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
                 width: 34
                 height: 34
-                radius: 11
-                color: row.modelData.active || row.selected ? Theme.fillStrong : Theme.fillSubtle
-
-                IslandGlyph {
-                    anchors.centerIn: parent
-                    width: 19
-                    height: 19
-                    name: row.applying ? "repeat" : root.pipeline === "input" ? "microphone" : "volumeHigh"
-                    glyphColor: row.modelData.active || row.selected ? Theme.textPrimary : Theme.textSecondary
-                }
+                glyph: row.applying ? "repeat" : root.pipeline === "input" ? "microphone" : "volumeHigh"
+                glyphSize: 19
+                glyphColor: row.modelData.active || row.selected ? Theme.textPrimary : Theme.textSecondary
             }
 
             Text {

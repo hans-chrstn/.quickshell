@@ -14,9 +14,11 @@ InteractionFrame {
     implicitHeight: Design.controlRailButtonSize
     cornerRadius: width / 2
     selected: active
+    accentColor: Theme.accent
+    selectionFillEnabled: false
     accentSelectedOutline: active
-    baseColor: Theme.fillQuiet
-    hoverColor: Theme.fillElevated
+    baseColor: "transparent"
+    hoverColor: Theme.interactionHover
     onTriggered: activated()
 
     Accessible.name: accessibleName

@@ -15,6 +15,8 @@ InteractionFrame {
     implicitHeight: 40
     selected: primary
     selectionFillEnabled: false
+    baseColor: "transparent"
+    hoverColor: Theme.interactionHover
     cornerRadius: 12
     controlInset: 2
     onTriggered: root.activated()
@@ -24,21 +26,6 @@ InteractionFrame {
     IslandToolTip {
         visible: root.hovered && root.toolTip.length > 0
         text: root.toolTip
-    }
-
-    Rectangle {
-        anchors.centerIn: parent
-        width: 30
-        height: 30
-        radius: 11
-        color: root.primary ? Theme.alpha(root.accentColor, 0.12) : Theme.fillQuiet
-
-        Behavior on color {
-            ColorAnimation {
-                duration: Design.motionStateDuration
-                easing.type: Design.motionStandardEasing
-            }
-        }
     }
 
     IslandGlyph {

@@ -107,6 +107,24 @@ Canvas {
             ctx.lineTo(7.3, 10.8);
             ctx.closePath();
             ctx.stroke();
+        } else if (root.name === "crop") {
+            ctx.beginPath();
+            ctx.moveTo(5.0, 2.3);
+            ctx.lineTo(5.0, 11.9);
+            ctx.quadraticCurveTo(5.0, 12.8, 6.0, 12.8);
+            ctx.lineTo(14.8, 12.8);
+            ctx.moveTo(2.3, 5.0);
+            ctx.lineTo(11.9, 5.0);
+            ctx.quadraticCurveTo(12.8, 5.0, 12.8, 6.0);
+            ctx.lineTo(12.8, 14.8);
+            ctx.stroke();
+        } else if (root.name === "rotate") {
+            ctx.beginPath();
+            ctx.arc(8.5, 8.5, 5.3, -2.3, 2.2);
+            ctx.moveTo(3.7, 5.7);
+            ctx.lineTo(4.0, 2.6);
+            ctx.lineTo(7.0, 3.3);
+            ctx.stroke();
         } else if (root.name === "plus") {
             ctx.beginPath();
             ctx.moveTo(8.5, 3.3);
@@ -147,6 +165,70 @@ Canvas {
             ctx.beginPath();
             ctx.arc(8.5, 13.8, 4.6, Math.PI * 1.22, Math.PI * 1.78);
             ctx.arc(8.5, 13.8, 8.2, Math.PI * 1.22, Math.PI * 1.78);
+            ctx.stroke();
+        } else if (root.name === "ethernet") {
+            ctx.beginPath();
+            ctx.moveTo(4.1, 2.5);
+            ctx.lineTo(12.9, 2.5);
+            ctx.lineTo(12.9, 8.2);
+            ctx.lineTo(10.6, 10.5);
+            ctx.lineTo(6.4, 10.5);
+            ctx.lineTo(4.1, 8.2);
+            ctx.closePath();
+            ctx.moveTo(6.4, 10.5);
+            ctx.lineTo(6.4, 14.4);
+            ctx.moveTo(10.6, 10.5);
+            ctx.lineTo(10.6, 14.4);
+            ctx.moveTo(3.5, 14.4);
+            ctx.lineTo(13.5, 14.4);
+            ctx.moveTo(6.4, 5.1);
+            ctx.lineTo(6.4, 7.3);
+            ctx.moveTo(8.5, 5.1);
+            ctx.lineTo(8.5, 7.3);
+            ctx.moveTo(10.6, 5.1);
+            ctx.lineTo(10.6, 7.3);
+            ctx.stroke();
+        } else if (root.name === "headphones") {
+            ctx.beginPath();
+            ctx.arc(8.5, 8.4, 5.5, Math.PI, 0);
+            ctx.moveTo(3.0, 8.4);
+            ctx.lineTo(3.0, 13.2);
+            ctx.quadraticCurveTo(3.0, 14.4, 4.2, 14.4);
+            ctx.lineTo(5.3, 14.4);
+            ctx.quadraticCurveTo(6.1, 14.4, 6.1, 13.5);
+            ctx.lineTo(6.1, 10.7);
+            ctx.quadraticCurveTo(6.1, 9.8, 5.3, 9.8);
+            ctx.lineTo(3.0, 9.8);
+            ctx.moveTo(14.0, 8.4);
+            ctx.lineTo(14.0, 13.2);
+            ctx.quadraticCurveTo(14.0, 14.4, 12.8, 14.4);
+            ctx.lineTo(11.7, 14.4);
+            ctx.quadraticCurveTo(10.9, 14.4, 10.9, 13.5);
+            ctx.lineTo(10.9, 10.7);
+            ctx.quadraticCurveTo(10.9, 9.8, 11.7, 9.8);
+            ctx.lineTo(14.0, 9.8);
+            ctx.stroke();
+        } else if (root.name === "keyboard") {
+            ctx.strokeRect(2.0, 4.0, 13.0, 9.5);
+            ctx.beginPath();
+            ctx.moveTo(4.0, 6.6);
+            ctx.lineTo(4.6, 6.6);
+            ctx.moveTo(6.4, 6.6);
+            ctx.lineTo(7.0, 6.6);
+            ctx.moveTo(8.8, 6.6);
+            ctx.lineTo(9.4, 6.6);
+            ctx.moveTo(11.2, 6.6);
+            ctx.lineTo(11.8, 6.6);
+            ctx.moveTo(4.0, 9.0);
+            ctx.lineTo(4.6, 9.0);
+            ctx.moveTo(6.4, 9.0);
+            ctx.lineTo(7.0, 9.0);
+            ctx.moveTo(8.8, 9.0);
+            ctx.lineTo(9.4, 9.0);
+            ctx.moveTo(11.2, 9.0);
+            ctx.lineTo(11.8, 9.0);
+            ctx.moveTo(5.0, 11.5);
+            ctx.lineTo(12.0, 11.5);
             ctx.stroke();
         } else if (root.name === "bluetooth") {
             ctx.beginPath();

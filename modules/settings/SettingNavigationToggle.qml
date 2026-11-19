@@ -13,17 +13,17 @@ HighlightableSurface {
     signal activated
     signal toggled(bool newValue)
 
-    implicitHeight: 52
+    implicitHeight: 60
     interactive: false
     focused: navigationHover.hovered
-    baseColor: Theme.fillSubtle
-    cornerRadius: 10
+    baseColor: "transparent"
+    cornerRadius: Design.radiusControl
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 14
-        anchors.rightMargin: 10
-        spacing: 10
+        anchors.leftMargin: Design.space12
+        anchors.rightMargin: Design.space8
+        spacing: Design.space8
 
         Item {
             id: navigationArea
@@ -42,7 +42,7 @@ HighlightableSurface {
                         text: root.title
                         color: root.dangerous ? Theme.danger : Theme.textPrimary
                         font.family: Design.fontText
-                        font.pixelSize: 12
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
@@ -50,14 +50,14 @@ HighlightableSurface {
                         text: root.description
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 9
+                        font.pixelSize: Design.typeCaption
                         elide: Text.ElideRight
                     }
                 }
 
                 IslandGlyph {
                     name: "chevronRight"
-                    glyphColor: navigationHover.hovered ? Theme.textPrimary : Theme.textSecondary
+                    glyphColor: navigationHover.hovered ? Theme.accent : Theme.textTertiary
                     Layout.preferredWidth: 17
                     Layout.preferredHeight: 17
                 }
@@ -71,38 +71,23 @@ HighlightableSurface {
             }
         }
 
-        Rectangle {
-            Layout.preferredWidth: 36
-            Layout.preferredHeight: 20
-            radius: 10
-            color: root.checked ? Theme.accent : Theme.fillElevated
-            border.width: 1
-            border.color: Theme.separator
-
-            Behavior on color {
-                ColorAnimation {
-                    duration: 120
-                }
-            }
-
-            Rectangle {
-                x: root.checked ? parent.width - width - 2 : 2
-                y: 2
-                width: 16
-                height: 16
-                radius: 8
-                color: Theme.textPrimary
-                Behavior on x {
-                    NumberAnimation {
-                        duration: 120
-                        easing.type: Easing.OutCubic
-                    }
-                }
-            }
-
-            TapHandler {
-                onTapped: root.toggled(!root.checked)
-            }
+        ToggleSwitch {
+            Layout.preferredWidth: 43
+            Layout.preferredHeight: 25
+            checked: root.checked
+            activeColor: root.dangerous ? Theme.statusDanger : Theme.accent
+            accessibleName: root.title
+            onToggled: value => root.toggled(value)
         }
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: Design.space12
+        anchors.rightMargin: Design.space12
+        height: 1
+        color: Theme.separator
     }
 }

@@ -9,11 +9,6 @@ HighlightableSurface {
 
     required property var record
     readonly property string path: String(record?.path || "")
-    readonly property string extension: {
-        const fileName = path.slice(path.lastIndexOf("/") + 1);
-        const dot = fileName.lastIndexOf(".");
-        return dot >= 0 && dot < fileName.length - 1 ? fileName.slice(dot + 1).toLowerCase() : "media";
-    }
     readonly property string state: String(record?.state || "unknown")
     readonly property string kind: String(record?.kind || "unsupported")
     readonly property string rendererBackend: WallpaperRenderSupportService.rendererFor(record)
@@ -60,79 +55,57 @@ HighlightableSurface {
         spacing: 4
         visible: !preview.previewReady
 
-        Text {
+        IslandGlyph {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: {
-                if (root.state === "queued" || root.state === "probing")
-                    return "Inspecting";
-                if (root.state === "failed")
-                    return "Unavailable";
-                if (root.state === "unsupported")
-                    return "Unsupported";
-                if (preview.poster.state === "queued" || preview.poster.state === "checking" || preview.poster.state === "generating")
-                    return "Preparing preview";
-                if (preview.poster.state === "failed")
-                    return "Preview unavailable";
-                if (root.kind === "animatedImage")
-                    return "Animated image";
-                if (root.kind === "video")
-                    return "Video";
-                return "Loading";
+            width: 20
+            height: 20
+            name: root.state === "failed" || root.state === "unsupported" ? "close" : "more"
+            glyphColor: Theme.textSecondary
+
+            SequentialAnimation on opacity {
+                running: !preview.previewReady && root.state !== "failed" && root.state !== "unsupported" && !Design.reducedMotion
+                loops: Animation.Infinite
+                NumberAnimation {
+                    to: 0.35
+                    duration: Design.weatherPulseDuration
+                }
+                NumberAnimation {
+                    to: 1
+                    duration: Design.weatherPulseDuration
+                }
             }
-            color: Theme.textSecondary
-            font.family: Design.fontText
-            font.pixelSize: 11
         }
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            visible: root.state === "ready" && !root.selectable
-            text: record.width + "×" + record.height + (record.durationMs > 0 ? " · " + (record.durationMs / 1000).toFixed(1) + "s" : "")
+            visible: root.state === "failed" || root.state === "unsupported" || preview.poster.state === "failed"
+            text: root.state === "unsupported" ? "Unsupported" : "Unavailable"
             color: Theme.textSecondary
-            opacity: 0.7
-            font.family: Design.fontMono
-            font.pixelSize: 9
+            font.family: Design.fontText
+            font.pixelSize: Design.typeCaption
         }
     }
 
-    Rectangle {
+    IslandGlyph {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.margins: 7
-        width: extensionLabel.implicitWidth + 12
-        height: 18
-        radius: 9
-        visible: root.path.length > 0
-        color: root.kind === "video" ? Theme.accent : Theme.fillElevated
-
-        Text {
-            id: extensionLabel
-            anchors.centerIn: parent
-            text: root.extension
-            color: Theme.textPrimary
-            font.family: Design.fontText
-            font.pixelSize: 8
-            font.weight: Font.DemiBold
-        }
+        width: 16
+        height: 16
+        visible: root.kind === "video" && preview.previewReady
+        name: "play"
+        glyphColor: Theme.textPrimary
     }
 
-    Rectangle {
+    IslandGlyph {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.margins: 8
         width: 18
         height: 18
-        radius: 9
         visible: root.selected
-        color: Theme.accent
-
-        Text {
-            anchors.centerIn: parent
-            text: "✓"
-            color: Theme.textPrimary
-            font.pixelSize: 11
-            font.weight: Font.Bold
-        }
+        name: "checkmark"
+        glyphColor: Theme.textPrimary
     }
 
     HoverHandler {

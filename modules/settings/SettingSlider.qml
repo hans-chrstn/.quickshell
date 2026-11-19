@@ -32,22 +32,23 @@ Item {
                     text: root.title
                     color: Theme.textPrimary
                     font.family: Design.fontText
-                    font.pixelSize: 12
+                    font.pixelSize: Design.typeBody
                     font.weight: Font.DemiBold
                 }
                 Text {
                     text: root.description
                     color: Theme.textSecondary
                     font.family: Design.fontText
-                    font.pixelSize: 9
+                    font.pixelSize: Design.typeCaption
+                    elide: Text.ElideRight
                 }
             }
 
             Text {
                 text: Math.round(root.value) + " " + root.unit
-                color: control.activeFocus || control.pressed ? Theme.selection : Theme.textSecondary
+                color: control.activeFocus || control.pressed ? Theme.accent : Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 10
+                font.pixelSize: Design.typeLabel
 
                 Behavior on color {
                     ColorAnimation {
@@ -66,7 +67,7 @@ Item {
             to: root.to
             stepSize: root.stepSize
             value: root.value
-            accentColor: Theme.selection
+            accentColor: Theme.accent
             onEditRequested: value => root.valueEdited(value)
         }
     }

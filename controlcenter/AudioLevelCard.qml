@@ -21,21 +21,14 @@ Rectangle {
     border.color: Theme.separatorQuiet
     opacity: available ? 1 : 0.48
 
-    Rectangle {
+    IconMark {
         x: Design.space16
         y: Design.space16
         width: 42
         height: 42
-        radius: width / 2
-        color: Theme.alpha(Theme.accent, 0.13)
-
-        IslandGlyph {
-            anchors.centerIn: parent
-            width: 22
-            height: 22
-            name: root.glyph
-            glyphColor: Theme.accent
-        }
+        glyph: root.glyph
+        glyphSize: 22
+        glyphColor: Theme.accent
     }
 
     Text {

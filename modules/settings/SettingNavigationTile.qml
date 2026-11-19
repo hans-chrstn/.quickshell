@@ -10,17 +10,18 @@ HighlightableSurface {
     required property string description
     signal activated
 
-    implicitHeight: 52
-    interactive: false
-    focused: hover.hovered
-    baseColor: Theme.fillSubtle
-    cornerRadius: 10
+    implicitHeight: 59
+    interactive: true
+    baseColor: "transparent"
+    cornerRadius: Design.radiusControl
+    accessibleName: title + ", " + description
+    onSurfaceActivated: root.activated()
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: 14
-        anchors.rightMargin: 14
-        spacing: 12
+        anchors.leftMargin: Design.space12
+        anchors.rightMargin: Design.space8
+        spacing: Design.space8
 
         ColumnLayout {
             Layout.fillWidth: true
@@ -30,7 +31,7 @@ HighlightableSurface {
                 text: root.title
                 color: Theme.textPrimary
                 font.family: Design.fontText
-                font.pixelSize: 12
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
 
@@ -38,25 +39,38 @@ HighlightableSurface {
                 text: root.description
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeCaption
+                elide: Text.ElideRight
             }
         }
 
         IslandGlyph {
+            id: arrow
             name: "chevronRight"
-            glyphColor: hover.hovered ? Theme.textPrimary : Theme.textSecondary
+            glyphColor: root.hovered ? Theme.accent : Theme.textTertiary
             Layout.preferredWidth: 17
             Layout.preferredHeight: 17
             Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+            opacity: root.hovered ? 1 : 0.65
+            transform: Translate {
+                x: root.hovered && !Design.reducedMotion ? 3 : 0
+
+                Behavior on x {
+                    SpatialSpring {
+                        phase: "morph"
+                    }
+                }
+            }
         }
     }
 
-    HoverHandler {
-        id: hover
-    }
-    TapHandler {
-        id: tap
-        acceptedButtons: Qt.LeftButton
-        onTapped: root.activated()
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: Design.space12
+        anchors.rightMargin: Design.space12
+        height: 1
+        color: Theme.separator
     }
 }

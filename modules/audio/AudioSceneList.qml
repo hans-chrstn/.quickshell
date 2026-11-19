@@ -118,22 +118,15 @@ Item {
                 }
             }
 
-            Rectangle {
+            IconMark {
                 anchors.left: parent.left
                 anchors.leftMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
                 width: 42
                 height: 42
-                radius: 13
-                color: row.selected || row.busy ? Theme.fillStrong : Theme.fillSubtle
-
-                IslandGlyph {
-                    anchors.centerIn: parent
-                    width: 23
-                    height: 23
-                    name: row.busy ? "repeat" : "volumeHigh"
-                    glyphColor: row.selected || row.busy ? Theme.textPrimary : Theme.textSecondary
-                }
+                glyph: row.busy ? "repeat" : "volumeHigh"
+                glyphSize: 23
+                glyphColor: row.selected || row.busy ? Theme.textPrimary : Theme.textSecondary
             }
 
             Column {

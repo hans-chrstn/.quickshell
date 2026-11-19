@@ -1,4 +1,5 @@
 import QtQuick
+import qs.components
 import qs.core
 
 Item {
@@ -7,7 +8,7 @@ Item {
     opacity: 0
     transform: Translate {
         id: translate
-        x: 12
+        x: Design.reducedMotion ? 0 : 18
     }
 
     Component.onCompleted: entranceAnimation.start()
@@ -19,16 +20,15 @@ Item {
             target: root
             property: "opacity"
             to: 1
-            duration: Design.contentRevealDuration
+            duration: Design.settingsRowEntrance
             easing.type: Easing.OutCubic
         }
 
-        NumberAnimation {
+        SpatialSpring {
             target: translate
             property: "x"
             to: 0
-            duration: Design.contentRevealDuration
-            easing.type: Easing.OutCubic
+            phase: "enter"
         }
     }
 }

@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.services
 import qs.services.config
+import "SettingsSearch.js" as SettingsSearch
 
 Singleton {
     id: root
@@ -12,10 +13,14 @@ Singleton {
     property bool closing: false
     property string targetScreenName: ""
     property int selectedCategory: 0
+    property string searchQuery: ""
+    property string wallpaperTarget: "desktop"
+    property string wallpaperScreenName: ""
     onSelectedCategoryChanged: if (opened)
         clearPages()
     property var pageStack: []
     readonly property string currentPage: pageStack.length > 0 ? String(pageStack[pageStack.length - 1]) : ""
+    readonly property var searchResults: SettingsSearch.search(categories, searchQuery, 20)
 
     readonly property int revealDuration: ConfigService.revealDuration
     readonly property int resizeDuration: ConfigService.resizeDuration
@@ -42,12 +47,64 @@ Singleton {
                 {
                     id: "wallpaper",
                     title: "Wallpaper",
-                    desc: "Select background images"
+                    desc: "Select background images",
+                    keywords: "background images video displays assign studio editor"
                 },
                 {
                     id: "island_style",
                     title: "Island Style",
-                    desc: "Customize dimensions, radius, and blur"
+                    desc: "Customize dimensions, radius, and blur",
+                    keywords: "collapsed width expanded height corner wing compositor blur"
+                }
+            ],
+            searchPages: [
+                {
+                    id: "wallpaper_options",
+                    title: "Wallpaper Options",
+                    desc: "Playback and source settings",
+                    keywords: "pause animation idle transitions duration reduce motion coverage battery",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
+                },
+                {
+                    id: "wallpaper_optimization",
+                    title: "Wallpaper Optimization",
+                    desc: "Media performance and quality",
+                    keywords: "scale frame rate bitrate transcoding",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
+                },
+                {
+                    id: "wallpaper_cache",
+                    title: "Wallpaper Cache",
+                    desc: "Cached previews and cleanup",
+                    keywords: "automatic bounded cleanup refresh clean planned clear all",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
+                },
+                {
+                    id: "wallpaper_directory",
+                    title: "Wallpaper Library",
+                    desc: "Choose the wallpaper folder",
+                    keywords: "directory browse path",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
+                },
+                {
+                    id: "wallpaper_file",
+                    title: "Wallpaper File",
+                    desc: "Choose an individual image",
+                    keywords: "browse image file preview lock desktop",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
+                },
+                {
+                    id: "wallpaper_adjust",
+                    title: "Wallpaper Placement",
+                    desc: "Crop, pan, zoom, and rotate an image",
+                    keywords: "image placement crop pan zoom rotate",
+                    parentId: "wallpaper",
+                    parentTitle: "Wallpaper"
                 }
             ]
         },
@@ -58,12 +115,14 @@ Singleton {
                 {
                     id: "motion",
                     title: "Motion",
-                    desc: "Configure animation durations and curves"
+                    desc: "Configure animation durations and curves",
+                    keywords: "island resize edge reveal content reveal attention delay module handoff"
                 },
                 {
                     id: "behavior",
                     title: "Behavior",
-                    desc: "Adjust hover intent and auto-hide delays"
+                    desc: "Adjust hover intent and auto-hide delays",
+                    keywords: "auto hide zen mode notifications privacy"
                 }
             ]
         },
@@ -74,17 +133,20 @@ Singleton {
                 {
                     id: "analytics_lifecycle",
                     title: "Lifecycle",
-                    desc: "Inspect widget loading, retention, and eviction"
+                    desc: "Inspect widget loading, retention, and eviction",
+                    keywords: "resource leases suspended active memory"
                 },
                 {
                     id: "analytics_wallpaper",
                     title: "Wallpaper",
-                    desc: "Review renderer and playback activity"
+                    desc: "Review renderer and playback activity",
+                    keywords: "decode media cache transition"
                 },
                 {
                     id: "analytics_performance",
                     title: "Performance",
-                    desc: "Understand measured shell resource behavior"
+                    desc: "Understand measured shell resource behavior",
+                    keywords: "cpu memory rss pss threads uptime"
                 }
             ]
         },
@@ -95,7 +157,18 @@ Singleton {
                 {
                     id: "developer_advanced",
                     title: "Advanced",
-                    desc: "Experimental and dangerous system controls"
+                    desc: "Experimental and dangerous system controls",
+                    keywords: "adaptive lifecycle dpms idle display power"
+                }
+            ],
+            searchPages: [
+                {
+                    id: "developer_lifecycle",
+                    title: "Lifecycle Controls",
+                    desc: "Resource retention and eviction",
+                    keywords: "inactive budget priority memory",
+                    parentId: "developer_advanced",
+                    parentTitle: "Advanced"
                 }
             ]
         }
@@ -106,6 +179,7 @@ Singleton {
         closing = false;
         targetScreenName = ScreenService.resolve(preferredScreenName || "");
         selectedCategory = 0;
+        searchQuery = "";
         clearPages();
         opened = true;
     }
@@ -129,6 +203,14 @@ Singleton {
                     open(preferredScreenName);
                     selectedCategory = index;
                     pageStack = [requested];
+                    return true;
+                }
+            }
+            for (const page of cat.searchPages || []) {
+                if (page.id === requested) {
+                    open(preferredScreenName);
+                    selectedCategory = index;
+                    pageStack = page.parentId ? [page.parentId, requested] : [requested];
                     return true;
                 }
             }
@@ -158,6 +240,8 @@ Singleton {
             closing: closing,
             targetScreenName: targetScreenName,
             selectedCategory: selectedCategory,
+            searchQuery: searchQuery,
+            searchResultCount: searchResults.length,
             currentPage: currentPage,
             pageStack: pageStack.slice()
         };
@@ -165,6 +249,19 @@ Singleton {
 
     function clearPages() {
         pageStack = [];
+    }
+
+    function openSearchResult(pageId) {
+        const result = searchResults.find(entry => entry.id === pageId);
+        if (!result)
+            return false;
+        const index = categories.findIndex(category => category.id === result.categoryId);
+        if (index < 0)
+            return false;
+        selectedCategory = index;
+        pageStack = result.parentId ? [result.parentId] : [];
+        searchQuery = "";
+        return openPage(pageId);
     }
 
     function openPage(pageId) {

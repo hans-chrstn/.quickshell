@@ -12,7 +12,7 @@ Item {
     property bool dangerous: false
     signal toggled(bool newValue)
 
-    implicitHeight: 38
+    implicitHeight: 44
 
     RowLayout {
         anchors.fill: parent
@@ -26,14 +26,15 @@ Item {
                 text: root.title
                 color: root.dangerous ? Theme.danger : Theme.textPrimary
                 font.family: Design.fontText
-                font.pixelSize: 12
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
             Text {
                 text: root.description
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeCaption
+                elide: Text.ElideRight
             }
         }
 
@@ -42,7 +43,7 @@ Item {
             Layout.preferredWidth: 43
             Layout.preferredHeight: 25
             checked: root.checked
-            activeColor: root.dangerous ? Theme.statusDanger : Theme.selection
+            activeColor: root.dangerous ? Theme.statusDanger : Theme.accent
             accessibleName: root.title
             onToggled: checked => root.toggled(checked)
         }

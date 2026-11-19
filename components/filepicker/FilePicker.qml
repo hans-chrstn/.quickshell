@@ -7,6 +7,8 @@ import qs.components
 import qs.components.filepicker
 import qs.components.scrolling
 import qs.core
+import qs.components.media
+import qs.services.wallpaper
 
 Item {
     id: root
@@ -23,6 +25,7 @@ Item {
     property bool busy: false
     property string busyLabel: "Working…"
     readonly property bool directoryMode: mode === "directory"
+    readonly property bool wallpaperMode: mode === "wallpaper"
     signal accepted(var paths)
     signal canceled
 
@@ -94,6 +97,7 @@ Item {
         showFiles: !root.directoryMode
         showDotAndDotDot: false
         showHidden: root.showHidden
+        nameFilters: root.wallpaperMode ? WallpaperCatalogService.candidateExtensions.map(extension => "*." + extension) : []
         sortField: FolderListModel.Name
         sortReversed: false
     }
@@ -106,27 +110,14 @@ Item {
             Layout.fillWidth: true
             spacing: 8
 
-            Rectangle {
+            GlyphButton {
                 Layout.preferredWidth: 30
                 Layout.preferredHeight: 30
-                radius: 10
-                color: upHover.hovered ? Theme.fillElevated : Theme.fillSubtle
-                border.width: 1
-                border.color: Theme.separator
+                glyph: "chevronLeft"
+                accessibleName: "Go to parent folder"
                 enabled: root.currentPath !== "/"
                 opacity: enabled ? 1 : 0.4
-
-                IslandGlyph {
-                    anchors.centerIn: parent
-                    name: "chevronLeft"
-                    glyphColor: Theme.textSecondary
-                }
-                HoverHandler {
-                    id: upHover
-                }
-                TapHandler {
-                    onTapped: root.enter(root.parentPath())
-                }
+                onActivated: root.enter(root.parentPath())
             }
 
             Text {
@@ -172,12 +163,18 @@ Item {
                     required property bool fileIsDir
                     readonly property string path: root.normalizedPath(fileUrl)
                     readonly property bool chosen: !fileIsDir && root.selected(path)
+                    readonly property var media: root.wallpaperMode && !fileIsDir ? WallpaperProbeService.recordFor(path) : null
+                    readonly property bool selectableMedia: !root.wallpaperMode || fileIsDir || (media?.state === "ready" ? WallpaperRenderSupportService.supported(media) : WallpaperCatalogService.isSupported(path))
                     width: Math.max(0, entryList.width - 10)
                     height: 38
                     radius: 10
                     color: chosen ? Theme.tint(Theme.accent) : rowHover.hovered ? Theme.fillElevated : Theme.fillSubtle
                     border.width: 1
                     border.color: chosen ? Theme.accent : rowHover.hovered ? Theme.glassHighlight : Theme.separator
+                    opacity: selectableMedia ? 1 : 0.45
+
+                    Component.onCompleted: if (root.wallpaperMode && !fileIsDir)
+                        WallpaperProbeService.enqueue(path)
 
                     RowLayout {
                         anchors.fill: parent
@@ -185,9 +182,34 @@ Item {
                         anchors.rightMargin: 10
                         spacing: 10
 
-                        IslandGlyph {
-                            name: entryRow.fileIsDir ? "folder" : "document"
-                            glyphColor: entryRow.chosen || rowHover.hovered ? Theme.accent : Theme.textSecondary
+                        Item {
+                            Layout.preferredWidth: root.wallpaperMode && !entryRow.fileIsDir ? 34 : 17
+                            Layout.preferredHeight: root.wallpaperMode && !entryRow.fileIsDir ? 30 : 17
+
+                            Image {
+                                anchors.fill: parent
+                                visible: root.wallpaperMode && !entryRow.fileIsDir && WallpaperCatalogService.isSupported(entryRow.path)
+                                source: visible ? LocalUrl.fromPath(entryRow.path) : ""
+                                sourceSize.width: 68
+                                sourceSize.height: 60
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                clip: true
+                            }
+
+                            MediaThumbnail {
+                                anchors.fill: parent
+                                visible: root.wallpaperMode && !entryRow.fileIsDir && !WallpaperCatalogService.isSupported(entryRow.path)
+                                record: entryRow.media
+                                cornerRadius: Design.space4
+                            }
+
+                            IslandGlyph {
+                                anchors.centerIn: parent
+                                visible: !root.wallpaperMode || entryRow.fileIsDir
+                                name: entryRow.fileIsDir ? "folder" : "document"
+                                glyphColor: entryRow.chosen || rowHover.hovered ? Theme.accent : Theme.textSecondary
+                            }
                         }
                         Text {
                             Layout.fillWidth: true
@@ -217,7 +239,10 @@ Item {
                         id: rowHover
                     }
                     TapHandler {
-                        onTapped: entryRow.fileIsDir ? root.enter(entryRow.path) : root.toggle(entryRow.path)
+                        onTapped: if (entryRow.fileIsDir)
+                            root.enter(entryRow.path)
+                        else if (entryRow.selectableMedia)
+                            root.toggle(entryRow.path)
                     }
                 }
 
@@ -238,7 +263,7 @@ Item {
 
             Text {
                 Layout.fillWidth: true
-                text: root.errorText.length > 0 ? root.errorText : root.directoryMode ? "" : root.selectedPaths.length + " selected"
+                text: root.errorText.length > 0 ? root.errorText : root.directoryMode ? "" : root.wallpaperMode ? root.selectedPaths.length > 0 ? "1 wallpaper selected" : "" : root.selectedPaths.length + " selected"
                 color: root.errorText.length > 0 ? Theme.danger : Theme.textSecondary
                 elide: Text.ElideRight
                 font.family: Design.fontText
@@ -249,9 +274,9 @@ Item {
                 onActivated: root.canceled()
             }
             PickerButton {
-                label: root.directoryMode ? "Use This Folder" : root.busy ? root.busyLabel : root.selectedPaths.length > 0 ? "Import " + root.selectedPaths.length : "Import"
+                label: root.directoryMode ? "Use This Folder" : root.wallpaperMode ? "Use Wallpaper" : root.busy ? root.busyLabel : root.selectedPaths.length > 0 ? "Import " + root.selectedPaths.length : "Import"
                 primary: true
-                enabled: !root.busy
+                enabled: !root.busy && (!root.wallpaperMode || root.selectedPaths.length > 0)
                 onActivated: root.acceptCurrent()
             }
         }

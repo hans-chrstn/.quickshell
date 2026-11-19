@@ -16,6 +16,7 @@ import qs.services.display
 import qs.services.island
 import qs.services.launcher
 import qs.services.notifications
+import qs.services.osd
 import qs.services.session
 import qs.services.wallpaper
 import qs.services.wallpaper.projects
@@ -96,6 +97,15 @@ ShellRoot {
         model: Quickshell.screens
 
         delegate: RightRailWindow {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        delegate: OsdWindow {
             required property var modelData
             screen: modelData
         }

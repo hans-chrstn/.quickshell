@@ -16,10 +16,13 @@ PanelWindow {
     readonly property real bodyWidth: Math.max(0, Math.min(Design.controlBodyWidth, (screen?.width || 1920) - Design.controlRailWidth - Design.controlRailOuterGap * 2))
     readonly property real bodyHeight: Math.max(0, Math.min(Design.controlBodyHeight, (screen?.height || 1080) - Design.space24 * 2))
     readonly property real compactHeight: ControlCenterService.items.length * Design.controlRailButtonSize + (ControlCenterService.items.length - 1) * Design.controlRailItemGap + Design.space24
-    readonly property bool bodyOpen: ControlCenterService.currentItem === "audio" && ControlCenterService.targetScreenName === screenName && ControlCenterService.opened
+    readonly property bool bodyOpen: ControlCenterService.targetScreenName === screenName && ControlCenterService.opened
+    property bool focusGrabEnabled: true
     property bool railShown: false
+    property bool expandedGeometry: false
     property bool pageRetained: false
     property bool pageRevealed: false
+    property real edgeOffset: railShown || bodyOpen ? Design.controlRailOuterGap : -Design.controlRailWidth - Design.controlRailOuterGap
 
     anchors.top: true
     anchors.bottom: true
@@ -28,7 +31,14 @@ PanelWindow {
     color: "transparent"
     exclusiveZone: 0
     aboveWindows: true
-    focusable: bodyOpen
+    focusable: bodyOpen && focusGrabEnabled
+
+    Behavior on edgeOffset {
+        enabled: !Design.reducedMotion
+        SpatialSpring {
+            phase: root.railShown ? "enter" : "exit"
+        }
+    }
 
     function updateHover() {
         if (edgeHover.hovered || islandHover.hovered || bodyOpen) {
@@ -41,12 +51,15 @@ PanelWindow {
 
     onBodyOpenChanged: {
         if (bodyOpen) {
+            collapseTimer.stop();
+            expandedGeometry = true;
             retireTimer.stop();
             pageRetained = true;
             revealTimer.restart();
         } else {
             revealTimer.stop();
             pageRevealed = false;
+            collapseTimer.restart();
             retireTimer.restart();
         }
         updateHover();
@@ -54,6 +67,7 @@ PanelWindow {
 
     Component.onCompleted: {
         if (bodyOpen) {
+            expandedGeometry = true;
             pageRetained = true;
             pageRevealed = true;
         }
@@ -62,10 +76,19 @@ PanelWindow {
 
     Timer {
         id: hideTimer
-        interval: Design.controlRailHideDelay
+        interval: Math.max(Design.controlRailHideDelay, Design.springViewRetireDelay)
         onTriggered: {
             if (!root.bodyOpen && !edgeHover.hovered && !islandHover.hovered)
                 root.railShown = false;
+        }
+    }
+
+    Timer {
+        id: collapseTimer
+        interval: Design.controlPageCollapseDelay
+        onTriggered: {
+            if (!root.bodyOpen)
+                root.expandedGeometry = false;
         }
     }
 
@@ -85,17 +108,22 @@ PanelWindow {
     }
 
     HyprlandFocusGrab {
-        active: root.bodyOpen
+        active: root.bodyOpen && root.focusGrabEnabled
         windows: [root]
         onCleared: ControlCenterService.close()
     }
 
     BackgroundEffect.blurRegion: Region {
-        item: (root.railShown || root.bodyOpen) && SettingsService.enableBlur ? islandGlass : null
-        topLeftRadius: islandGlass.cornerRadius
-        topRightRadius: islandGlass.cornerRadius
-        bottomLeftRadius: islandGlass.cornerRadius
-        bottomRightRadius: islandGlass.cornerRadius
+        Region {
+            item: blurParkingTarget
+        }
+        Region {
+            item: (root.railShown || root.bodyOpen) && SettingsService.enableBlur ? islandGlass : null
+            topLeftRadius: islandGlass.cornerRadius
+            topRightRadius: islandGlass.cornerRadius
+            bottomLeftRadius: islandGlass.cornerRadius
+            bottomRightRadius: islandGlass.cornerRadius
+        }
     }
 
     mask: Region {
@@ -105,6 +133,13 @@ PanelWindow {
         Region {
             item: root.railShown || root.bodyOpen ? islandGlass : null
         }
+    }
+
+    Item {
+        id: blurParkingTarget
+        width: 1
+        height: 1
+        opacity: 0
     }
 
     Item {
@@ -123,21 +158,15 @@ PanelWindow {
 
     GlassCard {
         id: islandGlass
-        x: root.railShown || root.bodyOpen ? root.width - width - Design.controlRailOuterGap : root.width + Design.controlRailOuterGap
+        x: root.width - width - root.edgeOffset
         anchors.verticalCenter: parent.verticalCenter
-        width: root.bodyOpen ? root.bodyWidth + Design.controlRailWidth : Design.controlRailWidth
-        height: root.bodyOpen ? root.bodyHeight : root.compactHeight
-        cornerRadius: root.bodyOpen ? Design.radiusWorkspace : width / 2
+        width: root.expandedGeometry ? root.bodyWidth + Design.controlRailWidth : Design.controlRailWidth
+        height: root.expandedGeometry ? root.bodyHeight : root.compactHeight
+        cornerRadius: root.expandedGeometry ? Design.radiusWorkspace : Design.controlRailWidth / 2
         backdropAvailable: SettingsService.enableBlur
-        emphasis: root.bodyOpen ? 1 : 0
+        emphasis: root.expandedGeometry ? 1 : 0
         opacity: root.railShown || root.bodyOpen ? 1 : 0
 
-        Behavior on x {
-            enabled: !Design.reducedMotion
-            SpatialSpring {
-                phase: root.railShown ? "enter" : "exit"
-            }
-        }
         Behavior on width {
             enabled: !Design.reducedMotion
             SpatialSpring {
@@ -190,14 +219,12 @@ PanelWindow {
                 x: pageViewport.width - root.bodyWidth
                 width: root.bodyWidth
                 height: parent.height
-                resourceId: "control-center.audio." + root.screenName
+                resourceId: "control-center." + (ControlCenterService.currentItem || "none") + "." + root.screenName
                 owner: "control-center"
                 classification: "active-only"
-                restorationSource: "AudioPanelService and AudioService"
-                requestedActive: root.pageRetained
-                sourceComponent: Component {
-                    ControlCenterAudioPage {}
-                }
+                restorationSource: ControlCenterService.activeItem?.restorationSource || ""
+                requestedActive: root.pageRetained && !!ControlCenterService.activeItem
+                source: ControlCenterService.activeItem?.pageSource || ""
             }
         }
 

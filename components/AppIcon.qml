@@ -26,12 +26,11 @@ Item {
         return Quickshell.iconPath("application-x-executable", true);
     }
 
-    Rectangle {
+    Item {
         anchors.fill: parent
-        radius: 7
-        color: Theme.fillElevated
 
         Text {
+            visible: image.status !== Image.Ready
             anchors.centerIn: parent
             text: root.name.length > 0 ? root.name[0].toUpperCase() : "?"
             color: Theme.textSecondary

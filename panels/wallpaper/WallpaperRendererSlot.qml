@@ -62,6 +62,7 @@ Item {
         if (backend === "static")
             return {
                 path: root.path,
+                screenName: root.screenName,
                 renderScale: root.renderScale
             };
         return ({});
@@ -97,6 +98,7 @@ Item {
             item.previewPlaying = previewPlaying;
             item.previewPositionMs = previewPositionMs;
         } else if (backend === "static") {
+            item.screenName = screenName;
             item.renderScale = renderScale;
         }
     }

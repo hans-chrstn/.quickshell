@@ -53,12 +53,10 @@ Item {
         anchors.fill: parent
         spacing: root.expanded ? 12 : 7
 
-        Rectangle {
+        Item {
             Layout.preferredWidth: root.expanded ? 38 : 20
             Layout.preferredHeight: Layout.preferredWidth
             Layout.alignment: Qt.AlignVCenter
-            radius: width / 2
-            color: root.expanded ? Theme.tint(root.accent) : Theme.tintSubtle(root.accent)
 
             Text {
                 anchors.centerIn: parent

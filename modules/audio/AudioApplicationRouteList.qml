@@ -93,22 +93,15 @@ Item {
                 }
             }
 
-            Rectangle {
+            IconMark {
                 anchors.left: parent.left
                 anchors.leftMargin: 8
                 anchors.verticalCenter: parent.verticalCenter
                 width: 40
                 height: 40
-                radius: 12
-                color: row.current || row.pending ? Theme.fillStrong : Theme.fillSubtle
-
-                IslandGlyph {
-                    anchors.centerIn: parent
-                    width: 22
-                    height: 22
-                    name: row.modelData.key === "default" ? "repeat" : "volumeHigh"
-                    glyphColor: !row.available ? Theme.textDisabled : row.current || row.pending ? Theme.textPrimary : Theme.textSecondary
-                }
+                glyph: row.modelData.key === "default" ? "repeat" : "volumeHigh"
+                glyphSize: 22
+                glyphColor: !row.available ? Theme.textDisabled : row.current || row.pending ? Theme.textPrimary : Theme.textSecondary
             }
 
             Column {

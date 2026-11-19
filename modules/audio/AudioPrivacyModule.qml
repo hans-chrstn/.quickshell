@@ -33,12 +33,10 @@ Item {
         height: root.collapsedImplicitHeight + (root.expandedImplicitHeight - root.collapsedImplicitHeight) * root.transitionProgress
         spacing: 8 + 4 * root.transitionProgress
 
-        Rectangle {
+        Item {
             Layout.preferredWidth: 24 + 14 * root.transitionProgress
             Layout.preferredHeight: Layout.preferredWidth
             Layout.alignment: Qt.AlignVCenter
-            radius: 8 + 5 * root.transitionProgress
-            color: Theme.tint(Theme.privacy)
 
             IslandGlyph {
                 anchors.centerIn: parent

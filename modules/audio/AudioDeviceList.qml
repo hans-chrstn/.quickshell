@@ -170,22 +170,15 @@ Item {
                         onSurfaceContextRequested: (x, y) => root.openDeviceMenu(row.modelData, row, x, y)
                     }
 
-                    Rectangle {
+                    IconMark {
                         anchors.left: parent.left
                         anchors.leftMargin: 8
                         anchors.verticalCenter: parent.verticalCenter
                         width: 44
                         height: 44
-                        radius: 13
-                        color: row.modelData.isDefault || row.requested ? Theme.tintStrong(root.accentColor) : Theme.tintSubtle(root.accentColor)
-
-                        IslandGlyph {
-                            anchors.centerIn: parent
-                            width: 24
-                            height: 24
-                            name: root.glyph
-                            glyphColor: row.modelData.isDefault || row.requested ? root.accentColor : Theme.textSecondary
-                        }
+                        glyph: root.glyph
+                        glyphSize: 24
+                        glyphColor: row.modelData.isDefault || row.requested ? root.accentColor : Theme.textSecondary
                     }
 
                     Column {

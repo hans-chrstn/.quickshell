@@ -3,9 +3,11 @@ import Quickshell
 import Quickshell.Io
 import qs.services.analytics
 import qs.services.audio
+import qs.services.bluetooth
 import qs.services.cache
 import qs.services.config
 import qs.services.controlcenter
+import qs.services.network
 import qs.services.display
 import qs.services.hardware
 import qs.services.island
@@ -13,6 +15,7 @@ import qs.services.launcher
 import qs.services.lifecycle
 import qs.services.media
 import qs.services.notifications
+import qs.services.osd
 import qs.services.jobs
 import qs.services.power
 import qs.services.session
@@ -79,8 +82,14 @@ IpcHandler {
     function settingsOpen(): void {
         SettingsService.open();
     }
+    function settingsOpenOnScreen(screenName: string): void {
+        SettingsService.open(screenName);
+    }
     function settingsOpenCategory(category: string): bool {
         return SettingsService.openCategory(category);
+    }
+    function settingsOpenCategoryOnScreen(category: string, screenName: string): bool {
+        return SettingsService.openCategory(category, screenName);
     }
     function settingsOpenPage(page: string): bool {
         return SettingsService.openPage(page);
@@ -93,6 +102,13 @@ IpcHandler {
     }
     function settingsStatus(): string {
         return JsonFormat.stringify(SettingsService.snapshot());
+    }
+    function settingsSearch(query: string): string {
+        SettingsService.searchQuery = query;
+        return JsonFormat.stringify(SettingsService.searchResults);
+    }
+    function settingsOpenSearchResult(pageId: string): bool {
+        return SettingsService.openSearchResult(pageId);
     }
     function configStatus(): string {
         return JsonFormat.stringify(ConfigService.snapshot());
@@ -208,7 +224,7 @@ IpcHandler {
         return PlayerService.cycleRepeat();
     }
     function audioPresentationStatus(): string {
-        return JsonFormat.stringify(AudioHudService.snapshot());
+        return JsonFormat.stringify(OsdService.snapshot());
     }
     function audioPanelStatus(): string {
         return JsonFormat.stringify(AudioPanelService.snapshot());
@@ -266,6 +282,22 @@ IpcHandler {
     }
     function controlCenterClose(): bool {
         return ControlCenterService.close();
+    }
+    function networkStatus(): string {
+        return JsonFormat.stringify(NetworkService.snapshot());
+    }
+    function networkRefresh(): bool {
+        NetworkService.refresh();
+        return true;
+    }
+    function bluetoothStatus(): string {
+        return JsonFormat.stringify(BluetoothService.snapshot());
+    }
+    function osdStatus(): string {
+        return JsonFormat.stringify(OsdService.snapshot());
+    }
+    function osdPreview(kind: string, value: real, muted: bool, screenName: string): bool {
+        return OsdService.preview(kind, value, muted, screenName);
     }
     function audioPanelSelectPage(pageId: string): bool {
         return AudioPanelService.selectPage(pageId);
@@ -525,6 +557,24 @@ IpcHandler {
     }
     function wallpaperForScreen(screen: string): string {
         return WallpaperAssignmentService.wallpaperForScreen(screen);
+    }
+    function wallpaperForLockScreen(screen: string): string {
+        return WallpaperAssignmentService.wallpaperForLockScreen(screen);
+    }
+    function wallpaperSetLock(path: string): bool {
+        return WallpaperAssignmentService.setLock(path);
+    }
+    function wallpaperUseDesktopForLock(): void {
+        WallpaperAssignmentService.useDesktopForLock();
+    }
+    function wallpaperPlacement(target: string, screen: string, path: string): string {
+        return JsonFormat.stringify(WallpaperAssignmentService.placementFor(target, screen, path));
+    }
+    function wallpaperSetPlacement(target: string, screen: string, path: string, zoom: real, panX: real, panY: real, rotation: int): bool {
+        return WallpaperAssignmentService.setPlacement(target, screen, path, zoom, panX, panY, rotation);
+    }
+    function wallpaperClearPlacement(target: string, screen: string, path: string): void {
+        WallpaperAssignmentService.clearPlacement(target, screen, path);
     }
     function wallpaperAssignments(): string {
         return JsonFormat.stringify(WallpaperAssignmentService.snapshot());
