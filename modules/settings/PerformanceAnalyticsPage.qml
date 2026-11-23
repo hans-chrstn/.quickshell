@@ -45,9 +45,9 @@ SettingPage {
                 Text {
                     Layout.fillWidth: true
                     text: root.metrics.available ? "Live process metrics" : "Metrics unavailable"
-                    color: root.metrics.available ? Theme.success : Theme.warning
+                    color: root.metrics.available ? Theme.textPrimary : Theme.textSecondary
                     font.family: Design.fontText
-                    font.pixelSize: 9
+                    font.pixelSize: Design.typeBody
                     font.weight: Font.DemiBold
                 }
 
@@ -55,13 +55,13 @@ SettingPage {
                     text: root.metrics.sampling ? "Reading…" : "Live"
                     color: Theme.textSecondary
                     font.family: Design.fontMono
-                    font.pixelSize: 8
+                    font.pixelSize: Design.typeLabel
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Design.space12
 
                 Repeater {
                     model: [
@@ -79,43 +79,19 @@ SettingPage {
                         }
                     ]
 
-                    Rectangle {
+                    SettingMetric {
                         required property var modelData
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 42
-                        radius: 9
-                        color: Theme.fillSubtle
-                        border.width: 1
-                        border.color: Theme.separator
-
-                        Column {
-                            anchors.centerIn: parent
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.value
-                                color: Theme.textPrimary
-                                font.family: Design.fontMono
-                                font.pixelSize: 10
-                                font.weight: Font.DemiBold
-                            }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.label
-                                color: Theme.textSecondary
-                                font.family: Design.fontText
-                                font.pixelSize: 7
-                            }
-                        }
+                        label: modelData.label
+                        value: modelData.value
                     }
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 92
-                radius: 11
+                Layout.preferredHeight: 132
+                radius: Design.radiusGrouped
                 color: Theme.fillSubtle
                 border.width: 1
                 border.color: Theme.separator
@@ -129,7 +105,7 @@ SettingPage {
                         text: "Current memory composition"
                         color: Theme.textPrimary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
@@ -164,7 +140,7 @@ SettingPage {
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 6
+                spacing: Design.space12
 
                 Repeater {
                     model: [
@@ -186,35 +162,11 @@ SettingPage {
                         }
                     ]
 
-                    Rectangle {
+                    SettingMetric {
                         required property var modelData
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 38
-                        radius: 9
-                        color: Theme.fillSubtle
-                        border.width: 1
-                        border.color: Theme.separator
-
-                        Column {
-                            anchors.centerIn: parent
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.value
-                                color: Theme.textPrimary
-                                font.family: Design.fontMono
-                                font.pixelSize: 9
-                                font.weight: Font.DemiBold
-                            }
-
-                            Text {
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                text: modelData.label
-                                color: Theme.textSecondary
-                                font.family: Design.fontText
-                                font.pixelSize: 7
-                            }
-                        }
+                        label: modelData.label
+                        value: modelData.value
                     }
                 }
             }
@@ -225,16 +177,16 @@ SettingPage {
                 text: root.metrics.error
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 8
+                font.pixelSize: Design.typeLabel
                 wrapMode: Text.Wrap
             }
 
             Text {
                 Layout.fillWidth: true
-                text: "RSS includes shared and file-backed mappings. PSS apportions shared memory; neither value alone proves a leak."
+                text: "RSS includes shared memory. PSS divides it among processes."
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 8
+                font.pixelSize: Design.typeLabel
                 wrapMode: Text.Wrap
             }
         }

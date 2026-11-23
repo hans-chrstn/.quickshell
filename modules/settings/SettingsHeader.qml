@@ -10,15 +10,16 @@ RowLayout {
     property string title: ""
 
     Layout.fillWidth: true
-    spacing: 10
+    spacing: Design.space12
     Layout.bottomMargin: Design.space8
 
     HighlightableSurface {
         id: backButton
-        width: 30
-        height: 30
+        width: Design.minimumTouchTarget
+        height: Design.minimumTouchTarget
         visible: SettingsService.currentPage !== ""
         interactive: visible
+        accessibleName: "Back to previous settings page"
         focused: hovered
         baseColor: "transparent"
         cornerRadius: Design.radiusControl

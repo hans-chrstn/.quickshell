@@ -85,7 +85,7 @@ RowLayout {
                 text: root.centerValue
                 color: Theme.textPrimary
                 font.family: Design.fontMono
-                font.pixelSize: 13
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
 
@@ -94,7 +94,7 @@ RowLayout {
                 text: root.centerLabel
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 7
+                font.pixelSize: Design.typeLabel
             }
         }
     }
@@ -109,14 +109,10 @@ RowLayout {
         Repeater {
             model: root.segments
 
-            Rectangle {
+            Item {
                 required property var modelData
                 Layout.fillWidth: true
-                Layout.preferredHeight: 27
-                radius: 8
-                color: Theme.fillSubtle
-                border.width: 1
-                border.color: Theme.separator
+                Layout.preferredHeight: Design.minimumTouchTarget
 
                 RowLayout {
                     anchors.fill: parent
@@ -136,7 +132,7 @@ RowLayout {
                         text: modelData.label ?? ""
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 8
+                        font.pixelSize: Design.typeLabel
                         elide: Text.ElideRight
                     }
 
@@ -144,7 +140,7 @@ RowLayout {
                         text: modelData.value ?? 0
                         color: Theme.textPrimary
                         font.family: Design.fontMono
-                        font.pixelSize: 9
+                        font.pixelSize: Design.typeLabel
                         font.weight: Font.DemiBold
                     }
                 }

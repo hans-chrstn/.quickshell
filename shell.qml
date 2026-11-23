@@ -105,6 +105,15 @@ ShellRoot {
     Variants {
         model: Quickshell.screens
 
+        delegate: WallpaperEditorWindow {
+            required property var modelData
+            screen: modelData
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
         delegate: OsdWindow {
             required property var modelData
             screen: modelData

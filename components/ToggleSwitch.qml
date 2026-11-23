@@ -9,13 +9,12 @@ InteractionFrame {
     property string accessibleName: "Toggle"
     signal toggled(bool checked)
 
-    implicitWidth: 43
-    implicitHeight: 25
+    implicitWidth: 55
+    implicitHeight: Design.minimumTouchTarget
     selected: checked
     selectionFillEnabled: false
     baseColor: "transparent"
-    cornerRadius: height / 2 + 3
-    controlInset: -3
+    cornerRadius: Design.radiusControl
     onTriggered: root.toggled(!root.checked)
 
     Accessible.role: Accessible.CheckBox
@@ -25,7 +24,9 @@ InteractionFrame {
         root.toggled(!root.checked)
 
     Rectangle {
-        anchors.fill: parent
+        width: 43
+        height: 25
+        anchors.centerIn: parent
         radius: height / 2
         color: root.checked ? root.activeColor : Theme.fillStrong
         border.width: root.checked ? 0 : 1

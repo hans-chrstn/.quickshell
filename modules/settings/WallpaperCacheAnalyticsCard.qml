@@ -23,8 +23,8 @@ Rectangle {
         }
     ]
 
-    implicitHeight: snapshot.scannedAt > 0 ? 132 : 66
-    radius: 11
+    implicitHeight: snapshot.scannedAt > 0 ? 164 : 76
+    radius: Design.radiusGrouped
     color: Theme.fillSubtle
     border.width: 1
     border.color: Theme.separator
@@ -42,15 +42,15 @@ Rectangle {
                 text: "Cache composition"
                 color: Theme.textPrimary
                 font.family: Design.fontText
-                font.pixelSize: 10
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
 
             Text {
                 text: root.snapshot.scanning ? "Measuring…" : root.snapshot.scannedAt > 0 ? "Measured" : "Not measured"
-                color: root.snapshot.error ? Theme.danger : Theme.textSecondary
+                color: Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 7
+                font.pixelSize: Design.typeLabel
             }
         }
 
@@ -67,10 +67,10 @@ Rectangle {
         Text {
             Layout.fillWidth: true
             visible: root.snapshot.scannedAt <= 0
-            text: root.snapshot.error || "Open Wallpaper Cache once to measure; Analytics never starts scans."
-            color: root.snapshot.error ? Theme.danger : Theme.textSecondary
+            text: root.snapshot.error || "Open Cache to measure usage."
+            color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             wrapMode: Text.Wrap
         }
 
@@ -80,7 +80,7 @@ Rectangle {
             text: (root.snapshot.posters?.count ?? 0) + " posters · " + (root.snapshot.optimized?.count ?? 0) + " optimized · " + (root.plan.protectedCount ?? 0) + " protected · " + root.formatBytes(root.plan.reclaimBytes) + " reclaimable"
             color: Theme.textSecondary
             font.family: Design.fontMono
-            font.pixelSize: 7
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -88,9 +88,9 @@ Rectangle {
             Layout.fillWidth: true
             visible: root.snapshot.scannedAt > 0 && (root.cleanup.state ?? "idle") !== "idle"
             text: root.cleanup.cleaning ? "Cleanup in progress" : (root.cleanup.deletedCount ?? 0) + " deleted · " + (root.cleanup.skippedCount ?? 0) + " skipped · " + root.formatBytes(root.cleanup.reclaimedBytes) + " reclaimed"
-            color: root.cleanup.error ? Theme.danger : Theme.textSecondary
+            color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 7
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
     }

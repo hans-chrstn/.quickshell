@@ -10,8 +10,8 @@ Rectangle {
     required property string stateLabel
     required property color stateColor
 
-    implicitHeight: 88
-    radius: 10
+    implicitHeight: 108
+    radius: Design.radiusGrouped
     color: Theme.fillSubtle
     border.width: 1
     border.color: Theme.separator
@@ -33,28 +33,17 @@ Rectangle {
                 text: root.record.resourceId ?? "unknown"
                 color: Theme.textPrimary
                 font.family: Design.fontMono
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
             }
 
-            Rectangle {
-                Layout.preferredWidth: stateText.implicitWidth + 10
-                Layout.preferredHeight: 16
-                radius: 8
-                color: Theme.tint(root.stateColor)
-                border.width: 1
-                border.color: Theme.tintBorder(root.stateColor)
-
-                Text {
-                    id: stateText
-                    anchors.centerIn: parent
-                    text: root.stateLabel
-                    color: root.stateColor
-                    font.family: Design.fontText
-                    font.pixelSize: 8
-                    font.weight: Font.DemiBold
-                }
+            Text {
+                text: root.stateLabel
+                color: Theme.textSecondary
+                font.family: Design.fontText
+                font.pixelSize: Design.typeLabel
+                font.weight: Font.DemiBold
             }
         }
 
@@ -63,7 +52,7 @@ Rectangle {
             text: (root.record.classification ?? "unknown") + " · " + (root.record.owner ?? "no owner") + " · " + "req " + (root.record.requested ? "1" : "0") + " use " + (root.record.active ? "1" : "0") + " load " + (root.record.loaded ? "1" : "0") + (root.record.adaptiveEligible ? " · cost " + root.record.estimatedCostUnits + " · score " + Number(root.record.retentionScore ?? 0).toFixed(1) : "")
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -72,7 +61,7 @@ Rectangle {
             text: "load " + (root.record.loadCount ?? 0) + " / unload " + (root.record.unloadCount ?? 0) + " · active " + root.formatDuration(root.record.activeDurationMs ?? 0) + " · " + (root.record.retentionReason || root.record.evictionReason || "no transition reason")
             color: Theme.textSecondary
             font.family: Design.fontMono
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 

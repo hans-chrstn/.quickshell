@@ -14,8 +14,8 @@ Rectangle {
     readonly property bool optimizedCopyAvailable: WallpaperOptimizationService.currentCopyAvailable(assessment?.target || "", assessment?.path || "")
     readonly property bool optimizedCopyApplied: WallpaperOptimizationService.currentCopyApplied(assessment?.target || "", assessment?.path || "")
 
-    implicitHeight: content.implicitHeight + 20
-    radius: 10
+    implicitHeight: content.implicitHeight + Design.space20
+    radius: Design.radiusGrouped
     color: Theme.fillSubtle
     border.width: 1
     border.color: severity >= 2 ? Theme.danger : severity === 1 ? Theme.warning : Theme.separator
@@ -35,7 +35,7 @@ Rectangle {
                 text: String(root.assessment?.target || "Wallpaper")
                 color: Theme.textPrimary
                 font.family: Design.fontText
-                font.pixelSize: 11
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
 
@@ -44,10 +44,10 @@ Rectangle {
             }
 
             Text {
-                text: root.assessment?.state !== "ready" ? "Unavailable" : root.severity >= 2 ? "High demand" : root.severity === 1 ? "Review" : "Recommended"
-                color: root.assessment?.state !== "ready" ? Theme.textSecondary : root.severity >= 2 ? Theme.danger : root.severity === 1 ? Theme.warning : Theme.success
+                text: root.assessment?.state !== "ready" ? "Unavailable" : root.severity >= 2 ? "High demand" : root.severity === 1 ? "Medium demand" : "Low demand"
+                color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 font.weight: Font.DemiBold
             }
         }
@@ -68,7 +68,7 @@ Rectangle {
             }
             color: Theme.textSecondary
             font.family: Design.fontMono
-            font.pixelSize: 9
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -81,7 +81,7 @@ Rectangle {
                 text: "• " + modelData
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 wrapMode: Text.Wrap
             }
         }
@@ -110,9 +110,9 @@ Rectangle {
                         return String(root.optimization?.error || "Optimization failed");
                     return WallpaperOptimizationPolicyService.recipeDescription(String(root.assessment?.target || ""), String(root.assessment?.path || ""));
                 }
-                color: root.optimization?.state === "failed" ? Theme.danger : Theme.textSecondary
+                color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 wrapMode: Text.Wrap
             }
 

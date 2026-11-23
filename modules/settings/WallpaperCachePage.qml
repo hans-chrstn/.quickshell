@@ -31,8 +31,8 @@ SettingPage {
 
         SettingToggle {
             Layout.fillWidth: true
-            title: "Automatic bounded cleanup"
-            description: "Clean stale unprotected cache after media changes"
+            title: "Automatic cleanup"
+            description: "Remove unused files after wallpaper changes"
             checked: ConfigService.automaticWallpaperCacheCleanup
             onToggled: value => SettingsService.setSetting("automaticWallpaperCacheCleanup", value)
         }
@@ -43,9 +43,9 @@ SettingPage {
             Text {
                 Layout.fillWidth: true
                 text: WallpaperCacheService.scanning ? "Measuring cache…" : WallpaperCacheService.error.length > 0 ? WallpaperCacheService.error : WallpaperCacheService.optimizedEntries.length + " optimized · " + root.formattedBytes(WallpaperCacheService.optimizedBytes) + "  |  " + WallpaperCacheService.posterEntries.length + " posters · " + root.formattedBytes(WallpaperCacheService.posterBytes)
-                color: WallpaperCacheService.error.length > 0 ? Theme.danger : Theme.textSecondary
+                color: Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 elide: Text.ElideRight
             }
 
@@ -61,7 +61,7 @@ SettingPage {
             text: WallpaperCacheService.scanning ? "Cleanup plan pending" : WallpaperCacheService.cleanupPlan.deleteCount + " removable · " + root.formattedBytes(WallpaperCacheService.cleanupPlan.reclaimBytes) + " · " + WallpaperCacheService.cleanupPlan.protectedCount + " protected"
             color: Theme.textSecondary
             font.family: Design.fontMono
-            font.pixelSize: 9
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -70,10 +70,10 @@ SettingPage {
 
             Text {
                 Layout.fillWidth: true
-                text: WallpaperCacheService.cleaning ? "Revalidating and cleaning planned entries…" : WallpaperCacheService.cleanupState === "ready" ? WallpaperCacheService.deletedCount + " deleted · " + WallpaperCacheService.skippedCount + " skipped · " + root.formattedBytes(WallpaperCacheService.reclaimedBytes) + " reclaimed" : "Oldest unprotected files are selected first"
-                color: WallpaperCacheService.cleanupError.length > 0 ? Theme.danger : Theme.textSecondary
+                text: WallpaperCacheService.cleaning ? "Cleaning unused files…" : WallpaperCacheService.cleanupState === "ready" ? WallpaperCacheService.deletedCount + " deleted · " + WallpaperCacheService.skippedCount + " skipped · " + root.formattedBytes(WallpaperCacheService.reclaimedBytes) + " reclaimed" : "Unused files, oldest first"
+                color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeLabel
                 elide: Text.ElideRight
             }
 
@@ -105,17 +105,18 @@ SettingPage {
                         return WallpaperOptimizationService.clearError;
                     if (WallpaperOptimizationService.hasAssignedOptimizedCopy())
                         return "Select original wallpapers before clearing all";
-                    return "Manual clear removes every optimized derivative";
+                    return "Remove optimized copies";
                 }
-                color: WallpaperOptimizationService.clearState === "failed" ? Theme.danger : Theme.textSecondary
+                color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeBody
                 wrapMode: Text.Wrap
             }
 
             SettingButton {
                 label: "Clear All"
                 dangerous: true
+                enabled: WallpaperCacheService.optimizedEntries.length > 0
                 visible: !WallpaperOptimizationService.clearing && !WallpaperCacheService.cleaning
                 onClicked: {
                     if (WallpaperOptimizationService.clearCache())

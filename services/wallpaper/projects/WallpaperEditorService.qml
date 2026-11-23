@@ -322,7 +322,7 @@ Singleton {
 
     Timer {
         id: closeTimer
-        interval: Design.contentRevealDuration
+        interval: Math.max(Design.contentRevealDuration, Design.springExitFadeDuration)
         onTriggered: {
             root.closing = false;
             WallpaperPresentationService.setEditorState(false, false);

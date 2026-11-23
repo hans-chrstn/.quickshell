@@ -137,7 +137,7 @@ FocusScope {
 
         AppIcon {
             id: detailIcon
-            anchors.horizontalCenter: parent.horizontalCenter
+            x: Design.space16
             y: Design.space20
             name: root.selectedResult?.title || ""
             icon: root.selectedResult?.icon || ""
@@ -146,29 +146,27 @@ FocusScope {
 
         Text {
             id: detailTitle
-            x: Design.space12
+            x: Design.space16
             y: detailIcon.y + detailIcon.height + Design.space12
-            width: parent.width - Design.space24
+            width: parent.width - Design.space16 * 2
             text: root.selectedResult?.title || ""
             color: Theme.textPrimary
             font.family: Design.fontDisplay
             font.pixelSize: Design.typeTitle
             font.weight: Font.DemiBold
-            horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             textFormat: Text.PlainText
         }
 
         Text {
             id: detailSubtitle
-            x: Design.space12
+            x: Design.space16
             y: detailTitle.y + detailTitle.height + Design.space4
-            width: parent.width - Design.space24
+            width: parent.width - Design.space16 * 2
             text: root.selectedResult?.subtitle || ""
             color: Theme.textSecondary
             font.family: Design.fontText
             font.pixelSize: Design.typeLabel
-            horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             textFormat: Text.PlainText
         }
@@ -185,14 +183,13 @@ FocusScope {
             font.pixelSize: Design.typeBody
             wrapMode: Text.Wrap
             maximumLineCount: 2
-            horizontalAlignment: Text.AlignHCenter
             elide: Text.ElideRight
             textFormat: Text.PlainText
         }
 
         GlyphButton {
             visible: root.selectedResult && root.selectedResult.actions.length === 0
-            anchors.horizontalCenter: parent.horizontalCenter
+            x: Design.space16
             y: parent.height - height - Design.space20
             width: Design.launcherPrimaryActionSize
             height: Design.launcherPrimaryActionSize

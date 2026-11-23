@@ -177,7 +177,7 @@ SettingPage {
 
         ValueSlider {
             Layout.fillWidth: true
-            Layout.preferredHeight: 30
+            Layout.preferredHeight: Design.minimumTouchTarget
             from: 1
             to: 3
             stepSize: 0.05

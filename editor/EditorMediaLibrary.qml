@@ -36,19 +36,11 @@ Rectangle {
                 font.weight: Font.DemiBold
             }
 
-            Rectangle {
-                implicitWidth: countLabel.implicitWidth + 12
-                implicitHeight: 20
-                radius: 7
-                color: Theme.fillSubtle
-                Text {
-                    id: countLabel
-                    anchors.centerIn: parent
-                    text: WallpaperEditorService.mediaItems.length
-                    color: Theme.textSecondary
-                    font.family: Design.fontMono
-                    font.pixelSize: 9
-                }
+            Text {
+                text: WallpaperEditorService.mediaItems.length
+                color: Theme.textSecondary
+                font.family: Design.fontMono
+                font.pixelSize: Design.typeLabel
             }
 
             PickerButton {

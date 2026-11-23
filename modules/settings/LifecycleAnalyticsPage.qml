@@ -181,14 +181,14 @@ SettingPage {
                 text: root.rows.length + " session resources"
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 9
+                font.pixelSize: Design.typeBody
             }
 
             Text {
                 text: (root.snapshot.adaptivePolicy?.enabled ? "Adaptive on" : "Adaptive off") + " · retain " + (root.snapshot.adaptivePolicy?.plan?.retained?.length ?? 0) + " · evict " + (root.snapshot.adaptivePolicy?.plan?.evicted?.length ?? 0)
-                color: root.snapshot.adaptivePolicy?.enabled ? Theme.success : Theme.textSecondary
+                color: Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 8
+                font.pixelSize: Design.typeLabel
             }
         }
 

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import qs.components
 import qs.core
 import "NumericRange.js" as NumericRange
 
@@ -15,8 +16,8 @@ Item {
     property string accessibleName: "Numeric value"
     signal valueEdited(real value)
 
-    implicitWidth: 142
-    implicitHeight: 30
+    implicitWidth: 160
+    implicitHeight: Design.minimumTouchTarget
 
     readonly property real normalizedValue: NumericRange.quantize(value, from, to, stepSize, from)
     readonly property string formattedValue: normalizedValue.toFixed(Math.max(0, decimals))
@@ -34,14 +35,14 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        radius: height / 2
+        radius: Design.radiusControl
         color: Theme.fillElevated
         border.width: 1
         border.color: editor.activeFocus ? Theme.accent : Theme.separator
 
         Behavior on border.color {
             ColorAnimation {
-                duration: 110
+                duration: Design.motionStateDuration
             }
         }
 
@@ -49,22 +50,21 @@ Item {
             anchors.fill: parent
             spacing: 0
 
-            Item {
-                Layout.preferredWidth: 32
+            HighlightableSurface {
+                Layout.preferredWidth: Design.minimumTouchTarget
                 Layout.fillHeight: true
-                opacity: root.normalizedValue > root.from ? 1 : 0.3
+                enabled: root.normalizedValue > root.from
+                baseColor: "transparent"
+                cornerRadius: Design.radiusControl
+                accessibleName: "Decrease " + root.accessibleName
+                onSurfaceActivated: root.step(-1)
 
                 Text {
                     anchors.centerIn: parent
                     text: "−"
                     color: Theme.textPrimary
                     font.family: Design.fontText
-                    font.pixelSize: 15
-                }
-
-                TapHandler {
-                    enabled: root.normalizedValue > root.from
-                    onTapped: root.step(-1)
+                    font.pixelSize: Design.typeTitle
                 }
             }
 
@@ -92,7 +92,7 @@ Item {
                         horizontalAlignment: TextInput.AlignHCenter
                         verticalAlignment: TextInput.AlignVCenter
                         font.family: Design.fontMono
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeLabel
                         inputMethodHints: Qt.ImhFormattedNumbersOnly
 
                         validator: DoubleValidator {
@@ -112,7 +112,7 @@ Item {
                         text: root.suffix
                         color: Theme.textSecondary
                         font.family: Design.fontMono
-                        font.pixelSize: 9
+                        font.pixelSize: Design.typeLabel
                     }
                 }
             }
@@ -123,22 +123,21 @@ Item {
                 color: Theme.separator
             }
 
-            Item {
-                Layout.preferredWidth: 32
+            HighlightableSurface {
+                Layout.preferredWidth: Design.minimumTouchTarget
                 Layout.fillHeight: true
-                opacity: root.normalizedValue < root.to ? 1 : 0.3
+                enabled: root.normalizedValue < root.to
+                baseColor: "transparent"
+                cornerRadius: Design.radiusControl
+                accessibleName: "Increase " + root.accessibleName
+                onSurfaceActivated: root.step(1)
 
                 Text {
                     anchors.centerIn: parent
                     text: "+"
                     color: Theme.textPrimary
                     font.family: Design.fontText
-                    font.pixelSize: 14
-                }
-
-                TapHandler {
-                    enabled: root.normalizedValue < root.to
-                    onTapped: root.step(1)
+                    font.pixelSize: Design.typeTitle
                 }
             }
         }

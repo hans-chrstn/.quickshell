@@ -14,8 +14,8 @@ Rectangle {
     readonly property var optimization: record.optimization ?? ({})
     readonly property bool showComparison: optimization.available
 
-    implicitHeight: showComparison ? 138 : 86
-    radius: 10
+    implicitHeight: showComparison ? 166 : 112
+    radius: Design.radiusGrouped
     color: Theme.fillSubtle
     border.width: 1
     border.color: Theme.separator
@@ -34,27 +34,16 @@ Rectangle {
                 text: root.screenName
                 color: Theme.textPrimary
                 font.family: Design.fontText
-                font.pixelSize: 10
+                font.pixelSize: Design.typeBody
                 font.weight: Font.DemiBold
             }
 
-            Rectangle {
-                Layout.preferredWidth: stateText.implicitWidth + 10
-                Layout.preferredHeight: 16
-                radius: 8
-                color: Theme.tint(root.stateColor)
-                border.width: 1
-                border.color: Theme.tintBorder(root.stateColor)
-
-                Text {
-                    id: stateText
-                    anchors.centerIn: parent
-                    text: root.stateLabel
-                    color: root.stateColor
-                    font.family: Design.fontText
-                    font.pixelSize: 8
-                    font.weight: Font.DemiBold
-                }
+            Text {
+                text: root.stateLabel
+                color: Theme.textSecondary
+                font.family: Design.fontText
+                font.pixelSize: Design.typeLabel
+                font.weight: Font.DemiBold
             }
         }
 
@@ -63,7 +52,7 @@ Rectangle {
             text: root.mediaSummary()
             color: Theme.textSecondary
             font.family: Design.fontMono
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -72,16 +61,16 @@ Rectangle {
             text: root.record.path || "No wallpaper assigned"
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideMiddle
         }
 
         Text {
             Layout.fillWidth: true
             text: root.runtimeSummary()
-            color: root.record.error ? Theme.danger : Theme.textSecondary
+            color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
 
@@ -97,7 +86,7 @@ Rectangle {
             text: root.optimization.mappingKnown ? "Optimized metadata is unavailable" : "Original mapping unavailable after restart"
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 7
+            font.pixelSize: Design.typeLabel
             elide: Text.ElideRight
         }
     }

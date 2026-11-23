@@ -6,6 +6,7 @@ import qs.core
 import qs.services.launcher
 import qs.services.island
 import qs.services.media
+import qs.services.settings
 import qs.services.shell
 import qs.services.time
 import qs.services.weather
@@ -36,12 +37,12 @@ FocusScope {
     readonly property bool compact: routeState.phase === "compact"
     readonly property bool expanded: routeState.expanded
     readonly property bool keyboardRequested: !hidden && (hover.hovered || !compact)
-    readonly property int collapsedWidth: 320
+    readonly property int collapsedWidth: SettingsService.topIslandCompactWidth
     readonly property int maximumExpandedHeight: Math.min(360, availableHeight - 30)
     readonly property real expansionProgress: displayPhase === "compact" ? 0 : 1
     readonly property Item blurTarget: surface
     readonly property real cornerRadius: surface.cornerRadius
-    readonly property int targetWidth: Math.min(availableWidth - 32, displayPhase === "compact" ? 320 : displayPhase === "media" ? (displayExpanded ? 620 : 470) : displayExpanded ? 640 : 460)
+    readonly property int targetWidth: Math.max(0, Math.min(availableWidth - 32, displayPhase === "compact" ? collapsedWidth : Math.round((displayPhase === "media" ? (displayExpanded ? 620 : 470) : displayExpanded ? 640 : 460) * SettingsService.topIslandExpandedScale / 100)))
     readonly property int targetHeight: displayPhase === "compact" ? 64 : displayPhase === "media" ? (displayExpanded ? 326 : 190) : displayPhase === "notifications" ? (displayExpanded ? 344 : 190) : (displayExpanded ? 356 : 230)
 
     width: targetWidth
@@ -229,7 +230,7 @@ FocusScope {
         GlassPanelSurface {
             id: surface
             anchors.fill: parent
-            cornerRadius: root.displayPhase === "compact" ? 32 : 27
+            cornerRadius: root.displayPhase === "compact" ? 32 : SettingsService.topIslandCornerRadius
             backdropAvailable: root.backdropAvailable
             emphasis: root.expansionProgress
 

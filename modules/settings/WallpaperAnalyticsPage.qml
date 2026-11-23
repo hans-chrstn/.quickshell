@@ -200,18 +200,18 @@ SettingPage {
             Layout.fillWidth: true
             visible: root.observerMessage.length > 0
             text: root.observerMessage
-            color: Theme.danger
+            color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             wrapMode: Text.Wrap
         }
 
         Text {
             Layout.fillWidth: true
-            text: "Live renderer state"
+            text: "Displays"
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             font.weight: Font.Medium
         }
 

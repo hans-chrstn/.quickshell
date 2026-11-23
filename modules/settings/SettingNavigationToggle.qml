@@ -40,7 +40,7 @@ HighlightableSurface {
 
                     Text {
                         text: root.title
-                        color: root.dangerous ? Theme.danger : Theme.textPrimary
+                        color: Theme.textPrimary
                         font.family: Design.fontText
                         font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
@@ -50,7 +50,7 @@ HighlightableSurface {
                         text: root.description
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: Design.typeCaption
+                        font.pixelSize: Design.typeLabel
                         elide: Text.ElideRight
                     }
                 }
@@ -72,8 +72,6 @@ HighlightableSurface {
         }
 
         ToggleSwitch {
-            Layout.preferredWidth: 43
-            Layout.preferredHeight: 25
             checked: root.checked
             activeColor: root.dangerous ? Theme.statusDanger : Theme.accent
             accessibleName: root.title

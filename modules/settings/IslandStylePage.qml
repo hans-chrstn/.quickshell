@@ -1,96 +1,87 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
+import qs.components.scrolling
 import qs.core
 import qs.services.settings
 
 SettingPage {
     id: root
 
-    ColumnLayout {
+    Flickable {
+        id: settingsScroll
         anchors.fill: parent
-        spacing: 6
+        contentWidth: width
+        contentHeight: settingsColumn.implicitHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
 
-        SettingsHeader {
-            title: "Island Style"
+        SmoothScrollBehavior {
+            target: settingsScroll
         }
-
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Collapsed Width"
-            description: "Width of the island in its resting state"
-            from: 100
-            to: 300
-            stepSize: 5
-            unit: "px"
-            value: SettingsService.islandCollapsedWidth
-            onValueEdited: value => SettingsService.setSetting("islandCollapsedWidth", value)
+        ScrollEdgeFeedback {
+            target: settingsScroll
         }
+        ScrollBar.vertical: MinimalScrollBar {}
 
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Expanded Width"
-            description: "Width applied proportionally to every island module"
-            from: 90
-            to: 125
-            stepSize: 1
-            unit: "%"
-            value: SettingsService.islandWidthPercent
-            onValueEdited: value => SettingsService.setSetting("islandWidthPercent", value)
-        }
+        ColumnLayout {
+            id: settingsColumn
+            width: settingsScroll.width - Design.space8
+            spacing: Design.space8
 
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Expanded Height"
-            description: "Height applied proportionally to every island module"
-            from: 90
-            to: 125
-            stepSize: 1
-            unit: "%"
-            value: SettingsService.islandHeightPercent
-            onValueEdited: value => SettingsService.setSetting("islandHeightPercent", value)
-        }
+            SettingsHeader {
+                title: "Island Style"
+            }
 
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Body Corner Radius"
-            description: "Rounding of the bottom corners of the island"
-            from: 0
-            to: 40
-            stepSize: 1
-            unit: "px"
-            value: SettingsService.islandBodyRadius
-            onValueEdited: value => SettingsService.setSetting("islandBodyRadius", value)
-        }
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Compact width"
+                description: "Time and weather"
+                from: 260
+                to: 420
+                stepSize: 5
+                unit: "px"
+                value: SettingsService.topIslandCompactWidth
+                onValueEdited: value => SettingsService.setSetting("topIslandCompactWidth", value)
+            }
 
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Wing Size"
-            description: "Width of the side wings that anchor to the top edge"
-            from: 0
-            to: 40
-            stepSize: 1
-            unit: "px"
-            value: SettingsService.islandWing
-            onValueEdited: value => SettingsService.setSetting("islandWing", value)
-        }
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Expanded width"
+                description: "Media, alerts, and apps"
+                from: 85
+                to: 115
+                stepSize: 1
+                unit: "%"
+                value: SettingsService.topIslandExpandedScale
+                onValueEdited: value => SettingsService.setSetting("topIslandExpandedScale", value)
+            }
 
-        SettingToggle {
-            Layout.fillWidth: true
-            title: "Compositor Blur"
-            description: "Enable background blur effect behind the island"
-            checked: SettingsService.enableBlur
-            onToggled: newValue => SettingsService.setSetting("enableBlur", newValue)
-        }
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Expanded corners"
+                description: ""
+                from: 16
+                to: 40
+                stepSize: 1
+                unit: "px"
+                value: SettingsService.topIslandCornerRadius
+                onValueEdited: value => SettingsService.setSetting("topIslandCornerRadius", value)
+            }
 
-        Item {
-            Layout.fillHeight: true
-        }
+            SettingToggle {
+                Layout.fillWidth: true
+                title: "Compositor blur"
+                description: "Island and rail"
+                checked: SettingsService.enableBlur
+                onToggled: newValue => SettingsService.setSetting("enableBlur", newValue)
+            }
 
-        SettingButton {
-            label: "Reset Style"
-            Layout.preferredHeight: 18
-            Layout.bottomMargin: 2
-            onClicked: SettingsService.resetStyle()
+            SettingButton {
+                label: "Reset Style"
+                Layout.alignment: Qt.AlignRight
+                onClicked: SettingsService.resetStyle()
+            }
         }
     }
 }

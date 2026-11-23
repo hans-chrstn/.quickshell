@@ -91,7 +91,7 @@ Item {
         text: root.result.subtitle || ""
         color: Theme.textTertiary
         font.family: Design.fontText
-        font.pixelSize: Design.typeCaption
+        font.pixelSize: Design.typeLabel
         elide: Text.ElideRight
         textFormat: Text.PlainText
     }

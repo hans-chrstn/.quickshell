@@ -35,7 +35,7 @@ Item {
                 text: root.title
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 8
+                font.pixelSize: Design.typeLabel
                 font.weight: Font.Medium
                 elide: Text.ElideRight
             }
@@ -45,7 +45,7 @@ Item {
                 visible: text.length > 0
                 color: Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 8
+                font.pixelSize: Design.typeLabel
             }
         }
 
@@ -100,7 +100,7 @@ Item {
                         text: (modelData.label ?? "") + " " + (modelData.value ?? 0)
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 7
+                        font.pixelSize: Design.typeLabel
                     }
                 }
             }

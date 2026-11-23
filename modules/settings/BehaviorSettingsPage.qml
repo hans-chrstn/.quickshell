@@ -22,29 +22,19 @@ SettingPage {
 
         SettingSlider {
             Layout.fillWidth: true
-            title: "Hover intent"
-            description: "Delay before the resting island expands"
-            from: 0
-            to: 1000
-            stepSize: 20
-            value: SettingsService.expandDelay
-            onValueEdited: value => SettingsService.setSetting("expandDelay", value)
-        }
-        SettingSlider {
-            Layout.fillWidth: true
             title: "Auto hide"
-            description: "Delay before the unattended island hides"
+            description: "When the pointer leaves"
             from: 300
-            to: 3000
+            to: 1500
             stepSize: 50
-            value: SettingsService.hideDelay
-            onValueEdited: value => SettingsService.setSetting("hideDelay", value)
+            value: SettingsService.topIslandHoverLeaveDelay
+            onValueEdited: value => SettingsService.setSetting("topIslandHoverLeaveDelay", value)
         }
 
         SettingToggle {
             Layout.fillWidth: true
             title: "Zen mode on this display"
-            description: "Silence notifications, microphone privacy, and other automatic displays"
+            description: "Hide automatic notices on this display"
             checked: root.zenModeEnabled
             onToggled: value => IslandPresentationService.setZenEnabled(SettingsService.targetScreenName, value)
         }

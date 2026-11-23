@@ -58,13 +58,13 @@ Singleton {
     readonly property real springMorphDamping: 0.38
     readonly property real springMorphMass: 0.92
     readonly property real springPixelEpsilon: 0.25
-    readonly property int springEnterFadeDuration: motionDuration(310)
-    readonly property int springExitFadeDuration: motionDuration(480)
+    readonly property int springEnterFadeDuration: motionDuration(SettingsService.topIslandEnterFadeDuration)
+    readonly property int springExitFadeDuration: motionDuration(SettingsService.topIslandExitFadeDuration)
     readonly property int springViewRetireDelay: 950
-    readonly property int islandHoverLeaveDelay: 650
+    readonly property int islandHoverLeaveDelay: SettingsService.topIslandHoverLeaveDelay
     readonly property int springContentSwapDelay: 140
-    readonly property int springContentFadeOutDuration: motionDuration(110)
-    readonly property int springContentFadeInDuration: motionDuration(210)
+    readonly property int springContentFadeOutDuration: motionDuration(Math.round(SettingsService.topIslandContentFadeDuration * 0.52))
+    readonly property int springContentFadeInDuration: motionDuration(SettingsService.topIslandContentFadeDuration)
     readonly property int audioLiquidFrameInterval: 33
     readonly property real audioLiquidPhaseStep: 0.075
     readonly property real audioLiquidResponse: 0.19

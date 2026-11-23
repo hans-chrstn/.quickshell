@@ -39,7 +39,7 @@ HighlightableSurface {
                 text: root.description
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: Design.typeCaption
+                font.pixelSize: Design.typeLabel
                 elide: Text.ElideRight
             }
         }

@@ -107,7 +107,7 @@ SettingPage {
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 31
+                Layout.preferredHeight: Design.minimumTouchTarget
 
                 Flickable {
                     anchors.fill: parent

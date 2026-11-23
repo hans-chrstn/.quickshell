@@ -12,7 +12,6 @@ Rectangle {
     property Component detailComponent: null
     property bool detailTakesOver: false
     property bool topAligned: false
-    property string glyph: ""
     property bool quiet: false
 
     radius: Design.editorSectionRadius
@@ -21,11 +20,11 @@ Rectangle {
     border.color: quiet ? Theme.separatorQuiet : Theme.separator
 
     ColumnLayout {
-        width: root.topAligned ? parent.width - 28 : Math.min(parent.width - 28, 280)
-        x: root.topAligned ? 14 : (parent.width - width) / 2
-        y: root.topAligned ? 14 : (parent.height - height) / 2
+        width: parent.width - Design.space16 * 2
+        x: Design.space16
+        y: root.topAligned ? Design.space16 : (parent.height - height) / 2
         height: implicitHeight
-        spacing: 8
+        spacing: Design.space8
 
         Loader {
             Layout.fillWidth: true
@@ -34,32 +33,13 @@ Rectangle {
             sourceComponent: root.detailComponent
         }
 
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            visible: root.glyph.length > 0 && !root.detailTakesOver
-            implicitWidth: 32
-            implicitHeight: 32
-            radius: 10
-            color: Theme.fillSubtle
-
-            Text {
-                anchors.centerIn: parent
-                text: root.glyph
-                color: Theme.textSecondary
-                font.family: Design.fontText
-                font.pixelSize: 14
-                font.weight: Font.DemiBold
-            }
-        }
-
         Text {
             Layout.fillWidth: true
             text: root.title
             visible: !root.detailTakesOver
             color: Theme.textPrimary
-            horizontalAlignment: Text.AlignHCenter
             font.family: Design.fontText
-            font.pixelSize: 13
+            font.pixelSize: Design.typeBody
             font.weight: Font.DemiBold
             elide: Text.ElideRight
         }
@@ -69,10 +49,9 @@ Rectangle {
             visible: root.description.length > 0 && !root.detailTakesOver
             text: root.description
             color: Theme.textSecondary
-            horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             font.family: Design.fontText
-            font.pixelSize: 11
+            font.pixelSize: Design.typeLabel
             lineHeight: 1.15
         }
 
@@ -81,10 +60,9 @@ Rectangle {
             visible: root.details.length > 0 && !root.detailTakesOver
             text: root.details
             color: Theme.textSecondary
-            horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
             font.family: Design.fontMono
-            font.pixelSize: 9
+            font.pixelSize: Design.typeLabel
             opacity: 0.82
         }
 
@@ -101,10 +79,9 @@ Rectangle {
                     Layout.fillWidth: true
                     text: modelData
                     color: Theme.textSecondary
-                    horizontalAlignment: Text.AlignHCenter
                     elide: Text.ElideRight
                     font.family: Design.fontText
-                    font.pixelSize: 9
+                    font.pixelSize: Design.typeLabel
                 }
             }
         }

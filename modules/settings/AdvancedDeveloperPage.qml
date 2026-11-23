@@ -15,17 +15,17 @@ SettingPage {
 
         Text {
             Layout.fillWidth: true
-            text: "Developer options can change resource lifetime and recovery behavior."
+            text: "These controls affect resource use and display power."
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 9
+            font.pixelSize: Design.typeBody
             wrapMode: Text.Wrap
         }
 
         SettingNavigationToggle {
             Layout.fillWidth: true
-            title: "Adaptive lifecycle · Experimental"
-            description: "Dangerous · tune inactive resource eviction"
+            title: "Adaptive lifecycle"
+            description: "May unload idle views sooner"
             dangerous: true
             checked: SettingsService.adaptiveLifecycleEnabled
             onActivated: SettingsService.openPage("developer_lifecycle")
@@ -34,8 +34,8 @@ SettingPage {
 
         SettingToggle {
             Layout.fillWidth: true
-            title: "Automatic DPMS on idle · Experimental"
-            description: "Dangerous · power displays off after the idle timeout"
+            title: "Turn off idle displays"
+            description: "Uses the system idle timeout"
             dangerous: true
             checked: ConfigService.experimentalDpmsOnIdle
             onToggled: value => SettingsService.setSetting("experimentalDpmsOnIdle", value)

@@ -12,52 +12,19 @@ SettingPage {
             title: "Lifecycle"
         }
 
-        RowLayout {
+        Text {
             Layout.fillWidth: true
-            spacing: 6
-
-            Repeater {
-                model: [
-                    {
-                        label: "Experimental",
-                        color: Theme.warning
-                    },
-                    {
-                        label: "Dangerous",
-                        color: Theme.danger
-                    }
-                ]
-
-                Rectangle {
-                    required property var modelData
-                    Layout.preferredWidth: badgeText.implicitWidth + 12
-                    Layout.preferredHeight: 18
-                    radius: 9
-                    color: Theme.tint(modelData.color)
-                    border.width: 1
-                    border.color: Theme.tintBorder(modelData.color)
-
-                    Text {
-                        id: badgeText
-                        anchors.centerIn: parent
-                        text: modelData.label
-                        color: modelData.color
-                        font.family: Design.fontText
-                        font.pixelSize: 8
-                        font.weight: Font.DemiBold
-                    }
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
+            text: "Affects inactive views"
+            color: Theme.textSecondary
+            font.family: Design.fontText
+            font.pixelSize: Design.typeLabel
+            font.weight: Font.DemiBold
         }
 
         SettingToggle {
             Layout.fillWidth: true
             title: "Adaptive eviction"
-            description: checked ? "Inactive eligible resources share the adaptive budget" : "Owners use deterministic fallback timeouts only"
+            description: checked ? "Share an idle-view budget" : "Use fixed unload timeouts"
             dangerous: true
             checked: SettingsService.adaptiveLifecycleEnabled
             onToggled: value => SettingsService.setSetting("adaptiveLifecycleEnabled", value)
@@ -67,7 +34,7 @@ SettingPage {
             Layout.fillWidth: true
             enabled: SettingsService.adaptiveLifecycleEnabled
             opacity: enabled ? 1 : 0.38
-            title: "Inactive budget · Dangerous"
+            title: "Idle-view budget"
             choices: [0, 60, 100, 120, 180]
             value: SettingsService.lifecycleInactiveBudgetUnits
             formatChoice: value => String(value)
@@ -75,26 +42,26 @@ SettingPage {
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: 120
+                    duration: Design.motionStateDuration
                 }
             }
         }
 
         Text {
             Layout.fillWidth: true
-            text: "Lower values release more inactive eligible resources. Zero keeps none warm; this never overrides active or state-owner protection."
+            text: "Lower budgets unload more idle views. Zero keeps none warm."
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             wrapMode: Text.Wrap
         }
 
         Text {
             Layout.fillWidth: true
-            text: "Always enforced: active and state-owning resources are protected; owners may refuse eviction; restoration contracts, diagnostics, and deterministic tie-breaking remain enabled."
+            text: "Active views stay loaded. Each view can restore its state when reopened."
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 8
+            font.pixelSize: Design.typeLabel
             wrapMode: Text.Wrap
         }
 

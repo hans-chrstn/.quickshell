@@ -8,11 +8,11 @@ HighlightableSurface {
     required property string label
     signal activated
 
-    implicitWidth: labelText.implicitWidth + 24
-    implicitHeight: 32
+    implicitWidth: Math.max(Design.minimumTouchTarget, labelText.implicitWidth + Design.space24)
+    implicitHeight: Design.minimumTouchTarget
     accentColor: Theme.accent
     baseColor: Theme.fillSubtle
-    cornerRadius: 10
+    cornerRadius: Design.radiusControl
     onSurfaceActivated: root.activated()
 
     Text {
@@ -21,7 +21,7 @@ HighlightableSurface {
         text: root.label
         color: root.selected ? Theme.textPrimary : Theme.textSecondary
         font.family: Design.fontText
-        font.pixelSize: 11
+        font.pixelSize: Design.typeLabel
         font.weight: Font.Medium
     }
 }

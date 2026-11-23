@@ -131,12 +131,11 @@ FocusScope {
     Text {
         x: Design.space24
         y: powerCard.y + powerCard.height + Design.space20
-        text: BluetoothService.scanning ? "SCANNING" : "DEVICES"
+        text: BluetoothService.scanning ? "Scanning devices" : "Devices"
         color: BluetoothService.scanning ? Theme.accent : Theme.textTertiary
         font.family: Design.fontText
-        font.pixelSize: Design.typeCaption
+        font.pixelSize: Design.typeBody
         font.weight: Font.DemiBold
-        font.letterSpacing: 1.2
     }
 
     Rectangle {
@@ -175,119 +174,26 @@ FocusScope {
                 Repeater {
                     model: root.devices
 
-                    Rectangle {
-                        id: deviceRow
+                    BluetoothDeviceRow {
                         required property var modelData
-                        readonly property bool selected: BluetoothService.selectedAddress === modelData.address
                         width: deviceColumn.width
-                        height: selected ? 124 : 62
-                        radius: Design.radiusControl
-                        color: selected ? Theme.fillSelected : Theme.fillQuiet
-                        border.color: selected ? Theme.tintBorder(Theme.accent) : Theme.separator
-
-                        Behavior on height {
-                            enabled: !Design.reducedMotion
-                            SpatialSpring {
-                                phase: "morph"
-                            }
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: BluetoothService.selectDevice(deviceRow.modelData.address)
-                        }
-
-                        IconMark {
-                            x: Design.space12
-                            y: 11
-                            width: 40
-                            height: 40
-                            glyph: deviceRow.modelData.icon?.includes("headset") || deviceRow.modelData.icon?.includes("headphones") ? "headphones" : deviceRow.modelData.icon?.includes("keyboard") ? "keyboard" : "bluetooth"
-                            glyphSize: 21
-                            glyphColor: deviceRow.modelData.connected ? Theme.accent : Theme.textSecondary
-                        }
-
-                        Text {
-                            x: 64
-                            y: 12
-                            width: parent.width - x - Design.space16
-                            text: deviceRow.modelData.name || deviceRow.modelData.deviceName || deviceRow.modelData.address
-                            elide: Text.ElideRight
-                            color: Theme.textPrimary
-                            font.family: Design.fontText
-                            font.pixelSize: Design.typeBody
-                            font.weight: Font.DemiBold
-                        }
-
-                        Text {
-                            x: 64
-                            y: 32
-                            text: deviceRow.modelData.pairing ? "Confirm on device" : deviceRow.modelData.connected ? "Connected" : deviceRow.modelData.paired ? "Paired" : deviceRow.modelData.trusted ? "Trusted" : "Available"
-                            color: Theme.textSecondary
-                            font.family: Design.fontText
-                            font.pixelSize: Design.typeLabel
-                        }
-
-                        Text {
-                            anchors.right: parent.right
-                            anchors.rightMargin: Design.space16
-                            y: 33
-                            visible: deviceRow.modelData.connected && deviceRow.modelData.batteryAvailable
-                            text: Math.round(deviceRow.modelData.battery * 100) + "%"
-                            color: Theme.accent
-                            font.family: Design.fontMono
-                            font.pixelSize: Design.typeLabel
-                        }
-
-                        Row {
-                            x: Design.space12
-                            y: 76
-                            spacing: Design.space8
-                            visible: deviceRow.selected
-
-                            RailActionPill {
-                                visible: deviceRow.modelData.pairing
-                                label: "Cancel pairing"
-                                onActivated: BluetoothService.cancelPairing()
-                            }
-
-                            RailActionPill {
-                                visible: !deviceRow.modelData.pairing && !deviceRow.modelData.paired
-                                label: "Pair"
-                                highlighted: true
-                                enabled: BluetoothService.enabled
-                                opacity: enabled ? 1 : 0.4
-                                onActivated: BluetoothService.pairSelected()
-                            }
-
-                            RailActionPill {
-                                visible: !deviceRow.modelData.pairing && deviceRow.modelData.paired
-                                label: deviceRow.modelData.connected ? "Disconnect" : "Connect"
-                                highlighted: !deviceRow.modelData.connected
-                                enabled: BluetoothService.enabled || deviceRow.modelData.connected
-                                opacity: enabled ? 1 : 0.4
-                                onActivated: deviceRow.modelData.connected ? BluetoothService.disconnectSelected() : BluetoothService.connectSelected()
-                            }
-
-                            RailActionPill {
-                                visible: deviceRow.modelData.paired
-                                label: deviceRow.modelData.trusted ? "Untrust" : "Trust"
-                                onActivated: BluetoothService.setTrusted(!deviceRow.modelData.trusted)
-                            }
-
-                            RailActionPill {
-                                visible: deviceRow.modelData.paired || deviceRow.modelData.trusted
-                                label: root.confirmForgetAddress === deviceRow.modelData.address ? "Confirm forget" : "Forget"
-                                destructive: root.confirmForgetAddress === deviceRow.modelData.address
-                                onActivated: {
-                                    if (root.confirmForgetAddress === deviceRow.modelData.address) {
-                                        BluetoothService.forgetSelected();
-                                        root.confirmForgetAddress = "";
-                                    } else {
-                                        root.confirmForgetAddress = deviceRow.modelData.address;
-                                        forgetTimeout.restart();
-                                    }
-                                }
+                        device: modelData
+                        selected: BluetoothService.selectedAddress === modelData.address
+                        bluetoothEnabled: BluetoothService.enabled
+                        confirmForget: root.confirmForgetAddress === modelData.address
+                        onSelectionRequested: address => BluetoothService.selectDevice(address)
+                        onPairRequested: BluetoothService.pairSelected()
+                        onPairingCancelRequested: BluetoothService.cancelPairing()
+                        onConnectRequested: BluetoothService.connectSelected()
+                        onDisconnectRequested: BluetoothService.disconnectSelected()
+                        onTrustRequested: trusted => BluetoothService.setTrusted(trusted)
+                        onForgetRequested: {
+                            if (root.confirmForgetAddress === modelData.address) {
+                                BluetoothService.forgetSelected();
+                                root.confirmForgetAddress = "";
+                            } else {
+                                root.confirmForgetAddress = modelData.address;
+                                forgetTimeout.restart();
                             }
                         }
                     }

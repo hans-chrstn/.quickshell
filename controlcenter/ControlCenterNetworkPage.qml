@@ -113,12 +113,11 @@ FocusScope {
     Text {
         x: Design.space24
         y: mainCard.y + mainCard.height + Design.space20
-        text: "DETAILS"
+        text: "Details"
         color: Theme.textTertiary
         font.family: Design.fontText
-        font.pixelSize: Design.typeCaption
+        font.pixelSize: Design.typeBody
         font.weight: Font.DemiBold
-        font.letterSpacing: 1.2
     }
 
     Rectangle {

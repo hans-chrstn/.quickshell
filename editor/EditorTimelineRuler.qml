@@ -34,7 +34,7 @@ Rectangle {
     Text {
         x: 12
         anchors.verticalCenter: parent.verticalCenter
-        text: "TRACKS"
+        text: "Tracks"
         color: Theme.textSecondary
         opacity: 0.68
         font.family: Design.fontText

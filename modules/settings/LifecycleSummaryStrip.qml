@@ -6,7 +6,7 @@ RowLayout {
     id: root
 
     required property var summary
-    spacing: 6
+    spacing: Design.space12
 
     Repeater {
         model: [
@@ -32,36 +32,11 @@ RowLayout {
             }
         ]
 
-        Rectangle {
+        SettingMetric {
             required property var modelData
             Layout.fillWidth: true
-            Layout.preferredHeight: 36
-            radius: 9
-            color: Theme.fillSubtle
-            border.width: 1
-            border.color: Theme.separator
-
-            Column {
-                anchors.centerIn: parent
-                spacing: 0
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: modelData.value
-                    color: modelData.color
-                    font.family: Design.fontMono
-                    font.pixelSize: 11
-                    font.weight: Font.DemiBold
-                }
-
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: modelData.label
-                    color: Theme.textSecondary
-                    font.family: Design.fontText
-                    font.pixelSize: 8
-                }
-            }
+            label: modelData.label
+            value: String(modelData.value)
         }
     }
 }

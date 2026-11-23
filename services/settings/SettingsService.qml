@@ -35,6 +35,13 @@ Singleton {
     readonly property int islandWidthPercent: ConfigService.islandWidthPercent
     readonly property int islandHeightPercent: ConfigService.islandHeightPercent
     readonly property int islandBodyRadius: ConfigService.islandBodyRadius
+    readonly property int topIslandCompactWidth: ConfigService.topIslandCompactWidth
+    readonly property int topIslandExpandedScale: ConfigService.topIslandExpandedScale
+    readonly property int topIslandCornerRadius: ConfigService.topIslandCornerRadius
+    readonly property int topIslandEnterFadeDuration: ConfigService.topIslandEnterFadeDuration
+    readonly property int topIslandExitFadeDuration: ConfigService.topIslandExitFadeDuration
+    readonly property int topIslandContentFadeDuration: ConfigService.topIslandContentFadeDuration
+    readonly property int topIslandHoverLeaveDelay: ConfigService.topIslandHoverLeaveDelay
     readonly property bool enableBlur: ConfigService.enableBlur
     readonly property bool adaptiveLifecycleEnabled: ConfigService.adaptiveLifecycleEnabled
     readonly property int lifecycleInactiveBudgetUnits: ConfigService.lifecycleInactiveBudgetUnits
@@ -47,21 +54,21 @@ Singleton {
                 {
                     id: "wallpaper",
                     title: "Wallpaper",
-                    desc: "Select background images",
+                    desc: "Desktop and lock screen",
                     keywords: "background images video displays assign studio editor"
                 },
                 {
                     id: "island_style",
                     title: "Island Style",
-                    desc: "Customize dimensions, radius, and blur",
-                    keywords: "collapsed width expanded height corner wing compositor blur"
+                    desc: "Size and glass",
+                    keywords: "compact width expanded scale corner radius compositor blur"
                 }
             ],
             searchPages: [
                 {
                     id: "wallpaper_options",
                     title: "Wallpaper Options",
-                    desc: "Playback and source settings",
+                    desc: "Playback and transitions",
                     keywords: "pause animation idle transitions duration reduce motion coverage battery",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -69,7 +76,7 @@ Singleton {
                 {
                     id: "wallpaper_optimization",
                     title: "Wallpaper Optimization",
-                    desc: "Media performance and quality",
+                    desc: "Scale, frame rate, bitrate",
                     keywords: "scale frame rate bitrate transcoding",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -77,7 +84,7 @@ Singleton {
                 {
                     id: "wallpaper_cache",
                     title: "Wallpaper Cache",
-                    desc: "Cached previews and cleanup",
+                    desc: "Storage and cleanup",
                     keywords: "automatic bounded cleanup refresh clean planned clear all",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -85,7 +92,7 @@ Singleton {
                 {
                     id: "wallpaper_directory",
                     title: "Wallpaper Library",
-                    desc: "Choose the wallpaper folder",
+                    desc: "Image folder",
                     keywords: "directory browse path",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -93,7 +100,7 @@ Singleton {
                 {
                     id: "wallpaper_file",
                     title: "Wallpaper File",
-                    desc: "Choose an individual image",
+                    desc: "Select one image",
                     keywords: "browse image file preview lock desktop",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -101,7 +108,7 @@ Singleton {
                 {
                     id: "wallpaper_adjust",
                     title: "Wallpaper Placement",
-                    desc: "Crop, pan, zoom, and rotate an image",
+                    desc: "Frame and rotate",
                     keywords: "image placement crop pan zoom rotate",
                     parentId: "wallpaper",
                     parentTitle: "Wallpaper"
@@ -115,13 +122,13 @@ Singleton {
                 {
                     id: "motion",
                     title: "Motion",
-                    desc: "Configure animation durations and curves",
-                    keywords: "island resize edge reveal content reveal attention delay module handoff"
+                    desc: "Entrance, exit, content",
+                    keywords: "island enter exit content reveal fade timing"
                 },
                 {
                     id: "behavior",
                     title: "Behavior",
-                    desc: "Adjust hover intent and auto-hide delays",
+                    desc: "Hide delay and quiet mode",
                     keywords: "auto hide zen mode notifications privacy"
                 }
             ]
@@ -133,19 +140,19 @@ Singleton {
                 {
                     id: "analytics_lifecycle",
                     title: "Lifecycle",
-                    desc: "Inspect widget loading, retention, and eviction",
+                    desc: "Loaded and idle views",
                     keywords: "resource leases suspended active memory"
                 },
                 {
                     id: "analytics_wallpaper",
                     title: "Wallpaper",
-                    desc: "Review renderer and playback activity",
+                    desc: "Rendering and cache use",
                     keywords: "decode media cache transition"
                 },
                 {
                     id: "analytics_performance",
                     title: "Performance",
-                    desc: "Understand measured shell resource behavior",
+                    desc: "Memory and CPU",
                     keywords: "cpu memory rss pss threads uptime"
                 }
             ]
@@ -157,7 +164,7 @@ Singleton {
                 {
                     id: "developer_advanced",
                     title: "Advanced",
-                    desc: "Experimental and dangerous system controls",
+                    desc: "Power and resource controls",
                     keywords: "adaptive lifecycle dpms idle display power"
                 }
             ],
@@ -165,7 +172,7 @@ Singleton {
                 {
                     id: "developer_lifecycle",
                     title: "Lifecycle Controls",
-                    desc: "Resource retention and eviction",
+                    desc: "Idle view budget",
                     keywords: "inactive budget priority memory",
                     parentId: "developer_advanced",
                     parentTitle: "Advanced"
@@ -291,28 +298,23 @@ Singleton {
 
     function resetMotion() {
         ConfigService.setSettings({
-            revealDuration: 300,
-            resizeDuration: 520,
-            contentRevealDuration: 180,
-            attentionExpandDelay: 170,
-            moduleCloseDuration: 440
+            topIslandEnterFadeDuration: 310,
+            topIslandExitFadeDuration: 480,
+            topIslandContentFadeDuration: 210
         });
     }
 
     function resetBehavior() {
         ConfigService.setSettings({
-            expandDelay: 420,
-            hideDelay: 1200
+            topIslandHoverLeaveDelay: 650
         });
     }
 
     function resetStyle() {
         ConfigService.setSettings({
-            islandWing: 16,
-            islandCollapsedWidth: 220,
-            islandWidthPercent: 100,
-            islandHeightPercent: 100,
-            islandBodyRadius: 20,
+            topIslandCompactWidth: 320,
+            topIslandExpandedScale: 100,
+            topIslandCornerRadius: 27,
             enableBlur: true
         });
     }

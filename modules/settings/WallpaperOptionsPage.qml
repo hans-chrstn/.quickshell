@@ -45,17 +45,17 @@ SettingPage {
                     spacing: 10
 
                     Text {
-                        text: "Playback Assessment"
+                        text: "Media"
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
                     SettingNavigationToggle {
                         Layout.fillWidth: true
-                        title: "Allow media optimization · Dangerous"
-                        description: "Permits explicit transcoding with sustained CPU and disk use"
+                        title: "Allow optimization"
+                        description: "May use CPU and disk space"
                         dangerous: true
                         checked: ConfigService.allowWallpaperOptimization
                         onActivated: SettingsService.openPage("wallpaper_optimization")
@@ -65,7 +65,7 @@ SettingPage {
                     SettingNavigationTile {
                         Layout.fillWidth: true
                         title: "Cache"
-                        description: "Inspect, clean, and clear generated media"
+                        description: "View and remove cached media"
                         onActivated: SettingsService.openPage("wallpaper_cache")
                     }
 
@@ -82,10 +82,10 @@ SettingPage {
                     Text {
                         Layout.fillWidth: true
                         visible: WallpaperGuardrailService.assignedAssessments.length === 0
-                        text: "Assign a wallpaper to inspect playback cost"
+                        text: "Choose a wallpaper to see playback details"
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeLabel
                     }
 
                     Rectangle {
@@ -98,14 +98,14 @@ SettingPage {
                         text: "Playback"
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Pause animation while idle"
-                        description: checked ? "Recommended · pauses decoding after " + root.idleTimeoutLabel() : "Higher resource use · animation continues while you are away"
+                        description: checked ? "Stop after " + root.idleTimeoutLabel() : "Keep playing when idle"
                         checked: ConfigService.pauseWallpaperWhenIdle
                         onToggled: value => SettingsService.setSetting("pauseWallpaperWhenIdle", value)
                     }
@@ -119,7 +119,7 @@ SettingPage {
                             text: "Idle timeout"
                             color: Theme.textSecondary
                             font.family: Design.fontText
-                            font.pixelSize: 10
+                            font.pixelSize: Design.typeBody
                         }
 
                         SettingNumericStepper {
@@ -144,14 +144,14 @@ SettingPage {
                         text: "Transitions"
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Wallpaper transitions"
-                        description: checked ? "Crossfade between settled wallpaper selections" : "Switch wallpapers immediately"
+                        description: checked ? "Fade between images" : "Change images immediately"
                         checked: ConfigService.wallpaperTransitionsEnabled
                         onToggled: value => SettingsService.setSetting("wallpaperTransitionsEnabled", value)
                     }
@@ -161,7 +161,7 @@ SettingPage {
                         enabled: ConfigService.wallpaperTransitionsEnabled && !ConfigService.reduceWallpaperMotion
                         opacity: enabled ? 1 : 0.45
                         title: "Transition duration"
-                        description: "Duration of the bounded two-renderer crossfade"
+                        description: "Fade time"
                         from: 120
                         to: 800
                         stepSize: 20
@@ -174,7 +174,7 @@ SettingPage {
                         enabled: ConfigService.wallpaperTransitionsEnabled
                         opacity: enabled ? 1 : 0.45
                         title: "Reduce wallpaper motion"
-                        description: checked ? "Use immediate swaps without wallpaper motion" : "Allow the configured crossfade"
+                        description: checked ? "Change images without a fade" : "Use the fade above"
                         checked: ConfigService.reduceWallpaperMotion
                         onToggled: value => SettingsService.setSetting("reduceWallpaperMotion", value)
                     }
@@ -186,17 +186,17 @@ SettingPage {
                     }
 
                     Text {
-                        text: "Experimental"
+                        text: "Power"
                         color: Theme.textSecondary
                         font.family: Design.fontText
-                        font.pixelSize: 10
+                        font.pixelSize: Design.typeBody
                         font.weight: Font.DemiBold
                     }
 
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Coverage-aware suspension"
-                        description: "Keep animation running until floating windows cover 75%"
+                        description: "Pause when windows cover most of the wallpaper"
                         checked: ConfigService.experimentalFloatingWallpaperSuspension
                         onToggled: value => SettingsService.setSetting("experimentalFloatingWallpaperSuspension", value)
                     }
@@ -204,7 +204,7 @@ SettingPage {
                     SettingToggle {
                         Layout.fillWidth: true
                         title: "Pause animation on battery"
-                        description: "Use the static poster while the laptop is unplugged"
+                        description: "Show a still image on battery"
                         checked: ConfigService.experimentalPauseWallpaperOnBattery
                         onToggled: value => SettingsService.setSetting("experimentalPauseWallpaperOnBattery", value)
                     }
@@ -215,6 +215,6 @@ SettingPage {
 
     function idleTimeoutLabel() {
         const minutes = Math.max(1, Math.round(ConfigService.wallpaperIdleTimeoutSeconds / 60));
-        return minutes === 1 ? "1 minute away" : minutes + " minutes away";
+        return minutes === 1 ? "1 minute idle" : minutes + " minutes idle";
     }
 }

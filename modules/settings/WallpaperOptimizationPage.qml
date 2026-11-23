@@ -16,10 +16,10 @@ SettingPage {
 
         Text {
             Layout.fillWidth: true
-            text: "Each enabled step becomes part of the cache recipe. Changing one creates a separate optimized copy the next time you choose Optimize & Use."
+            text: "Changes make a new cached copy when you optimize."
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 10
+            font.pixelSize: Design.typeBody
             wrapMode: Text.Wrap
         }
 
@@ -43,7 +43,7 @@ SettingPage {
                 text: "Custom scale"
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 10
+                font.pixelSize: Design.typeBody
             }
 
             SettingNumericStepper {
@@ -78,7 +78,7 @@ SettingPage {
                 text: "Custom frame rate"
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 10
+                font.pixelSize: Design.typeBody
             }
 
             SettingNumericStepper {
@@ -113,7 +113,7 @@ SettingPage {
                 text: "Custom bitrate"
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 10
+                font.pixelSize: Design.typeBody
             }
 
             SettingNumericStepper {

@@ -13,9 +13,9 @@ ColumnLayout {
         return maximum;
     }
     property string unit: ""
-    property int barHeight: 3
-    property int labelColumnWidth: 48
-    spacing: 2
+    property int barHeight: 4
+    property int labelColumnWidth: 76
+    spacing: Design.space4
 
     Repeater {
         model: root.metrics
@@ -23,7 +23,7 @@ ColumnLayout {
         RowLayout {
             required property var modelData
             Layout.fillWidth: true
-            spacing: 5
+            spacing: Design.space8
 
             Text {
                 Layout.preferredWidth: root.labelColumnWidth
@@ -31,7 +31,7 @@ ColumnLayout {
                 text: modelData.label ?? ""
                 color: Theme.textSecondary
                 font.family: Design.fontText
-                font.pixelSize: 7
+                font.pixelSize: Design.typeLabel
             }
 
             Rectangle {
@@ -49,12 +49,12 @@ ColumnLayout {
             }
 
             Text {
-                Layout.preferredWidth: 34
+                Layout.preferredWidth: 48
                 horizontalAlignment: Text.AlignRight
                 text: Number(modelData.value ?? 0).toFixed(0) + root.unit
                 color: Theme.textSecondary
                 font.family: Design.fontMono
-                font.pixelSize: 7
+                font.pixelSize: Design.typeLabel
             }
         }
     }

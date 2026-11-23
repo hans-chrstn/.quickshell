@@ -24,6 +24,13 @@ Singleton {
     property alias islandWidthPercent: data.islandWidthPercent
     property alias islandHeightPercent: data.islandHeightPercent
     property alias islandBodyRadius: data.islandBodyRadius
+    property alias topIslandCompactWidth: data.topIslandCompactWidth
+    property alias topIslandExpandedScale: data.topIslandExpandedScale
+    property alias topIslandCornerRadius: data.topIslandCornerRadius
+    property alias topIslandEnterFadeDuration: data.topIslandEnterFadeDuration
+    property alias topIslandExitFadeDuration: data.topIslandExitFadeDuration
+    property alias topIslandContentFadeDuration: data.topIslandContentFadeDuration
+    property alias topIslandHoverLeaveDelay: data.topIslandHoverLeaveDelay
     property alias enableBlur: data.enableBlur
     property alias experimentalFloatingWallpaperSuspension: data.experimentalFloatingWallpaperSuspension
     property alias experimentalPauseWallpaperOnBattery: data.experimentalPauseWallpaperOnBattery
@@ -125,6 +132,41 @@ Singleton {
                 type: "int",
                 minimum: 0,
                 maximum: 40
+            },
+            topIslandCompactWidth: {
+                type: "int",
+                minimum: 260,
+                maximum: 420
+            },
+            topIslandExpandedScale: {
+                type: "int",
+                minimum: 85,
+                maximum: 115
+            },
+            topIslandCornerRadius: {
+                type: "int",
+                minimum: 16,
+                maximum: 40
+            },
+            topIslandEnterFadeDuration: {
+                type: "int",
+                minimum: 150,
+                maximum: 600
+            },
+            topIslandExitFadeDuration: {
+                type: "int",
+                minimum: 180,
+                maximum: 700
+            },
+            topIslandContentFadeDuration: {
+                type: "int",
+                minimum: 100,
+                maximum: 400
+            },
+            topIslandHoverLeaveDelay: {
+                type: "int",
+                minimum: 300,
+                maximum: 1500
             },
             enableBlur: {
                 type: "bool"
@@ -514,6 +556,13 @@ Singleton {
             property int islandWidthPercent: 100
             property int islandHeightPercent: 100
             property int islandBodyRadius: 20
+            property int topIslandCompactWidth: 320
+            property int topIslandExpandedScale: 100
+            property int topIslandCornerRadius: 27
+            property int topIslandEnterFadeDuration: 310
+            property int topIslandExitFadeDuration: 480
+            property int topIslandContentFadeDuration: 210
+            property int topIslandHoverLeaveDelay: 650
             property bool enableBlur: true
             property bool experimentalFloatingWallpaperSuspension: false
             property bool experimentalPauseWallpaperOnBattery: false

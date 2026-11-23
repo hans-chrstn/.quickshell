@@ -1,77 +1,72 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
+import qs.components.scrolling
 import qs.core
 import qs.services.settings
 
 SettingPage {
-    ColumnLayout {
+    Flickable {
+        id: settingsScroll
         anchors.fill: parent
-        spacing: 6
+        contentWidth: width
+        contentHeight: settingsColumn.implicitHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
 
-        SettingsHeader {
-            title: "Motion"
+        SmoothScrollBehavior {
+            target: settingsScroll
         }
+        ScrollEdgeFeedback {
+            target: settingsScroll
+        }
+        ScrollBar.vertical: MinimalScrollBar {}
 
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Island resize"
-            description: "Expansion and contraction duration"
-            from: 200
-            to: 900
-            stepSize: 10
-            value: SettingsService.resizeDuration
-            onValueEdited: value => SettingsService.setSetting("resizeDuration", value)
-        }
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Edge reveal"
-            description: "Show and hide motion at the monitor edge"
-            from: 120
-            to: 600
-            stepSize: 10
-            value: SettingsService.revealDuration
-            onValueEdited: value => SettingsService.setSetting("revealDuration", value)
-        }
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Content reveal"
-            description: "Standard module content entrance"
-            from: 80
-            to: 400
-            stepSize: 10
-            value: SettingsService.contentRevealDuration
-            onValueEdited: value => SettingsService.setSetting("contentRevealDuration", value)
-        }
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Attention delay"
-            description: "Pause before an invoked module expands"
-            from: 0
-            to: 500
-            stepSize: 10
-            value: SettingsService.attentionExpandDelay
-            onValueEdited: value => SettingsService.setSetting("attentionExpandDelay", value)
-        }
-        SettingSlider {
-            Layout.fillWidth: true
-            title: "Module handoff"
-            description: "Closing lifecycle before returning to the clock"
-            from: 180
-            to: 800
-            stepSize: 10
-            value: SettingsService.moduleCloseDuration
-            onValueEdited: value => SettingsService.setSetting("moduleCloseDuration", value)
-        }
+        ColumnLayout {
+            id: settingsColumn
+            width: settingsScroll.width - Design.space8
+            spacing: Design.space8
 
-        Item {
-            Layout.fillHeight: true
-        }
+            SettingsHeader {
+                title: "Motion"
+            }
 
-        SettingButton {
-            label: "Reset Motion"
-            Layout.preferredHeight: 18
-            Layout.bottomMargin: 2
-            onClicked: SettingsService.resetMotion()
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Entrance fade"
+                description: "Shared shell surfaces"
+                from: 150
+                to: 600
+                stepSize: 10
+                value: SettingsService.topIslandEnterFadeDuration
+                onValueEdited: value => SettingsService.setSetting("topIslandEnterFadeDuration", value)
+            }
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Exit fade"
+                description: "Shared shell surfaces"
+                from: 180
+                to: 700
+                stepSize: 10
+                value: SettingsService.topIslandExitFadeDuration
+                onValueEdited: value => SettingsService.setSetting("topIslandExitFadeDuration", value)
+            }
+            SettingSlider {
+                Layout.fillWidth: true
+                title: "Content reveal"
+                description: "Page and route changes"
+                from: 100
+                to: 400
+                stepSize: 10
+                value: SettingsService.topIslandContentFadeDuration
+                onValueEdited: value => SettingsService.setSetting("topIslandContentFadeDuration", value)
+            }
+
+            SettingButton {
+                label: "Reset Motion"
+                Layout.alignment: Qt.AlignRight
+                onClicked: SettingsService.resetMotion()
+            }
         }
     }
 }

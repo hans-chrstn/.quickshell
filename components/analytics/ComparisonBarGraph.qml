@@ -26,14 +26,14 @@ ColumnLayout {
                     text: modelData.label ?? ""
                     color: Theme.textSecondary
                     font.family: Design.fontText
-                    font.pixelSize: 7
+                    font.pixelSize: Design.typeLabel
                 }
 
                 Text {
                     text: (modelData.beforeText ?? modelData.before ?? 0) + " → " + (modelData.afterText ?? modelData.after ?? 0)
                     color: Theme.textSecondary
                     font.family: Design.fontMono
-                    font.pixelSize: 7
+                    font.pixelSize: Design.typeLabel
                 }
             }
 

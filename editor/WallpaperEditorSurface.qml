@@ -149,22 +149,6 @@ Rectangle {
             Layout.rightMargin: 2
             spacing: 9
 
-            Rectangle {
-                implicitWidth: 25
-                implicitHeight: 25
-                radius: 8
-                color: Theme.tint(Theme.accent)
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "W"
-                    color: Theme.accent
-                    font.family: Design.fontDisplay
-                    font.pixelSize: 12
-                    font.weight: Font.Bold
-                }
-            }
-
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 0
@@ -174,7 +158,7 @@ Rectangle {
                     text: WallpaperEditorService.projectName
                     color: Theme.textPrimary
                     font.family: Design.fontDisplay
-                    font.pixelSize: 14
+                    font.pixelSize: Design.typeTitle
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -183,30 +167,20 @@ Rectangle {
                     text: "Wallpaper Studio"
                     color: Theme.textSecondary
                     font.family: Design.fontText
-                    font.pixelSize: 10
+                    font.pixelSize: Design.typeLabel
                     elide: Text.ElideRight
                 }
             }
 
-            Rectangle {
-                implicitWidth: statusText.implicitWidth + 18
-                implicitHeight: 25
-                radius: 9
-                color: Theme.fillQuiet
-                Text {
-                    id: statusText
-                    anchors.centerIn: parent
-                    text: WallpaperProjectService.dirty ? "Unsaved" : "Saved"
-                    color: WallpaperProjectService.dirty ? Theme.warning : Theme.textSecondary
-                    font.family: Design.fontText
-                    font.pixelSize: 10
-                    font.weight: Font.Medium
-                }
+            Text {
+                text: WallpaperProjectService.dirty ? "Unsaved" : "Saved"
+                color: WallpaperProjectService.dirty ? Theme.warning : Theme.textSecondary
+                font.family: Design.fontText
+                font.pixelSize: Design.typeLabel
+                font.weight: Font.Medium
             }
 
             GlyphButton {
-                implicitWidth: 28
-                implicitHeight: 28
                 glyph: "plus"
                 accessibleName: "New Project"
                 enabled: WallpaperProjectService.loaded && !WallpaperEditorService.importBusy && !WallpaperEditorService.openProjectBusy && !WallpaperEditorService.savePreflightBusy
@@ -283,7 +257,6 @@ Rectangle {
                 detailComponent: root.selectedMarker() ? markerActionEditorComponent : null
                 detailTakesOver: root.selectedMarker() !== null
                 topAligned: root.selectedMarker() !== null
-                glyph: root.selectedMarker() ? "◇" : root.selectedTimelineTarget() ? "▣" : "···"
             }
 
             SplitHandle {

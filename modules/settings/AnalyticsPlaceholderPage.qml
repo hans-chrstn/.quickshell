@@ -21,7 +21,7 @@ SettingPage {
             text: root.description
             color: Theme.textSecondary
             font.family: Design.fontText
-            font.pixelSize: 12
+            font.pixelSize: Design.typeBody
             wrapMode: Text.Wrap
         }
 
